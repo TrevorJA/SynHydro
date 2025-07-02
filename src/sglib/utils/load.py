@@ -195,178 +195,149 @@ class HDF5Manager:
         df = pd.DataFrame(data, index=dates)
         df.index = pd.to_datetime(df.index.astype(str))
         return df
-
-    def load_ensemble(self, 
-                      hdf5_file, 
-                      realization_subset=None):
+    
+    def extract_many_realizations_from_hdf5(self, 
+                                        hdf5_file, 
+                                        realization_list, 
+                                        stored_by_node=True):
         """
-        Load an ensemble of realizations from an HDF5 file.
+        Extract multiple realizations from an HDF5 file in a single pass.
+        
+        Parameters
+        ----------
+        hdf5_file : str
+            Path to the HDF5 file.
+        realization_list : list
+            List of realization numbers/names to extract.
+        stored_by_node : bool, optional
+            If True, assumes data keys are node names. Default is True.
+            
+        Returns
+        -------
+        dict
+            Dictionary mapping realization indices to DataFrames.
+        """
+        
+        with h5py.File(hdf5_file, "r") as f:
+            if stored_by_node:
+                # Get structure info from first node
+                keys = list(f.keys())
+                first_node = f[keys[0]]
+                column_labels = first_node.attrs["column_labels"]
+                dates = first_node["date"][:].tolist()
+                
+                # Validate all requested realizations exist
+                missing_realizations = [r for r in realization_list if r not in column_labels]
+                if missing_realizations:
+                    raise ValueError(f"Realizations {missing_realizations} not found in HDF5 file")
+                
+                # Load all data for all realizations at once
+                ensemble_dict = {}
+                for i, realization in enumerate(realization_list):
+                    data = {}
+                    # Extract data for this realization across all nodes
+                    for node in keys:
+                        node_data = f[node]
+                        data[node] = node_data[realization][:]
+                    
+                    # Create DataFrame
+                    df = pd.DataFrame(data, index=dates)
+                    df.index = pd.to_datetime(df.index.astype(str))
+                    df.index.name = 'datetime'
+                    ensemble_dict[i] = df
+                    
+            else:
+                # Data stored by realization
+                ensemble_dict = {}
+                for i, realization in enumerate(realization_list):
+                    if str(realization) not in f:
+                        raise ValueError(f"Realization {realization} not found in HDF5 file")
+                    
+                    realization_group = f[str(realization)]
+                    column_labels = realization_group.attrs["column_labels"]
+                    dates = realization_group["date"][:].tolist()
+                    
+                    # Load all columns for this realization
+                    data = {}
+                    for label in column_labels:
+                        data[label] = realization_group[label][:]
+                    
+                    # Create DataFrame
+                    df = pd.DataFrame(data, index=dates)
+                    df.index = pd.to_datetime(df.index.astype(str))
+                    df.index.name = 'datetime'
+                    ensemble_dict[i] = df
+        
+        return ensemble_dict
+
+
+    def load_ensemble(self, hdf5_file, 
+                            realization_subset=None):
+        """
+        Optimized ensemble loading using batch extraction.
         
         Args:
             hdf5_file (str): The filename for the hdf5 file
-            realization (int, optional): If specified, load only this realization.
+            realization_subset (list, optional): If specified, load only these realizations.
         
         Returns:
-            dict: A dictionary of DataFrames with site names as keys and DataFrames as values.
+            Ensemble: An Ensemble object containing the loaded data.
         """
         
         realization_ids = self.get_hdf5_realization_numbers(hdf5_file)
+        
         if realization_subset is not None:
-            for r in realization_subset:
-                if r not in realization_ids:
-                    msg = f'Realization {r} from realization_subset not found in HDF5 file {hdf5_file}.'
-                    raise ValueError(msg)
+            missing = [r for r in realization_subset if r not in realization_ids]
+            if missing:
+                raise ValueError(f'Realizations {missing} not found in HDF5 file {hdf5_file}')
             realization_ids = realization_subset
         
-        ensemble_dict = {}
-        for i, ri in enumerate(realization_ids):
-            if i%100 == 0:
-                print(f'Loading realization {i+1}/{len(realization_ids)} from {hdf5_file}')
+        print(f'Loading {len(realization_ids)} realizations from {hdf5_file}')
+        
+        # Load all realizations in single file operation
+        ensemble_dict = self.extract_many_realizations_from_hdf5(
+            hdf5_file, realization_ids, stored_by_node=True
+        )
+        
+        return Ensemble(ensemble_dict)
+
+
+    # Alternative: Memory-efficient vectorized approach for large ensembles
+    def load_ensemble_vectorized(self, hdf5_file, realization_subset=None):
+        """
+        Vectorized loading using numpy operations for maximum efficiency.
+        Best for large ensembles where memory allows.
+        """
+        
+        realization_ids = self.get_hdf5_realization_numbers(hdf5_file)
+        
+        if realization_subset is not None:
+            missing = [r for r in realization_subset if r not in realization_ids]
+            if missing:
+                raise ValueError(f'Realizations {missing} not found in HDF5 file {hdf5_file}')
+            realization_ids = realization_subset
+        
+        print(f'Loading {len(realization_ids)} realizations from {hdf5_file}')
+        
+        with h5py.File(hdf5_file, "r") as f:
+            keys = list(f.keys())
+            first_node = f[keys[0]]
+            column_labels = first_node.attrs["column_labels"]
+            dates = first_node["date"][:].tolist()
             
-            df = self.extract_realization_from_hdf5(hdf5_file, ri)
-            ensemble_dict[i] = df
+            # Get indices of requested realizations
+            realization_indices = [list(column_labels).index(r) for r in realization_ids]
+            
+            ensemble_dict = {}
+            for i, realization_idx in enumerate(realization_indices):
+                data = {}
+                # Use fancy indexing to load data efficiently
+                for node in keys:
+                    node_data = f[node]
+                    # Load specific realization column
+                    data[node] = node_data[column_labels[realization_idx]][:]
+                
+                df = pd.DataFrame(data, index=pd.to_datetime(dates))
+                ensemble_dict[i] = df
         
-        ensemble = Ensemble(ensemble_dict)
-        return ensemble
-        
-
-
-    # def combine_hdf5_files(self,
-    #                        files, 
-    #                        output_file):
-    #     """
-    #     This function reads multiple hdf5 files and 
-    #     combines all data into a single file with the same structure.
-
-    #     The function assumes that all files have the same structure.
-    #     """    
-    #     assert(type(files) == list), 'Input must be a list of file paths'
-        
-    #     output_file = output_file + '.hdf5' if ('.hdf' not in output_file) else output_file
-        
-    #     # Extract all
-    #     results_dict ={}
-    #     for i, f in enumerate(files):
-    #         if '.' not in f:
-    #             f = f + '.hdf5'
-    #         assert(f[-5:] == '.hdf5'), f'Filename {f} must end in .hdf5'
-    #         results_dict[i] = extract_loo_results_from_hdf5(f)
-
-    #     # Combine all data
-    #     # Each item in the results_dict has site_number as key and dataframe as values.
-    #     # We want to combine all dataframes into a single dataframe with columns corresponding to realization numbers
-    #     combined_results = {}
-    #     combined_column_names = []
-    #     for i in results_dict:
-    #         for site in results_dict[i]:
-    #             if site in combined_results:
-    #                 combined_results[site] = pd.concat([combined_results[site], results_dict[i][site]], axis=1)
-    #             else:
-    #                 combined_results[site] = results_dict[i][site]
-
-    #     # Reset the column names so that there are no duplicates
-    #     all_sites = list(combined_results.keys())
-    #     n_realizations = len(combined_results[all_sites[0]].columns)
-    #     combined_column_names = [str(i) for i in range(n_realizations)]
-    #     for site in all_sites:
-    #         assert len(combined_results[site].columns) == n_realizations, f'Number of realizations is not consistent for site {site}'
-    #         combined_results[site].columns = combined_column_names
-        
-    #     # Write to file
-    #     self.export_ensemble_to_hdf5(combined_results, output_file)        
-    #     return
-
-
-    # def save_to_hdf5(self, 
-    #                  file_path, 
-    #                  data, 
-    #                  datetime_index=None, 
-    #                  site_names=None):
-    #     """
-    #     Save data to HDF5.
-
-    #     Parameters:
-    #         file_path (str): Path to save the file.
-    #         data (np.ndarray or dict): Data array (n_realizations, n_sites, n_time) or dict {realization_id: DataFrame}.
-    #         datetime_index (pd.DatetimeIndex, optional): Time index to store.
-    #         site_names (list, optional): Names of the sites.
-    #     """
-    #     with h5py.File(file_path, 'w') as f:
-    #         if isinstance(data, np.ndarray):
-    #             f.create_dataset('data', data=data)
-    #             if datetime_index is not None:
-    #                 f.create_dataset('datetime', data=np.array(datetime_index.strftime('%Y-%m-%d')).astype('S'))
-
-    #             if site_names is not None:
-    #                 f.create_dataset('column_labels', data=np.array(site_names, dtype='S'))
-
-    #         elif isinstance(data, dict):
-    #             grp = f.create_group('realizations')
-    #             for key, df in data.items():
-    #                 grp.create_dataset(str(key), data=df.values)
-    #             if site_names is not None:
-    #                 f.create_dataset('column_labels', data=np.array(site_names, dtype='S'))
-    #             if datetime_index is not None:
-    #                 f.create_dataset('datetime', data=np.array(datetime_index.strftime('%Y-%m-%d')).astype('S'))
-    #         else:
-    #             raise TypeError("Data must be a numpy array or a dictionary of DataFrames.")
-
-
-    # def load_from_hdf5(self,
-    #                    file_path, 
-    #                    as_dict=False):
-    #     """
-    #     Load data from HDF5.
-
-    #     Parameters:
-    #         file_path (str): Path to the file.
-    #         as_dict (bool): If True, load as dict {realization_id: DataFrame}.
-
-    #     Returns:
-    #         data (np.ndarray or dict): Loaded data.
-    #         datetime_index (pd.DatetimeIndex): Loaded time index.
-    #         site_names (list): List of site names.
-    #     """
-    #     with h5py.File(file_path, 'r') as f:
-    #         site_names = f['column_labels'][:].astype(str).tolist()
-    #         datetime_index = pd.to_datetime(f['datetime'][:].astype(str))
-
-    #         if 'data' in f:
-    #             raw_data = f['data'][:]
-    #             if as_dict:
-    #                 data = {}
-    #                 n_realizations, n_sites, n_time = raw_data.shape
-    #                 for r in range(n_realizations):
-    #                     df = pd.DataFrame(
-    #                         raw_data[r].T,
-    #                         index=datetime_index[:n_time],
-    #                         columns=site_names
-    #                     )
-    #                     data[r] = df
-    #             else:
-    #                 data = raw_data
-
-    #         elif 'realizations' in f:
-    #             temp_dict = {}
-    #             for key in f['realizations']:
-    #                 df = pd.DataFrame(
-    #                     f['realizations'][key][:],
-    #                     index=datetime_index,
-    #                     columns=site_names
-    #                 )
-    #                 temp_dict[int(key)] = df
-    #             if as_dict:
-    #                 data = temp_dict
-    #             else:
-    #                 realizations = sorted(temp_dict.keys())
-    #                 n_sites = len(site_names)
-    #                 n_time = temp_dict[realizations[0]].shape[0]
-    #                 data_array = np.empty((len(realizations), n_sites, n_time))
-    #                 for idx, r in enumerate(realizations):
-    #                     data_array[idx] = temp_dict[r].T.values
-    #                 data = data_array
-
-    #         else:
-    #             raise KeyError("HDF5 file does not contain recognizable datasets.")
-
-    #     return data, datetime_index, site_names
+        return Ensemble(ensemble_dict)

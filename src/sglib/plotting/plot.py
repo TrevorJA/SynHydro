@@ -5,18 +5,58 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import pearsonr
 
+def infer_datetime_frequency(df):
+    """Infers the frequency of a pd.DatetimeIndex DataFrame."""
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise ValueError("Index must be a pd.DatetimeIndex.")
+    
+    # Calculate the time differences between consecutive index entries
+    time_diffs = df.index.to_series().diff().dropna()
+    
+    # Determine the most common frequency
+    time_delta = time_diffs.value_counts().idxmax()
+    
+    # Infer the frequency string
+    if time_delta == pd.Timedelta(days=1):
+        freq = 'D'
+    elif time_delta == pd.Timedelta(weeks=1):
+        freq = 'W'
+    elif time_delta in [pd.Timedelta(days=30), pd.Timedelta(days=31)]:
+        freq = 'M'
+    elif time_delta == pd.Timedelta(days=365):
+        freq = 'A'
+    else:
+        raise ValueError(f"Unsupported frequency detected with time delta: {time_delta}.")
+    
+    return freq
+
+
 def filter_complete_years(df):
-    # Extract year counts
-    days_per_year = df.index.to_series().groupby(df.index.year).count()
+    
+    # Infer the frequency of the index
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise ValueError("Index must be a pd.DatetimeIndex.")
 
-    # Determine if it's a leap year or not
-    full_year_days = df.index.to_series().groupby(df.index.year).apply(
-        lambda x: (pd.Timestamp(f"{x.dt.year.iloc[0]}-12-31") - pd.Timestamp(f"{x.dt.year.iloc[0]}-01-01")).days + 1
-    )
-
-    # Identify only the years that have complete daily records
-    complete_years = days_per_year[days_per_year == full_year_days].index
-
+    freq = infer_datetime_frequency(df)
+    
+    if freq not in ['D', 'W', 'M', 'A']:
+        raise ValueError("Unsupported frequency detected. Supported frequencies are 'D', 'W', 'M', and 'A'.")
+    
+    min_periods_per_year = {
+        'D': 365,
+        'W': 52,
+        'M': 12,
+        'A': 1
+    }
+    
+    df_index = df.index
+    complete_years = []    
+    for year in df_index.year.unique():
+        if df_index[df_index.year==year].size < min_periods_per_year[freq]:
+            print(f"Year {year} does not have enough data points for frequency '{freq}'. It has {df_index[df_index.year==year].size} points, but needs at least {min_periods_per_year[freq]}.")
+        else:
+            complete_years.append(year)
+    
     # Filter original DataFrame
     return df[df.index.year.isin(complete_years)]
 
@@ -131,8 +171,7 @@ def plot_fdc_ranges(Qh, Qs,
     Qh = filter_complete_years(Qh)
     Qs = filter_complete_years(Qs)
     
- 
-     
+
     # Calculate FDCs for total period and each realization
     nonexceedance = np.linspace(0.0001, 0.9999, 50)
     s_total_fdc = np.nanquantile(Qs.values.flatten(), nonexceedance)
@@ -183,9 +222,14 @@ def plot_fdc_ranges(Qh, Qs,
 def plot_autocorrelation(Qh, Qs, lag_range, 
                          timestep = 'daily',
                          savefig = False, fname = None,
-                         figsize=(7, 5), colors = ['black', 'orange'],
-                         alpha = 0.3):
-    """Plot autocorrelation of historic and synthetic flow over some range of lags.
+                         figsize=(7, 5), 
+                         colors = ['black', 'orange'],
+                         alpha = 0.3, 
+                         legend=False,
+                         ax=None,
+                         xy_labels=True):
+    """
+    Plot autocorrelation of historic and synthetic flow over some range of lags.
  
     Args:
         Qh (pd.Series): Historic daily streamflow timeseries. Index must be pd.DatetimeIndex. 
@@ -222,24 +266,37 @@ def plot_autocorrelation(Qh, Qs, lag_range,
     for i, lag in enumerate(lag_range):
         h_corr = pearsonr(Qh.values[:-lag], Qh.values[lag:])
         autocorr_h[i] = h_corr[0]
-        confidence_autocorr_h[0,i] = h_corr.confidence_interval().low
-        confidence_autocorr_h[1,i] = h_corr.confidence_interval().high
         
     autocorr_s = np.zeros((Qs.shape[1], len(lag_range)))
     
     for i, realization in enumerate(Qs.columns):
-        autocorr_s[i] = [pearsonr(Qs[realization].values[:-lag], Qs[realization].values[lag:])[0] for lag in lag_range]
+        autocorr_s[i] = [pearsonr(Qs[realization].values[:-lag], 
+                                  Qs[realization].values[lag:])[0] for lag in lag_range]
  
     ## Plotting
-    fig, ax = plt.subplots(figsize=figsize, dpi=200)
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize, dpi=200)
+    else:
+        fig = ax.get_figure()
  
     # Plot autocorrelation for each synthetic timeseries
-    for i, realization in enumerate(Qs.columns):
-        if i == 0:
-            ax.plot(lag_range, autocorr_s[i], alpha=1, color = colors[1], label=f'Synthetic Realization')
-        else:
-            ax.plot(lag_range, autocorr_s[i], color = colors[1], alpha=alpha, zorder = 1)
-        ax.scatter(lag_range, autocorr_s[i], alpha=alpha, color = 'orange', zorder = 2)
+    # for i, realization in enumerate(Qs.columns):
+    #     if i == 0:
+    #         ax.plot(lag_range, autocorr_s[i], alpha=1, color = colors[1], label=f'Synthetic Realization')
+    #     else:
+    #         ax.plot(lag_range, autocorr_s[i], color = colors[1], alpha=alpha, zorder = 1)
+    #     ax.scatter(lag_range, autocorr_s[i], alpha=alpha, color = 'orange', zorder = 2)
+    
+    # Plot fill_between max/min for synthetic autocorrelation
+    ax.fill_between(lag_range,
+                    np.nanmin(autocorr_s, axis=0),
+                    np.nanmax(autocorr_s, axis=0),
+                    color=colors[1], alpha=alpha, label='Synthetic Range', zorder = 1)
+    # Plot median synthetic autocorrelation
+    ax.plot(lag_range, np.nanmedian(autocorr_s, axis=0), 
+            color=colors[1], linewidth=2, 
+            label='Synthetic Median', zorder = 2)
+    
  
     # Plot autocorrelation for the historic timeseries
     ax.plot(lag_range, autocorr_h, color=colors[0], linewidth=2, label='Historic', zorder = 3)
@@ -247,11 +304,12 @@ def plot_autocorrelation(Qh, Qs, lag_range,
     
  
     # Set labels and title
-    ax.set_xlabel(f'Lag ({time_label})', fontsize=12)
-    ax.set_ylabel('Autocorrelation (Pearson)', fontsize=12)
-    ax.set_title('Autocorrelation Comparison\nHistoric Timeseries vs. Synthetic Ensemble', fontsize=14)
- 
-    ax.legend(fontsize=10)
+    if xy_labels:
+        ax.set_xlabel(f'Lag ({time_label})', fontsize=12)
+        ax.set_ylabel('Autocorrelation (Pearson)', fontsize=12)
+        
+    if legend:
+        ax.legend(fontsize=10)
     ax.grid(True, linestyle='--', linewidth=0.5)
     plt.subplots_adjust(left=0.12, right=0.95, bottom=0.12, top=0.92)
  
@@ -259,7 +317,7 @@ def plot_autocorrelation(Qh, Qs, lag_range,
         assert(fname is not None), 'If savefig is True, fname must be provided.'
         plt.savefig(fname, dpi=200, bbox_inches='tight')
     
-    return
+    return fig, ax
 
 def plot_correlation(Qh, Qs_i,
                         timestep = 'daily',
