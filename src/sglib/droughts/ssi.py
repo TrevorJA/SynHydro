@@ -31,13 +31,19 @@ def get_drought_metrics(ssi):
         else:
             # Record drought info once it ends
             if in_critical_drought:
+                
+                # Get date with max severity
+                max_severity_date = ssi.index[drought_days][ssi.values[drought_days].argmin()]
+                
+                
                 drought_counter += 1
                 drought_data[drought_counter] = {
                     'start': ssi.index[drought_days[0]],
                     'end': ssi.index[drought_days[-1]],
                     'duration': len(drought_days),
                     'magnitude': sum(ssi.values[drought_days]),
-                    'severity': min(ssi.values[drought_days])
+                    'severity': min(ssi.values[drought_days]),
+                    'max_severity_date': max_severity_date,
                 }
                 
             in_critical_drought = False
@@ -124,7 +130,8 @@ class SSIDroughtMetrics:
             raise ValueError("Data not set. Please set data before calculating SSI.")
         
         # Get rolling sum
-        data_rs = self.data.rolling(self.window, min_periods=self.window).sum().dropna()
+        data_rs = self.data.rolling(self.window, 
+                                    min_periods=self.window).sum().dropna()
         
         # Calculate the Standardized Streamflow Index (SSI)
         ssi = si.ssfi(series = data_rs, 
@@ -234,7 +241,8 @@ class SSI:
         
         if self.timescale > 0:
             new_series = (
-                new_series.rolling(self.timescale, min_periods=self.timescale)
+                new_series.rolling(self.timescale, 
+                                   min_periods=self.timescale)
                 .agg(self.agg_func)
                 .dropna()
                 .copy()
@@ -242,14 +250,19 @@ class SSI:
         
         # Calculate CDF for new data using fitted distributions
         cdf = self._calculate_cdf_for_new_data(new_series)
-        
+
+        # Clip CDF values to avoid -inf/+inf from norm.ppf
+        # Use small epsilon to prevent exactly 0 or 1
+        epsilon = 1e-10
+        cdf_clipped = np.clip(cdf.values, epsilon, 1 - epsilon)
+
         # Convert to standard normal (SSI values)
         ssi = Series(
-            norm.ppf(cdf.values, loc=0, scale=1),
+            norm.ppf(cdf_clipped, loc=0, scale=1),
             index=new_series.index,
             dtype=float
         )
-        
+
         return ssi
     
     def fit_transform(self, 

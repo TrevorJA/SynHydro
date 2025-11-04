@@ -83,8 +83,10 @@ class KirschNowakGenerator(KirschGenerator):
         # Fit the KirschGenerator
         super().fit()
         
-        print("Fitting multisite NowakDisaggregator")
         # Fit the multisite NowakDisaggregator
+        if self.params.get('debug', False):
+            print("Fitting multisite NowakDisaggregator")
+        
         self.nowak_disaggregator.fit()
     
     def generate(self, 
