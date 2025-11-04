@@ -9,7 +9,7 @@ __version__ = "0.0.1"
 
 # core utilities
 from .core.base import Generator
-from .utils.load import load_drb_reconstruction, HDF5Manager
+from .utils.load import HDF5Manager
 from .utils.ensemble_manager import Ensemble
 from .droughts.ssi import SSIDroughtMetrics, SSI
 
@@ -24,7 +24,6 @@ from .methods.temporal_disaggregation.nowak import NowakDisaggregator
 __all__ = [
     "KirschNowakGenerator", 
     "ThomasFieringGenerator",
-    "load_drb_reconstruction",
     "KirschGenerator",
     "NowakDisaggregator",
     "Generator",
