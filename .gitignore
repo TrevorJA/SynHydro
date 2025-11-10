@@ -168,3 +168,4 @@ pywrdrb/*
 *pywrdrb* 
 ./local/*
 local/
+.claude/

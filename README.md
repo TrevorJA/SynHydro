@@ -1,4 +1,7 @@
 # SGLib
+
+[![Tests](https://github.com/Pywr-DRB/SGLib/actions/workflows/tests.yml/badge.svg)](https://github.com/Pywr-DRB/SGLib/actions/workflows/tests.yml)
+
 The Synthetic Generation Library (SGLib) provides a suite of different methods for generating synthetic timeseries, with a focus on hydrologic applications.
 
 This package seeks to support multiple different synthetic generation models using a standardized API. All of the models are built on a common Abstract Base Class (`sglib.core.Generator`) which facilitates the standardized workflows.  Given the diversity of generation methods, the internal functionality of the different generators is customized, and each class (will eventually) require a corresponding `Option` argument. 

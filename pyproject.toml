@@ -1,15 +1,25 @@
 [project]
 name = "sglib"
 version = "0.0.1"
-packages = [
-  { include = "sglib", from = "src" }
-]
+description = "Synthetic Generation Library - Methods and models for generating synthetic hydrologic timeseries."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
 authors = [
     {name = "Trevor Amestoy", email = "tja73@cornell.edu"},
 ]
-license = { file = "LICENSE" }
-description = "Synthetic Generation Library - Methods and models for generating synthetic hydrologic timeseries."
-readme = { file = "README.md", content-type = "text/markdown" }  # Specify README with content type
+keywords = ["hydrology", "synthetic generation", "streamflow", "stochastic", "time series"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
 dependencies = [
     "numpy",
     "pandas",
@@ -19,50 +29,46 @@ dependencies = [
     "hmmlearn",
     "seaborn",
     "spei",
-    "pytest",
-    ]
+]
 
 [project.optional-dependencies]
 dev = [
     "ipython",
+    "pygeohydro",
+    "pytest",
+    "pytest-cov",
 ]
-
+test = [
+    "pytest",
+    "pytest-cov",
+]
 lint = [
     "pre-commit>=2.20.0",
 ]
-plotting = [
-    "matplotlib",
-    "seaborn"
-]
+
+[project.urls]
+Homepage = "https://github.com/Pywr-DRB/SGLib"
+Repository = "https://github.com/Pywr-DRB/SGLib"
+Issues = "https://github.com/Pywr-DRB/SGLib/issues"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build]
-include = [
-    "src/**/*",
-]
-
-[tool.hatch.build.package]
-# Force hatch to treat 'src' as the root. 
-source = "src"
-
 [tool.hatch.build.targets.wheel]
-sources = ["src"]
-
-[tool.hatch.build.data]
-include = [
-  "pywrdrb/data/**/*",
-]
+packages = ["src/sglib"]
 
 [tool.black]
 line-length = 88
 target-version = ["py310", "py311", "py312"]
 
-[tool.hatch.envs.default]
-dependencies = [
-    "pytest",
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
 ]
-
-# Note: hatch need to be installed in the environment to use the hatchling build backend.

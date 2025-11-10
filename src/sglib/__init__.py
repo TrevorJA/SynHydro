@@ -1,31 +1,81 @@
 """
 SGLib: Synthetic Generation Library
 
-A library for generating synthetic hydrologic timeseries with focus on 
+A library for generating synthetic hydrologic timeseries with focus on
 statistical preservation and hydrologic applications.
 """
 
 __version__ = "0.0.1"
 
-# core utilities
-from .core.base import Generator
-from .utils.load import HDF5Manager
-from .utils.ensemble_manager import Ensemble
-from .droughts.ssi import SSIDroughtMetrics, SSI
+# Core utilities
+from sglib.core import (
+    Generator,
+    Disaggregator,
+    Ensemble,
+    EnsembleMetadata,
+    GeneratorDisaggregatorPipeline,
+)
+from sglib.utils import load_example_data
 
-# Only import stable, tested implementations
-from .methods.nonparametric.kirsch_nowak import KirschNowakGenerator
-from .methods.parametric.thomas_fiering import ThomasFieringGenerator
-from .methods.nonparametric.kirsch import KirschGenerator
-from .methods.temporal_disaggregation.nowak import NowakDisaggregator
+# Drought analysis tools
+from sglib.droughts.ssi import SSIDroughtMetrics, SSI, get_drought_metrics
+from sglib.droughts.distributions import (
+    list_distributions,
+    get_distribution,
+    DISTRIBUTION_REGISTRY,
+)
+from sglib.droughts.diagnostics import (
+    compare_distributions,
+    distribution_summary,
+)
+
+# Generators
+from sglib.methods.generation.nonparametric.kirsch import KirschGenerator
+from sglib.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
+
+# Disaggregators
+from sglib.methods.disaggregation.temporal.nowak import NowakDisaggregator
+
+# Pre-built pipelines (recommended for most users)
+from sglib.pipelines import (
+    KirschNowakPipeline,
+    ThomasFieringNowakPipeline,
+)
+
+# Legacy combined class (deprecated, kept for backward compatibility)
+from sglib.methods.generation.depreciated.kirsch_nowak import KirschNowakGenerator
 
 
-# public API
+# Public API
 __all__ = [
-    "KirschNowakGenerator", 
-    "ThomasFieringGenerator",
-    "KirschGenerator",
-    "NowakDisaggregator",
+    # Base classes
     "Generator",
-    "HDF5Manager"
+    "Disaggregator",
+    # Individual generators
+    "KirschGenerator",
+    "ThomasFieringGenerator",
+    # Individual disaggregators
+    "NowakDisaggregator",
+    # Pipeline system
+    "GeneratorDisaggregatorPipeline",
+    "KirschNowakPipeline",
+    "ThomasFieringNowakPipeline",
+    # Legacy (deprecated)
+    "KirschNowakGenerator",
+    # Ensemble management
+    "Ensemble",
+    "EnsembleMetadata",
+    # Data utilities
+    "load_example_data",
+    # Drought analysis - SSI calculation
+    "SSIDroughtMetrics",
+    "SSI",
+    "get_drought_metrics",
+    # Drought analysis - distributions
+    "list_distributions",
+    "get_distribution",
+    "DISTRIBUTION_REGISTRY",
+    # Drought analysis - diagnostics
+    "compare_distributions",
+    "distribution_summary",
 ]

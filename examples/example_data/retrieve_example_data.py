@@ -1,5 +1,7 @@
 """
 Retrieves USGS gauge data using hyriver suite.
+
+Selects 3-4 gauges in the NE US with long, overlapping records.
 """
 
 import numpy as np
@@ -8,46 +10,67 @@ import pygeohydro as gh
 from pygeohydro import NWIS
 
 
-# Specify bounded box region of interest
-bbox = (-77, 42, -76.0, 43)
+# Use specific gauges in the NE US (Delaware River Basin and nearby) with long records
+# These gauges are known to have good data quality and temporal overlap
+stations = [
+    '01434000',  # Delaware River at Port Jervis, NY (1904-present)
+    '01438500',  # Delaware River at Montague, NJ (1940-present)
+    '01463500',  # Delaware River at Trenton, NJ (1912-present)
+    '01440000',  # Flat Brook near Flatbrookville, NJ (1923-present)
+]
 
-# Specify time period of interest
-dates = ('1900-01-01', '2022-12-31')
-
-# Make query and search for gauges
-nwis = NWIS()
-query_request = {"bBox": ",".join(f"{b:.06f}" for b in bbox),
-                    "hasDataTypeCd": "dv",
-                    "outputDataTypeCd": "dv"}
-query_result = nwis.get_info(query_request, expanded= False, nhd_info= False)
-
-# Filter non-streamflow stations
-query_result = query_result.query("site_tp_cd in ('ST','ST-TS')")
-query_result = query_result[query_result.parm_cd == '00060']  # https://help.waterdata.usgs.gov/parameter_cd?group_cd=PHY
-query_result = query_result.reset_index(drop = True)
-stations = list(set(query_result.site_no.tolist()))
-stations.append('01434000') # a known gauge with 100 years of data
+# Specify time period - use 1945-2025 to ensure good overlap
+dates = ('1945-01-01', '2025-09-30')
 
 # Retrieve data for the gauges
+nwis = NWIS()
 Q = nwis.get_streamflow(stations, dates)
 Q.index = pd.to_datetime(Q.index.date)
 
-# remove dates with no data
-Q = Q.dropna(axis=0, how='all')
+print(f"Initial data shape: {Q.shape}")
+print(f"Date range: {Q.index[0]} to {Q.index[-1]}")
+print()
 
-# remove gauges which have no data prior to 1915
-drop_gauges = []
+# Check data availability for each gauge
 for gauge in Q.columns:
-    if Q[gauge].dropna().index[0].year > 1915:
-        drop_gauges.append(gauge)
-Q = Q.drop(drop_gauges, axis=1)
+    valid_data = Q[gauge].dropna()
+    if len(valid_data) > 0:
+        print(f"{gauge}: {len(valid_data)} valid days, {valid_data.index[0]} to {valid_data.index[-1]}")
+    else:
+        print(f"{gauge}: No valid data")
+print()
+
+# Filter to continuous period where all gauges have data
+# Find the date range where all columns have non-NaN values
+valid_mask = Q.notna().all(axis=1) & (Q > 0).all(axis=1)
+print(f"Rows where all gauges valid: {valid_mask.sum()} / {len(Q)}")
+
+# Find longest continuous valid period
+if valid_mask.sum() > 0:
+    valid_groups = (valid_mask != valid_mask.shift()).cumsum()
+    valid_groups_filtered = valid_groups[valid_mask]
+    group_sizes = valid_groups_filtered.value_counts()
+    longest_group_id = group_sizes.idxmax()
+    longest_mask = valid_groups_filtered == longest_group_id
+    valid_indices = longest_mask[longest_mask].index
+    Q = Q.loc[valid_indices]
+    print(f"Filtered to longest continuous period: {len(Q)} days")
+    print(f"Final date range: {Q.index[0]} to {Q.index[-1]}")
+else:
+    print("WARNING: No overlapping valid data found, keeping all data")
+print()
 
 # Transform to monthly
-Q_monthly = Q.resample('M').sum()
+Q_monthly = Q.resample('MS').sum()
 
 # Export
 Q.to_csv(f'./usgs_daily_streamflow_cms.csv', sep=',')
 Q_monthly.to_csv(f'./usgs_monthly_streamflow_cms.csv', sep=',')
 
-print(f"Gage data gathered, {Q.shape[1]} USGS streamflow gauges found in date range.")
+print(f"Data exported successfully!")
+print(f"  - {Q.shape[1]} USGS streamflow gauges")
+print(f"  - {len(Q)} daily observations")
+print(f"  - {len(Q_monthly)} monthly observations")
+print(f"  - Date range: {Q.index[0]} to {Q.index[-1]}")
+print(f"  - Files: usgs_daily_streamflow_cms.csv, usgs_monthly_streamflow_cms.csv")
 
