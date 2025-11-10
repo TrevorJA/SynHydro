@@ -29,6 +29,7 @@ dependencies = [
     "hmmlearn",
     "seaborn",
     "spei",
+    "h5py",
 ]
 
 [project.optional-dependencies]
