@@ -386,7 +386,10 @@ class Ensemble:
 
                 first_node = f[keys[0]]
                 column_labels = first_node.attrs['column_labels']
-                dates = first_node['date'][:].tolist()
+                dates_raw = first_node['date'][:].tolist()
+
+                # Convert bytes to strings if necessary
+                dates = [d.decode('utf-8') if isinstance(d, bytes) else d for d in dates_raw]
 
                 # Determine which realizations to load
                 if realization_subset is not None:
@@ -420,7 +423,10 @@ class Ensemble:
                 for i, realization in enumerate(keys):
                     realization_group = f[str(realization)]
                     column_labels = realization_group.attrs['column_labels']
-                    dates = realization_group['date'][:].tolist()
+                    dates_raw = realization_group['date'][:].tolist()
+
+                    # Convert bytes to strings if necessary
+                    dates = [d.decode('utf-8') if isinstance(d, bytes) else d for d in dates_raw]
 
                     data = {}
                     for label in column_labels:
