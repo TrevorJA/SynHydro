@@ -405,7 +405,7 @@ class Ensemble:
                     data = {}
                     for node in keys:
                         node_data = f[node]
-                        data[node] = node_data[realization][:]
+                        data[node] = node_data[str(realization)][:]
 
                     df = pd.DataFrame(data, index=pd.to_datetime(dates))
                     df.index.name = 'datetime'
@@ -424,7 +424,7 @@ class Ensemble:
 
                     data = {}
                     for label in column_labels:
-                        data[label] = realization_group[label][:]
+                        data[str(label)] = realization_group[str(label)][:]
 
                     df = pd.DataFrame(data, index=pd.to_datetime(dates))
                     df.index.name = 'datetime'
