@@ -16,84 +16,94 @@ from spei.utils import get_data_series, group_yearly_df, validate_series
 from sglib.droughts.distributions import get_distribution, validate_distribution
 
 
-def get_drought_metrics(ssi):
+def get_drought_metrics(ssi, end_drought_threshold_months=3):
     """
-    Extract drought metrics from an SSI time series.
-
-    A drought is defined as any period where SSI drops to -1 or below.
-    The drought period extends from when SSI first goes below 0 until
-    SSI returns to positive values.
-
+    Calculate drought metrics from standardized supply index (SSI) time series.
+    
     Parameters
     ----------
     ssi : pd.Series
-        Time series of Standardized Streamflow Index values.
-
+        Time series of standardized supply index values
+    end_drought_threshold_months : int, default=3
+        Number of consecutive days with SSI > 0 required to end a critical drought
+        
     Returns
     -------
     pd.DataFrame
-        DataFrame with columns: start, end, duration, magnitude, severity, max_severity_date
-        Returns empty DataFrame if no droughts are detected.
+        DataFrame containing drought metrics for each identified drought event
     """
+    import pandas as pd
+    
+    ## Get historic drought metrics
     drought_data = {}
     drought_counter = 0
     in_critical_drought = False
     drought_days = []
-
+    positive_days_count = 0  # Track consecutive days with SSI > 0
+    
     for ind in range(len(ssi)):
         if ssi.values[ind] < 0:
             drought_days.append(ind)
-
+            positive_days_count = 0  # Reset counter when SSI < 0
+            
             if ssi.values[ind] <= -1:
                 in_critical_drought = True
         else:
-            # Record drought info once it ends
+            # Check if we're in a critical drought
             if in_critical_drought:
-
-                # Get date with max severity
-                max_severity_date = ssi.index[drought_days][ssi.values[drought_days].argmin()]
-
-
-                drought_counter += 1
-                drought_data[drought_counter] = {
-                    'start': pd.Timestamp(ssi.index[drought_days[0]]),
-                    'end': pd.Timestamp(ssi.index[drought_days[-1]]),
-                    'duration': len(drought_days),
-                    'magnitude': sum(ssi.values[drought_days]),
-                    'severity': min(ssi.values[drought_days]),
-                    'max_severity_date': pd.Timestamp(max_severity_date),
-                }
-
-            in_critical_drought = False
-            drought_days = []
-
-    # Handle case where series ends in a drought
-    if in_critical_drought and len(drought_days) > 0:
-        max_severity_date = ssi.index[drought_days][ssi.values[drought_days].argmin()]
-        drought_counter += 1
-        drought_data[drought_counter] = {
-            'start': pd.Timestamp(ssi.index[drought_days[0]]),
-            'end': pd.Timestamp(ssi.index[drought_days[-1]]),
-            'duration': len(drought_days),
-            'magnitude': sum(ssi.values[drought_days]),
-            'severity': min(ssi.values[drought_days]),
-            'max_severity_date': pd.Timestamp(max_severity_date),
-        }
+                positive_days_count += 1
+                
+                # Only end drought after N consecutive positive days
+                if positive_days_count >= end_drought_threshold_months:
+                    # Get date with max severity
+                    max_severity_date = ssi.index[drought_days][ssi.values[drought_days].argmin()]
+                    max_severity_idx = drought_days[ssi.values[drought_days].argmin()]
+                    
+                    # Calculate average severity during drought
+                    avg_severity = ssi.values[drought_days].mean()
+                    
+                    # Calculate recovery period (months from peak severity to end)
+                    recovery_period = len(drought_days) - drought_days.index(max_severity_idx)
+                    
+                    # Calculate standardized water surplus prior to drought start
+                    start_idx = drought_days[0]
+                    
+                    # 1-month prior surplus
+                    prior_1m_start = max(0, start_idx - 1)
+                    prior_1m_surplus = sum([v for v in ssi.values[prior_1m_start:start_idx] if v > 0])
+                    
+                    # 3-month prior surplus
+                    prior_3m_start = max(0, start_idx - 3)
+                    prior_3m_surplus = sum([v for v in ssi.values[prior_3m_start:start_idx] if v > 0])
+                    
+                    # 6-month prior surplus
+                    prior_6m_start = max(0, start_idx - 6)
+                    prior_6m_surplus = sum([v for v in ssi.values[prior_6m_start:start_idx] if v > 0])
+                    
+                    drought_counter += 1
+                    drought_data[drought_counter] = {
+                        'start': ssi.index[drought_days[0]],
+                        'end': ssi.index[drought_days[-1]],
+                        'duration': len(drought_days),
+                        'magnitude': sum(ssi.values[drought_days]),
+                        'severity': min(ssi.values[drought_days]),
+                        'avg_severity': avg_severity,
+                        'max_severity_date': max_severity_date,
+                        'recovery_period': recovery_period,
+                        'prior_1m_surplus': prior_1m_surplus,
+                        'prior_3m_surplus': prior_3m_surplus,
+                        'prior_6m_surplus': prior_6m_surplus,
+                    }
+                    
+                    in_critical_drought = False
+                    drought_days = []
+                    positive_days_count = 0
+            else:
+                # Not in drought, reset drought_days
+                drought_days = []
+                positive_days_count = 0
 
     drought_metrics = pd.DataFrame(drought_data).transpose()
-
-    # Convert columns to proper dtypes
-    if len(drought_metrics) > 0:
-        # Convert datetime columns
-        for col in ['start', 'end', 'max_severity_date']:
-            if col in drought_metrics.columns:
-                drought_metrics[col] = pd.to_datetime(drought_metrics[col])
-
-        # Convert numeric columns
-        for col in ['duration', 'magnitude', 'severity']:
-            if col in drought_metrics.columns:
-                drought_metrics[col] = pd.to_numeric(drought_metrics[col])
-
     return drought_metrics
 
 class SSIDroughtMetrics:
