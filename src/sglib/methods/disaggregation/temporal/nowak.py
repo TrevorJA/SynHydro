@@ -61,6 +61,7 @@ class NowakDisaggregator(Disaggregator):
         # Store algorithm-specific parameters
         self.n_neighbors = n_neighbors
         self.max_month_shift = max_month_shift
+        self.site_names = self._Q_obs_raw.columns.tolist() if isinstance(self._Q_obs_raw, pd.DataFrame) else [self._Q_obs_raw.name if self._Q_obs_raw.name else 'site']
 
         # Update init_params
         self.init_params.algorithm_params = {
