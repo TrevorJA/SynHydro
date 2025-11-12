@@ -383,10 +383,64 @@ class NowakDisaggregator(Disaggregator):
                 # Get the daily flow proportions for the sampled month
                 # The profiles are stored with max 31 days, but we only want the valid days for this specific month
                 sampled_idx = sampled_indices[y]
+
                 if self.is_multisite:
                     daily_flow_proportions_for_month = self.daily_flow_profiles[month][sampled_idx, :expected_days, :]
                 else:
                     daily_flow_proportions_for_month = self.daily_flow_profiles[month][sampled_idx, :expected_days]
+
+                # CRITICAL FIX: Handle leap year mismatch
+                # If KNN selected a non-leap February (28 days) but target is leap February (29 days),
+                # the day 29 proportion will be zero. We need to renormalize or fill missing days.
+                # This can occur because the daily_flow_profiles array is pre-allocated with 31 days,
+                # but only the actual days for each historical month are filled (days beyond are left as zeros).
+                if self.is_multisite:
+                    # Check each site for zero proportions
+                    for s in range(daily_flow_proportions_for_month.shape[1]):
+                        site_props = daily_flow_proportions_for_month[:, s]
+                        prop_sum = site_props.sum()
+                        n_zeros = (site_props == 0.0).sum()
+
+                        # If we have ANY zeros in a February with 29 days, we likely sampled a 28-day February
+                        # In this case, the proportions sum to 1.0 over 28 days, but day 29 is zero
+                        # We need to renormalize by scaling all proportions so they sum to 1.0 over all 29 days
+                        if n_zeros > 0 and month == 2 and expected_days == 29:
+                            # Simple approach: redistribute uniformly across ALL days (including the zero day)
+                            # This preserves the relative pattern while ensuring day 29 gets a reasonable value
+                            non_zero_mask = site_props > 0
+                            n_non_zero = non_zero_mask.sum()
+                            if n_non_zero == expected_days - 1:  # Exactly one zero (day 29)
+                                # Scale down all existing proportions and give day 29 the average
+                                avg_prop = 1.0 / expected_days
+                                site_props[non_zero_mask] *= (1.0 - avg_prop) / prop_sum  # Scale to leave room for day 29
+                                site_props[~non_zero_mask] = avg_prop  # Assign average to day 29
+                                daily_flow_proportions_for_month[:, s] = site_props
+                            elif n_non_zero > 0:
+                                # Multiple zeros - redistribute mass
+                                missing_mass = 1.0 - prop_sum
+                                site_props[non_zero_mask] += missing_mass / n_non_zero
+                                daily_flow_proportions_for_month[:, s] = site_props
+                        elif prop_sum == 0:
+                            # All zeros - use uniform distribution (should rarely happen)
+                            daily_flow_proportions_for_month[:, s] = 1.0 / expected_days
+                else:
+                    prop_sum = daily_flow_proportions_for_month.sum()
+                    n_zeros = (daily_flow_proportions_for_month == 0.0).sum()
+
+                    # Same fix for single-site case
+                    if n_zeros > 0 and month == 2 and expected_days == 29:
+                        non_zero_mask = daily_flow_proportions_for_month > 0
+                        n_non_zero = non_zero_mask.sum()
+                        if n_non_zero == expected_days - 1:
+                            avg_prop = 1.0 / expected_days
+                            daily_flow_proportions_for_month[non_zero_mask] *= (1.0 - avg_prop) / prop_sum
+                            daily_flow_proportions_for_month[~non_zero_mask] = avg_prop
+                        elif n_non_zero > 0:
+                            missing_mass = 1.0 - prop_sum
+                            daily_flow_proportions_for_month[non_zero_mask] += missing_mass / n_non_zero
+                    elif prop_sum == 0:
+                        # All zeros - use uniform distribution
+                        daily_flow_proportions_for_month[:] = 1.0 / expected_days
 
                 # Disaggregate the monthly flow
                 if self.is_multisite:
@@ -527,32 +581,67 @@ class NowakDisaggregator(Disaggregator):
                     if self.is_multisite:
                         daily_site_data = Qh_daily_wrap.loc[start_date:end_date]
                         for s, site in enumerate(self.site_names):
-                            site_total = daily_site_data[site].sum()
-                            if site_total > 0:
-                                daily_flow_profiles[month][idx, :actual_days, s] = daily_site_data[site].values / site_total
+                            # Use skipna=True to properly handle NaN values (e.g., from replaced zeros)
+                            site_values = daily_site_data[site].values
+                            site_total = daily_site_data[site].sum(skipna=True)
+
+                            if site_total > 0 and not np.isnan(site_total):
+                                # Calculate proportions, handling NaN values
+                                proportions = site_values / site_total
+                                # Replace any NaN proportions with uniform distribution over valid days
+                                if np.any(np.isnan(proportions)):
+                                    n_valid = np.sum(~np.isnan(proportions))
+                                    if n_valid > 0:
+                                        # Redistribute NaN proportion mass uniformly over valid days
+                                        nan_mass = np.sum(np.isnan(proportions)) / actual_days
+                                        proportions = np.where(np.isnan(proportions), 0.0, proportions)
+                                        proportions += nan_mass / n_valid
+                                    else:
+                                        # All proportions are NaN - use uniform
+                                        proportions = np.ones(actual_days) / actual_days
+                                daily_flow_profiles[month][idx, :actual_days, s] = proportions
                             else:
-                                # Handle zero flow case
+                                # Handle zero or NaN total flow case - use uniform distribution
                                 daily_flow_profiles[month][idx, :actual_days, s] = 1.0 / actual_days
 
                             # Ensure proportions are valid
                             daily_flow_profiles[month][idx, :actual_days, s] = np.clip(daily_flow_profiles[month][idx, :actual_days, s], 0, 1)
                             # Renormalize to ensure they sum to 1
                             prop_sum = daily_flow_profiles[month][idx, :actual_days, s].sum()
-                            if prop_sum > 0:
+                            if prop_sum > 0 and not np.isnan(prop_sum):
                                 daily_flow_profiles[month][idx, :actual_days, s] /= prop_sum
+                            else:
+                                # Fallback to uniform if sum is zero or NaN
+                                daily_flow_profiles[month][idx, :actual_days, s] = 1.0 / actual_days
                     else:
-                        if total_monthly_flow > 0:
-                            daily_flow_profiles[month][idx, :actual_days] = daily_index_data.values / total_monthly_flow
+                        if total_monthly_flow > 0 and not np.isnan(total_monthly_flow):
+                            # Calculate proportions, handling NaN values
+                            proportions = daily_index_data.values / total_monthly_flow
+                            # Replace any NaN proportions with uniform distribution over valid days
+                            if np.any(np.isnan(proportions)):
+                                n_valid = np.sum(~np.isnan(proportions))
+                                if n_valid > 0:
+                                    # Redistribute NaN proportion mass uniformly over valid days
+                                    nan_mass = np.sum(np.isnan(proportions)) / actual_days
+                                    proportions = np.where(np.isnan(proportions), 0.0, proportions)
+                                    proportions += nan_mass / n_valid
+                                else:
+                                    # All proportions are NaN - use uniform
+                                    proportions = np.ones(actual_days) / actual_days
+                            daily_flow_profiles[month][idx, :actual_days] = proportions
                         else:
-                            # Handle zero flow case
+                            # Handle zero or NaN flow case - use uniform distribution
                             daily_flow_profiles[month][idx, :actual_days] = 1.0 / actual_days
 
                         # limit daily flow proportions to [0, 1]
                         daily_flow_profiles[month][idx, :actual_days] = np.clip(daily_flow_profiles[month][idx, :actual_days], 0, 1)
                         # Renormalize to ensure they sum to 1
                         prop_sum = daily_flow_profiles[month][idx, :actual_days].sum()
-                        if prop_sum > 0:
+                        if prop_sum > 0 and not np.isnan(prop_sum):
                             daily_flow_profiles[month][idx, :actual_days] /= prop_sum
+                        else:
+                            # Fallback to uniform if sum is zero or NaN
+                            daily_flow_profiles[month][idx, :actual_days] = 1.0 / actual_days
     
         self.monthly_cumulative_flows = monthly_cumulative_flows
         self.daily_flow_profiles = daily_flow_profiles

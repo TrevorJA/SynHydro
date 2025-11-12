@@ -379,9 +379,10 @@ class KirschGenerator(Generator):
             if M.shape != (n_years_buffered, self.n_months):
                 raise ValueError(f"M must have shape ({n_years_buffered}, {self.n_months})")
 
-        # M_prime uses the same indices as M for generating the cross-year correlations
-        # No need to limit by Y_prime shape here; the limiting happens in _combine_Z_and_Z_prime
-        M_prime = M.copy()
+        # Generate separate bootstrap indices for Y_prime with correct bounds
+        # Y_prime has one fewer year than Y due to cross-year correlation structure
+        # Using M.copy() would allow indices up to Y.shape[0]-1, but Y_prime only has indices up to Y.shape[0]-2
+        M_prime = self._get_bootstrap_indices(n_years_buffered, max_idx=self.Y_prime.shape[0])
 
         X = self._create_bootstrap_tensor(M, use_Y_prime=False)
         X_prime = self._create_bootstrap_tensor(M_prime, use_Y_prime=True)
