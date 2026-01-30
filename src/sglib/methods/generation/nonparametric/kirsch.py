@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import warnings
+from scipy.stats import norm
 
 from sglib.core.base import Generator, GeneratorParams, FittedParams
 from sglib.core.ensemble import Ensemble, EnsembleMetadata
@@ -170,7 +171,13 @@ class KirschGenerator(Generator):
         self.historic_years = np.array(valid_years)
         self.n_historic_years = len(valid_years)
 
-        self.Y = self.Z_h.copy()
+        # Apply normal score transform when using log flow to prevent
+        # bias from non-Gaussian standardized residuals interacting with exp()
+        if self.generate_using_log_flow:
+            self._fit_normal_score_transforms()
+            self.Y = self._apply_normal_score_transform(self.Z_h)
+        else:
+            self.Y = self.Z_h.copy()
         self.Y_prime = np.zeros_like(self.Y[:-1])
         self.Y_prime[:, :6, :] = self.Y[:-1, 6:, :]
         self.Y_prime[:, 6:, :] = self.Y[1:, :6, :]
@@ -254,6 +261,86 @@ class KirschGenerator(Generator):
             repaired_corr = repair_correlation_matrix(corr, method=self.matrix_repair_method)
             return np.linalg.cholesky(repaired_corr).T
 
+    def _fit_normal_score_transforms(self):
+        """
+        Compute empirical CDF mappings for normal score transform per month per site.
+
+        For each (month, site), stores the sorted standardized residuals and their
+        corresponding normal scores (via Hazen plotting position). These are used
+        during generation to map Cholesky-mixed values back to the correct
+        month-specific distribution, preventing bias from the exp() back-transform.
+        """
+        n_years = self.Z_h.shape[0]
+        self._nst_sorted = {}
+        self._nst_nscores = {}
+
+        pp = (np.arange(1, n_years + 1) - 0.5) / n_years
+        nscores = norm.ppf(pp)
+
+        for m in range(self.n_months):
+            for s in range(self.n_sites):
+                sorted_vals = np.sort(self.Z_h[:, m, s])
+                self._nst_sorted[(m, s)] = sorted_vals
+                self._nst_nscores[(m, s)] = nscores
+
+    def _apply_normal_score_transform(self, Z):
+        """
+        Forward transform: standardized residuals -> normal scores.
+
+        Parameters
+        ----------
+        Z : np.ndarray
+            Standardized residuals with shape (n_years, 12, n_sites).
+
+        Returns
+        -------
+        np.ndarray
+            Normal-scored residuals with same shape.
+        """
+        Z_norm = np.zeros_like(Z)
+        for m in range(self.n_months):
+            for s in range(self.n_sites):
+                Z_norm[:, m, s] = np.interp(
+                    Z[:, m, s],
+                    self._nst_sorted[(m, s)],
+                    self._nst_nscores[(m, s)]
+                )
+        return Z_norm
+
+    def _apply_inverse_normal_score_transform(self, ZC):
+        """
+        Inverse transform: normal scores -> original standardized space per target month.
+
+        Uses linear extrapolation at tails so synthetic values beyond the
+        observed range are not clamped.
+
+        Parameters
+        ----------
+        ZC : np.ndarray
+            Normal-scored combined tensor with shape (n_years, 12, n_sites).
+
+        Returns
+        -------
+        np.ndarray
+            Standardized residuals in original space with same shape.
+        """
+        ZC_orig = np.zeros_like(ZC)
+        for m in range(self.n_months):
+            for s in range(self.n_sites):
+                ns = self._nst_nscores[(m, s)]
+                sv = self._nst_sorted[(m, s)]
+                # Linear extrapolation at tails
+                slope_lo = (sv[1] - sv[0]) / (ns[1] - ns[0]) if ns[1] != ns[0] else 1.0
+                slope_hi = (sv[-1] - sv[-2]) / (ns[-1] - ns[-2]) if ns[-1] != ns[-2] else 1.0
+                ns_ext = np.concatenate([[-10.0], ns, [10.0]])
+                sv_ext = np.concatenate([
+                    [sv[0] + slope_lo * (-10.0 - ns[0])],
+                    sv,
+                    [sv[-1] + slope_hi * (10.0 - ns[-1])]
+                ])
+                ZC_orig[:, m, s] = np.interp(ZC[:, m, s], ns_ext, sv_ext)
+        return ZC_orig
+
     def _get_bootstrap_indices(self, n_years, max_idx=None):
         """
         Return 'M', a matrix of bootstrap indices for the synthetic time series.
@@ -321,7 +408,7 @@ class KirschGenerator(Generator):
         n_years = Z.shape[0] - 1
         ZC = np.zeros((n_years, self.n_months, self.n_sites))
         ZC[:, :6, :] = Z_prime[:n_years, 6:, :]
-        ZC[:, 6:, :] = Z[1:n_years+1, :6, :]
+        ZC[:, 6:, :] = Z[1:n_years+1, 6:, :]
         return ZC
 
     def _destandardize_flows(self, Z_combined):
@@ -395,6 +482,12 @@ class KirschGenerator(Generator):
             Z_prime[:, :, s] = X_prime[:, :, s] @ self.U_prime_site[s]
 
         ZC = self._combine_Z_and_Z_prime(Z, Z_prime)
+
+        # Inverse normal score transform: map from N(0,1) back to
+        # month-specific standardized distributions before destandardization
+        if self.generate_using_log_flow:
+            ZC = self._apply_inverse_normal_score_transform(ZC)
+
         Q_syn = self._destandardize_flows(ZC)
 
         if self.generate_using_log_flow:
