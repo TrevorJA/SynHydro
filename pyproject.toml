@@ -50,7 +50,6 @@ lint = [
 docs = [
     "mkdocs-material>=9.5,<9.7",
     "mkdocstrings[python]>=0.24",
-    "mkdocs-git-revision-date-localized-plugin>=1.2",
 ]
 
 [project.urls]

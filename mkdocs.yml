@@ -52,10 +52,6 @@ plugins:
             show_signature_annotations: true
             merge_init_into_class: true
             filters: ["!^_"]
-  - git-revision-date-localized:
-      enable_creation_date: true
-      fallback_to_build_date: true
-      enable_git_follow: false
 
 markdown_extensions:
   - admonition
@@ -85,7 +81,7 @@ extra_css:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Pywr-DRB/SGLib
+      link: https://github.com/TrevorJA/SGLib
 
 nav:
   - Home: index.md
