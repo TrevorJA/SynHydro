@@ -1,0 +1,3188 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+      
+      
+        <meta name="author" content="Trevor Amestoy">
+      
+      
+        <link rel="canonical" href="https://trevorja.github.io/SGLib/algorithms/warm/">
+      
+      
+        <link rel="prev" href="../phase_randomization/">
+      
+      
+        <link rel="next" href="../multisite_hmm/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.2">
+    
+    
+      
+        <title>WARM - SGLib</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#wavelet-auto-regressive-method-warm" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SGLib" class="md-header__button md-logo" aria-label="SGLib" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SGLib
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              WARM
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="cyan"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/TrevorJA/SGLib" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    TrevorJA/SGLib
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../getting-started/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  Getting Started
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
+          
+  
+  
+  Tutorials
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+  
+  Algorithms
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../api/generators/" class="md-tabs__link">
+          
+  
+  
+  API Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SGLib" class="md-nav__button md-logo" aria-label="SGLib" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    SGLib
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/TrevorJA/SGLib" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    TrevorJA/SGLib
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Tutorials
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Tutorials
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/01_quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quickstart (Thomas-Fiering)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/02_multisite/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Site Monthly (Kirsch)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/03_pipeline/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Monthly→Daily Pipeline
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/04_drought_analysis/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drought Analysis (SSI)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Algorithms
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Algorithms
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../thomas_fiering/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Thomas-Fiering AR(1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kirsch/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Kirsch Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../matalas/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Matalas MAR(1)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../phase_randomization/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Phase Randomization
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WARM
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    WARM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#technical-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Specifications
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm-description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Algorithm Description
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Algorithm Description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-preprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Preprocessing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-fitting-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Fitting (Training)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Fitting (Training)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-continuous-wavelet-transform-cwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Continuous Wavelet Transform (CWT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-scale-averaged-wavelet-power-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Scale Averaged Wavelet Power (SAWP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-normalize-by-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Normalize by SAWP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-fit-ar-models-to-each-scale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Fit AR Models to Each Scale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-generation-synthesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Generation (Synthesis)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Generation (Synthesis)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-generate-normalized-coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Generate Normalized Coefficients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-resample-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Resample SAWP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-rescale-coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Rescale Coefficients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-inverse-wavelet-transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Inverse Wavelet Transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mathematical-formulation-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mathematical Formulation Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mathematical Formulation Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fitted-quantities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fitted Quantities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-parameters-and-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Parameters and Tuning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Parameters and Tuning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wavelet-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wavelet Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#number-of-scales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Number of Scales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ar-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AR Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#computational-complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Computational Complexity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-and-special-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations and Special Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Limitations and Special Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-annual-frequency-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Annual Frequency Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-univariate-single-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Univariate (Single Site)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-edge-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Edge Effects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-non-stationary-mean-trends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Non-stationary Mean Trends
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-zeronear-zero-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Zero/Near-Zero Flows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-reconstruction-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Reconstruction Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydrologic-properties-preserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydrologic Properties Preserved
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydrologic Properties Preserved">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#temporal-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequency-domain-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frequency-Domain Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributional-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distributional Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-with-other-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison with Other Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison with Other Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#warm-vs-traditional-ar-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WARM vs. Traditional AR Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warm-vs-kwon-et-al-2007-wavelet-ar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WARM vs. Kwon et al. (2007) Wavelet-AR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warm-vs-hmm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WARM vs. HMM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing SAWP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparing-wavelets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparing Wavelets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Primary Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#related-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Software
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version History
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../multisite_hmm/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Site HMM
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../nowak_disaggregation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Nowak Disaggregation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    API Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/generators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Generators
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/disaggregators/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Disaggregators & Pipelines
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/drought/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Drought Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/core/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#technical-specifications" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Technical Specifications
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overview
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm-description" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Algorithm Description
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Algorithm Description">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-preprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Preprocessing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-fitting-training" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Fitting (Training)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Fitting (Training)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-continuous-wavelet-transform-cwt" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Continuous Wavelet Transform (CWT)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-scale-averaged-wavelet-power-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Scale Averaged Wavelet Power (SAWP)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-normalize-by-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Normalize by SAWP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-fit-ar-models-to-each-scale" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Fit AR Models to Each Scale
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-generation-synthesis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Generation (Synthesis)
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. Generation (Synthesis)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-generate-normalized-coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 1: Generate Normalized Coefficients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-resample-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 2: Resample SAWP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-rescale-coefficients" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 3: Rescale Coefficients
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-4-inverse-wavelet-transform" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step 4: Inverse Wavelet Transform
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#mathematical-formulation-summary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Mathematical Formulation Summary
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Mathematical Formulation Summary">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#input" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Input
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fitted-quantities" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fitted Quantities
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Output
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-parameters-and-tuning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Parameters and Tuning
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Key Parameters and Tuning">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#wavelet-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wavelet Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#number-of-scales" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Number of Scales
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ar-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        AR Order
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#computational-complexity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Computational Complexity
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations-and-special-handling" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Limitations and Special Handling
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Limitations and Special Handling">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-annual-frequency-only" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Annual Frequency Only
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-univariate-single-site" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Univariate (Single Site)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-edge-effects" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Edge Effects
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-non-stationary-mean-trends" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Non-stationary Mean Trends
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#5-zeronear-zero-flows" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Zero/Near-Zero Flows
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#6-reconstruction-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Reconstruction Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hydrologic-properties-preserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hydrologic Properties Preserved
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Hydrologic Properties Preserved">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#temporal-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Temporal Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#frequency-domain-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Frequency-Domain Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#distributional-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Distributional Properties
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#comparison-with-other-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparison with Other Methods
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Comparison with Other Methods">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#warm-vs-traditional-ar-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WARM vs. Traditional AR Models
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warm-vs-kwon-et-al-2007-wavelet-ar" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WARM vs. Kwon et al. (2007) Wavelet-AR
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#warm-vs-hmm" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        WARM vs. HMM
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usage-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Usage Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Usage Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Usage
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Parameters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#analyzing-sawp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Analyzing SAWP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#comparing-wavelets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Comparing Wavelets
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        References
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="References">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Primary Reference
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#related-work" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Related Work
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#software" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Software
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-history" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Version History
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Future Enhancements
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="wavelet-auto-regressive-method-warm">Wavelet Auto-Regressive Method (WARM)<a class="headerlink" href="#wavelet-auto-regressive-method-warm" title="Permanent link">&para;</a></h1>
+<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Method Name</strong></td>
+<td>WARM (Wavelet Auto-Regressive Method)</td>
+</tr>
+<tr>
+<td><strong>Implementation</strong></td>
+<td><code>WARMGenerator</code></td>
+</tr>
+<tr>
+<td><strong>Type</strong></td>
+<td>Parametric, Stochastic</td>
+</tr>
+<tr>
+<td><strong>Frequency</strong></td>
+<td>Annual</td>
+</tr>
+<tr>
+<td><strong>Sites</strong></td>
+<td>Univariate (single site)</td>
+</tr>
+<tr>
+<td><strong>Reference</strong></td>
+<td>Nowak et al. (2011)</td>
+</tr>
+<tr>
+<td><strong>Full Citation</strong></td>
+<td>Nowak, K., Rajagopalan, B., &amp; Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Wavelet Auto-Regressive Method (WARM) is an advanced stochastic generator designed for non-stationary streamflow simulation. WARM combines continuous wavelet transforms with autoregressive modeling to preserve both time-varying spectral characteristics and temporal persistence in synthetic streamflow sequences.</p>
+<p><strong>Key Innovation</strong>: The Scale Averaged Wavelet Power (SAWP) enables WARM to capture and reproduce time-varying power spectral characteristics, making it particularly suitable for streamflows with non-stationary trends, regime shifts, or low-frequency variability (e.g., climate oscillations, long-term droughts).</p>
+<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
+<p>WARM operates through a 4-step process that decomposes, models, and reconstructs streamflow signals using wavelet analysis and autoregressive modeling.</p>
+<h3 id="1-preprocessing">1. Preprocessing<a class="headerlink" href="#1-preprocessing" title="Permanent link">&para;</a></h3>
+<p><strong>Objective</strong>: Prepare annual streamflow data for wavelet analysis.</p>
+<p><strong>Steps</strong>:
+1. Validate input data (univariate time series)
+2. Resample to annual frequency if needed (monthly → annual via sum, daily → annual via sum)
+3. Store observed annual flows: <span class="arithmatex">\(Q_{\text{obs}}(t)\)</span>, where <span class="arithmatex">\(t = 1, 2, \ldots, T\)</span> years</p>
+<p><strong>Validation</strong>:
+- Minimum recommended: 20 years of data
+- WARM designed specifically for annual streamflow
+- Single-site only (univariate)</p>
+<h3 id="2-fitting-training">2. Fitting (Training)<a class="headerlink" href="#2-fitting-training" title="Permanent link">&para;</a></h3>
+<p>WARM fitting consists of 4 sub-steps:</p>
+<h4 id="step-1-continuous-wavelet-transform-cwt">Step 1: Continuous Wavelet Transform (CWT)<a class="headerlink" href="#step-1-continuous-wavelet-transform-cwt" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Decompose time series into time-frequency components.</p>
+<p>Apply continuous wavelet transform using mother wavelet <span class="arithmatex">\(\psi\)</span>:</p>
+<div class="arithmatex">\[
+W(s, t) = \int_{-\infty}^{\infty} Q(\tau) \cdot \frac{1}{\sqrt{s}} \psi^*\left(\frac{\tau - t}{s}\right) d\tau
+\]</div>
+<p>where:
+- <span class="arithmatex">\(W(s, t)\)</span> = wavelet coefficients at scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span>
+- <span class="arithmatex">\(\psi\)</span> = mother wavelet function (e.g., Morlet, Mexican Hat)
+- <span class="arithmatex">\(s\)</span> = scale parameter (related to frequency: larger scales = lower frequencies)
+- <span class="arithmatex">\(*\)</span> denotes complex conjugate</p>
+<p><strong>Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">scales</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_scales</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">coefficients</span><span class="p">,</span> <span class="n">frequencies</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">cwt</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="n">scales</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="s1">&#39;morl&#39;</span><span class="p">)</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Result: coefficients with shape (n_scales, n_years)</span>
+</span></code></pre></div></p>
+<p><strong>Recommended Wavelets</strong>:
+- <strong>Morlet</strong> (<code>'morl'</code>): Best for hydrologic applications, good time-frequency localization
+- <strong>Mexican Hat</strong> (<code>'mexh'</code>): Symmetric, good for detecting peaks
+- <strong>Gaussian</strong> (<code>'gaus1'</code>-<code>'gaus8'</code>): Smooth, varying derivatives</p>
+<h4 id="step-2-scale-averaged-wavelet-power-sawp">Step 2: Scale Averaged Wavelet Power (SAWP)<a class="headerlink" href="#step-2-scale-averaged-wavelet-power-sawp" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Compute time-varying power across all frequency scales.</p>
+<p>SAWP is the <strong>key innovation</strong> of WARM (Nowak et al. 2011) compared to previous methods (Kwon et al. 2007). It captures temporal variations in spectral power.</p>
+<p>Calculate wavelet power at each scale and time:</p>
+<div class="arithmatex">\[
+P(s, t) = |W(s, t)|^2
+\]</div>
+<p>Average across all scales for each time point:</p>
+<div class="arithmatex">\[
+\text{SAWP}(t) = \frac{1}{S} \sum_{s=1}^{S} P(s, t) = \frac{1}{S} \sum_{s=1}^{S} |W(s, t)|^2
+\]</div>
+<p>where <span class="arithmatex">\(S\)</span> = total number of scales.</p>
+<p><strong>Physical Meaning</strong>:
+- High SAWP(t) → High energy/variability at time <span class="arithmatex">\(t\)</span>
+- Low SAWP(t) → Low energy/variability at time <span class="arithmatex">\(t\)</span>
+- Captures non-stationary variance structure</p>
+<p><strong>Implementation</strong>:
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coefficients</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">sawp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Average across scales</span>
+</span></code></pre></div></p>
+<h4 id="step-3-normalize-by-sawp">Step 3: Normalize by SAWP<a class="headerlink" href="#step-3-normalize-by-sawp" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Remove time-varying power to create stationary components.</p>
+<p>For each scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span>:</p>
+<div class="arithmatex">\[
+W_{\text{norm}}(s, t) = \frac{W(s, t)}{\sqrt{\text{SAWP}(t) + \epsilon}}
+\]</div>
+<p>where <span class="arithmatex">\(\epsilon\)</span> is a small constant (<span class="arithmatex">\(10^{-10}\)</span>) to prevent division by zero.</p>
+<p><strong>Result</strong>: Normalized coefficients <span class="arithmatex">\(W_{\text{norm}}(s, t)\)</span> are approximately stationary and suitable for AR modeling.</p>
+<h4 id="step-4-fit-ar-models-to-each-scale">Step 4: Fit AR Models to Each Scale<a class="headerlink" href="#step-4-fit-ar-models-to-each-scale" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Model temporal persistence at each frequency scale.</p>
+<p>For each scale <span class="arithmatex">\(s\)</span>, fit an AR(p) model to the normalized coefficients <span class="arithmatex">\(W_{\text{norm}}(s, \cdot)\)</span>:</p>
+<div class="arithmatex">\[
+W_{\text{norm}}(s, t) = \mu_s + \sum_{i=1}^{p} \phi_{s,i} \left[W_{\text{norm}}(s, t-i) - \mu_s\right] + \epsilon_s(t)
+\]</div>
+<p>where:
+- <span class="arithmatex">\(\mu_s\)</span> = mean of normalized coefficients at scale <span class="arithmatex">\(s\)</span>
+- <span class="arithmatex">\(\phi_{s,i}\)</span> = AR coefficient for lag <span class="arithmatex">\(i\)</span> at scale <span class="arithmatex">\(s\)</span>
+- <span class="arithmatex">\(\epsilon_s(t) \sim N(0, \sigma_s^2)\)</span> = white noise innovation
+- <span class="arithmatex">\(p\)</span> = AR order (typically 1 or 2)</p>
+<p><strong>Parameter Estimation</strong>: Yule-Walker equations</p>
+<p>Given autocorrelation function <span class="arithmatex">\(\rho(k)\)</span>, solve:</p>
+<div class="arithmatex">\[
+\begin{bmatrix}
+1 &amp; \rho(1) &amp; \cdots &amp; \rho(p-1) \\
+\rho(1) &amp; 1 &amp; \cdots &amp; \rho(p-2) \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\rho(p-1) &amp; \rho(p-2) &amp; \cdots &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+\phi_1 \\
+\phi_2 \\
+\vdots \\
+\phi_p
+\end{bmatrix}
+=
+\begin{bmatrix}
+\rho(1) \\
+\rho(2) \\
+\vdots \\
+\rho(p)
+\end{bmatrix}
+\]</div>
+<p>Innovation variance:</p>
+<div class="arithmatex">\[
+\sigma^2 = \gamma(0) \left(1 - \sum_{i=1}^{p} \phi_i \rho(i)\right)
+\]</div>
+<p>where <span class="arithmatex">\(\gamma(0)\)</span> is the variance of the normalized coefficients.</p>
+<p><strong>Stored Parameters</strong>:
+- For each scale <span class="arithmatex">\(s\)</span>: <span class="arithmatex">\(\{\mu_s, \phi_{s,1}, \ldots, \phi_{s,p}, \sigma_s\}\)</span>
+- SAWP time series: <span class="arithmatex">\(\text{SAWP}(1), \ldots, \text{SAWP}(T)\)</span>
+- Wavelet parameters: wavelet type, scales array</p>
+<h3 id="3-generation-synthesis">3. Generation (Synthesis)<a class="headerlink" href="#3-generation-synthesis" title="Permanent link">&para;</a></h3>
+<p><strong>Objective</strong>: Generate synthetic annual streamflow sequences.</p>
+<h4 id="step-1-generate-normalized-coefficients">Step 1: Generate Normalized Coefficients<a class="headerlink" href="#step-1-generate-normalized-coefficients" title="Permanent link">&para;</a></h4>
+<p>For each scale <span class="arithmatex">\(s\)</span> and each synthetic year <span class="arithmatex">\(t\)</span>:</p>
+<ol>
+<li>
+<p>Initialize: <span class="arithmatex">\(W_{\text{syn,norm}}(s, 0) = \mu_s\)</span> (or use historical values)</p>
+</li>
+<li>
+<p>Generate AR process:
+   $$
+   W_{\text{syn,norm}}(s, t) = \mu_s + \sum_{i=1}^{p} \phi_{s,i} \left[W_{\text{syn,norm}}(s, t-i) - \mu_s\right] + \epsilon_s(t)
+   $$</p>
+</li>
+</ol>
+<p>where <span class="arithmatex">\(\epsilon_s(t) \sim N(0, \sigma_s^2)\)</span> are independent random innovations.</p>
+<p><strong>Result</strong>: Normalized synthetic coefficients for all scales and times.</p>
+<h4 id="step-2-resample-sawp">Step 2: Resample SAWP<a class="headerlink" href="#step-2-resample-sawp" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Create time-varying power for synthetic sequence.</p>
+<p>Resample SAWP from historical record with replacement:</p>
+<div class="arithmatex">\[
+\text{SAWP}_{\text{syn}}(t) = \text{SAWP}_{\text{obs}}(k_t)
+\]</div>
+<p>where <span class="arithmatex">\(k_t\)</span> is a randomly selected time index from <span class="arithmatex">\(\{1, 2, \ldots, T\}\)</span>.</p>
+<p><strong>Purpose</strong>: Preserve the distribution and range of power variations while allowing different temporal patterns.</p>
+<h4 id="step-3-rescale-coefficients">Step 3: Rescale Coefficients<a class="headerlink" href="#step-3-rescale-coefficients" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Restore time-varying power to synthetic coefficients.</p>
+<p>For each scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span>:</p>
+<div class="arithmatex">\[
+W_{\text{syn}}(s, t) = W_{\text{syn,norm}}(s, t) \cdot \sqrt{\text{SAWP}_{\text{syn}}(t) + \epsilon}
+\]</div>
+<p><strong>Result</strong>: Synthetic wavelet coefficients with time-varying power.</p>
+<h4 id="step-4-inverse-wavelet-transform">Step 4: Inverse Wavelet Transform<a class="headerlink" href="#step-4-inverse-wavelet-transform" title="Permanent link">&para;</a></h4>
+<p><strong>Objective</strong>: Reconstruct synthetic streamflow time series.</p>
+<p>The inverse CWT is approximated by weighted summation across scales:</p>
+<div class="arithmatex">\[
+Q_{\text{syn}}(t) = C \sum_{s=1}^{S} \frac{\Re[W_{\text{syn}}(s, t)]}{\sqrt{s}} \cdot w_s
+\]</div>
+<p>where:
+- <span class="arithmatex">\(\Re[\cdot]\)</span> = real part
+- <span class="arithmatex">\(w_s\)</span> = scale-dependent weights (typically <span class="arithmatex">\(w_s = 1/\sqrt{s}\)</span>)
+- <span class="arithmatex">\(C\)</span> = normalization constant</p>
+<p><strong>Adjustment</strong>:
+After reconstruction, adjust mean and variance to match observed:</p>
+<div class="arithmatex">\[
+Q_{\text{syn,adjusted}}(t) = \sigma_{\text{obs}} \cdot \frac{Q_{\text{syn}}(t) - \bar{Q}_{\text{syn}}}{\sigma_{\text{syn}}} + \bar{Q}_{\text{obs}}
+\]</div>
+<p><strong>Non-negativity</strong>: Ensure <span class="arithmatex">\(Q_{\text{syn}}(t) \geq 0\)</span> (set negative values to 0).</p>
+<h2 id="mathematical-formulation-summary">Mathematical Formulation Summary<a class="headerlink" href="#mathematical-formulation-summary" title="Permanent link">&para;</a></h2>
+<h3 id="input">Input<a class="headerlink" href="#input" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Historical annual flows: <span class="arithmatex">\(Q_{\text{obs}}(t)\)</span>, <span class="arithmatex">\(t = 1, \ldots, T\)</span></li>
+</ul>
+<h3 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Wavelet type: <span class="arithmatex">\(\psi\)</span> (e.g., Morlet)</li>
+<li>Number of scales: <span class="arithmatex">\(S\)</span> (e.g., 64)</li>
+<li>AR order: <span class="arithmatex">\(p\)</span> (e.g., 1)</li>
+</ul>
+<h3 id="fitted-quantities">Fitted Quantities<a class="headerlink" href="#fitted-quantities" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Wavelet coefficients: <span class="arithmatex">\(W(s, t)\)</span> for <span class="arithmatex">\(s = 1, \ldots, S\)</span> and <span class="arithmatex">\(t = 1, \ldots, T\)</span></li>
+<li>SAWP: <span class="arithmatex">\(\text{SAWP}(t)\)</span> for <span class="arithmatex">\(t = 1, \ldots, T\)</span></li>
+<li>AR parameters for each scale: <span class="arithmatex">\(\{\mu_s, \phi_{s,1}, \ldots, \phi_{s,p}, \sigma_s\}\)</span> for <span class="arithmatex">\(s = 1, \ldots, S\)</span></li>
+</ul>
+<h3 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Synthetic annual flows: <span class="arithmatex">\(Q_{\text{syn}}(t)\)</span>, <span class="arithmatex">\(t = 1, \ldots, T_{\text{syn}}\)</span></li>
+</ul>
+<h2 id="key-parameters-and-tuning">Key Parameters and Tuning<a class="headerlink" href="#key-parameters-and-tuning" title="Permanent link">&para;</a></h2>
+<h3 id="wavelet-selection">Wavelet Selection<a class="headerlink" href="#wavelet-selection" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Wavelet</th>
+<th>Code</th>
+<th>Characteristics</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Morlet</strong></td>
+<td><code>'morl'</code></td>
+<td>Complex, good time-frequency localization</td>
+<td><strong>Recommended</strong> for streamflow (default)</td>
+</tr>
+<tr>
+<td><strong>Mexican Hat</strong></td>
+<td><code>'mexh'</code></td>
+<td>Symmetric, second derivative of Gaussian</td>
+<td>Detecting peaks/oscillations</td>
+</tr>
+<tr>
+<td><strong>Gaussian (1st-8th)</strong></td>
+<td><code>'gaus1'</code>-<code>'gaus8'</code></td>
+<td>Smooth, varying smoothness</td>
+<td>Experimental/smoothing</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Recommendation</strong>: Use <strong>Morlet</strong> wavelet (<code>'morl'</code>) as it provides the best balance between time and frequency localization for hydrologic signals.</p>
+<h3 id="number-of-scales">Number of Scales<a class="headerlink" href="#number-of-scales" title="Permanent link">&para;</a></h3>
+<p><strong>Parameter</strong>: <code>scales</code> (default: 64)</p>
+<p><strong>Guidelines</strong>:
+- <strong>Low (8-16)</strong>: Faster computation, captures only major frequencies
+- <strong>Medium (32-64)</strong>: <strong>Recommended</strong>, good frequency resolution
+- <strong>High (128+)</strong>: Very detailed, computationally expensive, may overfit</p>
+<p><strong>Rule of thumb</strong>: Use <span class="arithmatex">\(S \approx T/2\)</span> to <span class="arithmatex">\(T\)</span>, where <span class="arithmatex">\(T\)</span> = number of years.</p>
+<p><strong>Example</strong>:
+- 50 years of data → 32-64 scales
+- 100 years of data → 64-128 scales</p>
+<h3 id="ar-order">AR Order<a class="headerlink" href="#ar-order" title="Permanent link">&para;</a></h3>
+<p><strong>Parameter</strong>: <code>ar_order</code> (default: 1)</p>
+<p><strong>Guidelines</strong>:
+- <strong>AR(1)</strong>: Captures first-order temporal persistence, <strong>recommended for most cases</strong>
+- <strong>AR(2)</strong>: Captures additional lag structure, use if data shows strong 2-year memory
+- <strong>AR(3+)</strong>: Rarely needed, risk of overfitting</p>
+<p><strong>Selection</strong>: Use information criteria (AIC/BIC) or cross-validation if uncertain. Default AR(1) works well for annual streamflow.</p>
+<h2 id="computational-complexity">Computational Complexity<a class="headerlink" href="#computational-complexity" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Complexity</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CWT</strong></td>
+<td><span class="arithmatex">\(O(S \cdot T)\)</span></td>
+<td><span class="arithmatex">\(S\)</span> = scales, <span class="arithmatex">\(T\)</span> = years</td>
+</tr>
+<tr>
+<td><strong>SAWP Calculation</strong></td>
+<td><span class="arithmatex">\(O(S \cdot T)\)</span></td>
+<td>Simple averaging</td>
+</tr>
+<tr>
+<td><strong>AR Fitting</strong></td>
+<td><span class="arithmatex">\(O(S \cdot T \cdot p^2)\)</span></td>
+<td><span class="arithmatex">\(p\)</span> = AR order, Yule-Walker solution</td>
+</tr>
+<tr>
+<td><strong>Generation</strong></td>
+<td><span class="arithmatex">\(O(S \cdot T_{\text{syn}})\)</span></td>
+<td>Per realization</td>
+</tr>
+<tr>
+<td><strong>Inverse CWT</strong></td>
+<td><span class="arithmatex">\(O(S \cdot T_{\text{syn}})\)</span></td>
+<td>Weighted summation</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Total Fitting</strong>: <span class="arithmatex">\(O(S \cdot T \cdot p^2)\)</span></p>
+<p><strong>Total Generation</strong> (per realization): <span class="arithmatex">\(O(S \cdot T_{\text{syn}})\)</span></p>
+<p><strong>Memory</strong>: <span class="arithmatex">\(O(S \cdot T)\)</span> for storing wavelet coefficients.</p>
+<p><strong>Typical Performance</strong> (64 scales, 50 years, AR(1)):
+- Fitting: &lt; 1 second
+- Generation (100 realizations × 100 years): ~ 2-5 seconds</p>
+<h2 id="limitations-and-special-handling">Limitations and Special Handling<a class="headerlink" href="#limitations-and-special-handling" title="Permanent link">&para;</a></h2>
+<h3 id="1-annual-frequency-only">1. Annual Frequency Only<a class="headerlink" href="#1-annual-frequency-only" title="Permanent link">&para;</a></h3>
+<p><strong>Limitation</strong>: WARM is designed for annual streamflow.</p>
+<p><strong>Reason</strong>: Wavelet decomposition for capturing multi-year oscillations (e.g., ENSO, PDO) works best at annual scale.</p>
+<p><strong>Workaround</strong>: For monthly/daily generation, consider:
+- Use WARM for annual totals
+- Disaggregate to finer resolution using separate method (e.g., K-NN, HMM)</p>
+<h3 id="2-univariate-single-site">2. Univariate (Single Site)<a class="headerlink" href="#2-univariate-single-site" title="Permanent link">&para;</a></h3>
+<p><strong>Current Implementation</strong>: Single site only.</p>
+<p><strong>Extension</strong>: Nowak et al. (2011) describes multi-site extension:
+- Generate multiple sites using WARM independently
+- Apply spatial disaggregation method to impose spatial correlation
+- Preserve historical spatial correlation structure</p>
+<p><strong>Future Work</strong>: Multi-site version could use:
+- Coupled AR models at each scale (VAR instead of AR)
+- Joint wavelet analysis with cross-wavelet transforms</p>
+<h3 id="3-edge-effects">3. Edge Effects<a class="headerlink" href="#3-edge-effects" title="Permanent link">&para;</a></h3>
+<p><strong>Issue</strong>: CWT has edge effects (cone of influence) at start/end of time series.</p>
+<p><strong>Handling</strong>:
+- PyWavelets pads signal automatically
+- WARM resamples SAWP, which mitigates edge effect impact
+- For very short series (&lt; 20 years), edge effects may be noticeable</p>
+<p><strong>Recommendation</strong>: Use at least 30 years of data for robust results.</p>
+<h3 id="4-non-stationary-mean-trends">4. Non-stationary Mean Trends<a class="headerlink" href="#4-non-stationary-mean-trends" title="Permanent link">&para;</a></h3>
+<p><strong>Handling</strong>: WARM preserves non-stationary spectral characteristics (via SAWP).</p>
+<p><strong>Strong Linear Trends</strong>: If data has strong deterministic trend:
+- Option 1: Detrend before WARM, re-trend after generation
+- Option 2: Use WARM as-is if trend is part of low-frequency variability</p>
+<p><strong>Recommendation</strong>: Analyze whether trend is deterministic or stochastic before deciding.</p>
+<h3 id="5-zeronear-zero-flows">5. Zero/Near-Zero Flows<a class="headerlink" href="#5-zeronear-zero-flows" title="Permanent link">&para;</a></h3>
+<p><strong>Handling</strong>: WARM can generate negative values (since AR model has Gaussian innovations).</p>
+<p><strong>Correction</strong>: Post-processing in <code>_generate()</code>:
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Q_syn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Q_syn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Truncate to non-negative</span>
+</span></code></pre></div></p>
+<p><strong>Limitation</strong>: For intermittent streams with frequent zeros, consider:
+- Two-stage model (occurrence + magnitude)
+- Non-parametric methods (K-NN, phase randomization)</p>
+<h3 id="6-reconstruction-accuracy">6. Reconstruction Accuracy<a class="headerlink" href="#6-reconstruction-accuracy" title="Permanent link">&para;</a></h3>
+<p><strong>Approximation</strong>: Inverse CWT is approximate (PyWavelets doesn't provide exact inverse for CWT).</p>
+<p><strong>Adjustment</strong>: WARM applies mean/variance adjustment after reconstruction:
+- Preserves observed mean and standard deviation
+- Small reconstruction error is acceptable for stochastic generation</p>
+<h2 id="hydrologic-properties-preserved">Hydrologic Properties Preserved<a class="headerlink" href="#hydrologic-properties-preserved" title="Permanent link">&para;</a></h2>
+<h3 id="temporal-properties">Temporal Properties<a class="headerlink" href="#temporal-properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Preserved?</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Mean</strong></td>
+<td>✅ Exactly</td>
+<td>Post-reconstruction adjustment</td>
+</tr>
+<tr>
+<td><strong>Variance</strong></td>
+<td>✅ Exactly</td>
+<td>Post-reconstruction adjustment</td>
+</tr>
+<tr>
+<td><strong>Lag-1 autocorrelation</strong></td>
+<td>✅ Approximately</td>
+<td>AR models at each scale</td>
+</tr>
+<tr>
+<td><strong>Multi-year persistence</strong></td>
+<td>✅ Strong</td>
+<td>Low-frequency wavelet components + AR</td>
+</tr>
+<tr>
+<td><strong>Non-stationary variance</strong></td>
+<td>✅ Strong</td>
+<td>SAWP resampling</td>
+</tr>
+</tbody>
+</table>
+<h3 id="frequency-domain-properties">Frequency-Domain Properties<a class="headerlink" href="#frequency-domain-properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Preserved?</th>
+<th>Method</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Power spectrum</strong></td>
+<td>✅ Strong</td>
+<td>Wavelet decomposition</td>
+</tr>
+<tr>
+<td><strong>Time-varying spectrum</strong></td>
+<td>✅ Strong</td>
+<td><strong>SAWP innovation</strong></td>
+</tr>
+<tr>
+<td><strong>Low-frequency oscillations</strong></td>
+<td>✅ Strong</td>
+<td>Large-scale wavelet components</td>
+</tr>
+<tr>
+<td><strong>High-frequency variability</strong></td>
+<td>✅ Moderate</td>
+<td>Small-scale wavelet components + AR noise</td>
+</tr>
+</tbody>
+</table>
+<h3 id="distributional-properties">Distributional Properties<a class="headerlink" href="#distributional-properties" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Property</th>
+<th>Preserved?</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Marginal distribution</strong></td>
+<td>⚠️ Approximate</td>
+<td>Mean/variance preserved, but shape may differ</td>
+</tr>
+<tr>
+<td><strong>Skewness</strong></td>
+<td>⚠️ Moderate</td>
+<td>Not explicitly preserved</td>
+</tr>
+<tr>
+<td><strong>Extremes</strong></td>
+<td>⚠️ Moderate</td>
+<td>AR innovations are Gaussian</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Note</strong>: For better preservation of marginal distribution, consider:
+- Log-transformation before WARM
+- Post-processing to match observed distribution (e.g., quantile mapping)</p>
+<h2 id="comparison-with-other-methods">Comparison with Other Methods<a class="headerlink" href="#comparison-with-other-methods" title="Permanent link">&para;</a></h2>
+<h3 id="warm-vs-traditional-ar-models">WARM vs. Traditional AR Models<a class="headerlink" href="#warm-vs-traditional-ar-models" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>WARM</th>
+<th>AR(1) / ARMA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Non-stationarity</strong></td>
+<td>✅ Handles via SAWP</td>
+<td>❌ Assumes stationarity</td>
+</tr>
+<tr>
+<td><strong>Low-frequency persistence</strong></td>
+<td>✅ Strong (wavelet scales)</td>
+<td>⚠️ Weak (limited memory)</td>
+</tr>
+<tr>
+<td><strong>Computation</strong></td>
+<td>Moderate (CWT)</td>
+<td>Fast</td>
+</tr>
+<tr>
+<td><strong>Interpretability</strong></td>
+<td>Moderate</td>
+<td>High</td>
+</tr>
+</tbody>
+</table>
+<h3 id="warm-vs-kwon-et-al-2007-wavelet-ar">WARM vs. Kwon et al. (2007) Wavelet-AR<a class="headerlink" href="#warm-vs-kwon-et-al-2007-wavelet-ar" title="Permanent link">&para;</a></h3>
+<p><strong>Key Difference</strong>: SAWP normalization</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>WARM (Nowak 2011)</th>
+<th>Kwon et al. (2007)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Time-varying power</strong></td>
+<td>✅ SAWP captures</td>
+<td>❌ Not captured</td>
+</tr>
+<tr>
+<td><strong>Non-stationary variance</strong></td>
+<td>✅ Strong</td>
+<td>⚠️ Moderate</td>
+</tr>
+<tr>
+<td><strong>Complexity</strong></td>
+<td>Moderate</td>
+<td>Moderate</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Advantage</strong>: WARM better preserves non-stationary spectral characteristics.</p>
+<h3 id="warm-vs-hmm">WARM vs. HMM<a class="headerlink" href="#warm-vs-hmm" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>WARM</th>
+<th>HMM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Regime changes</strong></td>
+<td>⚠️ Implicit (via SAWP)</td>
+<td>✅ Explicit (states)</td>
+</tr>
+<tr>
+<td><strong>Multi-site</strong></td>
+<td>❌ Univariate (current)</td>
+<td>✅ Native multi-site</td>
+</tr>
+<tr>
+<td><strong>Frequency</strong></td>
+<td>Annual</td>
+<td>Annual or Monthly</td>
+</tr>
+<tr>
+<td><strong>Low-frequency persistence</strong></td>
+<td>✅ Strong</td>
+<td>⚠️ Depends on state design</td>
+</tr>
+</tbody>
+</table>
+<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">sglib.methods.generation.parametric.warm</span><span class="w"> </span><span class="kn">import</span> <span class="n">WARMGenerator</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Load annual streamflow data</span>
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">Q_annual</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;annual_flows.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
+</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Initialize WARM generator with default parameters</span>
+</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
+</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Preprocess</span>
+</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
+</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
+</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># Fit model to historical data</span>
+</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
+</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="c1"># Generate 100 realizations of 100 years each</span>
+</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">warm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
+</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="c1"># Access realizations</span>
+</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="n">Q_syn_r0</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># First realization</span>
+</span></code></pre></div>
+<h3 id="custom-parameters">Custom Parameters<a class="headerlink" href="#custom-parameters" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Use Mexican Hat wavelet, 32 scales, AR(2) model</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">Q_annual</span><span class="p">,</span>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">wavelet</span><span class="o">=</span><span class="s1">&#39;mexh&#39;</span><span class="p">,</span>    <span class="c1"># Mexican Hat wavelet</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">scales</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>          <span class="c1"># 32 frequency scales</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">ar_order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># AR(2) model for temporal persistence</span>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">debug</span><span class="o">=</span><span class="kc">True</span>          <span class="c1"># Enable debug logging</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">warm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+</span></code></pre></div>
+<h3 id="analyzing-sawp">Analyzing SAWP<a class="headerlink" href="#analyzing-sawp" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># Fit model</span>
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="p">,</span> <span class="n">scales</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
+</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
+</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
+</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1"># Plot SAWP time series</span>
+</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">warm</span><span class="o">.</span><span class="n">Q_obs_annual</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">warm</span><span class="o">.</span><span class="n">sawp_</span><span class="p">)</span>
+</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Year&#39;</span><span class="p">)</span>
+</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;SAWP&#39;</span><span class="p">)</span>
+</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Scale Averaged Wavelet Power - Captures Time-Varying Energy&#39;</span><span class="p">)</span>
+</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
+</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="c1"># SAWP reveals periods of high/low variability</span>
+</span></code></pre></div>
+<h3 id="comparing-wavelets">Comparing Wavelets<a class="headerlink" href="#comparing-wavelets" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">wavelets</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;morl&#39;</span><span class="p">,</span> <span class="s1">&#39;mexh&#39;</span><span class="p">,</span> <span class="s1">&#39;gaus4&#39;</span><span class="p">]</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">for</span> <span class="n">wavelet</span> <span class="ow">in</span> <span class="n">wavelets</span><span class="p">:</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="n">wavelet</span><span class="p">,</span> <span class="n">scales</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
+</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">ensemble</span> <span class="o">=</span> <span class="n">warm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
+</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">wavelet</span><span class="si">}</span><span class="s2"> wavelet:&quot;</span><span class="p">)</span>
+</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Generated mean: </span><span class="si">{</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Generated std:  </span><span class="si">{</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></div>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<h3 id="primary-reference">Primary Reference<a class="headerlink" href="#primary-reference" title="Permanent link">&para;</a></h3>
+<p><strong>Nowak, K., Rajagopalan, B., &amp; Zagona, E. (2011).</strong> A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12.
+- <a href="https://doi.org/10.1016/j.jhydrol.2011.08.049">https://doi.org/10.1016/j.jhydrol.2011.08.049</a></p>
+<h3 id="related-work">Related Work<a class="headerlink" href="#related-work" title="Permanent link">&para;</a></h3>
+<p><strong>Kwon, H.-H., Lall, U., &amp; Khalil, A. F. (2007).</strong> Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition: Applications to rainfall and temperature. <em>Water Resources Research</em>, 43(5).
+- Precursor to WARM, introduced wavelet-AR methodology
+- WARM extends this with SAWP for time-varying power</p>
+<p><strong>Torrence, C., &amp; Compo, G. P. (1998).</strong> A Practical Guide to Wavelet Analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78.
+- Comprehensive guide to wavelet analysis
+- Foundational reference for continuous wavelet transform</p>
+<p><strong>Box, G. E. P., Jenkins, G. M., Reinsel, G. C., &amp; Ljung, G. M. (2015).</strong> <em>Time Series Analysis: Forecasting and Control</em> (5th ed.). Wiley.
+- Yule-Walker equations for AR parameter estimation
+- Theoretical foundation for autoregressive models</p>
+<h3 id="software">Software<a class="headerlink" href="#software" title="Permanent link">&para;</a></h3>
+<p><strong>PyWavelets</strong>: Wavelet transforms in Python
+- <a href="https://pywavelets.readthedocs.io/">https://pywavelets.readthedocs.io/</a>
+- Used for continuous wavelet transform (CWT)</p>
+<h2 id="version-history">Version History<a class="headerlink" href="#version-history" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>v0.0.1</strong> (2024): Initial implementation</li>
+<li>Univariate (single-site) WARM</li>
+<li>Morlet, Mexican Hat, Gaussian wavelets supported</li>
+<li>AR(1) through AR(p) models</li>
+<li>SAWP-based time-varying power preservation</li>
+<li>Full test coverage (39 tests)</li>
+</ul>
+<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Multi-Site Extension</strong></li>
+<li>Implement VAR (Vector AR) models at each scale</li>
+<li>
+<p>Spatial correlation preservation via coupled wavelets</p>
+</li>
+<li>
+<p><strong>Distribution Preservation</strong></p>
+</li>
+<li>Optional log-transformation for skewed flows</li>
+<li>
+<p>Quantile mapping post-processing</p>
+</li>
+<li>
+<p><strong>Automatic Parameter Selection</strong></p>
+</li>
+<li>AIC/BIC for AR order selection</li>
+<li>
+<p>Cross-validation for scale selection</p>
+</li>
+<li>
+<p><strong>Monthly/Daily Disaggregation</strong></p>
+</li>
+<li>Couple WARM (annual) with K-NN or HMM (monthly/daily)</li>
+<li>
+<p>Preserve both annual structure (WARM) and seasonal patterns</p>
+</li>
+<li>
+<p><strong>Computational Optimization</strong></p>
+</li>
+<li>Parallel AR fitting across scales</li>
+<li>GPU-accelerated wavelet transforms for large datasets</li>
+</ol>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 23, 2026 18:59:19 UTC">February 23, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="February 23, 2026 18:52:41 UTC">February 23, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://github.com/Pywr-DRB/SGLib" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "content.code.annotate", "search.highlight"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

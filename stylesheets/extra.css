@@ -1,0 +1,10 @@
+/* Horizontal scroll for wide equations on small screens */
+.arithmatex {
+  overflow-x: auto;
+}
+
+/* Tighten spacing in algorithm specification tables */
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+  padding: 0.5em 1em;
+}
