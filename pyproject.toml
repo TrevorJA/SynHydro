@@ -48,7 +48,7 @@ lint = [
     "pre-commit>=2.20.0",
 ]
 docs = [
-    "mkdocs-material>=9.5",
+    "mkdocs-material>=9.5,<9.7",
     "mkdocstrings[python]>=0.24",
     "mkdocs-git-revision-date-localized-plugin>=1.2",
 ]
