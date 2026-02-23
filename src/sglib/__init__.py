@@ -46,8 +46,6 @@ from sglib.pipelines import (
     ThomasFieringNowakPipeline,
 )
 
-# Legacy combined class (deprecated, kept for backward compatibility)
-from sglib.methods.generation.depreciated.kirsch_nowak import KirschNowakGenerator
 
 
 # Public API
@@ -68,8 +66,6 @@ __all__ = [
     "GeneratorDisaggregatorPipeline",
     "KirschNowakPipeline",
     "ThomasFieringNowakPipeline",
-    # Legacy (deprecated)
-    "KirschNowakGenerator",
     # Ensemble management
     "Ensemble",
     "EnsembleMetadata",
