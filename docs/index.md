@@ -37,7 +37,7 @@ ensemble = gen.generate(n_realizations=50, n_years=30, seed=42)
 ## Installation
 
 ```bash
-pip install sglib
+pip install git+https://github.com/TrevorJA/SGLib.git
 ```
 
 See [Getting Started](getting-started.md) for full setup and data format details.

@@ -2,14 +2,16 @@
 
 ## Installation
 
+SGLib is not yet published on PyPI. Install directly from GitHub:
+
 ```bash
-pip install sglib
+pip install git+https://github.com/TrevorJA/SGLib.git
 ```
 
-Development install:
+For development (editable install with dev extras):
 
 ```bash
-git clone https://github.com/Pywr-DRB/SGLib.git
+git clone https://github.com/TrevorJA/SGLib.git
 cd SGLib
 pip install -e ".[dev]"
 ```
