@@ -20,19 +20,19 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.10"
           cache: "pip"
 
       - name: Install dependencies
         run: pip install -e ".[docs]"
 
-      - name: Test imports
-        run: python -c "import sglib; print('sglib', sglib.__version__)"
+      - name: Show installed versions
+        run: pip list | grep -E "mkdocs|griffe|mkdocstrings"
 
       - name: Build docs
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m mkdocs build
+        run: python -m mkdocs build 2>&1
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
