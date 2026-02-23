@@ -1294,15 +1294,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.plot" class="md-nav__link">
-    <span class="md-ellipsis">
-      plot
-    </span>
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1964,15 +1955,6 @@
   <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.generate" class="md-nav__link">
     <span class="md-ellipsis">
       generate
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.plot" class="md-nav__link">
-    <span class="md-ellipsis">
-      plot
     </span>
   </a>
   
@@ -4623,7 +4605,7 @@ Each entry contains {'xi', 'alfa', 'k', 'h'}.</p>
 
 
 <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ThomasFieringGenerator</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">ThomasFieringGenerator</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="n">DataFrame</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents first">
@@ -4792,7 +4774,7 @@ If not monthly frequency, will be resampled during preprocessing.</p>
 
 
 <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.preprocessing" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">preprocessing</span><span class="p">(</span><span class="n">sites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">preprocessing</span><span class="p">(</span><span class="n">sites</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4861,7 +4843,7 @@ Stedinger-Taylor normalization.</p>
 
 
 <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.fit" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">fit</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">fit</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4914,7 +4896,7 @@ correlations from normalized flows.</p>
 
 
 <a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.generate" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate</span><span class="p">(</span><span class="n">n_years</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_realizations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4975,7 +4957,7 @@ If None, uses the length of historic data.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Not used (Thomas-Fiering generates by years).</p>
+                <p>Number of monthly timesteps to generate. If provided, overrides n_years.</p>
               </div>
             </td>
             <td>
@@ -5029,12 +5011,11 @@ If None, uses the length of historic data.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                  <code><span title="pandas.DataFrame">DataFrame</span></code>
+                  <code><a class="autorefs autorefs-internal" title="Ensemble (sglib.core.ensemble.Ensemble)" href="../core/#sglib.core.ensemble.Ensemble">Ensemble</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>DataFrame with realizations as columns (indexed 0, 1, 2, ...).
-Index is DatetimeIndex with monthly frequency.</p>
+                <p>Ensemble object containing all realizations.</p>
               </div>
             </td>
           </tr>
@@ -5042,69 +5023,23 @@ Index is DatetimeIndex with monthly frequency.</p>
     </table>
 
 
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.plot" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">plot</span>
-
-
-<a href="#sglib.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator.plot" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;ts&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Plot observed vs. synthetic flows for visual comparison.</p>
-<p>Automatically calls preprocessing(), fit(), and generate() if needed.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
+<p><span class="doc-section-title">Raises:</span></p>
     <table>
       <thead>
         <tr>
-          <th>Name</th>
           <th>Type</th>
           <th>Description</th>
-          <th>Default</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>kind</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="ValueError">ValueError</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Type of plot: 'ts' (time series), 'hist' (histogram),
-or 'kde' (kernel density estimate). Default is 'ts'.</p>
+                <p>If neither n_years nor n_timesteps is provided.</p>
               </div>
-            </td>
-            <td>
-                  <code>&#39;ts&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>**kwargs</code>
-            </td>
-            <td>
-                  <code><span title="dict">dict</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Additional parameters (currently unused).</p>
-              </div>
-            </td>
-            <td>
-                  <code>{}</code>
             </td>
           </tr>
       </tbody>
