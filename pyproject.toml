@@ -1,6 +1,6 @@
 [project]
 name = "sglib"
-version = "0.0.1"
+version = "0.0.2"
 description = "Synthetic Generation Library - Methods and models for generating synthetic hydrologic timeseries."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -27,6 +27,7 @@ dependencies = [
     "scipy",
     "scikit-learn",
     "hmmlearn",
+    "pywavelets",
     "seaborn",
     "spei",
     "h5py",
@@ -46,10 +47,16 @@ test = [
 lint = [
     "pre-commit>=2.20.0",
 ]
+docs = [
+    "mkdocs-material>=9.5",
+    "mkdocstrings[python]>=0.24",
+    "mkdocs-git-revision-date-localized-plugin>=1.2",
+]
 
 [project.urls]
 Homepage = "https://github.com/Pywr-DRB/SGLib"
 Repository = "https://github.com/Pywr-DRB/SGLib"
+Documentation = "https://pywr-drb.github.io/SGLib/"
 Issues = "https://github.com/Pywr-DRB/SGLib/issues"
 
 [build-system]
