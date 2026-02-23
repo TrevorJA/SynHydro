@@ -94,20 +94,20 @@ class TestSSI:
         ssi = SSI(
             dist='lognorm',
             timescale=6,
-            fit_freq='M',
+            fit_freq='ME',
             fit_window=30,
             prob_zero=True
         )
         assert ssi.dist == 'lognorm'
         assert ssi._dist_obj == scs.lognorm
         assert ssi.timescale == 6
-        assert ssi.fit_freq == 'M'
+        assert ssi.fit_freq == 'ME'
         assert ssi.fit_window == 30
         assert ssi.prob_zero is True
 
     def test_fit_transform_daily(self, sample_ssi_data):
         """Test fit_transform with daily data."""
-        ssi = SSI(timescale=30, fit_freq='M')
+        ssi = SSI(timescale=30, fit_freq='ME')
         ssi_values = ssi.fit_transform(sample_ssi_data)
 
         assert isinstance(ssi_values, pd.Series)
@@ -117,7 +117,7 @@ class TestSSI:
 
     def test_fit_and_transform_separately(self, sample_ssi_data):
         """Test fit and transform as separate steps."""
-        ssi = SSI(timescale=30, fit_freq='M')
+        ssi = SSI(timescale=30, fit_freq='ME')
 
         # Split data into train and test
         split_idx = len(sample_ssi_data) // 2
@@ -135,7 +135,7 @@ class TestSSI:
 
     def test_get_training_ssi(self, sample_ssi_data):
         """Test getting training SSI values."""
-        ssi = SSI(timescale=30, fit_freq='M')
+        ssi = SSI(timescale=30, fit_freq='ME')
         ssi_values = ssi.fit_transform(sample_ssi_data)
 
         training_ssi = ssi.get_training_ssi()
@@ -147,7 +147,7 @@ class TestSSI:
         """Test SSI with different distributions."""
         distributions = ['gamma', 'lognorm', 'pearson3']
         for dist_name in distributions:
-            ssi = SSI(dist=dist_name, timescale=1, fit_freq='M')
+            ssi = SSI(dist=dist_name, timescale=1, fit_freq='ME')
             try:
                 ssi_values = ssi.fit_transform(sample_monthly_series)
                 assert isinstance(ssi_values, pd.Series)
@@ -158,11 +158,11 @@ class TestSSI:
     def test_prob_zero_parameter(self, sample_daily_series):
         """Test SSI with prob_zero parameter."""
         # With prob_zero=True
-        ssi1 = SSI(timescale=30, fit_freq='M', prob_zero=True)
+        ssi1 = SSI(timescale=30, fit_freq='ME', prob_zero=True)
         ssi_values1 = ssi1.fit_transform(sample_daily_series)
 
         # With prob_zero=False
-        ssi2 = SSI(timescale=30, fit_freq='M', prob_zero=False)
+        ssi2 = SSI(timescale=30, fit_freq='ME', prob_zero=False)
         ssi_values2 = ssi2.fit_transform(sample_daily_series)
 
         # Both should produce valid output
