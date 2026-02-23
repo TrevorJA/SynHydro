@@ -26,10 +26,13 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[docs]"
 
+      - name: Test imports
+        run: python -c "import sglib; print('sglib', sglib.__version__)"
+
       - name: Build docs
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m mkdocs build --verbose
+        run: python -m mkdocs build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
