@@ -26,10 +26,13 @@ jobs:
       - name: Install dependencies
         run: pip install -e ".[docs]"
 
-      - name: Deploy to GitHub Pages
+      - name: Build docs
         env:
           PYTHONIOENCODING: utf-8
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          python -m mkdocs gh-deploy --force --clean
+        run: python -m mkdocs build --verbose
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
