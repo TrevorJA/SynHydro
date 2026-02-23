@@ -32,4 +32,4 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          mkdocs gh-deploy --force --clean
+          python -m mkdocs gh-deploy --force --clean
