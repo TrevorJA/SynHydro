@@ -2,10 +2,10 @@
 
 **Synthetic Generation Library** — stochastic streamflow generation for hydrologic analysis.
 
-[![Tests](https://github.com/Pywr-DRB/SGLib/actions/workflows/tests.yml/badge.svg)](https://github.com/Pywr-DRB/SGLib/actions/workflows/tests.yml)
-[![Docs](https://github.com/Pywr-DRB/SGLib/actions/workflows/docs.yml/badge.svg)](https://github.com/Pywr-DRB/SGLib/actions/workflows/docs.yml)
+[![Tests](https://github.com/TrevorJA/SGLib/actions/workflows/tests.yml/badge.svg)](https://github.com/TrevorJA/SGLib/actions/workflows/tests.yml)
+[![Docs](https://github.com/TrevorJA/SGLib/actions/workflows/docs.yml/badge.svg)](https://github.com/TrevorJA/SGLib/actions/workflows/docs.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/Pywr-DRB/SGLib/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/TrevorJA/SGLib/blob/main/LICENSE)
 
 SGLib provides parametric, nonparametric, and machine-learning stochastic generation methods under a unified API. All generators share the same `preprocessing() → fit() → generate()` workflow.
 

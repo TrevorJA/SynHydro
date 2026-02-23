@@ -54,10 +54,10 @@ docs = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Pywr-DRB/SGLib"
-Repository = "https://github.com/Pywr-DRB/SGLib"
-Documentation = "https://pywr-drb.github.io/SGLib/"
-Issues = "https://github.com/Pywr-DRB/SGLib/issues"
+Homepage = "https://github.com/TrevorJA/SGLib"
+Repository = "https://github.com/TrevorJA/SGLib"
+Documentation = "https://trevorja.github.io/SGLib/"
+Issues = "https://github.com/TrevorJA/SGLib/issues"
 
 [build-system]
 requires = ["hatchling"]

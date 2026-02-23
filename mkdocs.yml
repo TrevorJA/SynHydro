@@ -1,9 +1,9 @@
 site_name: SGLib
 site_description: Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis
 site_author: Trevor Amestoy
-site_url: https://pywr-drb.github.io/SGLib/
-repo_url: https://github.com/Pywr-DRB/SGLib
-repo_name: Pywr-DRB/SGLib
+site_url: https://trevorja.github.io/SGLib/
+repo_url: https://github.com/TrevorJA/SGLib
+repo_name: TrevorJA/SGLib
 docs_dir: docs
 edit_uri: edit/main/docs/
 
