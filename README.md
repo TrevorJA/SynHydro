@@ -14,10 +14,19 @@ In addition to the basic generation capabilities, this package (will someday) pr
 
 This package is a work in progress, and many of the methods are incomplete or unverified. 
 
-## Currently supported methods:
-- Kirsch-Nowak daily streamflow generation (`KirschNowakGenerator`)
-- Thomas-Fiering monthly streamflow generation (`ThomasFieringGenerator`)
+## Supported generators
 
-## Methods to be developed:
-- Hidden Markov Model
-- Autoregressive models
+| Generator | Type | Frequency | Sites | Reference |
+|---|---|---|---|---|
+| `KirschGenerator` | Nonparametric | Monthly | Multi | Kirsch et al. (2013) |
+| `PhaseRandomizationGenerator` | Nonparametric | Daily | Single | Brunner et al. (2019) |
+| `ThomasFieringGenerator` | Parametric AR(1) | Monthly | Single | Thomas & Fiering (1962) |
+| `MATALASGenerator` | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
+| `MultiSiteHMMGenerator` | Hidden Markov Model | Annual | Multi | Gold et al. (2025) |
+| `WARMGenerator` | Wavelet AR | Annual | Single | Nowak et al. (2011) |
+
+## Planned additions
+
+- ARFIMA (Hosking 1984) — long-memory / Hurst persistence
+- Vine Copula (Fernandes et al. 2017) — modern flexible multivariate
+- LSTM stochastic generator (2020+) — deep learning

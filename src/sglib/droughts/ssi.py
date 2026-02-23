@@ -104,6 +104,15 @@ def get_drought_metrics(ssi, end_drought_threshold_months=3):
                 positive_days_count = 0
 
     drought_metrics = pd.DataFrame(drought_data).transpose()
+    if len(drought_metrics) > 0:
+        for col in ['start', 'end', 'max_severity_date']:
+            if col in drought_metrics.columns:
+                drought_metrics[col] = pd.to_datetime(drought_metrics[col])
+        numeric_cols = ['duration', 'magnitude', 'severity', 'avg_severity',
+                        'recovery_period', 'prior_1m_surplus', 'prior_3m_surplus', 'prior_6m_surplus']
+        for col in numeric_cols:
+            if col in drought_metrics.columns:
+                drought_metrics[col] = pd.to_numeric(drought_metrics[col])
     return drought_metrics
 
 class SSIDroughtMetrics:

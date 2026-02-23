@@ -5,7 +5,7 @@ A library for generating synthetic hydrologic timeseries with focus on
 statistical preservation and hydrologic applications.
 """
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 # Core utilities
 from sglib.core import (
@@ -31,7 +31,11 @@ from sglib.droughts.diagnostics import (
 
 # Generators
 from sglib.methods.generation.nonparametric.kirsch import KirschGenerator
+from sglib.methods.generation.nonparametric.phase_randomization import PhaseRandomizationGenerator
 from sglib.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
+from sglib.methods.generation.parametric.matalas import MATALASGenerator
+from sglib.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
+from sglib.methods.generation.parametric.warm import WARMGenerator
 
 # Disaggregators
 from sglib.methods.disaggregation.temporal.nowak import NowakDisaggregator
@@ -53,7 +57,11 @@ __all__ = [
     "Disaggregator",
     # Individual generators
     "KirschGenerator",
+    "PhaseRandomizationGenerator",
     "ThomasFieringGenerator",
+    "MATALASGenerator",
+    "MultiSiteHMMGenerator",
+    "WARMGenerator",
     # Individual disaggregators
     "NowakDisaggregator",
     # Pipeline system

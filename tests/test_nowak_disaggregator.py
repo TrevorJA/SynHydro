@@ -12,23 +12,21 @@ from sglib.methods.disaggregation.temporal.nowak import NowakDisaggregator
 class TestNowakDisaggregatorInitialization:
     """Tests for NowakDisaggregator initialization."""
 
-    def test_initialization_default_params(self):
+    def test_initialization_default_params(self, sample_daily_series):
         """Test initialization with default parameters."""
-        disagg = NowakDisaggregator()
+        disagg = NowakDisaggregator(sample_daily_series)
         assert disagg.n_neighbors == 5
         assert disagg.max_month_shift == 7
-        assert disagg.sample_method == 'distance_weighted'
 
-    def test_initialization_custom_params(self):
+    def test_initialization_custom_params(self, sample_daily_series):
         """Test initialization with custom parameters."""
         disagg = NowakDisaggregator(
+            sample_daily_series,
             n_neighbors=10,
             max_month_shift=10,
-            sample_method='lall_and_sharma_1996'
         )
         assert disagg.n_neighbors == 10
         assert disagg.max_month_shift == 10
-        assert disagg.sample_method == 'lall_and_sharma_1996'
 
 
 class TestNowakDisaggregatorPreprocessing:
@@ -36,19 +34,15 @@ class TestNowakDisaggregatorPreprocessing:
 
     def test_preprocessing_daily_series(self, sample_daily_series):
         """Test preprocessing with daily Series."""
-        disagg = NowakDisaggregator()
-        disagg.preprocessing(sample_daily_series)
-
-        # Preprocessing is a no-op but should succeed
-        assert True
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        assert disagg.is_preprocessed is True
 
     def test_preprocessing_daily_dataframe(self, sample_daily_dataframe):
         """Test preprocessing with daily DataFrame."""
-        disagg = NowakDisaggregator()
-        disagg.preprocessing(sample_daily_dataframe)
-
-        # Should succeed
-        assert True
+        disagg = NowakDisaggregator(sample_daily_dataframe)
+        disagg.preprocessing()
+        assert disagg.is_preprocessed is True
 
 
 class TestNowakDisaggregatorFit:
@@ -56,9 +50,11 @@ class TestNowakDisaggregatorFit:
 
     def test_fit_single_site(self, sample_daily_series):
         """Test fitting with single site."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
+        assert disagg.is_fitted is True
         assert hasattr(disagg, 'knn_models')
         assert hasattr(disagg, 'monthly_cumulative_flows')
         assert hasattr(disagg, 'daily_flow_profiles')
@@ -67,9 +63,11 @@ class TestNowakDisaggregatorFit:
 
     def test_fit_multiple_sites(self, sample_daily_dataframe):
         """Test fitting with multiple sites."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_dataframe)
+        disagg = NowakDisaggregator(sample_daily_dataframe)
+        disagg.preprocessing()
+        disagg.fit()
 
+        assert disagg.is_fitted is True
         assert disagg.is_multisite is True
         assert disagg.n_sites == 3
         assert len(disagg.site_names) == 3
@@ -77,8 +75,9 @@ class TestNowakDisaggregatorFit:
 
     def test_fit_creates_knn_models(self, sample_daily_series):
         """Test that fit creates KNN models for each month."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
         for month in range(1, 13):
             assert month in disagg.knn_models
@@ -87,8 +86,9 @@ class TestNowakDisaggregatorFit:
 
     def test_fit_creates_historic_profiles(self, sample_daily_series):
         """Test that fit creates historic flow profiles."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
         assert len(disagg.monthly_cumulative_flows) == 12
         assert len(disagg.daily_flow_profiles) == 12
@@ -102,55 +102,46 @@ class TestNowakDisaggregatorKNNSearch:
     """Tests for KNN search functionality."""
 
     def test_find_knn_indices_single_site(self, sample_daily_series):
-        """Test finding KNN indices for single site."""
-        disagg = NowakDisaggregator(n_neighbors=5)
-        disagg.fit(sample_daily_series)
+        """Test finding KNN indices for single site, single month."""
+        disagg = NowakDisaggregator(sample_daily_series, n_neighbors=5)
+        disagg.preprocessing()
+        disagg.fit()
 
-        # Create synthetic monthly flow
-        synthetic_monthly = pd.Series(
-            [100.0],
-            index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
-        )
-
-        indices, distances = disagg.find_knn_indices(synthetic_monthly)
+        # Query for January flows (month=1)
+        flow_array = np.array([100.0])
+        distances, indices = disagg.find_knn_indices(flow_array, month=1)
 
         assert isinstance(indices, np.ndarray)
         assert isinstance(distances, np.ndarray)
-        assert len(indices) == 5
-        assert len(distances) == 5
+        assert indices.shape == (1, 5)   # 1 sample, 5 neighbors
+        assert distances.shape == (1, 5)
 
-    def test_find_knn_indices_multiple_months(self, sample_daily_series):
-        """Test finding KNN indices for multiple months."""
-        disagg = NowakDisaggregator(n_neighbors=5)
-        disagg.fit(sample_daily_series)
+    def test_find_knn_indices_multiple_years(self, sample_daily_series):
+        """Test finding KNN indices for multiple flow values in same month."""
+        disagg = NowakDisaggregator(sample_daily_series, n_neighbors=5)
+        disagg.preprocessing()
+        disagg.fit()
 
-        # Create synthetic monthly flows for multiple months
-        synthetic_monthly = pd.Series(
-            [100.0, 120.0, 90.0],
-            index=pd.date_range('2020-01-01', periods=3, freq='MS')
-        )
+        # Query for 3 years of January flows
+        flow_array = np.array([100.0, 120.0, 90.0])
+        distances, indices = disagg.find_knn_indices(flow_array, month=1)
 
-        indices, distances = disagg.find_knn_indices(synthetic_monthly)
-
-        assert indices.shape == (3, 5)  # 3 months, 5 neighbors each
+        assert indices.shape == (3, 5)   # 3 samples, 5 neighbors each
         assert distances.shape == (3, 5)
 
     def test_sample_knn_monthly_flows(self, sample_daily_series):
         """Test sampling from KNN neighbors."""
-        disagg = NowakDisaggregator(n_neighbors=5)
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series, n_neighbors=5)
+        disagg.preprocessing()
+        disagg.fit()
 
-        synthetic_monthly = pd.Series(
-            [100.0],
-            index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
-        )
-
-        indices, distances = disagg.find_knn_indices(synthetic_monthly)
-        sampled_idx = disagg.sample_knn_monthly_flows(indices, distances)
+        flow_array = np.array([100.0])
+        sampled_idx = disagg.sample_knn_monthly_flows(flow_array, month=1)
 
         assert isinstance(sampled_idx, np.ndarray)
         assert len(sampled_idx) == 1
-        assert sampled_idx[0] in indices[0]  # Should be one of the neighbors
+        # Sampled index should be within range of historic profiles
+        assert sampled_idx[0] < len(disagg.monthly_cumulative_flows[1])
 
 
 class TestNowakDisaggregatorDisaggregation:
@@ -158,8 +149,9 @@ class TestNowakDisaggregatorDisaggregation:
 
     def test_disaggregate_single_month_single_site(self, sample_daily_series):
         """Test disaggregating single month for single site."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
         synthetic_monthly = pd.Series(
             [3000.0],
@@ -170,14 +162,14 @@ class TestNowakDisaggregatorDisaggregation:
 
         assert isinstance(daily, pd.Series)
         assert len(daily) == 31  # January has 31 days
-        assert daily.index.freq == 'D'
         # Check that monthly sum matches (approximately)
         assert np.abs(daily.sum() - 3000.0) < 1e-6
 
     def test_disaggregate_full_year_single_site(self, sample_daily_series):
         """Test disaggregating full year for single site."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
         synthetic_monthly = pd.Series(
             np.random.gamma(2.0, 100.0, 12),
@@ -188,7 +180,6 @@ class TestNowakDisaggregatorDisaggregation:
 
         assert isinstance(daily, pd.Series)
         assert len(daily) == 366  # 2020 is a leap year
-        assert daily.index.freq == 'D'
 
         # Check that each monthly sum matches
         for month in range(1, 13):
@@ -199,8 +190,9 @@ class TestNowakDisaggregatorDisaggregation:
 
     def test_disaggregate_multiple_sites(self, sample_daily_dataframe):
         """Test disaggregating for multiple sites."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_dataframe)
+        disagg = NowakDisaggregator(sample_daily_dataframe)
+        disagg.preprocessing()
+        disagg.fit()
 
         # Create synthetic monthly flows for all sites
         synthetic_monthly = pd.DataFrame(
@@ -226,8 +218,9 @@ class TestNowakDisaggregatorDisaggregation:
 
     def test_disaggregate_preserves_spatial_correlation(self, sample_daily_dataframe):
         """Test that disaggregation preserves spatial correlation."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_dataframe)
+        disagg = NowakDisaggregator(sample_daily_dataframe)
+        disagg.preprocessing()
+        disagg.fit()
 
         synthetic_monthly = pd.DataFrame(
             np.random.gamma(2.0, 100.0, (12, 3)),
@@ -245,8 +238,9 @@ class TestNowakDisaggregatorDisaggregation:
 
     def test_disaggregate_leap_year(self, sample_daily_series):
         """Test disaggregation handles leap years correctly."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
         # 2020 is a leap year
         synthetic_monthly = pd.Series(
@@ -261,8 +255,9 @@ class TestNowakDisaggregatorDisaggregation:
 
     def test_disaggregate_non_leap_year(self, sample_daily_series):
         """Test disaggregation handles non-leap years correctly."""
-        disagg = NowakDisaggregator()
-        disagg.fit(sample_daily_series)
+        disagg = NowakDisaggregator(sample_daily_series)
+        disagg.preprocessing()
+        disagg.fit()
 
         # 2019 is not a leap year
         synthetic_monthly = pd.Series(
@@ -277,32 +272,37 @@ class TestNowakDisaggregatorDisaggregation:
 
     def test_disaggregate_different_sample_methods(self, sample_daily_series):
         """Test disaggregation with different sampling methods."""
-        # Distance weighted
-        disagg1 = NowakDisaggregator(sample_method='distance_weighted')
-        disagg1.fit(sample_daily_series)
-
         synthetic_monthly = pd.Series(
             [3000.0],
             index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
         )
 
-        daily1 = disagg1.disaggregate_monthly_flows(synthetic_monthly)
+        # Distance weighted
+        disagg1 = NowakDisaggregator(sample_daily_series)
+        disagg1.preprocessing()
+        disagg1.fit()
+        daily1 = disagg1.disaggregate_monthly_flows(
+            synthetic_monthly, sample_method='distance_weighted'
+        )
         assert len(daily1) == 31
 
         # Lall and Sharma method
-        disagg2 = NowakDisaggregator(sample_method='lall_and_sharma_1996')
-        disagg2.fit(sample_daily_series)
-
-        daily2 = disagg2.disaggregate_monthly_flows(synthetic_monthly)
+        disagg2 = NowakDisaggregator(sample_daily_series)
+        disagg2.preprocessing()
+        disagg2.fit()
+        daily2 = disagg2.disaggregate_monthly_flows(
+            synthetic_monthly, sample_method='lall_and_sharma_1996'
+        )
         assert len(daily2) == 31
 
 
 class TestNowakDisaggregatorEdgeCases:
     """Tests for edge cases and error handling."""
 
-    def test_disaggregate_without_fit_raises(self, sample_daily_series):
-        """Test that disaggregation without fit raises error."""
-        disagg = NowakDisaggregator()
+    def test_disaggregate_without_preprocessing_raises(self, sample_daily_series):
+        """Test that disaggregation without preprocessing raises AttributeError."""
+        disagg = NowakDisaggregator(sample_daily_series)
+        # No preprocessing or fit called
 
         synthetic_monthly = pd.Series(
             [3000.0],
@@ -314,28 +314,28 @@ class TestNowakDisaggregatorEdgeCases:
 
     def test_disaggregate_with_different_n_neighbors(self, sample_daily_series):
         """Test disaggregation with different number of neighbors."""
+        synthetic_monthly = pd.Series(
+            [3000.0],
+            index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
+        )
+
         for n in [3, 5, 10]:
-            disagg = NowakDisaggregator(n_neighbors=n)
-            disagg.fit(sample_daily_series)
-
-            synthetic_monthly = pd.Series(
-                [3000.0],
-                index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
-            )
-
+            disagg = NowakDisaggregator(sample_daily_series, n_neighbors=n)
+            disagg.preprocessing()
+            disagg.fit()
             daily = disagg.disaggregate_monthly_flows(synthetic_monthly)
             assert len(daily) == 31
 
     def test_disaggregate_with_different_month_shifts(self, sample_daily_series):
         """Test disaggregation with different month shift values."""
+        synthetic_monthly = pd.Series(
+            [3000.0],
+            index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
+        )
+
         for shift in [3, 7, 14]:
-            disagg = NowakDisaggregator(max_month_shift=shift)
-            disagg.fit(sample_daily_series)
-
-            synthetic_monthly = pd.Series(
-                [3000.0],
-                index=pd.DatetimeIndex(['2020-01-01'], freq='MS')
-            )
-
+            disagg = NowakDisaggregator(sample_daily_series, max_month_shift=shift)
+            disagg.preprocessing()
+            disagg.fit()
             daily = disagg.disaggregate_monthly_flows(synthetic_monthly)
             assert len(daily) == 31

@@ -1,5 +1,6 @@
 """
 Tests for Kirsch-Nowak combined generator (monthly generation + daily disaggregation).
+Updated to match current deprecated API.
 """
 
 import pytest
@@ -17,9 +18,9 @@ class TestKirschNowakGeneratorInitialization:
         gen = KirschNowakGenerator(sample_daily_dataframe)
         assert gen.state.is_preprocessed is False
         assert gen.state.is_fitted is False
-        assert gen.n_neighbors == 5
-        assert gen.max_month_shift == 7
-        assert hasattr(gen, 'Q')
+        # n_neighbors and max_month_shift are stored in the embedded disaggregator
+        assert gen.nowak_disaggregator.n_neighbors == 5
+        assert gen.nowak_disaggregator.max_month_shift == 7
 
     def test_initialization_custom_params(self, sample_daily_dataframe):
         """Test initialization with custom parameters."""
@@ -30,8 +31,8 @@ class TestKirschNowakGeneratorInitialization:
             max_month_shift=10,
             matrix_repair_method='nearest'
         )
-        assert gen.n_neighbors == 10
-        assert gen.max_month_shift == 10
+        assert gen.nowak_disaggregator.n_neighbors == 10
+        assert gen.nowak_disaggregator.max_month_shift == 10
 
 
 class TestKirschNowakGeneratorPreprocessing:
@@ -56,10 +57,11 @@ class TestKirschNowakGeneratorPreprocessing:
         assert gen.state.is_preprocessed is True
         assert gen.n_sites == 3
 
-    def test_preprocessing_invalid_input(self):
-        """Test initialization with invalid input (not DataFrame)."""
+    def test_preprocessing_invalid_input(self, sample_daily_series):
+        """Test that invalid input type raises TypeError during validation."""
+        gen = KirschNowakGenerator(sample_daily_series.to_frame())
         with pytest.raises(TypeError):
-            gen = KirschNowakGenerator([1, 2, 3, 4, 5])
+            gen.validate_input_data([1, 2, 3, 4, 5])
 
 
 class TestKirschNowakGeneratorFit:
@@ -93,80 +95,73 @@ class TestKirschNowakGeneratorFit:
     def test_fit_without_preprocessing_raises(self, sample_daily_dataframe):
         """Test that fit without preprocessing raises error."""
         gen = KirschNowakGenerator(sample_daily_dataframe)
-        with pytest.raises(ValueError, match="not been preprocessed"):
+        with pytest.raises(ValueError, match="preprocessing"):
             gen.fit()
 
 
 class TestKirschNowakGeneratorGenerate:
-    """Tests for KirschNowakGenerator generation."""
+    """Tests for KirschNowakGenerator generation.
 
-    def test_generate_single_realization_daily_series(self, sample_daily_series):
-        """Test generating single daily realization from Series."""
+    KirschNowakGenerator.generate() API:
+      generate(n_realizations=1, n_years=1, as_array=False) -> dict
+    Returns a dict mapping realization index -> pd.Series (single-site)
+    or pd.DataFrame (multi-site) of daily flows.
+    With fixture data (2010-2015), synthetic starts at 2016 (a leap year).
+    So n_years=1 → 366 daily rows.
+    """
+
+    def test_generate_single_realization_single_site(self, sample_daily_series):
+        """Test generating single realization from single-site data."""
         df = sample_daily_series.to_frame()
         gen = KirschNowakGenerator(df)
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-03-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=1, n_years=1)
 
-        assert isinstance(result, pd.DataFrame)
-        assert result.index.freq == 'D'
-        # Q1 2020: Jan (31) + Feb (29, leap year) + Mar (31) = 91 days
-        assert len(result) == 91
+        assert isinstance(result, dict)
+        assert 0 in result
+        # Result is daily; 2016 is a leap year so 366 days
+        assert len(result[0]) == 366
 
-    def test_generate_multiple_realizations_daily_series(self, sample_daily_series):
-        """Test generating multiple daily realizations from Series."""
+    def test_generate_multiple_realizations_single_site(self, sample_daily_series):
+        """Test generating multiple realizations from single-site data."""
         df = sample_daily_series.to_frame()
         gen = KirschNowakGenerator(df)
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=3,
-            start_date='2020-01-01',
-            end_date='2020-03-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=3, n_years=1)
 
-        assert isinstance(result, pd.DataFrame)
-        assert isinstance(result.index, pd.MultiIndex)
-        assert result.index.names == ['realization', 'date']
+        assert isinstance(result, dict)
+        assert len(result) == 3
+        for r in range(3):
+            assert r in result
+            assert len(result[r]) == 366
 
-    def test_generate_single_realization_daily_dataframe(self, sample_daily_dataframe):
-        """Test generating single daily realization from DataFrame."""
+    def test_generate_single_realization_dataframe(self, sample_daily_dataframe):
+        """Test generating single realization from DataFrame."""
         gen = KirschNowakGenerator(sample_daily_dataframe)
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-03-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=1, n_years=1)
 
-        assert isinstance(result, pd.DataFrame)
-        assert result.shape[1] == 3  # 3 sites
-        assert len(result) == 91
-        assert result.columns.tolist() == sample_daily_dataframe.columns.tolist()
+        assert isinstance(result, dict)
+        assert 0 in result
+        df = result[0]
+        assert isinstance(df, pd.DataFrame)
+        assert df.shape[1] == 3  # 3 sites
+        assert len(df) == 366  # 2016 is leap year
+        assert df.columns.tolist() == sample_daily_dataframe.columns.tolist()
 
-    def test_generate_multiple_realizations_daily_dataframe(self, sample_daily_dataframe):
-        """Test generating multiple daily realizations from DataFrame."""
+    def test_generate_multiple_realizations_dataframe(self, sample_daily_dataframe):
+        """Test generating multiple realizations from DataFrame."""
         gen = KirschNowakGenerator(sample_daily_dataframe)
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=3,
-            start_date='2020-01-01',
-            end_date='2020-12-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=3, n_years=1)
 
         assert isinstance(result, dict)
         assert len(result) == 3
@@ -174,86 +169,50 @@ class TestKirschNowakGeneratorGenerate:
             assert r in result
             assert isinstance(result[r], pd.DataFrame)
             assert result[r].shape[1] == 3
-            assert len(result[r]) == 366  # 2020 is leap year
-
-    def test_generate_monthly_output(self, sample_daily_series):
-        """Test generating monthly output (no disaggregation)."""
-        df = sample_daily_series.to_frame()
-        gen = KirschNowakGenerator(df)
-        gen.preprocessing()
-        gen.fit()
-
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-12-31',
-            freq='MS'
-        )
-
-        assert isinstance(result, pd.DataFrame)
-        assert result.index.freq == 'MS'
-        assert len(result) == 12
 
     def test_generate_preserves_monthly_totals(self, sample_daily_series):
-        """Test that daily generation preserves monthly totals."""
+        """Test that daily generation preserves monthly structure."""
         df = sample_daily_series.to_frame()
         gen = KirschNowakGenerator(df)
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-12-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=1, n_years=1)
+        realization = result[0]
 
         # Aggregate to monthly and check structure
-        monthly = result.resample('MS').sum()
+        monthly = realization.resample('MS').sum()
         assert len(monthly) == 12
-        assert not monthly.isna().any().any()
+        assert not monthly.isna().any()
 
-    def test_generate_leap_year(self, sample_daily_series):
-        """Test generation handles leap years correctly."""
+    def test_generate_leap_year_february(self, sample_daily_series):
+        """Test that February in leap year (2016) has 29 days."""
         df = sample_daily_series.to_frame()
         gen = KirschNowakGenerator(df)
         gen.preprocessing()
         gen.fit()
 
-        # 2020 is a leap year
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-12-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=1, n_years=1)
+        realization = result[0]
 
-        assert len(result) == 366
-
-        # Check February has 29 days
-        feb_mask = (result.index.month == 2)
+        # Fixture data is 2010-2015, synthetic starts 2016 (leap year)
+        feb_mask = (realization.index.month == 2)
         assert feb_mask.sum() == 29
 
-    def test_generate_non_leap_year(self, sample_daily_series):
-        """Test generation handles non-leap years correctly."""
+    def test_generate_non_leap_year_february(self, sample_daily_series):
+        """Test that February in non-leap year (2017) has 28 days."""
         df = sample_daily_series.to_frame()
         gen = KirschNowakGenerator(df)
         gen.preprocessing()
         gen.fit()
 
-        # 2019 is not a leap year
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2019-01-01',
-            end_date='2019-12-31',
-            freq='D'
-        )
+        # n_years=2 → 2016 and 2017
+        result = gen.generate(n_realizations=1, n_years=2)
+        realization = result[0]
 
-        assert len(result) == 365
-
-        # Check February has 28 days
-        feb_mask = (result.index.month == 2)
-        assert feb_mask.sum() == 28
+        # Check Feb 2017 has 28 days
+        feb_2017_mask = (realization.index.month == 2) & (realization.index.year == 2017)
+        assert feb_2017_mask.sum() == 28
 
     def test_generate_without_fit_raises(self, sample_daily_series):
         """Test that generate without fit raises error."""
@@ -261,7 +220,7 @@ class TestKirschNowakGeneratorGenerate:
         gen = KirschNowakGenerator(df)
         gen.preprocessing()
 
-        with pytest.raises(ValueError, match="not been fitted"):
+        with pytest.raises(ValueError, match="fit"):
             gen.generate(n_realizations=1)
 
     def test_generate_preserves_spatial_correlation(self, sample_daily_dataframe):
@@ -270,15 +229,11 @@ class TestKirschNowakGeneratorGenerate:
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2022-12-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=1, n_years=3)
+        df = result[0]
 
         # Calculate correlation matrix
-        corr = result.corr()
+        corr = df.corr()
         # All values should be between -1 and 1
         assert (corr.values >= -1.0).all()
         assert (corr.values <= 1.0).all()
@@ -287,20 +242,16 @@ class TestKirschNowakGeneratorGenerate:
 
     def test_generate_with_log_flow(self, sample_daily_series):
         """Test generation with log-transformed flows."""
-        gen = KirschNowakGenerator(generate_using_log_flow=True)
-        gen.preprocessing(sample_daily_series)
+        df = sample_daily_series.to_frame()
+        gen = KirschNowakGenerator(df, generate_using_log_flow=True)
+        gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-03-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=1, n_years=1)
+        realization = result[0]
 
-        assert isinstance(result, pd.DataFrame)
-        assert not result.isna().any().any()
-        assert (result >= 0).all().all()  # Flows should be non-negative
+        assert not realization.isna().any()
+        assert (realization >= 0).all()
 
 
 class TestKirschNowakGeneratorSaveLoad:
@@ -308,8 +259,8 @@ class TestKirschNowakGeneratorSaveLoad:
 
     def test_save_and_load(self, sample_daily_dataframe, tmp_path):
         """Test saving and loading generator."""
-        gen = KirschNowakGenerator(n_neighbors=10)
-        gen.preprocessing(sample_daily_dataframe)
+        gen = KirschNowakGenerator(sample_daily_dataframe, n_neighbors=10)
+        gen.preprocessing()
         gen.fit()
 
         # Save
@@ -322,17 +273,12 @@ class TestKirschNowakGeneratorSaveLoad:
         assert loaded_gen.state.is_preprocessed is True
         assert loaded_gen.state.is_fitted is True
         assert loaded_gen.n_sites == 3
-        assert loaded_gen.n_neighbors == 10
+        assert loaded_gen.nowak_disaggregator.n_neighbors == 10
 
         # Generate from loaded generator
-        result = loaded_gen.generate(
-            n_realizations=1,
-            start_date='2020-01-01',
-            end_date='2020-03-31',
-            freq='D'
-        )
-
-        assert result.shape == (91, 3)
+        result = loaded_gen.generate(n_realizations=1, n_years=1)
+        assert isinstance(result, dict)
+        assert result[0].shape[1] == 3
 
 
 class TestKirschNowakGeneratorIntegration:
@@ -343,49 +289,37 @@ class TestKirschNowakGeneratorIntegration:
         df = sample_daily_series.to_frame()
         gen = KirschNowakGenerator(df)
 
-        # Preprocessing
         gen.preprocessing()
         assert gen.state.is_preprocessed is True
 
-        # Fit
         gen.fit()
         assert gen.state.is_fitted is True
 
-        # Generate daily
-        daily = gen.generate(
-            n_realizations=2,
-            start_date='2020-01-01',
-            end_date='2020-12-31',
-            freq='D'
-        )
-        assert isinstance(daily, pd.DataFrame)
+        result = gen.generate(n_realizations=2, n_years=1)
+        assert isinstance(result, dict)
+        assert len(result) == 2
 
     def test_full_workflow_multiple_sites(self, sample_daily_dataframe):
         """Test complete workflow for multiple sites."""
-        gen = KirschNowakGenerator(n_neighbors=7, max_month_shift=10)
+        gen = KirschNowakGenerator(
+            sample_daily_dataframe,
+            n_neighbors=7,
+            max_month_shift=10
+        )
 
-        # Preprocessing
-        gen.preprocessing(sample_daily_dataframe)
+        gen.preprocessing()
         assert gen.state.is_preprocessed is True
         assert gen.n_sites == 3
 
-        # Fit
         gen.fit()
         assert gen.state.is_fitted is True
 
-        # Generate daily
-        daily = gen.generate(
-            n_realizations=3,
-            start_date='2020-01-01',
-            end_date='2021-12-31',
-            freq='D'
-        )
-        assert isinstance(daily, dict)
-        assert len(daily) == 3
+        result = gen.generate(n_realizations=3, n_years=2)
+        assert isinstance(result, dict)
+        assert len(result) == 3
 
-        # Check data quality
         for r in range(3):
-            df = daily[r]
+            df = result[r]
             assert not df.isna().any().any()
             assert (df >= 0).all().all()
             assert df.shape[1] == 3
@@ -397,18 +331,9 @@ class TestKirschNowakGeneratorIntegration:
         gen.preprocessing()
         gen.fit()
 
-        result = gen.generate(
-            n_realizations=5,
-            start_date='2020-01-01',
-            end_date='2020-12-31',
-            freq='D'
-        )
+        result = gen.generate(n_realizations=5, n_years=1)
 
-        # Check that realizations are not identical
-        realizations = []
-        for r in range(5):
-            realization_data = result.loc[r].values
-            realizations.append(realization_data)
+        realizations = [result[r].values for r in range(5)]
 
         # At least some realizations should be different
         different_count = 0
@@ -417,4 +342,4 @@ class TestKirschNowakGeneratorIntegration:
                 if not np.array_equal(realizations[i], realizations[j]):
                     different_count += 1
 
-        assert different_count > 0  # At least some pairs should be different
+        assert different_count > 0

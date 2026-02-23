@@ -818,9 +818,7 @@ class NowakDisaggregator(Disaggregator):
         
         if n_neighbors is None:
             n_neighbors = self.n_neighbors
-        
-        Qs_monthly = self._verify_input_data(Qs_monthly)
-        
+
         # Check if multisite consistency
         if self.is_multisite:
             if not isinstance(Qs_monthly, pd.DataFrame):

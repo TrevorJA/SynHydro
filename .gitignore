@@ -170,3 +170,4 @@ pywrdrb/*
 ./local/*
 local/
 .claude/
+external_source_codes/*

@@ -11,6 +11,7 @@ import tempfile
 import pickle
 
 from sglib.core.base import Generator, GeneratorState
+from sglib.core.ensemble import Ensemble
 
 
 class MockGenerator(Generator):
@@ -35,7 +36,7 @@ class MockGenerator(Generator):
         """Return output frequency for this generator."""
         return 'D'  # Daily output for testing
 
-    def preprocessing(self):
+    def preprocessing(self, sites=None, **kwargs):
         """Mock preprocessing implementation."""
         Q_validated = self.validate_input_data(self._Q_obs_raw)
         self._Q_obs = Q_validated
@@ -74,7 +75,7 @@ class MockGenerator(Generator):
             realization_dict[r] = pd.DataFrame(data, index=index, columns=self._sites)
 
         # Return as Ensemble
-        return Ensemble.from_dict(realization_dict, frequency=self.output_frequency)
+        return Ensemble(realization_dict)
 
 
 class TestGeneratorState:
@@ -150,7 +151,7 @@ class TestGenerator:
         gen = MockGenerator()
         assert gen.state.is_preprocessed is False
 
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
 
         assert gen.preprocessing_called is True
         assert gen.state.is_preprocessed is True
@@ -158,7 +159,7 @@ class TestGenerator:
     def test_validate_preprocessing_passes_when_preprocessed(self, sample_daily_series):
         """Test validate_preprocessing passes after preprocessing."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         gen.validate_preprocessing()  # Should not raise
 
     def test_validate_preprocessing_fails_when_not_preprocessed(self):
@@ -170,7 +171,7 @@ class TestGenerator:
     def test_fit_workflow(self, sample_daily_series):
         """Test fit workflow."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
 
         assert gen.state.is_fitted is False
         gen.fit()
@@ -188,113 +189,112 @@ class TestGenerator:
     def test_validate_fit_passes_when_fitted(self, sample_daily_series):
         """Test validate_fit passes after fitting."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         gen.fit()
         gen.validate_fit()  # Should not raise
 
     def test_validate_fit_fails_when_not_fitted(self, sample_daily_series):
         """Test validate_fit fails before fitting."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         with pytest.raises(ValueError, match="fit"):
             gen.validate_fit()
 
     def test_generate_workflow(self, sample_daily_series):
         """Test generate workflow."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         gen.fit()
 
         result = gen.generate(n_realizations=1)
 
         assert gen.generate_called is True
-        assert isinstance(result, pd.DataFrame)
+        assert isinstance(result, Ensemble)
 
     def test_generate_fails_without_fit(self, sample_daily_series):
         """Test generate fails without fitting."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         with pytest.raises(ValueError, match="fit"):
             gen.generate()
 
     def test_n_sites_property_series(self, sample_daily_series):
         """Test n_sites property with Series input."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen = MockGenerator(sample_daily_series)
+        gen.preprocessing()
         assert gen.n_sites == 1
 
     def test_n_sites_property_dataframe(self, sample_daily_dataframe):
         """Test n_sites property with DataFrame input."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_dataframe)
+        gen = MockGenerator(sample_daily_dataframe)
+        gen.preprocessing()
         assert gen.n_sites == 3
 
     def test_sites_property_series(self, sample_daily_series):
         """Test sites property with Series input."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen = MockGenerator(sample_daily_series)
+        gen.preprocessing()
         expected_name = sample_daily_series.name if sample_daily_series.name else 'flow'
         assert gen.sites == [expected_name]
 
     def test_sites_property_dataframe(self, sample_daily_dataframe):
         """Test sites property with DataFrame input."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_dataframe)
+        gen = MockGenerator(sample_daily_dataframe)
+        gen.preprocessing()
         assert gen.sites == sample_daily_dataframe.columns.tolist()
 
     def test_format_output_single_realization_series(self, sample_daily_series):
         """Test output format with single realization from Series."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen = MockGenerator(sample_daily_series)
+        gen.preprocessing()
         gen.fit()
 
         result = gen.generate(n_realizations=1, start_date='2020-01-01', end_date='2020-01-31')
 
-        assert isinstance(result, pd.DataFrame)
-        assert len(result) == 31
+        assert isinstance(result, Ensemble)
+        assert len(result.data_by_realization[0]) == 31
 
     def test_format_output_multiple_realizations_series(self, sample_daily_series):
         """Test output format with multiple realizations from Series."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen = MockGenerator(sample_daily_series)
+        gen.preprocessing()
         gen.fit()
 
         result = gen.generate(n_realizations=3, start_date='2020-01-01', end_date='2020-01-31')
 
-        assert isinstance(result, pd.DataFrame)
-        assert len(result) == 31
-        # For single site with multiple realizations, columns are r0, r1, r2
-        assert result.shape[1] == 3
+        assert isinstance(result, Ensemble)
+        assert result.metadata.n_realizations == 3
+        assert len(result.data_by_realization[0]) == 31
 
     def test_format_output_single_realization_dataframe(self, sample_daily_dataframe):
         """Test output format with single realization from DataFrame."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_dataframe)
+        gen = MockGenerator(sample_daily_dataframe)
+        gen.preprocessing()
         gen.fit()
 
         result = gen.generate(n_realizations=1, start_date='2020-01-01', end_date='2020-01-31')
 
-        assert isinstance(result, pd.DataFrame)
-        assert result.shape[1] == 3
-        assert len(result) == 31
-        assert result.columns.tolist() == sample_daily_dataframe.columns.tolist()
+        assert isinstance(result, Ensemble)
+        assert result.data_by_realization[0].shape[1] == 3
+        assert len(result.data_by_realization[0]) == 31
+        assert result.data_by_realization[0].columns.tolist() == sample_daily_dataframe.columns.tolist()
 
     def test_format_output_multiple_realizations_dataframe(self, sample_daily_dataframe):
         """Test output format with multiple realizations from DataFrame."""
-        gen = MockGenerator()
-        gen.preprocessing(sample_daily_dataframe)
+        gen = MockGenerator(sample_daily_dataframe)
+        gen.preprocessing()
         gen.fit()
 
         result = gen.generate(n_realizations=2, start_date='2020-01-01', end_date='2020-01-31')
 
-        assert isinstance(result, dict)
-        assert len(result) == 2
-        assert all(isinstance(df, pd.DataFrame) for df in result.values())
+        assert isinstance(result, Ensemble)
+        assert result.metadata.n_realizations == 2
+        assert all(isinstance(df, pd.DataFrame) for df in result.data_by_realization.values())
 
     def test_get_params(self, sample_daily_series):
         """Test get_params method."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         gen.fit()
 
         params = gen.get_params()
@@ -303,7 +303,7 @@ class TestGenerator:
     def test_save_and_load(self, sample_daily_series, tmp_path):
         """Test save and load functionality."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
         gen.fit()
 
         # Save
@@ -321,7 +321,7 @@ class TestGenerator:
     def test_update_state(self, sample_daily_series):
         """Test update_state method."""
         gen = MockGenerator()
-        gen.preprocessing(sample_daily_series)
+        gen.preprocessing()
 
         # Update state
         gen.update_state(fitted=True)

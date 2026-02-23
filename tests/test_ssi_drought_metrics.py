@@ -221,10 +221,12 @@ class TestGetDroughtMetrics:
         assert len(drought_df) == 0
 
     def test_continuous_drought(self):
-        """Test case with continuous drought."""
-        # Create continuous drought
-        dates = pd.date_range('2020-01-01', periods=100, freq='D')
-        ssi_values = pd.Series(np.full(100, -2.0), index=dates)
+        """Test case with continuous drought followed by recovery."""
+        # Drought must be followed by 3+ consecutive positive days to be recorded
+        dates = pd.date_range('2020-01-01', periods=103, freq='D')
+        ssi_values = pd.Series(np.zeros(103), index=dates)
+        ssi_values.iloc[:100] = -2.0   # 100 days of drought
+        ssi_values.iloc[100:103] = 1.0  # 3 days of recovery to close the drought
 
         drought_df = get_drought_metrics(ssi_values)
 
@@ -250,11 +252,11 @@ class TestGetDroughtMetrics:
 class TestSSIIntegration:
     """Integration tests for SSI drought analysis."""
 
-    def test_full_workflow_daily(self, sample_daily_series):
-        """Test complete workflow for daily data."""
+    def test_full_workflow_daily(self, sample_ssi_data):
+        """Test complete workflow for daily data (requires 20+ years for robust SSI fitting)."""
         # Step 1: Calculate SSI
         ssi_metrics = SSIDroughtMetrics(timescale='D', window=30)
-        ssi_values = ssi_metrics.calculate_ssi(sample_daily_series)
+        ssi_values = ssi_metrics.calculate_ssi(sample_ssi_data)
 
         assert isinstance(ssi_values, pd.Series)
 
@@ -276,11 +278,11 @@ class TestSSIIntegration:
 
         assert isinstance(drought_metrics, pd.DataFrame)
 
-    def test_workflow_with_dataframe(self, sample_daily_dataframe):
-        """Test workflow with DataFrame (multiple sites)."""
-        # Process each site separately
-        for site in sample_daily_dataframe.columns:
-            site_data = sample_daily_dataframe[site]
+    def test_workflow_with_dataframe(self, sample_ssi_data):
+        """Test workflow processing multiple scaled versions of a long daily series."""
+        # Process multiple site variants (requires long data for robust SSI fitting)
+        for multiplier in [1.0, 0.9, 1.1]:
+            site_data = sample_ssi_data * multiplier
 
             ssi_metrics = SSIDroughtMetrics(timescale='D', window=30)
             ssi_values = ssi_metrics.calculate_ssi(site_data)
@@ -290,19 +292,19 @@ class TestSSIIntegration:
             drought_metrics = ssi_metrics.calculate_drought_metrics(ssi_values)
             assert isinstance(drought_metrics, pd.DataFrame)
 
-    def test_different_window_sizes(self, sample_daily_series):
-        """Test SSI calculation with different window sizes."""
+    def test_different_window_sizes(self, sample_ssi_data):
+        """Test SSI calculation with different window sizes (requires long data)."""
         for window in [7, 30, 90]:
             ssi_metrics = SSIDroughtMetrics(timescale='D', window=window)
-            ssi_values = ssi_metrics.calculate_ssi(sample_daily_series)
+            ssi_values = ssi_metrics.calculate_ssi(sample_ssi_data)
 
             assert isinstance(ssi_values, pd.Series)
             assert len(ssi_values) > 0
 
-    def test_ssi_standardization(self, sample_daily_series):
+    def test_ssi_standardization(self, sample_ssi_data):
         """Test that SSI values are approximately standardized."""
         ssi_metrics = SSIDroughtMetrics(timescale='D', window=30)
-        ssi_values = ssi_metrics.calculate_ssi(sample_daily_series)
+        ssi_values = ssi_metrics.calculate_ssi(sample_ssi_data)
 
         # Remove NaN values
         valid_ssi = ssi_values.dropna()

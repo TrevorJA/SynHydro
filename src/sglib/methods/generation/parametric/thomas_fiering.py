@@ -5,15 +5,16 @@ Implements the Thomas-Fiering method (1962) with Stedinger-Taylor (1982)
 normalization for generating synthetic streamflow sequences.
 """
 import logging
+from typing import Optional, Union, Dict, Any
+
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
 
-from sglib.core.base import Generator, GeneratorParams, FittedParams
+from sglib.core.base import Generator, FittedParams
 from sglib.core.ensemble import Ensemble
 from sglib.core.statistics import compute_monthly_statistics
 from sglib.transformations import SteddingerTransform
-from scipy.stats import pearsonr
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,13 @@ class ThomasFieringGenerator(Generator):
     Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation:
     1. Model verification and validation. Water Resources Research, 18(4), 909-918.
     """
-    def __init__(self, Q_obs, name=None, debug=False, **kwargs):
+    def __init__(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        name: Optional[str] = None,
+        debug: bool = False,
+        **kwargs
+    ):
         """
         Initialize the ThomasFieringGenerator.
 
@@ -82,7 +89,7 @@ class ThomasFieringGenerator(Generator):
         """Thomas-Fiering generator produces monthly output."""
         return 'MS'  # Month Start
     
-    def preprocessing(self, sites=None, **kwargs):
+    def preprocessing(self, sites: Optional[list] = None, **kwargs) -> None:
         """
         Preprocess observed data for Thomas-Fiering generation.
 
@@ -123,7 +130,7 @@ class ThomasFieringGenerator(Generator):
         self.update_state(preprocessed=True)
         self.logger.info(f"Preprocessing complete: {len(self.Q_obs_monthly)} months")
         
-    def fit(self, **kwargs):
+    def fit(self, **kwargs) -> None:
         """
         Estimate Thomas-Fiering model parameters from normalized flows.
 
@@ -186,10 +193,27 @@ class ThomasFieringGenerator(Generator):
                     first_values.append(data.iloc[i])
                     second_values.append(data.iloc[i + 1])
 
-            # Compute Pearson correlation
-            if len(first_values) > 1:  # Need at least 2 pairs for correlation
-                corr, _ = pearsonr(first_values, second_values)
-                monthly_corr[month] = corr
+            # Filter out NaN and Inf values
+            if len(first_values) > 1:
+                # Convert to numpy arrays for easier filtering
+                first_arr = np.array(first_values)
+                second_arr = np.array(second_values)
+
+                # Keep only finite values
+                valid_mask = np.isfinite(first_arr) & np.isfinite(second_arr)
+                first_clean = first_arr[valid_mask]
+                second_clean = second_arr[valid_mask]
+
+                # Compute Pearson correlation if enough valid data
+                if len(first_clean) > 1 and np.std(first_clean) > 0 and np.std(second_clean) > 0:
+                    try:
+                        corr, _ = pearsonr(first_clean, second_clean)
+                        # Replace NaN with 0
+                        monthly_corr[month] = corr if np.isfinite(corr) else 0.0
+                    except (ValueError, RuntimeWarning):
+                        monthly_corr[month] = 0.0
+                else:
+                    monthly_corr[month] = 0.0  # Default to 0 if insufficient valid data
             else:
                 monthly_corr[month] = 0.0  # Default to 0 if insufficient data
 
@@ -236,7 +260,7 @@ class ThomasFieringGenerator(Generator):
             training_period_=training_period
         )
 
-    def _generate(self, n_years, **kwargs):
+    def _generate(self, n_years: int, **kwargs) -> pd.DataFrame:
         """
         Generate a single realization of synthetic flows (internal method).
 
@@ -272,19 +296,34 @@ class ThomasFieringGenerator(Generator):
                                             (self.x_syn[i*12+m-1] - self.mu_monthly[prev_month]) + \
                                                 np.sqrt(1-self.rho_monthly[month]**2)*self.sigma_monthly[month]*e_rand
                         
-        # convert to df
+        # Convert to DataFrame
         syn_start_year = self.Q_obs_monthly.index[0].year
         syn_start_date = f'{syn_start_year}-01-01'
-        self.x_syn = pd.DataFrame(self.x_syn, 
-                                index=pd.date_range(start=syn_start_date, 
-                                                    periods=len(self.x_syn), freq='MS'))
-        self.x_syn[self.x_syn < 0] = self.Q_norm.min()
+        x_syn_df = pd.DataFrame(
+            self.x_syn,
+            index=pd.date_range(start=syn_start_date, periods=len(self.x_syn), freq='MS')
+        )
 
-        self.Q_syn = self.stedinger_transform.inverse_transform(self.x_syn)
-        self.Q_syn[self.Q_syn < 0] = self.Q_obs_monthly.min()
-        return self.Q_syn
+        # Replace negative values in normalized space
+        x_syn_df[x_syn_df < 0] = self.Q_norm.min()
+
+        # Inverse transform to original space
+        Q_syn = self.stedinger_transform.inverse_transform(x_syn_df)
+
+        # Handle negative and NaN values
+        Q_syn[Q_syn < 0] = self.Q_obs_monthly.min()
+        Q_syn = Q_syn.fillna(self.Q_obs_monthly.min())
+
+        return Q_syn
     
-    def generate(self, n_years=None, n_realizations=1, n_timesteps=None, seed=None, **kwargs):
+    def generate(
+        self,
+        n_years: Optional[int] = None,
+        n_realizations: int = 1,
+        n_timesteps: Optional[int] = None,
+        seed: Optional[int] = None,
+        **kwargs
+    ) -> Ensemble:
         """
         Generate synthetic monthly streamflows.
 
@@ -296,7 +335,7 @@ class ThomasFieringGenerator(Generator):
         n_realizations : int, default=1
             Number of synthetic realizations to generate.
         n_timesteps : int, optional
-            Not used (Thomas-Fiering generates by years).
+            Number of monthly timesteps to generate. If provided, overrides n_years.
         seed : int, optional
             Random seed for reproducibility.
         **kwargs : dict, optional
@@ -304,9 +343,13 @@ class ThomasFieringGenerator(Generator):
 
         Returns
         -------
-        pd.DataFrame
-            DataFrame with realizations as columns (indexed 0, 1, 2, ...).
-            Index is DatetimeIndex with monthly frequency.
+        Ensemble
+            Ensemble object containing all realizations.
+
+        Raises
+        ------
+        ValueError
+            If neither n_years nor n_timesteps is provided.
         """
         # Validate fit
         self.validate_fit()
@@ -316,65 +359,31 @@ class ThomasFieringGenerator(Generator):
             np.random.seed(seed)
 
         # Determine number of years
-        if n_years is None:
+        if n_timesteps is not None:
+            n_years = int(np.ceil(n_timesteps / 12))
+        elif n_years is None:
             n_years = len(self.Q_obs_monthly) // 12  # Convert months to years
 
+        if n_years <= 0:
+            raise ValueError(f"n_years must be positive, got {n_years}")
+
         # Generate realizations
-        realizations = []
+        realizations = {}
         for i in range(n_realizations):
             Q_syn = self._generate(n_years)
+
             # Extract values as Series
             if isinstance(Q_syn, pd.DataFrame):
                 Q_syn = Q_syn.iloc[:, 0]
-            realizations.append(Q_syn)
 
-        # Combine into DataFrame with realizations as columns
-        Q_syn_all = pd.concat(realizations, axis=1, keys=range(n_realizations))
+            # If n_timesteps specified, truncate to exact length
+            if n_timesteps is not None and len(Q_syn) > n_timesteps:
+                Q_syn = Q_syn.iloc[:n_timesteps]
+
+            # Convert Series to DataFrame for Ensemble
+            realizations[i] = Q_syn.to_frame(name=self._sites[0])
 
         self.logger.info(f"Generated {n_realizations} realizations of {n_years} years each")
 
-        return Q_syn_all
-    
-    def plot(self, kind='ts', **kwargs):
-        """
-        Plot observed vs. synthetic flows for visual comparison.
-
-        Automatically calls preprocessing(), fit(), and generate() if needed.
-
-        Parameters
-        ----------
-        kind : str, optional
-            Type of plot: 'ts' (time series), 'hist' (histogram),
-            or 'kde' (kernel density estimate). Default is 'ts'.
-        **kwargs : dict, optional
-            Additional parameters (currently unused).
-        """
-        if not self.is_preprocessed:
-            self.preprocessing()
-        if not self.is_fit:
-            self.fit()
-        if not hasattr(self, 'x_syn'):
-            self.generate(n_years=5)
-
-        fig, ax = plt.subplots(figsize=(10, 5))
-
-        if kind == 'ts':
-            self.Q_obs_monthly.plot(label='Observed', ax=ax,
-                                    zorder=5)
-
-            self.Q_syn_df.plot(ax=ax,
-                               color='orange', alpha=0.5,
-                               zorder=1,
-                               legend=False)
-        elif kind == 'hist':
-            self.Q_obs_monthly.hist(label='Observed')
-            self.Q_syn_df.hist(legend=False, alpha=0.5)
-        elif kind == 'kde':
-            self.Q_obs_monthly.plot(ax=ax, kind='kde',
-                                    label='Observed', zorder=5)
-            self.Q_syn_df.plot(ax=ax, color='orange',
-                               kind='kde', legend=False, alpha=0.5, zorder=1)
-
-        plt.show()
-        return
+        return Ensemble(realizations)
     
