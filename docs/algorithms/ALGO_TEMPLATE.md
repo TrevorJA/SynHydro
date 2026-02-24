@@ -1,108 +1,61 @@
-# [Algorithm Name]
+# [Method Name] ([Author et al. Year])
 
-**Classification:** [Parametric/Nonparametric/Machine Learning]
-**Temporal Resolution:** [Daily/Monthly/Annual]
-**Site Compatibility:** [Univariate/Multisite]
+| | |
+|---|---|
+| **Type** | [Parametric / Nonparametric / ML] |
+| **Resolution** | [Monthly / Daily / Annual] |
+| **Sites** | [Univariate / Multisite] |
+| **Class** | `[ClassName]` |
 
----
+## Overview
 
-## Technical Specifications
+[2-4 sentence description: what the method does, its core mechanism, and what it's best suited for.]
 
-| Property | Specification |
-|----------|---------------|
-| Input data | [e.g., "Daily streamflow, minimum 2 years", "Monthly flows, complete water years"] |
-| Output frequency | [D/MS/AS] |
-| Distributional assumption | [e.g., "Normal after transformation", "Nonparametric", "Kappa"] |
-| Correlation structure | [e.g., "Lag-1 AR", "Full spectrum", "Spatial + temporal"] |
-
----
-
-## Algorithm Description
+## Algorithm
 
 ### Preprocessing
 
-1. **[Step name]**
-   - [Technical description]
-   - [Mathematical formulation if applicable]
+1. [Step]
+2. [Step]
 
-2. **[Step name]**
-   - [Technical description]
+### Fitting
 
-### Fitting/Calibration
-
-1. **[Step name]**
-   - [Technical description]
-   - Mathematical form: [equation or description]
-
-2. **[Step name]**
-   - [Technical description]
+1. [Step with key equations in code blocks]
+2. [Step]
 
 ### Generation
 
-1. **[Step name]**
-   - [Technical description]
+1. [Step with key equations in code blocks]
+2. [Step]
 
-2. **[Step name]**
-   - [Technical description]
+## Parameters
 
-3. **[Step name]**
-   - [Technical description]
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `param` | type | value | What it controls |
 
----
+## Properties Preserved
 
-## Key Parameters
+- [Property 1]
+- [Property 2]
 
-- **`parameter_name`**: [Description and role in algorithm]
-  - Type: [dtype]
-  - Default: [value]
-  - Notes: [when/how to adjust]
+**Not preserved:**
+- [Limitation as property]
 
----
+## Limitations
 
-## Algorithmic Details
-
-### [Specific technique/transformation name]
-[Detailed technical explanation of key algorithmic component]
-
-Mathematical formulation:
-```
-[equation or pseudocode]
-```
-
-### [Another key component]
-[Technical details]
-
----
-
-## Algorithm Variations
-
-- **[Variant 1]**: [What differs technically]
-- **[Variant 2]**: [What differs technically]
-
----
-
-## Implementation Notes
-
-### Computational complexity
-- [Time and space complexity or qualitative description]
-
-### Limitations
-- [Technical limitations]
-- [Edge cases or failure modes]
-
-### Special handling
-- [Negative values, missing data, boundary conditions, etc.]
-
----
+- [Key limitation 1]
+- [Key limitation 2]
 
 ## References
 
 **Primary:**
-[Full citation of main algorithm paper]
+[Full APA citation with DOI]
 
-**Implementation details:**
-[Citations for specific techniques used, e.g., normalization methods]
+**See also:**
+- [Supporting citation]
 
 ---
 
-**Implementation:** [src/synhydro/methods/generation/category/file.py]
+**Implementation:** `src/synhydro/methods/generation/[category]/[file].py`
+**Tests:** `tests/test_[name].py`
