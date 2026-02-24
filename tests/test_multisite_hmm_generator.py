@@ -10,8 +10,8 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from sglib.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
-from sglib.core.ensemble import Ensemble
+from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
+from synhydro.core.ensemble import Ensemble
 
 
 @pytest.fixture

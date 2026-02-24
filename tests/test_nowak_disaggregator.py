@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from sglib.methods.disaggregation.temporal.nowak import NowakDisaggregator
+from synhydro.methods.disaggregation.temporal.nowak import NowakDisaggregator
 
 
 class TestNowakDisaggregatorInitialization:

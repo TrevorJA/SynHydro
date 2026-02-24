@@ -2,20 +2,20 @@
 
 ## Ensemble
 
-::: sglib.core.ensemble.Ensemble
+::: synhydro.core.ensemble.Ensemble
 
 ---
 
 ## EnsembleMetadata
 
-::: sglib.core.ensemble.EnsembleMetadata
+::: synhydro.core.ensemble.EnsembleMetadata
 
 ---
 
 ## Parameter Containers
 
-::: sglib.core.base.FittedParams
+::: synhydro.core.base.FittedParams
 
-::: sglib.core.base.GeneratorState
+::: synhydro.core.base.GeneratorState
 
-::: sglib.core.base.GeneratorParams
+::: synhydro.core.base.GeneratorParams

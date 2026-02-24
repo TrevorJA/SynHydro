@@ -14,9 +14,9 @@ Key parameters to explore:
 - max_month_shift: Temporal flexibility in daily pattern matching (default: 7)
 """
 import matplotlib.pyplot as plt
-from sglib import load_example_data, Ensemble
-from sglib.pipelines import KirschNowakPipeline
-from sglib.plotting import plot_timeseries, plot_flow_duration_curve
+from synhydro import load_example_data, Ensemble
+from synhydro.pipelines import KirschNowakPipeline
+from synhydro.plotting import plot_timeseries, plot_flow_duration_curve
 
 # ============================================================================
 # Configuration

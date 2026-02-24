@@ -33,7 +33,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/ -v --cov=sglib --cov-report=xml --cov-report=term
+        pytest tests/ -v --cov=synhydro --cov-report=xml --cov-report=term
 
     - name: Upload coverage to Codecov
       if: matrix.os == 'ubuntu-latest' && matrix.python-version == '3.11'

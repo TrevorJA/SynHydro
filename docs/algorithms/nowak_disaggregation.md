@@ -75,4 +75,4 @@ Nowak, K., Prairie, J., Rajagopalan, B., & Lall, U. (2010).
 A nonparametric stochastic approach for multisite disaggregation of annual to daily
 streamflow. *Water Resources Research*, 46(8).
 
-**SGLib Implementation:** [`src/sglib/methods/disaggregation/temporal/nowak.py`](https://github.com/Pywr-DRB/SGLib/blob/main/src/sglib/methods/disaggregation/temporal/nowak.py)
+**SynHydro Implementation:** [`src/synhydro/methods/disaggregation/temporal/nowak.py`](https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/disaggregation/temporal/nowak.py)

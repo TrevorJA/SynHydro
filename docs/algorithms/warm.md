@@ -451,7 +451,7 @@ Q_syn = np.maximum(Q_syn, 0)  # Truncate to non-negative
 
 ```python
 import pandas as pd
-from sglib.methods.generation.parametric.warm import WARMGenerator
+from synhydro.methods.generation.parametric.warm import WARMGenerator
 
 # Load annual streamflow data
 Q_annual = pd.read_csv('annual_flows.csv', index_col=0, parse_dates=True)

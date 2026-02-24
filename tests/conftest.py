@@ -1,5 +1,5 @@
 """
-Pytest configuration and fixtures for sglib tests.
+Pytest configuration and fixtures for synhydro tests.
 """
 
 import pytest

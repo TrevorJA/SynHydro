@@ -1,6 +1,6 @@
 # Algorithms
 
-SGLib implements the following stochastic generation and disaggregation methods.
+SynHydro implements the following stochastic generation and disaggregation methods.
 
 ## Generation Methods
 

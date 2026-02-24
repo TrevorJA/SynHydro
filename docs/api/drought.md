@@ -2,22 +2,22 @@
 
 ## SSIDroughtMetrics
 
-::: sglib.droughts.ssi.SSIDroughtMetrics
+::: synhydro.droughts.ssi.SSIDroughtMetrics
 
 ---
 
 ## SSI
 
-::: sglib.droughts.ssi.SSI
+::: synhydro.droughts.ssi.SSI
 
 ---
 
 ## Functions
 
-::: sglib.droughts.ssi.get_drought_metrics
+::: synhydro.droughts.ssi.get_drought_metrics
 
 ---
 
 ## Distribution Utilities
 
-::: sglib.droughts.distributions
+::: synhydro.droughts.distributions

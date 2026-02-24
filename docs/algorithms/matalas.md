@@ -87,4 +87,4 @@ Matalas, N. C. (1967). Mathematical assessment of synthetic hydrology.
 Salas, J. D., Delleur, J. W., Yevjevich, V., & Lane, W. L. (1980).
 *Applied Modeling of Hydrologic Time Series*. Water Resources Publications.
 
-**SGLib Implementation:** [`src/sglib/methods/generation/parametric/matalas.py`](https://github.com/Pywr-DRB/SGLib/blob/main/src/sglib/methods/generation/parametric/matalas.py)
+**SynHydro Implementation:** [`src/synhydro/methods/generation/parametric/matalas.py`](https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/parametric/matalas.py)

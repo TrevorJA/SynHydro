@@ -10,7 +10,7 @@ This script shows how to:
 
 import numpy as np
 import pandas as pd
-from sglib.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
+from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 
 # Create synthetic monthly flow data for demonstration
 np.random.seed(42)

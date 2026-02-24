@@ -1,3 +1,0 @@
-"""
-Disaggregation methods for SGLib.
-"""

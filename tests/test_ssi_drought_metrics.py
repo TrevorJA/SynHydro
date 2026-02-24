@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from sglib.droughts.ssi import SSI, SSIDroughtMetrics, get_drought_metrics
+from synhydro.droughts.ssi import SSI, SSIDroughtMetrics, get_drought_metrics
 
 
 class TestSSIDroughtMetrics:

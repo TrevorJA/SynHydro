@@ -1,7 +1,7 @@
 """
 Tests for Thomas-Fiering parametric streamflow generator.
 
-Comprehensive test suite following SGLib standards.
+Comprehensive test suite following SynHydro standards.
 """
 
 import pytest
@@ -9,8 +9,8 @@ import pickle
 import numpy as np
 import pandas as pd
 
-from sglib.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
-from sglib.core.ensemble import Ensemble
+from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
+from synhydro.core.ensemble import Ensemble
 
 
 class TestThomasFieringInitialization:

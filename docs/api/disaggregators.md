@@ -2,28 +2,28 @@
 
 ## Base Class
 
-::: sglib.core.base.Disaggregator
+::: synhydro.core.base.Disaggregator
 
 ---
 
 ## NowakDisaggregator
 
-::: sglib.methods.disaggregation.temporal.nowak.NowakDisaggregator
+::: synhydro.methods.disaggregation.temporal.nowak.NowakDisaggregator
 
 ---
 
 ## Pipelines
 
-::: sglib.core.pipeline.GeneratorDisaggregatorPipeline
+::: synhydro.core.pipeline.GeneratorDisaggregatorPipeline
 
 ---
 
 ### KirschNowakPipeline
 
-::: sglib.pipelines.prebuilt.KirschNowakPipeline
+::: synhydro.pipelines.prebuilt.KirschNowakPipeline
 
 ---
 
 ### ThomasFieringNowakPipeline
 
-::: sglib.pipelines.prebuilt.ThomasFieringNowakPipeline
+::: synhydro.pipelines.prebuilt.ThomasFieringNowakPipeline

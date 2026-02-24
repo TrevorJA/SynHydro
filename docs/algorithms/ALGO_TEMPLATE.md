@@ -105,4 +105,4 @@ Mathematical formulation:
 
 ---
 
-**Implementation:** [src/sglib/methods/generation/category/file.py]
+**Implementation:** [src/synhydro/methods/generation/category/file.py]

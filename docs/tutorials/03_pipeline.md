@@ -4,11 +4,11 @@
 disaggregator. It accepts only daily observed data and handles internal aggregation.
 
 ```python
-import sglib
+import synhydro
 
-Q_daily = sglib.load_example_data()                     # daily observed flows
+Q_daily = synhydro.load_example_data()                     # daily observed flows
 
-pipeline = sglib.KirschNowakPipeline(Q_daily)
+pipeline = synhydro.KirschNowakPipeline(Q_daily)
 pipeline.preprocessing()
 pipeline.fit()
 daily_ensemble = pipeline.generate(n_realizations=10, n_years=30, seed=42)
@@ -26,7 +26,7 @@ print(Q_syn_daily.shape)                                 # (~10957 days × n_sit
 !!! tip "Thomas-Fiering + Nowak"
     A single-site monthly→daily pipeline is also available:
     ```python
-    pipeline = sglib.ThomasFieringNowakPipeline(Q_daily)
+    pipeline = synhydro.ThomasFieringNowakPipeline(Q_daily)
     ```
 
 **Algorithm details:** [Kirsch Bootstrap](../algorithms/kirsch.md) · [Nowak Disaggregation](../algorithms/nowak_disaggregation.md)

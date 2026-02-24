@@ -315,9 +315,9 @@ Gold, D.F., Reed, P.M., & Gupta, R.S. (In Revision). Exploring the Spatially Com
 
 ---
 
-**SGLib Implementation:** [`src/sglib/methods/generation/parametric/multisite_hmm.py`](https://github.com/Pywr-DRB/SGLib/blob/main/src/sglib/methods/generation/parametric/multisite_hmm.py)
+**SynHydro Implementation:** [`src/synhydro/methods/generation/parametric/multisite_hmm.py`](https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/parametric/multisite_hmm.py)
 
-**Tests:** [`tests/test_multisite_hmm_generator.py`](https://github.com/Pywr-DRB/SGLib/blob/main/tests/test_multisite_hmm_generator.py)
+**Tests:** [`tests/test_multisite_hmm_generator.py`](https://github.com/TrevorJA/SynHydro/blob/main/tests/test_multisite_hmm_generator.py)
 
 ---
 
@@ -325,7 +325,7 @@ Gold, D.F., Reed, P.M., & Gupta, R.S. (In Revision). Exploring the Spatially Com
 
 ```python
 import pandas as pd
-from sglib.methods.generation.parametric import MultiSiteHMMGenerator
+from synhydro.methods.generation.parametric import MultiSiteHMMGenerator
 
 # Load annual streamflow data for multiple sites
 Q_annual = pd.read_csv('annual_flows.csv', index_col=0, parse_dates=True)

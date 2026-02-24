@@ -1,5 +1,5 @@
 """
-Tests for sglib.core.base module (Generator base class and GeneratorState).
+Tests for synhydro.core.base module (Generator base class and GeneratorState).
 Updated to match the current API.
 """
 
@@ -10,8 +10,8 @@ from datetime import datetime
 import tempfile
 import pickle
 
-from sglib.core.base import Generator, GeneratorState
-from sglib.core.ensemble import Ensemble
+from synhydro.core.base import Generator, GeneratorState
+from synhydro.core.ensemble import Ensemble
 
 
 class MockGenerator(Generator):
@@ -46,7 +46,7 @@ class MockGenerator(Generator):
 
     def _compute_fitted_params(self):
         """Mock implementation of required abstract method."""
-        from sglib.core.base import FittedParams
+        from synhydro.core.base import FittedParams
         # Return minimal FittedParams for testing
         return FittedParams()
 
@@ -59,7 +59,7 @@ class MockGenerator(Generator):
 
     def generate(self, n_realizations=1, start_date='2020-01-01', end_date='2020-12-31', freq='D', **kwargs):
         """Mock generate implementation - returns Ensemble."""
-        from sglib.core.ensemble import Ensemble
+        from synhydro.core.ensemble import Ensemble
 
         self.validate_fit()
         self.generate_called = True

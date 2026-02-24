@@ -4,13 +4,13 @@
 cross-site correlations in monthly streamflow.
 
 ```python
-import sglib
+import synhydro
 
 # Multi-site monthly data
-Q_daily = sglib.load_example_data()
+Q_daily = synhydro.load_example_data()
 Q_monthly = Q_daily.resample("MS").mean()
 
-gen = sglib.KirschGenerator(Q_monthly)
+gen = synhydro.KirschGenerator(Q_monthly)
 gen.preprocessing()
 gen.fit()
 ensemble = gen.generate(n_realizations=50, n_years=30, seed=42)

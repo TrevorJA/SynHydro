@@ -1,6 +1,6 @@
 # Tutorials
 
-Concise examples covering the core SGLib workflows.
+Concise examples covering the core SynHydro workflows.
 
 | Tutorial | Generator | Description |
 |----------|-----------|-------------|
@@ -9,4 +9,4 @@ Concise examples covering the core SGLib workflows.
 | [Monthly→Daily Pipeline](03_pipeline.md) | `KirschNowakPipeline` | Full monthly-to-daily workflow |
 | [Drought Analysis](04_drought_analysis.md) | `SSIDroughtMetrics` | SSI calculation and drought metrics |
 
-All examples use `sglib.load_example_data()`, which returns a multi-site daily streamflow `DataFrame`.
+All examples use `synhydro.load_example_data()`, which returns a multi-site daily streamflow `DataFrame`.

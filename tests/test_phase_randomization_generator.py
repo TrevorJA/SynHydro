@@ -6,10 +6,10 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from sglib.methods.generation.nonparametric.phase_randomization import (
+from synhydro.methods.generation.nonparametric.phase_randomization import (
     PhaseRandomizationGenerator
 )
-from sglib.core.ensemble import Ensemble
+from synhydro.core.ensemble import Ensemble
 
 
 @pytest.fixture

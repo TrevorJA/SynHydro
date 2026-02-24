@@ -280,9 +280,9 @@ Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Mo
 
 ---
 
-**SGLib Implementation:** [`src/sglib/methods/generation/parametric/thomas_fiering.py`](https://github.com/Pywr-DRB/SGLib/blob/main/src/sglib/methods/generation/parametric/thomas_fiering.py)
+**SynHydro Implementation:** [`src/synhydro/methods/generation/parametric/thomas_fiering.py`](https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/parametric/thomas_fiering.py)
 
-**Tests:** [`tests/test_thomas_fiering_generator.py`](https://github.com/Pywr-DRB/SGLib/blob/main/tests/test_thomas_fiering_generator.py)
+**Tests:** [`tests/test_thomas_fiering_generator.py`](https://github.com/TrevorJA/SynHydro/blob/main/tests/test_thomas_fiering_generator.py)
 
 ---
 
@@ -290,7 +290,7 @@ Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Mo
 
 ```python
 import pandas as pd
-from sglib.methods.generation.parametric import ThomasFieringGenerator
+from synhydro.methods.generation.parametric import ThomasFieringGenerator
 
 # Load monthly streamflow data
 Q_monthly = pd.read_csv('monthly_flows.csv', index_col=0, parse_dates=True)

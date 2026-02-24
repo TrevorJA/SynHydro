@@ -1,19 +1,19 @@
 # Drought Analysis
 
-SGLib provides Standardized Streamflow Index (SSI) calculation and drought metric extraction
+SynHydro provides Standardized Streamflow Index (SSI) calculation and drought metric extraction
 via `SSIDroughtMetrics`.
 
 ## SSI Calculation
 
 ```python
-import sglib
+import synhydro
 
-Q_daily = sglib.load_example_data()
+Q_daily = synhydro.load_example_data()
 Q_monthly = Q_daily.resample("MS").mean()
 site = Q_monthly.columns[0]
 
 # Calculate 12-month SSI using gamma distribution
-ssi_calc = sglib.SSIDroughtMetrics(timescale="M", window=12, dist="gamma")
+ssi_calc = synhydro.SSIDroughtMetrics(timescale="M", window=12, dist="gamma")
 ssi = ssi_calc.calculate_ssi(Q_monthly[site])
 ```
 
@@ -22,7 +22,7 @@ The SSI series has mean ≈ 0 and std ≈ 1. Values below −1 indicate moderate
 ## Drought Metrics
 
 ```python
-metrics = sglib.get_drought_metrics(ssi)
+metrics = synhydro.get_drought_metrics(ssi)
 print(metrics.head())
 ```
 
@@ -32,7 +32,7 @@ Returned columns include: `duration`, `magnitude`, `severity` (minimum SSI), and
 ## Comparing Observed vs. Synthetic
 
 ```python
-gen = sglib.KirschGenerator(Q_monthly)
+gen = synhydro.KirschGenerator(Q_monthly)
 gen.preprocessing()
 gen.fit()
 ensemble = gen.generate(n_realizations=20, n_years=30, seed=42)

@@ -1,5 +1,5 @@
 """
-Tests for sglib.utils and sglib.core modules (data loading, Ensemble).
+Tests for synhydro.utils and synhydro.core modules (data loading, Ensemble).
 """
 
 import pytest
@@ -7,8 +7,8 @@ import numpy as np
 import pandas as pd
 import h5py
 
-from sglib.utils import load_example_data
-from sglib.core import Ensemble
+from synhydro.utils import load_example_data
+from synhydro.core import Ensemble
 
 
 class TestLoadExampleData:

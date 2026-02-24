@@ -3,14 +3,14 @@
 The `ThomasFieringGenerator` fits a seasonal AR(1) model to single-site monthly streamflow.
 
 ```python
-import sglib
+import synhydro
 
 # Load example data and extract a single site
-Q_daily = sglib.load_example_data()
+Q_daily = synhydro.load_example_data()
 Q_monthly = Q_daily.resample("MS").mean().iloc[:, [0]]   # single-site monthly
 
 # Fit and generate
-gen = sglib.ThomasFieringGenerator(Q_monthly)
+gen = synhydro.ThomasFieringGenerator(Q_monthly)
 gen.preprocessing()
 gen.fit()
 ensemble = gen.generate(n_realizations=10, n_years=30, seed=42)

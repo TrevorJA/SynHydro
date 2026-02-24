@@ -11,7 +11,7 @@ This script shows how to:
 
 import numpy as np
 import pandas as pd
-from sglib import ThomasFieringGenerator, Ensemble, EnsembleMetadata
+from synhydro import ThomasFieringGenerator, Ensemble, EnsembleMetadata
 
 print("=" * 80)
 print("Ensemble Class Demonstration")
@@ -202,7 +202,7 @@ print("-" * 80)
 
 print("Loading example data with new utility:")
 try:
-    from sglib import load_example_data
+    from synhydro import load_example_data
     print("  Loading default dataset...")
     example_data = load_example_data()
     print(f"  Loaded: {example_data.shape}")

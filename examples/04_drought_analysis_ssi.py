@@ -22,13 +22,13 @@ Key parameters to explore:
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from sglib import (
+from synhydro import (
     load_example_data,
     SSIDroughtMetrics,
     compare_distributions,
     list_distributions,
 )
-from sglib.droughts import get_drought_metrics
+from synhydro.droughts import get_drought_metrics
 
 # ============================================================================
 # Configuration

@@ -7,8 +7,8 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from sglib.methods.generation.nonparametric.kirsch import KirschGenerator
-from sglib.core.ensemble import Ensemble
+from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
+from synhydro.core.ensemble import Ensemble
 
 
 class TestKirschGeneratorInitialization:

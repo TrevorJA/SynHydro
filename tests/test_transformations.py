@@ -1,12 +1,12 @@
 """
-Tests for sglib.transformations module.
+Tests for synhydro.transformations module.
 """
 
 import pytest
 import numpy as np
 import pandas as pd
 
-from sglib.transformations import (
+from synhydro.transformations import (
     Transform,
     TransformPipeline,
     SteddingerTransform,

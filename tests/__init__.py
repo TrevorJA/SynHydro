@@ -1,3 +1,3 @@
 """
-SGLib test suite.
+SynHydro test suite.
 """

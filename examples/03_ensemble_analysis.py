@@ -16,9 +16,9 @@ Key parameters to explore:
 """
 import pandas as pd
 import matplotlib.pyplot as plt
-from sglib import load_example_data, Ensemble
-from sglib.pipelines import KirschNowakPipeline
-from sglib.plotting import plot_validation_panel
+from synhydro import load_example_data, Ensemble
+from synhydro.pipelines import KirschNowakPipeline
+from synhydro.plotting import plot_validation_panel
 
 # ============================================================================
 # Configuration

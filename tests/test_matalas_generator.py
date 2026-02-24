@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from sglib.methods.generation.parametric.matalas import MATALASGenerator
-from sglib.core.ensemble import Ensemble
+from synhydro.methods.generation.parametric.matalas import MATALASGenerator
+from synhydro.core.ensemble import Ensemble
 
 
 # ---------------------------------------------------------------------------

@@ -2,17 +2,17 @@
 
 ## Installation
 
-SGLib is not yet published on PyPI. Install directly from GitHub:
+SynHydro is not yet published on PyPI. Install directly from GitHub:
 
 ```bash
-pip install git+https://github.com/TrevorJA/SGLib.git
+pip install git+https://github.com/TrevorJA/SynHydro.git
 ```
 
 For development (editable install with dev extras):
 
 ```bash
-git clone https://github.com/TrevorJA/SGLib.git
-cd SGLib
+git clone https://github.com/TrevorJA/SynHydro.git
+cd SynHydro
 pip install -e ".[dev]"
 ```
 
@@ -36,12 +36,12 @@ dates = pd.date_range("1980-01", periods=480, freq="MS")
 Q_obs = pd.DataFrame({"site_A": [...]}, index=dates)
 ```
 
-Use `sglib.load_example_data()` to get a ready-to-use daily dataset:
+Use `synhydro.load_example_data()` to get a ready-to-use daily dataset:
 
 ```python
-import sglib
+import synhydro
 
-Q_daily = sglib.load_example_data()                 # USGS daily streamflow (cms)
+Q_daily = synhydro.load_example_data()                 # USGS daily streamflow (cms)
 Q_monthly = Q_daily.resample("MS").mean()           # aggregate to monthly
 ```
 
@@ -62,7 +62,7 @@ Q_monthly = Q_daily.resample("MS").mean()           # aggregate to monthly
 Every generator follows the same three-step pattern:
 
 ```python
-gen = sglib.ThomasFieringGenerator(Q_obs)
+gen = synhydro.ThomasFieringGenerator(Q_obs)
 gen.preprocessing()                                 # validate and prepare data
 gen.fit()                                           # estimate parameters
 ensemble = gen.generate(n_realizations=10,          # synthetic flows

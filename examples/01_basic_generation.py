@@ -13,10 +13,10 @@ Key parameters to explore:
 - seed: Random seed for reproducibility
 """
 import matplotlib.pyplot as plt
-from sglib import load_example_data, ThomasFieringGenerator, Ensemble
-from sglib.methods.generation.nonparametric.kirsch import KirschGenerator
+from synhydro import load_example_data, ThomasFieringGenerator, Ensemble
+from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
 
-from sglib.plotting import plot_timeseries, plot_flow_duration_curve
+from synhydro.plotting import plot_timeseries, plot_flow_duration_curve
 
 # ============================================================================
 # Configuration

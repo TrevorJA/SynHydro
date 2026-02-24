@@ -227,9 +227,9 @@ Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of 
 
 **Implementation details:**
 - Normal score transform: Prevents bias in log-normal generation
-- Matrix repair: Uses spectral method from `sglib.core.statistics.repair_correlation_matrix`
-- Monthly statistics: Computed via `sglib.core.statistics.compute_monthly_statistics`
+- Matrix repair: Uses spectral method from `synhydro.core.statistics.repair_correlation_matrix`
+- Monthly statistics: Computed via `synhydro.core.statistics.compute_monthly_statistics`
 
 ---
 
-**SGLib Implementation:** [`src/sglib/methods/generation/nonparametric/kirsch.py`](https://github.com/Pywr-DRB/SGLib/blob/main/src/sglib/methods/generation/nonparametric/kirsch.py)
+**SynHydro Implementation:** [`src/synhydro/methods/generation/nonparametric/kirsch.py`](https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/nonparametric/kirsch.py)

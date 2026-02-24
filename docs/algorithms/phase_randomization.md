@@ -238,9 +238,9 @@ Brunner, M.I. (2017). PRSim: Stochastic Simulation of Streamflow Time Series usi
 
 ---
 
-**SGLib Implementation:** [`src/sglib/methods/generation/nonparametric/phase_randomization.py`](https://github.com/Pywr-DRB/SGLib/blob/main/src/sglib/methods/generation/nonparametric/phase_randomization.py)
+**SynHydro Implementation:** [`src/synhydro/methods/generation/nonparametric/phase_randomization.py`](https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/nonparametric/phase_randomization.py)
 
-**Tests:** [`tests/test_phase_randomization_generator.py`](https://github.com/Pywr-DRB/SGLib/blob/main/tests/test_phase_randomization_generator.py)
+**Tests:** [`tests/test_phase_randomization_generator.py`](https://github.com/TrevorJA/SynHydro/blob/main/tests/test_phase_randomization_generator.py)
 
 ---
 
@@ -248,7 +248,7 @@ Brunner, M.I. (2017). PRSim: Stochastic Simulation of Streamflow Time Series usi
 
 ```python
 import pandas as pd
-from sglib.methods.generation.nonparametric import PhaseRandomizationGenerator
+from synhydro.methods.generation.nonparametric import PhaseRandomizationGenerator
 
 # Load daily streamflow data
 Q_daily = pd.read_csv('daily_flows.csv', index_col=0, parse_dates=True)
