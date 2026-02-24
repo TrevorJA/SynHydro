@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#references" class="md-skip">
+        <a href="#parametric-methods" class="md-skip">
           Skip to content
         </a>
       
@@ -972,9 +972,45 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
+  <a href="#parametric-methods" class="md-nav__link">
     <span class="md-ellipsis">
-      References
+      Parametric Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#nonparametric-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nonparametric Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disaggregation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Disaggregation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#wavelet-based-methods" class="md-nav__link">
+    <span class="md-ellipsis">
+      Wavelet-Based Methods
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#methodological-foundations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Methodological Foundations
     </span>
   </a>
   
@@ -1001,10 +1037,46 @@
 
   <h1>References</h1>
 
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p>Kirsch, B. R., Characklis, G. W., &amp; Zeff, H. B. (2013). Evaluating the impact of alternative hydro-climate scenarios on transfer agreements: Practical improvement for generating synthetic streamflows. Journal of Water Resources Planning and Management, 139(4), 396-406. https://doi.org/10.1061/(ASCE)WR.1943-5452.0000287</p>
-<p>Nowak, K., Prairie, J., Rajagopalan, B., &amp; Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. Water resources research, 46(8). https://doi.org/10.1029/2009WR008530Digital </p>
-<p>Erkyihun, S. T., Rajagopalan, B., Zagona, E., Lall, U., &amp; Nowak, K. (2016). Wavelet‐based time series bootstrap model for multidecadal streamflow simulation using climate indicators. Water Resources Research, 52(5), 4061-4077.</p>
+<h2 id="parametric-methods">Parametric Methods<a class="headerlink" href="#parametric-methods" title="Permanent link">&para;</a></h2>
+<p><strong>Thomas-Fiering AR(1)</strong>
+Thomas, H.A., and Fiering, M.B. (1962). Mathematical synthesis of streamflow sequences for the analysis of river basins by simulation. In <em>Design of Water Resource Systems</em> (eds. Maass et al.), pp. 459-493. Harvard University Press.</p>
+<p><strong>Matalas MAR(1)</strong>
+Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. <em>Water Resources Research</em>, 3(4), 937–945. https://doi.org/10.1029/WR003i004p00937</p>
+<p><strong>Multi-Site Hidden Markov Model</strong>
+Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. <em>Earth's Future</em>. https://doi.org/10.1029/2023EF004126</p>
+<p><strong>Stedinger-Taylor Normalization</strong> (used in Thomas-Fiering)
+Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. <em>Water Resources Research</em>, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909</p>
+<hr />
+<h2 id="nonparametric-methods">Nonparametric Methods<a class="headerlink" href="#nonparametric-methods" title="Permanent link">&para;</a></h2>
+<p><strong>Kirsch Monthly Bootstrap</strong>
+Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of alternative hydro-climate scenarios on transfer agreements: A practical improvement for generating synthetic streamflows. <em>Journal of Water Resources Planning and Management</em>, 139(4), 396-406. https://doi.org/10.1061/(ASCE)WR.1943-5452.0000287</p>
+<p><strong>Phase Randomization</strong>
+Brunner, M.I., Bárdossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. <em>Hydrology and Earth System Sciences</em>, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019</p>
+<hr />
+<h2 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h2>
+<p><strong>Nowak Annual-to-Daily Disaggregation</strong>
+Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. <em>Water Resources Research</em>, 46(8). https://doi.org/10.1029/2009WR008530</p>
+<hr />
+<h2 id="wavelet-based-methods">Wavelet-Based Methods<a class="headerlink" href="#wavelet-based-methods" title="Permanent link">&para;</a></h2>
+<p><strong>WARM (Wavelet Auto-Regressive Method)</strong>
+Erkyihun, S.T., Rajagopalan, B., Zagona, E., Lall, U., and Nowak, K. (2016). Wavelet-based time series bootstrap model for multidecadal streamflow simulation using climate indicators. <em>Water Resources Research</em>, 52(5), 4061-4077. https://doi.org/10.1002/2016WR018696</p>
+<p>Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12. https://doi.org/10.1016/j.jhydrol.2011.08.049</p>
+<hr />
+<h2 id="methodological-foundations">Methodological Foundations<a class="headerlink" href="#methodological-foundations" title="Permanent link">&para;</a></h2>
+<p><strong>Applied stochastic hydrology</strong>
+Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). <em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.</p>
+<p><strong>L-moments</strong>
+Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. <em>Journal of the Royal Statistical Society Series B</em>, 52, 105-124. https://doi.org/10.1111/j.2517-6161.1990.tb01775.x</p>
+<p><strong>Kappa distribution</strong>
+Hosking, J.R.M. (1994). The four-parameter kappa distribution. <em>IBM Journal of Research and Development</em>, 38, 251-258. https://doi.org/10.1147/rd.383.0251</p>
+<p><strong>Surrogate data / phase randomization theory</strong>
+Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. <em>Physica D</em>, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90102-S</p>
+<p><strong>Hidden Markov Models</strong>
+Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. <em>Proceedings of the IEEE</em>, 77(2), 257-286. https://doi.org/10.1109/5.18626</p>
+<p><strong>GMMHMM for hydrology</strong>
+Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. <em>Water Resources Research</em>, 41(9). https://doi.org/10.1029/2004WR003605</p>
+<p><strong>Wavelet analysis</strong>
+Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78. https://doi.org/10.1175/1520-0477(1998)079&lt;0061:APGTWA&gt;2.0.CO;2</p>
 
 
 

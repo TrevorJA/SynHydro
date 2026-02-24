@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -843,15 +843,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Specifications
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
@@ -861,13 +852,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -903,18 +894,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#notes" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Notes
+      Properties Preserved
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
     </span>
   </a>
   
@@ -1114,15 +1114,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Specifications
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
@@ -1132,13 +1123,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1174,18 +1165,27 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#notes" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Notes
+      Properties Preserved
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
     </span>
   </a>
   
@@ -1220,81 +1220,58 @@
 
 
 <h1 id="nowak-2010-knn-temporal-disaggregation">Nowak (2010) KNN Temporal Disaggregation<a class="headerlink" href="#nowak-2010-knn-temporal-disaggregation" title="Permanent link">&para;</a></h1>
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Value</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>NowakDisaggregator</code></td>
-</tr>
 <tr>
 <td><strong>Type</strong></td>
 <td>Nonparametric</td>
 </tr>
 <tr>
-<td><strong>Input Frequency</strong></td>
-<td>Monthly</td>
-</tr>
-<tr>
-<td><strong>Output Frequency</strong></td>
-<td>Daily</td>
+<td><strong>Resolution</strong></td>
+<td>Monthly to Daily</td>
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
-<td>Single or Multi</td>
+<td>Univariate / Multisite</td>
 </tr>
 <tr>
-<td><strong>Reference</strong></td>
-<td>Nowak et al. (2010)</td>
+<td><strong>Class</strong></td>
+<td><code>NowakDisaggregator</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing
-within-month daily patterns from the closest historic analogs. For each synthetic month,
-it identifies the <span class="arithmatex">\(K\)</span> nearest historic months (by total flow), randomly selects one, and
-applies its daily proportions to the synthetic total.</p>
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
+<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, it identifies the K nearest historic months by total flow, randomly selects one using Lall-Sharma kernel weights, and applies its daily proportions to the synthetic total.</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Validate and store daily observed flows <span class="arithmatex">\(\{q^*_d\}\)</span>.</li>
-<li>Build historic monthly totals <span class="arithmatex">\(Q^*_m = \sum_{d \in m} q^*_d\)</span> at the index gauge
-   (sum across all sites for multi-site disaggregation).</li>
+<li>Validate and store daily observed flows.</li>
+<li>Build historic monthly totals at the index gauge (sum across all sites for multi-site disaggregation).</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<p>For each calendar month <span class="arithmatex">\(m \in \{1, \ldots, 12\}\)</span>, fit a <code>sklearn</code> <code>NearestNeighbors</code>
-model on the scalar historic monthly totals. Only historic months within
-<span class="arithmatex">\(\pm\)</span><code>max_month_shift</code> calendar days of month <span class="arithmatex">\(m\)</span>'s center are included in the pool.</p>
+<p>For each calendar month m, fit a <code>sklearn.NearestNeighbors</code> model on the scalar historic monthly totals. Only historic months within +/- <code>max_month_shift</code> calendar days of month m's center are included in the pool.</p>
 <h3 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h3>
-<p>For each synthetic monthly flow <span class="arithmatex">\(Q_{\text{syn},m}\)</span>:</p>
+<p>For each synthetic monthly flow <code>Q_syn_m</code>:</p>
 <ol>
-<li><strong>Find neighbors.</strong> Query the fitted KNN model to retrieve the <span class="arithmatex">\(K\)</span> nearest historic
-   months <span class="arithmatex">\(\{m^*_1, \ldots, m^*_K\}\)</span> by Euclidean distance on total flow:</li>
+<li><strong>Find neighbors</strong> — query the KNN model for the K nearest historic months by Euclidean distance on total flow.</li>
+<li><strong>Select one neighbor</strong> — draw with probability proportional to <code>1/k</code> (Lall-Sharma kernel, using ranks).</li>
+<li><strong>Disaggregate</strong> — apply the selected month's daily proportions:
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>q_d = Q_syn_m * (q*_d / sum(q*_d&#39;))
+</span></code></pre></div>
+   For multi-site data, each site is disaggregated independently using the same selected analog month.</li>
 </ol>
-<p>$<span class="arithmatex">\(d_k = \left| Q_{\text{syn},m} - Q^*_{m^*_k} \right|\)</span>$</p>
-<ol>
-<li><strong>Select one neighbor.</strong> Draw index <span class="arithmatex">\(k^*\)</span> with probability proportional to
-   <span class="arithmatex">\(1/d_k\)</span> (Lall-Sharma kernel):</li>
-</ol>
-<p>$<span class="arithmatex">\(P(k^*= k) \propto \frac{1}{k}\)</span>$</p>
-<p>(ranks are used if distances are tied).</p>
-<ol>
-<li><strong>Disaggregate.</strong> Apply the selected month's daily proportions to the synthetic total:</li>
-</ol>
-<p>$<span class="arithmatex">\(q_d = Q_{\text{syn},m} \cdot \frac{q^*_d}{\displaystyle\sum_{d' \in m^*_{k^*}} q^*_{d'}}\)</span>$</p>
-<p>For multi-site data, each site is disaggregated independently using the same selected
-   analog month.</p>
-<h2 id="key-parameters">Key Parameters<a class="headerlink" href="#key-parameters" title="Permanent link">&para;</a></h2>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Parameter</th>
+<th>Type</th>
 <th>Default</th>
 <th>Description</th>
 </tr>
@@ -1302,28 +1279,39 @@ model on the scalar historic monthly totals. Only historic months within
 <tbody>
 <tr>
 <td><code>n_neighbors</code></td>
+<td><code>int</code></td>
 <td><code>5</code></td>
-<td><span class="arithmatex">\(K\)</span> — number of candidate neighbors</td>
+<td>K — number of candidate neighbors</td>
 </tr>
 <tr>
 <td><code>max_month_shift</code></td>
+<td><code>int</code></td>
 <td><code>7</code></td>
 <td>Days of calendar flexibility around each month</td>
 </tr>
 </tbody>
 </table>
-<h2 id="notes">Notes<a class="headerlink" href="#notes" title="Permanent link">&para;</a></h2>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Leap year handling: if the synthetic month spans a leap day and the analog month does
-  not (or vice versa), flow is proportionally adjusted.</li>
-<li>For multi-site data, the <strong>index gauge</strong> (sum of all sites) is used for KNN search;
-  the same analog is then applied to all sites.</li>
+<li>Daily flow patterns within each month (borrowed from historical record)</li>
+<li>Monthly totals (exact, by construction)</li>
+<li>Multi-site consistency (same analog month applied to all sites)</li>
+</ul>
+<p><strong>Not preserved:</strong>
+- Month-to-month daily transitions (each month disaggregated independently)
+- Daily patterns outside historical range</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Cannot produce daily patterns not seen in the historical record</li>
+<li>Leap year handling requires proportional adjustment when analog and target months differ</li>
+<li>Quality depends on having a sufficiently long historical record to find good analogs</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p>Nowak, K., Prairie, J., Rajagopalan, B., &amp; Lall, U. (2010).
-A nonparametric stochastic approach for multisite disaggregation of annual to daily
-streamflow. <em>Water Resources Research</em>, 46(8).</p>
-<p><strong>SynHydro Implementation:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/disaggregation/temporal/nowak.py"><code>src/synhydro/methods/disaggregation/temporal/nowak.py</code></a></p>
+<p><strong>Primary:</strong>
+Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. <em>Water Resources Research</em>, 46(8). https://doi.org/10.1029/2009WR008530</p>
+<hr />
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/nowak.py</code>
+<strong>Tests:</strong> <code>tests/test_nowak_disaggregator.py</code></p>
 
 
 

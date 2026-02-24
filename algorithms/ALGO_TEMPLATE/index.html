@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -22,7 +22,7 @@
     
     
       
-        <title>[Algorithm Name] - SynHydro</title>
+        <title>[Method Name] ([Author et al. Year]) - SynHydro</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#algorithm-name" class="md-skip">
+        <a href="#method-name-author-et-al-year" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              [Algorithm Name]
+              [Method Name] ([Author et al. Year])
             
           </span>
         </div>
@@ -974,22 +974,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1002,9 +1002,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -1025,95 +1025,29 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#specific-techniquetransformation-name" class="md-nav__link">
-    <span class="md-ellipsis">
-      [Specific technique/transformation name]
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#another-key-component" class="md-nav__link">
-    <span class="md-ellipsis">
-      [Another key component]
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1145,127 +1079,90 @@
   
 
 
-<h1 id="algorithm-name">[Algorithm Name]<a class="headerlink" href="#algorithm-name" title="Permanent link">&para;</a></h1>
-<p><strong>Classification:</strong> [Parametric/Nonparametric/Machine Learning]
-<strong>Temporal Resolution:</strong> [Daily/Monthly/Annual]
-<strong>Site Compatibility:</strong> [Univariate/Multisite]</p>
-<hr />
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
+<h1 id="method-name-author-et-al-year">[Method Name] ([Author et al. Year])<a class="headerlink" href="#method-name-author-et-al-year" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Specification</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Input data</td>
-<td>[e.g., "Daily streamflow, minimum 2 years", "Monthly flows, complete water years"]</td>
+<td><strong>Type</strong></td>
+<td>[Parametric / Nonparametric / ML]</td>
 </tr>
 <tr>
-<td>Output frequency</td>
-<td>[D/MS/AS]</td>
+<td><strong>Resolution</strong></td>
+<td>[Monthly / Daily / Annual]</td>
 </tr>
 <tr>
-<td>Distributional assumption</td>
-<td>[e.g., "Normal after transformation", "Nonparametric", "Kappa"]</td>
+<td><strong>Sites</strong></td>
+<td>[Univariate / Multisite]</td>
 </tr>
 <tr>
-<td>Correlation structure</td>
-<td>[e.g., "Lag-1 AR", "Full spectrum", "Spatial + temporal"]</td>
+<td><strong>Class</strong></td>
+<td><code>[ClassName]</code></td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>[2-4 sentence description: what the method does, its core mechanism, and what it's best suited for.]</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>[Step name]</strong></li>
-<li>[Technical description]</li>
-<li>
-<p>[Mathematical formulation if applicable]</p>
-</li>
-<li>
-<p><strong>[Step name]</strong></p>
-</li>
-<li>[Technical description]</li>
+<li>[Step]</li>
+<li>[Step]</li>
 </ol>
-<h3 id="fittingcalibration">Fitting/Calibration<a class="headerlink" href="#fittingcalibration" title="Permanent link">&para;</a></h3>
+<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>[Step name]</strong></li>
-<li>[Technical description]</li>
-<li>
-<p>Mathematical form: [equation or description]</p>
-</li>
-<li>
-<p><strong>[Step name]</strong></p>
-</li>
-<li>[Technical description]</li>
+<li>[Step with key equations in code blocks]</li>
+<li>[Step]</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>[Step name]</strong></li>
-<li>
-<p>[Technical description]</p>
-</li>
-<li>
-<p><strong>[Step name]</strong></p>
-</li>
-<li>
-<p>[Technical description]</p>
-</li>
-<li>
-<p><strong>[Step name]</strong></p>
-</li>
-<li>[Technical description]</li>
+<li>[Step with key equations in code blocks]</li>
+<li>[Step]</li>
 </ol>
-<hr />
-<h2 id="key-parameters">Key Parameters<a class="headerlink" href="#key-parameters" title="Permanent link">&para;</a></h2>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>param</code></td>
+<td>type</td>
+<td>value</td>
+<td>What it controls</td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>parameter_name</code></strong>: [Description and role in algorithm]</li>
-<li>Type: [dtype]</li>
-<li>Default: [value]</li>
-<li>Notes: [when/how to adjust]</li>
+<li>[Property 1]</li>
+<li>[Property 2]</li>
 </ul>
-<hr />
-<h2 id="algorithmic-details">Algorithmic Details<a class="headerlink" href="#algorithmic-details" title="Permanent link">&para;</a></h2>
-<h3 id="specific-techniquetransformation-name">[Specific technique/transformation name]<a class="headerlink" href="#specific-techniquetransformation-name" title="Permanent link">&para;</a></h3>
-<p>[Detailed technical explanation of key algorithmic component]</p>
-<p>Mathematical formulation:
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>[equation or pseudocode]
-</span></code></pre></div></p>
-<h3 id="another-key-component">[Another key component]<a class="headerlink" href="#another-key-component" title="Permanent link">&para;</a></h3>
-<p>[Technical details]</p>
-<hr />
-<h2 id="algorithm-variations">Algorithm Variations<a class="headerlink" href="#algorithm-variations" title="Permanent link">&para;</a></h2>
+<p><strong>Not preserved:</strong>
+- [Limitation as property]</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>[Variant 1]</strong>: [What differs technically]</li>
-<li><strong>[Variant 2]</strong>: [What differs technically]</li>
+<li>[Key limitation 1]</li>
+<li>[Key limitation 2]</li>
 </ul>
-<hr />
-<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">&para;</a></h2>
-<h3 id="computational-complexity">Computational complexity<a class="headerlink" href="#computational-complexity" title="Permanent link">&para;</a></h3>
-<ul>
-<li>[Time and space complexity or qualitative description]</li>
-</ul>
-<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h3>
-<ul>
-<li>[Technical limitations]</li>
-<li>[Edge cases or failure modes]</li>
-</ul>
-<h3 id="special-handling">Special handling<a class="headerlink" href="#special-handling" title="Permanent link">&para;</a></h3>
-<ul>
-<li>[Negative values, missing data, boundary conditions, etc.]</li>
-</ul>
-<hr />
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
-[Full citation of main algorithm paper]</p>
-<p><strong>Implementation details:</strong>
-[Citations for specific techniques used, e.g., normalization methods]</p>
+[Full APA citation with DOI]</p>
+<p><strong>See also:</strong>
+- [Supporting citation]</p>
 <hr />
-<p><strong>Implementation:</strong> [src/synhydro/methods/generation/category/file.py]</p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/[category]/[file].py</code>
+<strong>Tests:</strong> <code>tests/test_[name].py</code></p>
 
 
 

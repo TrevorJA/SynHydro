@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -751,15 +751,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Specifications
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
@@ -769,13 +760,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -811,9 +802,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
@@ -823,6 +814,15 @@
   <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
       Properties Preserved
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
     </span>
   </a>
   
@@ -1114,15 +1114,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Specifications
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
@@ -1132,13 +1123,13 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1174,9 +1165,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
@@ -1186,6 +1177,15 @@
   <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
       Properties Preserved
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
     </span>
   </a>
   
@@ -1220,79 +1220,75 @@
 
 
 <h1 id="matalas-1967-multi-site-mar1">Matalas (1967) Multi-Site MAR(1)<a class="headerlink" href="#matalas-1967-multi-site-mar1" title="Permanent link">&para;</a></h1>
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Value</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Class</strong></td>
-<td><code>MATALASGenerator</code></td>
-</tr>
-<tr>
 <td><strong>Type</strong></td>
-<td>Parametric, Stochastic</td>
+<td>Parametric</td>
 </tr>
 <tr>
-<td><strong>Frequency</strong></td>
+<td><strong>Resolution</strong></td>
 <td>Monthly</td>
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
-<td>Multi-site</td>
+<td>Multisite</td>
 </tr>
 <tr>
-<td><strong>Reference</strong></td>
-<td>Matalas (1967)</td>
+<td><strong>Class</strong></td>
+<td><code>MATALASGenerator</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Matalas MAR(1) model is the classical parametric baseline for multi-site stochastic
-streamflow generation. It extends the univariate Thomas-Fiering model to <span class="arithmatex">\(n\)</span> sites by
-fitting a matrix autoregressive model to the standardized monthly flows. A separate pair
-of coefficient matrices is estimated for each of the 12 calendar-month transitions.</p>
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
+<p>The Matalas MAR(1) model is the classical parametric baseline for multi-site stochastic streamflow generation. It extends the univariate Thomas-Fiering model to n sites by fitting a matrix autoregressive model to standardized monthly flows. A separate pair of coefficient matrices is estimated for each of the 12 calendar-month transitions.</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
 <li>Validate input; resample to monthly if daily data are provided.</li>
-<li>Clip values to <span class="arithmatex">\(10^{-6}\)</span> (avoid log of zero).</li>
-<li>Optionally apply <span class="arithmatex">\(\log(Q + 1)\)</span> transformation to reduce skewness.</li>
+<li>Clip values to 1e-6 to avoid log of zero.</li>
+<li>Optionally apply <code>log(Q + 1)</code> transformation to reduce skewness.</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<p><strong>Standardize</strong> observed flows by monthly means <span class="arithmatex">\(\mu_m\)</span> and standard deviations <span class="arithmatex">\(\sigma_m\)</span>:</p>
-<div class="arithmatex">\[Z(t) = \frac{Q(t) - \mu_m}{\sigma_m}, \quad m = \text{month}(t)\]</div>
-<p><strong>Estimate cross-correlation matrices</strong> for each monthly transition <span class="arithmatex">\(m \to m+1\)</span>:</p>
-<div class="arithmatex">\[S_0(m) = \frac{1}{n-1} \mathbf{Z}(m)^T \mathbf{Z}(m)\]</div>
-<div class="arithmatex">\[S_1(m) = \frac{1}{n-1} \mathbf{Z}(m+1)^T \mathbf{Z}(m)\]</div>
-<p>where rows of <span class="arithmatex">\(\mathbf{Z}(m)\)</span> are the standardized flow vectors across all sites for month
-<span class="arithmatex">\(m\)</span> across all observed years.</p>
-<p><strong>Solve for coefficient matrices:</strong></p>
-<div class="arithmatex">\[A(m) = S_1(m) \cdot S_0(m)^{-1}\]</div>
-<div class="arithmatex">\[M(m) = S_0(m+1) - A(m) \cdot S_0(m) \cdot A(m)^T\]</div>
-<div class="arithmatex">\[B(m) = \text{chol}\!\left(M(m)\right) \quad \text{(lower Cholesky factor)}\]</div>
-<div class="admonition note">
-<p class="admonition-title">Numerical stability</p>
-<p>If <span class="arithmatex">\(M(m)\)</span> is not positive semi-definite (due to finite-sample noise), it is first
-projected to the nearest PSD matrix via eigenvalue clipping before Cholesky decomposition.</p>
-</div>
-<p>The December→January transition wraps across the year boundary: <span class="arithmatex">\(Z\)</span>(Dec, year <span class="arithmatex">\(y\)</span>)
-is paired with <span class="arithmatex">\(Z\)</span>(Jan, year <span class="arithmatex">\(y+1\)</span>).</p>
+<ol>
+<li><strong>Standardize</strong> observed flows by monthly means and standard deviations:
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Z(t) = (Q(t) - mu_m) / sigma_m,    m = month(t)
+</span></code></pre></div></li>
+<li><strong>Estimate cross-correlation matrices</strong> for each transition m to m+1:
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>S0(m) = (1/(n-1)) * Z(m)^T * Z(m)         # lag-0 covariance
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>S1(m) = (1/(n-1)) * Z(m+1)^T * Z(m)        # lag-1 cross-covariance
+</span></code></pre></div></li>
+<li><strong>Solve for coefficient matrices:</strong>
+   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>A(m) = S1(m) * S0(m)^{-1}                   # AR coefficient matrix
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>M(m) = S0(m+1) - A(m) * S0(m) * A(m)^T      # innovation covariance
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>B(m) = cholesky(M(m))                         # lower Cholesky factor
+</span></code></pre></div>
+   If M(m) is not positive semi-definite, project to nearest PSD matrix via eigenvalue clipping before Cholesky decomposition.</li>
+</ol>
+<p>The December to January transition wraps across the year boundary.</p>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<p>Initialize <span class="arithmatex">\(Z_0 \sim \mathcal{N}(\mathbf{0}, I)\)</span>, then recurse:</p>
-<div class="arithmatex">\[Z(t+1) = A(m) \cdot Z(t) + B(m) \cdot \varepsilon(t+1), \quad \varepsilon \sim \mathcal{N}(\mathbf{0}, I)\]</div>
-<p>Back-transform to flow space:</p>
-<div class="arithmatex">\[Q(t) = \sigma_m \cdot Z(t) + \mu_m\]</div>
-<p>If <code>log_transform=True</code>, apply <span class="arithmatex">\(Q \leftarrow e^Q - 1\)</span>.</p>
-<h2 id="key-parameters">Key Parameters<a class="headerlink" href="#key-parameters" title="Permanent link">&para;</a></h2>
+<ol>
+<li><strong>Initialize</strong>: <code>Z_0 ~ N(0, I)</code></li>
+<li><strong>Recurse</strong> for each subsequent month:
+   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Z(t+1) = A(m) * Z(t) + B(m) * epsilon(t+1),    epsilon ~ N(0, I)
+</span></code></pre></div></li>
+<li><strong>Back-transform</strong> to flow space:
+   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Q(t) = sigma_m * Z(t) + mu_m
+</span></code></pre></div></li>
+<li>If log transform was applied: <code>Q = exp(Q) - 1</code></li>
+</ol>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
 <th>Parameter</th>
+<th>Type</th>
 <th>Default</th>
 <th>Description</th>
 </tr>
@@ -1300,8 +1296,9 @@ is paired with <span class="arithmatex">\(Z\)</span>(Jan, year <span class="arit
 <tbody>
 <tr>
 <td><code>log_transform</code></td>
+<td><code>bool</code></td>
 <td><code>True</code></td>
-<td>Apply <span class="arithmatex">\(\log(Q+1)\)</span> before standardization</td>
+<td>Apply log(Q+1) before standardization</td>
 </tr>
 </tbody>
 </table>
@@ -1311,12 +1308,24 @@ is paired with <span class="arithmatex">\(Z\)</span>(Jan, year <span class="arit
 <li>Lag-1 serial correlation at each site</li>
 <li>Contemporaneous cross-site correlations</li>
 </ul>
+<p><strong>Not preserved:</strong>
+- Higher-order autocorrelation (lag &gt; 1)
+- Non-Gaussian marginal distributions</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>First-order memory only (lag-1)</li>
+<li>Normality assumption after transformation</li>
+<li>Requires sufficient record length for stable covariance estimation</li>
+<li>Covariance matrices may require PSD repair with limited data</li>
+</ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p>Matalas, N. C. (1967). Mathematical assessment of synthetic hydrology.
-<em>Water Resources Research</em>, 3(4), 937–945.</p>
-<p>Salas, J. D., Delleur, J. W., Yevjevich, V., &amp; Lane, W. L. (1980).
-<em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.</p>
-<p><strong>SynHydro Implementation:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/parametric/matalas.py"><code>src/synhydro/methods/generation/parametric/matalas.py</code></a></p>
+<p><strong>Primary:</strong>
+Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. <em>Water Resources Research</em>, 3(4), 937-945. https://doi.org/10.1029/WR003i004p00937</p>
+<p><strong>See also:</strong>
+- Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). <em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.</p>
+<hr />
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/matalas.py</code>
+<strong>Tests:</strong> <code>tests/test_matalas_generator.py</code></p>
 
 
 

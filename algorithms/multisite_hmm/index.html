@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#multi-site-hidden-markov-model-gold-et-al-2025" class="md-skip">
+        <a href="#multi-site-hidden-markov-model-gold-et-al-2024" class="md-skip">
           Skip to content
         </a>
       
@@ -820,22 +820,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -848,9 +848,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -871,94 +871,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gaussian-mixture-model-hmm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Gaussian Mixture Model HMM
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#multivariate-gaussian-emissions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Multivariate Gaussian Emissions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stationary-distribution-computation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Stationary Distribution Computation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#baum-welch-em-algorithm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Baum-Welch (EM) Algorithm
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
@@ -966,103 +896,11 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#hydrologic-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hydrologic properties preserved
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Usage
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#multi-state-model-for-finer-regime-resolution" class="md-nav__link">
-    <span class="md-ellipsis">
-      Multi-state model for finer regime resolution
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#diagonal-covariance-for-faster-fitting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Diagonal covariance for faster fitting
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#site-subset-selection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Site subset selection
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verification Checklist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparison-to-other-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparison to Other Methods
     </span>
   </a>
   
@@ -1276,22 +1114,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1304,9 +1142,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -1327,94 +1165,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#gaussian-mixture-model-hmm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Gaussian Mixture Model HMM
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#multivariate-gaussian-emissions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Multivariate Gaussian Emissions
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stationary-distribution-computation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Stationary Distribution Computation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#baum-welch-em-algorithm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Baum-Welch (EM) Algorithm
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
@@ -1422,103 +1190,11 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#hydrologic-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hydrologic properties preserved
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Usage
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#multi-state-model-for-finer-regime-resolution" class="md-nav__link">
-    <span class="md-ellipsis">
-      Multi-state model for finer regime resolution
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#diagonal-covariance-for-faster-fitting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Diagonal covariance for faster fitting
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#site-subset-selection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Site subset selection
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verification Checklist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparison-to-other-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparison to Other Methods
     </span>
   </a>
   
@@ -1543,499 +1219,127 @@
   
 
 
-<h1 id="multi-site-hidden-markov-model-gold-et-al-2025">Multi-Site Hidden Markov Model (Gold et al. 2025)<a class="headerlink" href="#multi-site-hidden-markov-model-gold-et-al-2025" title="Permanent link">&para;</a></h1>
-<p><strong>Classification:</strong> Parametric
-<strong>Temporal Resolution:</strong> Annual
-<strong>Site Compatibility:</strong> Multisite</p>
-<hr />
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
+<h1 id="multi-site-hidden-markov-model-gold-et-al-2024">Multi-Site Hidden Markov Model (Gold et al. 2024)<a class="headerlink" href="#multi-site-hidden-markov-model-gold-et-al-2024" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Specification</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Input data</td>
-<td>Annual streamflow for multiple sites, minimum 2 years recommended</td>
+<td><strong>Type</strong></td>
+<td>Parametric</td>
 </tr>
 <tr>
-<td>Output frequency</td>
-<td>AS (Annual Start) or user-specified annual frequency</td>
+<td><strong>Resolution</strong></td>
+<td>Annual</td>
 </tr>
 <tr>
-<td>Distributional assumption</td>
-<td>Multivariate Gaussian emissions per hidden state (after log transformation)</td>
+<td><strong>Sites</strong></td>
+<td>Multisite</td>
 </tr>
 <tr>
-<td>Correlation structure</td>
-<td>Full covariance matrices per state (preserves spatial correlations) + temporal structure via state transitions</td>
-</tr>
-<tr>
-<td>Temporal dependence</td>
-<td>Markov chain (first-order) with hidden states representing hydrologic regimes</td>
+<td><strong>Class</strong></td>
+<td><code>MultiSiteHMMGenerator</code></td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
-<p>The Multi-Site Hidden Markov Model (HMM) generator uses a Gaussian Mixture Model HMM to generate synthetic streamflow across multiple sites simultaneously. The method models temporal dependencies through hidden states (e.g., dry/wet regimes) and spatial correlations through state-specific multivariate Gaussian emissions with full covariance matrices.</p>
-<p>This approach is particularly effective for capturing drought dynamics and spatially compounding water scarcity across multiple basins, as demonstrated in Gold et al. (2025) for Colorado's West Slope river basins.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Multi-Site HMM uses a Gaussian Mixture Model HMM to generate synthetic streamflow across multiple sites simultaneously. Hidden states represent hydrologic regimes (e.g., dry/wet), with state-specific multivariate Gaussian emissions capturing spatial correlations via full covariance matrices. Temporal dependence arises from the Markov state transition structure. This approach is particularly effective for modeling drought dynamics and spatially compounding water scarcity.</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Data validation</strong></li>
-<li>Validate input as pandas DataFrame with multiple sites (columns)</li>
-<li>Check for minimum sample size (recommended: 10+ years)</li>
-<li>
-<p>Allow site subset selection</p>
-</li>
-<li>
-<p><strong>Offset application</strong></p>
-</li>
-<li>Add small offset to handle zero flows: <code>Q_adj = Q + offset</code></li>
-<li>Default offset: 1.0 (in flow units)</li>
-<li>
-<p>Prevents log(0) issues</p>
-</li>
-<li>
-<p><strong>Log transformation</strong></p>
-</li>
-<li>Apply natural logarithm: <code>Q_log = log(Q_adj)</code></li>
-<li>Transform to log-space for Gaussian modeling</li>
-<li>Store transformed data for fitting</li>
+<li>Validate input as multi-site DataFrame; optionally select site subset.</li>
+<li>Add offset to handle zeros: <code>Q_adj = Q + offset</code> (default: 1.0).</li>
+<li>Log-transform: <code>Q_log = log(Q_adj)</code>.</li>
 </ol>
-<h3 id="fittingcalibration">Fitting/Calibration<a class="headerlink" href="#fittingcalibration" title="Permanent link">&para;</a></h3>
+<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>GMMHMM initialization</strong></li>
-<li>Use <code>hmmlearn.hmm.GMMHMM</code> with:<ul>
-<li><code>n_components = n_states</code> (default: 2 for dry/wet)</li>
-<li><code>covariance_type = 'full'</code> (default, captures all spatial correlations)</li>
-<li>Alternative: 'diag' (site-independent) or 'spherical' (single variance)</li>
-</ul>
-</li>
-<li>
-<p>Set maximum iterations for Expectation-Maximization convergence</p>
-</li>
-<li>
-<p><strong>Model fitting</strong></p>
-</li>
-<li>Fit GMMHMM to log-transformed flows: <code>model.fit(Q_log)</code></li>
-<li>Estimate via Baum-Welch algorithm (EM):<ul>
-<li><strong>E-step</strong>: Compute state posteriors given parameters</li>
-<li><strong>M-step</strong>: Update parameters given state posteriors</li>
-</ul>
-</li>
-<li>
-<p>Iterate until convergence or max iterations</p>
-</li>
-<li>
-<p><strong>Parameter extraction</strong></p>
-</li>
-<li>Extract state means: μₛ ∈ ℝⁿˢⁱᵗᵉˢ for each state s</li>
-<li>Extract covariance matrices: Σₛ ∈ ℝⁿˢⁱᵗᵉˢ ˣ ⁿˢⁱᵗᵉˢ for each state s</li>
-<li>
-<p>Extract transition matrix: P ∈ ℝⁿˢᵗᵃᵗᵉˢ ˣ ⁿˢᵗᵃᵗᵉˢ</p>
-</li>
-<li>
-<p><strong>State ordering</strong></p>
-</li>
-<li>Order states by mean of first site (ascending)</li>
-<li>State 0 = driest, State (n_states-1) = wettest</li>
-<li>
-<p>Ensures consistent state interpretation</p>
-</li>
-<li>
-<p><strong>Stationary distribution computation</strong></p>
-</li>
-<li>Solve for stationary distribution π:<ul>
-<li>π is left eigenvector of P with eigenvalue 1</li>
-<li>π · P = π</li>
-<li>Σπᵢ = 1</li>
-</ul>
-</li>
-<li>Used for initial state sampling in generation</li>
+<li><strong>Initialize GMMHMM</strong> via <code>hmmlearn.hmm.GMMHMM</code>:</li>
+<li><code>n_components = n_states</code> (default 2: dry/wet)</li>
+<li><code>covariance_type = 'full'</code> (preserves spatial correlations)</li>
+<li><strong>Fit</strong> via Baum-Welch (EM) algorithm on log-transformed flows:</li>
+<li>E-step: compute state posteriors via forward-backward</li>
+<li>M-step: update state means, covariances, and transition probabilities</li>
+<li><strong>Order states</strong> by mean of first site (ascending: driest → wettest).</li>
+<li><strong>Compute stationary distribution</strong> — solve for left eigenvector of transition matrix with eigenvalue 1.</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>State trajectory generation</strong></li>
-<li>Sample initial state from stationary distribution:
-     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>s₀ ~ Categorical(π)
+<li><strong>State trajectory</strong> — sample initial state from stationary distribution, then at each timestep sample next state from transition matrix row.</li>
+<li><strong>Emission sampling</strong> — for each timestep with state s:
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Q_log[t, :] ~ MultivariateNormal(mu_s, Sigma_s)
 </span></code></pre></div></li>
-<li>For each subsequent timestep t = 1, ..., T:
-     <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>sₜ ~ Categorical(P[sₜ₋₁, :])
-</span></code></pre></div></li>
-<li>
-<p>Creates temporally coherent state sequence</p>
-</li>
-<li>
-<p><strong>Emission sampling</strong></p>
-</li>
-<li>For each timestep t with state sₜ:
-     <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Q_log[t, :] ~ MultivariateNormal(μ_sₜ, Σ_sₜ)
-</span></code></pre></div></li>
-<li>
-<p>Samples preserve spatial correlations (via Σₛ)</p>
-</li>
-<li>
-<p><strong>Back-transformation</strong></p>
-</li>
-<li>Inverse log transform:
-     <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Q_syn = exp(Q_log) - offset
-</span></code></pre></div></li>
-<li>
-<p>Ensures positive flows</p>
-</li>
-<li>
-<p><strong>Non-negativity enforcement</strong></p>
-</li>
-<li>Apply floor: <code>Q_syn = max(Q_syn, 0)</code></li>
-<li>
-<p>Handles rare numerical issues from back-transformation</p>
-</li>
-<li>
-<p><strong>Time index creation</strong></p>
-</li>
-<li>Generate dates starting from observed data start</li>
-<li>Use inferred frequency (typically 'AS' or 'YS')</li>
-<li>Return as pandas DataFrame with proper DatetimeIndex</li>
+<li><strong>Back-transform</strong>: <code>Q_syn = exp(Q_log) - offset</code>, then clip negatives to 0.</li>
+<li><strong>Build output</strong> — create DataFrame with DatetimeIndex at inferred frequency.</li>
 </ol>
-<hr />
-<h2 id="key-parameters">Key Parameters<a class="headerlink" href="#key-parameters" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong><code>n_states</code></strong>: Number of hidden states</li>
-<li>Type: int</li>
-<li>Default: 2</li>
-<li>
-<p>Notes: 2 states (dry/wet) is typical; 3+ states can model intermediate regimes. More states require more data for reliable estimation.</p>
-</li>
-<li>
-<p><strong><code>offset</code></strong>: Value added before log transformation</p>
-</li>
-<li>Type: float</li>
-<li>Default: 1.0</li>
-<li>
-<p>Notes: Should be small relative to typical flows. Too small risks numerical issues with zeros; too large biases the distribution.</p>
-</li>
-<li>
-<p><strong><code>max_iterations</code></strong>: Maximum EM iterations for fitting</p>
-</li>
-<li>Type: int</li>
-<li>Default: 1000</li>
-<li>
-<p>Notes: Increase if convergence warnings occur. Typical convergence: 50-200 iterations.</p>
-</li>
-<li>
-<p><strong><code>covariance_type</code></strong>: Structure of state covariance matrices</p>
-</li>
-<li>Type: str</li>
-<li>Default: 'full'</li>
-<li>Options:<ul>
-<li>'full': Full covariance (all correlations preserved) - <strong>recommended</strong></li>
-<li>'diag': Diagonal (sites independent within states)</li>
-<li>'spherical': Single variance (spherical clusters)</li>
-</ul>
-</li>
-<li>Notes: 'full' is essential for preserving spatial correlations but requires n_sites² parameters per state.</li>
-</ul>
-<hr />
-<h2 id="algorithmic-details">Algorithmic Details<a class="headerlink" href="#algorithmic-details" title="Permanent link">&para;</a></h2>
-<h3 id="gaussian-mixture-model-hmm">Gaussian Mixture Model HMM<a class="headerlink" href="#gaussian-mixture-model-hmm" title="Permanent link">&para;</a></h3>
-<p>The GMMHMM combines:
-- <strong>Hidden Markov Model</strong>: Temporal structure via state transitions
-- <strong>Gaussian Mixture</strong>: Multivariate emissions from each state</p>
-<p><strong>Joint probability</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>P(Q, S) = π(s₀) · ∏ₜ P(sₜ|sₜ₋₁) · P(Qₜ|sₜ)
-</span></code></pre></div></p>
-<p>Where:
-- S = {s₀, s₁, ..., sₜ}: Hidden state sequence
-- Q = {Q₀, Q₁, ..., Qₜ}: Observed flows (log-space)
-- π: Stationary distribution
-- P(sₜ|sₜ₋₁): Transition probabilities
-- P(Qₜ|sₜ) = 𝒩(Qₜ; μₛₜ, Σₛₜ): Multivariate normal emissions</p>
-<h3 id="multivariate-gaussian-emissions">Multivariate Gaussian Emissions<a class="headerlink" href="#multivariate-gaussian-emissions" title="Permanent link">&para;</a></h3>
-<p>For state s, emissions follow:
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Q_log ~ 𝒩(μₛ, Σₛ)
-</span></code></pre></div></p>
-<p><strong>Mean vector</strong>: μₛ ∈ ℝⁿ where n = number of sites</p>
-<p><strong>Covariance matrix</strong> (for 'full' type):
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Σₛ = [
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>  σ₁₁  σ₁₂  ...  σ₁ₙ
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>  σ₂₁  σ₂₂  ...  σ₂ₙ
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>  ...
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>  σₙ₁  σₙ₂  ...  σₙₙ
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>]
-</span></code></pre></div></p>
-<p>Where σᵢⱼ captures correlation between sites i and j in state s.</p>
-<p><strong>Probability density</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>p(Q) = (2π)^(-n/2) |Σₛ|^(-1/2) exp[-0.5(Q - μₛ)ᵀ Σₛ⁻¹ (Q - μₛ)]
-</span></code></pre></div></p>
-<h3 id="stationary-distribution-computation">Stationary Distribution Computation<a class="headerlink" href="#stationary-distribution-computation" title="Permanent link">&para;</a></h3>
-<p>Solve for eigenvector of transition matrix transpose:
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Pᵀ · π = 1 · π
-</span></code></pre></div></p>
-<p>Algorithm:
-1. Compute eigendecomposition: <code>Pᵀ = V · Λ · V⁻¹</code>
-2. Find eigenvector vᵢ corresponding to λᵢ ≈ 1
-3. Normalize: <code>π = vᵢ / Σvᵢ</code></p>
-<h3 id="baum-welch-em-algorithm">Baum-Welch (EM) Algorithm<a class="headerlink" href="#baum-welch-em-algorithm" title="Permanent link">&para;</a></h3>
-<p><strong>Expectation (E) step</strong>: Compute forward-backward probabilities
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>Forward: α(sₜ) = P(Q₁:ₜ, sₜ)
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a>Backward: β(sₜ) = P(Qₜ₊₁:ₜ | sₜ)
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>Posterior: γ(sₜ) = P(sₜ | Q) = α(sₜ)β(sₜ) / P(Q)
-</span></code></pre></div></p>
-<p><strong>Maximization (M) step</strong>: Update parameters
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>πₛ = γ(s₀)
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>Pᵢⱼ = Σₜ ξ(sₜ=i, sₜ₊₁=j) / Σₜ γ(sₜ=i)
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>μₛ = Σₜ γ(sₜ=s) Qₜ / Σₜ γ(sₜ=s)
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a>Σₛ = Σₜ γ(sₜ=s) (Qₜ - μₛ)(Qₜ - μₛ)ᵀ / Σₜ γ(sₜ=s)
-</span></code></pre></div></p>
-<hr />
-<h2 id="algorithm-variations">Algorithm Variations<a class="headerlink" href="#algorithm-variations" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Variable number of states</strong>: n_states &gt; 2 can model additional regimes (e.g., dry/normal/wet)</li>
-<li><strong>Diagonal covariance</strong>: Faster fitting but ignores spatial correlations</li>
-<li><strong>Tied covariance</strong>: Single Σ shared across states (more parsimonious)</li>
-<li><strong>Non-parametric emissions</strong>: Replace Gaussian with histograms or kernel density estimates</li>
-<li><strong>Seasonal HMM</strong>: Separate models per season or use time-varying transition matrices</li>
-<li><strong>Continuous-time HMM</strong>: Model sub-annual dynamics with continuous-time Markov processes</li>
-</ul>
-<hr />
-<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">&para;</a></h2>
-<h3 id="computational-complexity">Computational complexity<a class="headerlink" href="#computational-complexity" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Time complexity</strong>: O(n_states² · n_timesteps · n_sites³) per EM iteration</li>
-<li>Dominated by covariance matrix operations</li>
-<li>Typical: 50-200 EM iterations for convergence</li>
-<li><strong>Space complexity</strong>: O(n_states · n_sites²) for covariance storage</li>
-<li><strong>Scalability</strong>:</li>
-<li>Efficient for typical applications: 2-10 sites, 10-100 years, 2-3 states</li>
-<li>Full covariance becomes expensive for n_sites &gt; 20</li>
-<li>Consider diagonal covariance for large n_sites</li>
-</ul>
-<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Sample size</strong>: Requires sufficient data for reliable parameter estimation</li>
-<li>Minimum: ~10 years</li>
-<li>Recommended: 20+ years for 2-3 states, 50+ years for more states</li>
-<li><strong>First-order Markov</strong>: Only captures one-timestep memory</li>
-<li>May miss multi-year persistence (e.g., droughts spanning 3+ years)</li>
-<li>Consider higher-order HMMs or AR-HMM hybrids for longer memory</li>
-<li><strong>Stationarity assumption</strong>: Assumes transition probabilities are time-invariant</li>
-<li>Not suitable for data with trends or regime shifts</li>
-<li>Consider time-varying or non-stationary HMM variants</li>
-<li><strong>Gaussian assumption</strong>: Emissions assumed Gaussian in log-space</li>
-<li>May not capture extreme tail behavior perfectly</li>
-<li>Consider mixture models or Student-t emissions for heavy tails</li>
-<li><strong>Annual timestep</strong>: Designed for annual data</li>
-<li>Can handle monthly/daily but computationally expensive</li>
-<li>State interpretation may differ at finer resolutions</li>
-</ul>
-<h3 id="special-handling">Special handling<a class="headerlink" href="#special-handling" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Zeros and negative flows</strong>: Offset prevents log(0); negatives from back-transform are floored to 0</li>
-<li><strong>Covariance matrix</strong>: May be non-positive-definite if sample size is small</li>
-<li>hmmlearn handles regularization internally</li>
-<li>Increase sample size or reduce n_states if fitting fails</li>
-<li><strong>State label switching</strong>: HMM likelihood is invariant to state label permutation</li>
-<li>State ordering by mean ensures consistent interpretation</li>
-<li>Still, different random seeds may converge to different local optima</li>
-<li><strong>EM convergence</strong>: May converge to local optimum</li>
-<li>Use multiple random initializations and select best by likelihood</li>
-<li>Check convergence warnings; increase max_iterations if needed</li>
-<li><strong>Degenerate states</strong>: One state may "absorb" most observations</li>
-<li>Indicates n_states too large for data</li>
-<li>Reduce n_states or increase sample size</li>
-</ul>
-<h3 id="hydrologic-properties-preserved">Hydrologic properties preserved<a class="headerlink" href="#hydrologic-properties-preserved" title="Permanent link">&para;</a></h3>
-<p><strong>Explicitly preserved:</strong>
-- Spatial correlations (via full covariance matrices Σₛ)
-- Temporal persistence (via transition matrix P)
-- Regime-dependent distributions (dry vs wet states have different μₛ, Σₛ)
-- Marginal distributions in log-space (Gaussian mixture)</p>
-<p><strong>Implicitly preserved (approximately):</strong>
-- Drought frequency (via state persistence)
-- Drought spatial extent (via spatial correlations in dry state)
-- Flow magnitudes per regime (via state-specific means)</p>
-<p><strong>Not preserved:</strong>
-- Exact observed autocorrelation at lags &gt; 1 (first-order Markov)
-- Non-Gaussian marginal distributions (log-transformation imposes log-normality)
-- Trends or non-stationarity
-- Sub-annual seasonality (annual timestep)</p>
-<hr />
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p><strong>Primary:</strong>
-Gold, D.F., Reed, P.M., &amp; Gupta, R.S. (In Revision). Exploring the Spatially Compounding Multi-sectoral Drought Vulnerabilities in Colorado's West Slope River Basins. <em>Earth's Future</em>.</p>
-<p><strong>Methodological foundations:</strong>
-- <strong>Hidden Markov Models</strong>: Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. <em>Proceedings of the IEEE</em>, 77(2), 257-286.
-- <strong>Gaussian Mixture Models</strong>: Reynolds, D.A., &amp; Rose, R.C. (1995). Robust text-independent speaker identification using Gaussian mixture speaker models. <em>IEEE Transactions on Speech and Audio Processing</em>, 3(1), 72-83.
-- <strong>GMMHMM for hydrology</strong>: Akintug, B., &amp; Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. <em>Water Resources Research</em>, 41(9).
-- <strong>Baum-Welch algorithm</strong>: Bilmes, J.A. (1998). A gentle tutorial of the EM algorithm and its application to parameter estimation for Gaussian mixture and hidden Markov models. <em>International Computer Science Institute</em>, 4(510), 126.</p>
-<p><strong>Python implementation:</strong>
-- hmmlearn: https://hmmlearn.readthedocs.io/</p>
-<p><strong>Original application:</strong>
-- Gold et al. GitHub repository: https://github.com/TrevorJA/Multisite_GMMHMM</p>
-<hr />
-<p><strong>SynHydro Implementation:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/parametric/multisite_hmm.py"><code>src/synhydro/methods/generation/parametric/multisite_hmm.py</code></a></p>
-<p><strong>Tests:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/tests/test_multisite_hmm_generator.py"><code>tests/test_multisite_hmm_generator.py</code></a></p>
-<hr />
-<h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">synhydro.methods.generation.parametric</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiSiteHMMGenerator</span>
-</span><span id="__span-11-3"><a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a>
-</span><span id="__span-11-4"><a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a><span class="c1"># Load annual streamflow data for multiple sites</span>
-</span><span id="__span-11-5"><a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a><span class="n">Q_annual</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;annual_flows.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-11-6"><a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a><span class="c1"># Expected format: DatetimeIndex with annual frequency, columns = sites</span>
-</span><span id="__span-11-7"><a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>
-</span><span id="__span-11-8"><a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a><span class="c1"># Initialize generator with 2 states (dry/wet)</span>
-</span><span id="__span-11-9"><a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">MultiSiteHMMGenerator</span><span class="p">(</span>
-</span><span id="__span-11-10"><a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>    <span class="n">Q_annual</span><span class="p">,</span>
-</span><span id="__span-11-11"><a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>    <span class="n">n_states</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>              <span class="c1"># Dry and wet states</span>
-</span><span id="__span-11-12"><a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>    <span class="n">offset</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>              <span class="c1"># Offset for log transform</span>
-</span><span id="__span-11-13"><a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>    <span class="n">covariance_type</span><span class="o">=</span><span class="s1">&#39;full&#39;</span>   <span class="c1"># Preserve spatial correlations</span>
-</span><span id="__span-11-14"><a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a><span class="p">)</span>
-</span><span id="__span-11-15"><a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>
-</span><span id="__span-11-16"><a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a><span class="c1"># Preprocess: apply log transformation</span>
-</span><span id="__span-11-17"><a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-11-18"><a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>
-</span><span id="__span-11-19"><a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a><span class="c1"># Fit: estimate HMM parameters</span>
-</span><span id="__span-11-20"><a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-11-21"><a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>
-</span><span id="__span-11-22"><a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a><span class="c1"># Examine fitted parameters</span>
-</span><span id="__span-11-23"><a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;State means (log-space):</span><span class="se">\n</span><span class="si">{</span><span class="n">gen</span><span class="o">.</span><span class="n">means_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-11-24"><a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Transition matrix:</span><span class="se">\n</span><span class="si">{</span><span class="n">gen</span><span class="o">.</span><span class="n">transition_matrix_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-11-25"><a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Stationary distribution: </span><span class="si">{</span><span class="n">gen</span><span class="o">.</span><span class="n">stationary_distribution_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-11-26"><a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>
-</span><span id="__span-11-27"><a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a><span class="c1"># Generate 100 realizations of 50 years each</span>
-</span><span id="__span-11-28"><a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_realizations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_years</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-11-29"><a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>
-</span><span id="__span-11-30"><a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a><span class="c1"># Access results</span>
-</span><span id="__span-11-31"><a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">ensemble</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">n_realizations</span><span class="si">}</span><span class="s2"> realizations&quot;</span><span class="p">)</span>
-</span><span id="__span-11-32"><a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Each has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> years&quot;</span><span class="p">)</span>
-</span><span id="__span-11-33"><a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>
-</span><span id="__span-11-34"><a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a><span class="c1"># Get first realization</span>
-</span><span id="__span-11-35"><a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a><span class="n">first_real</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-11-36"><a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a><span class="nb">print</span><span class="p">(</span><span class="n">first_real</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
-</span><span id="__span-11-37"><a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>
-</span><span id="__span-11-38"><a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a><span class="c1"># Get all realizations for a specific site</span>
-</span><span id="__span-11-39"><a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a><span class="n">site_data</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_site</span><span class="p">[</span><span class="s1">&#39;site_1&#39;</span><span class="p">]</span>
-</span><span id="__span-11-40"><a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Site 1 data shape: </span><span class="si">{</span><span class="n">site_data</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># (n_years, n_realizations)</span>
-</span></code></pre></div>
-<hr />
-<h2 id="advanced-usage">Advanced Usage<a class="headerlink" href="#advanced-usage" title="Permanent link">&para;</a></h2>
-<h3 id="multi-state-model-for-finer-regime-resolution">Multi-state model for finer regime resolution<a class="headerlink" href="#multi-state-model-for-finer-regime-resolution" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="c1"># 3-state model: dry, normal, wet</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">MultiSiteHMMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="p">,</span> <span class="n">n_states</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="c1"># Interpret states (ordered by mean)</span>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State 0 (Dry):&quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">means_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State 1 (Normal):&quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">means_</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State 2 (Wet):&quot;</span><span class="p">,</span> <span class="n">gen</span><span class="o">.</span><span class="n">means_</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-</span></code></pre></div>
-<h3 id="diagonal-covariance-for-faster-fitting">Diagonal covariance for faster fitting<a class="headerlink" href="#diagonal-covariance-for-faster-fitting" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-13-1"><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a><span class="c1"># When spatial correlations are less important</span>
-</span><span id="__span-13-2"><a id="__codelineno-13-2" name="__codelineno-13-2" href="#__codelineno-13-2"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">MultiSiteHMMGenerator</span><span class="p">(</span>
-</span><span id="__span-13-3"><a id="__codelineno-13-3" name="__codelineno-13-3" href="#__codelineno-13-3"></a>    <span class="n">Q_annual</span><span class="p">,</span>
-</span><span id="__span-13-4"><a id="__codelineno-13-4" name="__codelineno-13-4" href="#__codelineno-13-4"></a>    <span class="n">n_states</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-</span><span id="__span-13-5"><a id="__codelineno-13-5" name="__codelineno-13-5" href="#__codelineno-13-5"></a>    <span class="n">covariance_type</span><span class="o">=</span><span class="s1">&#39;diag&#39;</span>  <span class="c1"># Faster, but ignores correlations</span>
-</span><span id="__span-13-6"><a id="__codelineno-13-6" name="__codelineno-13-6" href="#__codelineno-13-6"></a><span class="p">)</span>
-</span><span id="__span-13-7"><a id="__codelineno-13-7" name="__codelineno-13-7" href="#__codelineno-13-7"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-13-8"><a id="__codelineno-13-8" name="__codelineno-13-8" href="#__codelineno-13-8"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span></code></pre></div>
-<h3 id="site-subset-selection">Site subset selection<a class="headerlink" href="#site-subset-selection" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-14-1"><a id="__codelineno-14-1" name="__codelineno-14-1" href="#__codelineno-14-1"></a><span class="c1"># Generate only for subset of sites</span>
-</span><span id="__span-14-2"><a id="__codelineno-14-2" name="__codelineno-14-2" href="#__codelineno-14-2"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">MultiSiteHMMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="p">)</span>
-</span><span id="__span-14-3"><a id="__codelineno-14-3" name="__codelineno-14-3" href="#__codelineno-14-3"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">(</span><span class="n">sites</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;site_A&#39;</span><span class="p">,</span> <span class="s1">&#39;site_B&#39;</span><span class="p">,</span> <span class="s1">&#39;site_C&#39;</span><span class="p">])</span>
-</span><span id="__span-14-4"><a id="__codelineno-14-4" name="__codelineno-14-4" href="#__codelineno-14-4"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-14-5"><a id="__codelineno-14-5" name="__codelineno-14-5" href="#__codelineno-14-5"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_realizations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_years</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
-</span></code></pre></div>
-<hr />
-<h2 id="verification-checklist">Verification Checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">&para;</a></h2>
-<p>When implementing or validating Multi-Site HMM:</p>
-<ul>
-<li>[ ] <strong>Parameter shapes correct</strong>: means (n_states, n_sites), covariances (n_states, n_sites, n_sites)</li>
-<li>[ ] <strong>Transition matrix valid</strong>: rows sum to 1, all entries in [0, 1]</li>
-<li>[ ] <strong>Stationary distribution valid</strong>: sums to 1, is left eigenvector of P</li>
-<li>[ ] <strong>State ordering</strong>: states ordered by mean (dry to wet)</li>
-<li>[ ] <strong>Covariance matrices positive semi-definite</strong>: all eigenvalues ≥ 0</li>
-<li>[ ] <strong>Generation reproducible</strong>: same seed gives same results</li>
-<li>[ ] <strong>Non-negative flows</strong>: no negative values in synthetic output</li>
-<li>[ ] <strong>Spatial correlations preserved</strong>: synthetic corr ≈ observed corr (ensemble average)</li>
-<li>[ ] <strong>Temporal persistence</strong>: state autocorrelation matches transition probabilities</li>
-<li>[ ] <strong>Ensemble structure</strong>: proper Ensemble object with by-site and by-realization views</li>
-<li>[ ] <strong>Drought characteristics</strong>: frequency and spatial extent similar to observed (in dry state)</li>
-</ul>
-<hr />
-<h2 id="comparison-to-other-methods">Comparison to Other Methods<a class="headerlink" href="#comparison-to-other-methods" title="Permanent link">&para;</a></h2>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Aspect</th>
-<th>Multi-Site HMM</th>
-<th>Kirsch-Nowak</th>
-<th>Phase Randomization</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Temporal resolution</strong></td>
-<td>Annual</td>
-<td>Monthly</td>
-<td>Daily</td>
+<td><code>n_states</code></td>
+<td><code>int</code></td>
+<td><code>2</code></td>
+<td>Number of hidden states (2 = dry/wet)</td>
 </tr>
 <tr>
-<td><strong>Spatial</strong></td>
-<td>Multisite</td>
-<td>Multisite</td>
-<td>Univariate</td>
+<td><code>offset</code></td>
+<td><code>float</code></td>
+<td><code>1.0</code></td>
+<td>Additive offset before log transform</td>
 </tr>
 <tr>
-<td><strong>Correlation</strong></td>
-<td>Full spatial + temporal</td>
-<td>Full spatial + temporal</td>
-<td>Temporal only (full spectrum)</td>
+<td><code>max_iterations</code></td>
+<td><code>int</code></td>
+<td><code>1000</code></td>
+<td>Maximum EM iterations</td>
 </tr>
 <tr>
-<td><strong>Distributional</strong></td>
-<td>Log-normal mixture</td>
-<td>Normal (transformed)</td>
-<td>Kappa or empirical</td>
-</tr>
-<tr>
-<td><strong>Regime modeling</strong></td>
-<td>Explicit (hidden states)</td>
-<td>Implicit (correlations)</td>
-<td>None</td>
-</tr>
-<tr>
-<td><strong>Drought dynamics</strong></td>
-<td>Excellent (state-based)</td>
-<td>Good (via correlations)</td>
-<td>Good (via persistence)</td>
-</tr>
-<tr>
-<td><strong>Computational</strong></td>
-<td>Moderate (EM iterations)</td>
-<td>Fast</td>
-<td>Fast (FFT)</td>
-</tr>
-<tr>
-<td><strong>Sample size</strong></td>
-<td>20+ years recommended</td>
-<td>10+ years</td>
-<td>10+ years</td>
-</tr>
-<tr>
-<td><strong>Extrapolation</strong></td>
-<td>Yes (beyond observed)</td>
-<td>Yes (via distributions)</td>
-<td>Depends on marginal choice</td>
+<td><code>covariance_type</code></td>
+<td><code>str</code></td>
+<td><code>'full'</code></td>
+<td>Covariance structure: <code>'full'</code>, <code>'diag'</code>, or <code>'spherical'</code></td>
 </tr>
 </tbody>
 </table>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Spatial correlations (via full covariance matrices per state)</li>
+<li>Temporal persistence (via Markov state transitions)</li>
+<li>Regime-dependent distributions (distinct mean/covariance per state)</li>
+<li>Drought frequency and spatial extent (via dry-state persistence)</li>
+</ul>
+<p><strong>Not preserved:</strong>
+- Autocorrelation at lags &gt; 1 (first-order Markov)
+- Non-Gaussian marginal distributions (log-normality imposed)
+- Trends or non-stationarity</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Requires 20+ years for 2 states; 50+ for more states</li>
+<li>First-order Markov — may miss multi-year drought persistence</li>
+<li>Full covariance becomes expensive for n_sites &gt; 20 (consider <code>'diag'</code>)</li>
+<li>EM may converge to local optima; multiple initializations recommended</li>
+<li>State label switching: ordering by mean ensures consistency but different seeds may find different optima</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p><strong>Primary:</strong>
+Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. <em>Earth's Future</em>. https://doi.org/10.1029/2023EF004126</p>
+<p><strong>See also:</strong>
+- Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. <em>Proceedings of the IEEE</em>, 77(2), 257-286.
+- Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. <em>Water Resources Research</em>, 41(9).</p>
+<hr />
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/multisite_hmm.py</code>
+<strong>Tests:</strong> <code>tests/test_multisite_hmm_generator.py</code></p>
 
 
 

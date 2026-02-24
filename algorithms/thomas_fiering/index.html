@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -705,22 +705,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -733,9 +733,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -756,85 +756,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ar1-model-formulation" class="md-nav__link">
-    <span class="md-ellipsis">
-      AR(1) Model Formulation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stedinger-taylor-normalization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Stedinger-Taylor Normalization
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#statistical-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Statistical Properties Preserved
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
@@ -842,112 +781,11 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#hydrologic-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hydrologic properties preserved
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Usage
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#generate-from-daily-data-automatic-resampling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generate from daily data (automatic resampling)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#generate-specific-number-of-timesteps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generate specific number of timesteps
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#access-fitted-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Access fitted parameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verification Checklist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparison-to-other-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparison to Other Methods
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#historical-context" class="md-nav__link">
-    <span class="md-ellipsis">
-      Historical Context
     </span>
   </a>
   
@@ -1276,22 +1114,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1304,9 +1142,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -1327,85 +1165,24 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ar1-model-formulation" class="md-nav__link">
-    <span class="md-ellipsis">
-      AR(1) Model Formulation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#stedinger-taylor-normalization" class="md-nav__link">
-    <span class="md-ellipsis">
-      Stedinger-Taylor Normalization
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#statistical-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Statistical Properties Preserved
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
@@ -1413,112 +1190,11 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#hydrologic-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hydrologic properties preserved
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-example" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Example
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Advanced Usage
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced Usage">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#generate-from-daily-data-automatic-resampling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generate from daily data (automatic resampling)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#generate-specific-number-of-timesteps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generate specific number of timesteps
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#access-fitted-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Access fitted parameters
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verification-checklist" class="md-nav__link">
-    <span class="md-ellipsis">
-      Verification Checklist
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparison-to-other-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparison to Other Methods
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#historical-context" class="md-nav__link">
-    <span class="md-ellipsis">
-      Historical Context
     </span>
   </a>
   
@@ -1544,469 +1220,115 @@
 
 
 <h1 id="thomas-fiering-1962-with-stedinger-taylor-normalization">Thomas-Fiering (1962) with Stedinger-Taylor Normalization<a class="headerlink" href="#thomas-fiering-1962-with-stedinger-taylor-normalization" title="Permanent link">&para;</a></h1>
-<p><strong>Classification:</strong> Parametric
-<strong>Temporal Resolution:</strong> Monthly
-<strong>Site Compatibility:</strong> Univariate</p>
-<hr />
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Specification</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Input data</td>
-<td>Monthly streamflow, minimum 2 complete years (24 months)</td>
+<td><strong>Type</strong></td>
+<td>Parametric</td>
 </tr>
 <tr>
-<td>Output frequency</td>
-<td>MS (Month Start)</td>
+<td><strong>Resolution</strong></td>
+<td>Monthly</td>
 </tr>
 <tr>
-<td>Distributional assumption</td>
-<td>Normal after Stedinger-Taylor transformation</td>
+<td><strong>Sites</strong></td>
+<td>Univariate</td>
 </tr>
 <tr>
-<td>Correlation structure</td>
-<td>Lag-1 serial correlation (AR(1) model)</td>
-</tr>
-<tr>
-<td>Temporal dependence</td>
-<td>Monthly autoregressive with seasonal parameters</td>
+<td><strong>Class</strong></td>
+<td><code>ThomasFieringGenerator</code></td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
-<p>The Thomas-Fiering method generates synthetic monthly streamflow using a first-order autoregressive (AR(1)) model with season-specific (monthly) parameters. The Stedinger-Taylor (1982) normalization improves the method by applying a lower-bound adjustment before log transformation, reducing skewness and improving normality.</p>
-<p>This method preserves monthly means, standard deviations, and lag-1 serial correlations, making it suitable for operational hydrology, reservoir simulation, and water supply planning at monthly resolution.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Thomas-Fiering method generates synthetic monthly streamflow using a seasonal AR(1) model with month-specific parameters. The Stedinger-Taylor (1982) normalization applies a lower-bound adjustment before log transformation, reducing skewness and improving the normality assumption. The method preserves monthly means, standard deviations, and lag-1 serial correlations.</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Frequency validation</strong></li>
-<li>Validate input has DatetimeIndex</li>
-<li>
-<p>If not monthly frequency ('MS'), resample:</p>
-<ul>
-<li>Daily → Monthly: sum flows within each month</li>
-<li>Weekly → Monthly: sum flows within each month</li>
-</ul>
-</li>
-<li>
-<p><strong>Univariate enforcement</strong></p>
-</li>
-<li>Thomas-Fiering is univariate (single site only)</li>
-<li>If DataFrame with multiple columns, use first column only</li>
-<li>
-<p>Warn user about multi-site input</p>
-</li>
-<li>
-<p><strong>Stedinger-Taylor normalization</strong></p>
-</li>
-<li><strong>Fit lower bound parameters (τ)</strong>:<ul>
-<li>For each month m ∈ {1, ..., 12}:</li>
-<li>Extract all observations for month m across years</li>
-<li>Compute: `τₘ = (Qₘₐₓ·Qₘᵢₙ - Q²ₘₑ</li>
-</ul>
-</li>
+<li><strong>Resample to monthly</strong> if input is daily or sub-monthly (sum within each month).</li>
+<li><strong>Univariate enforcement</strong> — use first column if multi-site DataFrame is provided.</li>
+<li><strong>Stedinger-Taylor normalization</strong> — for each month m:</li>
+<li>Estimate lower bound:
+     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>tau_m = (Q_max * Q_min - Q_median^2) / (Q_max + Q_min - 2 * Q_median)
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>tau_m = max(tau_m, 0)
+</span></code></pre></div></li>
+<li>Transform: <code>X_m = log(Q_m - tau_m)</code></li>
 </ol>
-<p>dian) / (Qₘₐₓ + Qₘᵢₙ - 2·Qₘₑdian)<code>- Clip:</code>τₘ = max(τₘ, 0)<code>(ensure non-negative)
-   - **Apply transformation**:
-     - For each observation in month m:
-       - Subtract lower bound and log-transform:</code>Xₘ = log(Qₘ - τₘ)`
-       - This reduces skewness and improves normality</p>
-<h3 id="fittingcalibration">Fitting/Calibration<a class="headerlink" href="#fittingcalibration" title="Permanent link">&para;</a></h3>
+<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Compute monthly statistics</strong></li>
-<li>
-<p>For each month m ∈ {1, ..., 12}, compute from normalized flows X:</p>
-<ul>
-<li>Mean: <code>μₘ = E[Xₘ]</code></li>
-<li>Standard deviation: <code>σₘ = std(Xₘ)</code></li>
-</ul>
-</li>
-<li>
-<p><strong>Compute lag-1 serial correlations</strong></p>
-</li>
-<li>
-<p>For each month transition m → m+1 (with Dec → Jan wraparound):</p>
-<ul>
-<li>Extract all pairs of consecutive months across years:</li>
-<li><code>(X₁ₘ, X₁,ₘ₊₁), (X₂ₘ, X₂,ₘ₊₁), ..., (Xₙₘ, Xₙ,ₘ₊₁)</code></li>
-<li>Filter out NaN and Inf values from transformation</li>
-<li>Compute Pearson correlation: <code>ρₘ = corr(Xₘ, Xₘ₊₁)</code></li>
-<li>If insufficient data or zero variance, default to <code>ρₘ = 0</code></li>
-</ul>
-</li>
-<li>
-<p><strong>Store fitted parameters</strong></p>
-</li>
-<li>Monthly means: <code>μ = {μ₁, μ₂, ..., μ₁₂}</code></li>
-<li>Monthly standard deviations: <code>σ = {σ₁, σ₂, ..., σ₁₂}</code></li>
-<li>Monthly lag-1 correlations: <code>ρ = {ρ₁, ρ₂, ..., ρ₁₂}</code></li>
-<li>Stedinger transformation parameters: <code>τ = {τ₁, τ₂, ..., τ₁₂}</code></li>
-<li>Total: 48 parameters (12 months × 4 parameters)</li>
+<li><strong>Monthly statistics</strong> — for each month m, compute from transformed flows X:</li>
+<li>Mean: <code>mu_m</code></li>
+<li>Standard deviation: <code>sigma_m</code></li>
+<li><strong>Lag-1 serial correlations</strong> — for each transition m to m+1:</li>
+<li><code>rho_m = corr(X_m, X_{m+1})</code> (Dec-Jan wraps across year boundary)</li>
+<li><strong>Store parameters</strong> — 48 total (12 months x 4: mu, sigma, rho, tau).</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Initialize first month</strong></li>
-<li>
-<p>For first month (January) of first year:
-     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>X₁,₁ = μ₁ + ε₁,₁ · σ₁
-</span></code></pre></div>
-     where <code>ε₁,₁ ~ N(0, 1)</code> is standard normal random variate</p>
-</li>
-<li>
-<p><strong>Generate subsequent months (AR(1) recursion)</strong></p>
-</li>
-<li>
-<p>For each subsequent month i = 2, 3, ..., n_years × 12:</p>
-<ul>
-<li>Determine current month m (1-12) and previous month m_prev</li>
-<li>Generate standard normal random variate: <code>ε ~ N(0, 1)</code></li>
-<li>Apply AR(1) formula:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Xᵢ,ₘ = μₘ + ρₘ · (σₘ/σₘ_prev) · (Xᵢ₋₁,ₘ_prev - μₘ_prev) + √(1 - ρₘ²) · σₘ · ε
+<li><strong>Initialize</strong> first month: <code>X_1 = mu_1 + epsilon * sigma_1</code> where <code>epsilon ~ N(0,1)</code>.</li>
+<li><strong>AR(1) recursion</strong> for each subsequent month:
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>X_m = mu_m + rho_m * (sigma_m / sigma_{m-1}) * (X_{m-1} - mu_{m-1})
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>      + sqrt(1 - rho_m^2) * sigma_m * epsilon
 </span></code></pre></div></li>
-<li>This preserves:</li>
-<li>Mean: <code>E[Xᵢ,ₘ] = μₘ</code></li>
-<li>Variance: <code>Var[Xᵢ,ₘ] = σₘ²</code></li>
-<li>Lag-1 correlation: <code>corr(Xᵢ₋₁, Xᵢ) = ρₘ</code></li>
-</ul>
-</li>
-<li>
-<p><strong>Inverse Stedinger transformation</strong></p>
-</li>
-<li>For each generated normalized flow Xᵢ,ₘ:
-     <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Qᵢ,ₘ = exp(Xᵢ,ₘ) + τₘ
-</span></code></pre></div></li>
-<li>
-<p>Back-transforms from normal space to original flow space</p>
-</li>
-<li>
-<p><strong>Non-negativity enforcement</strong></p>
-</li>
-<li>Replace negative values (rare, from transformation):
-     <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Qᵢ,ₘ = max(Qᵢ,ₘ, Qₘᵢₙ,observed)
-</span></code></pre></div></li>
-<li>
-<p>Fill NaN values with observed minimum for that month</p>
-</li>
-<li>
-<p><strong>Time index creation</strong></p>
-</li>
-<li>Generate monthly DatetimeIndex starting from observed data start year</li>
-<li>Frequency: 'MS' (month start)</li>
+<li><strong>Inverse transform</strong>: <code>Q_m = exp(X_m) + tau_m</code></li>
+<li><strong>Non-negativity</strong>: clip to observed monthly minimum.</li>
 </ol>
-<hr />
-<h2 id="key-parameters">Key Parameters<a class="headerlink" href="#key-parameters" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong><code>Q_obs</code></strong>: Observed streamflow data</li>
-<li>Type: pd.Series or pd.DataFrame (first column used if DataFrame)</li>
-<li>
-<p>Notes: Must have DatetimeIndex. If not monthly, will be resampled during preprocessing.</p>
-</li>
-<li>
-<p><strong><code>debug</code></strong>: Enable debug logging</p>
-</li>
-<li>Type: bool</li>
-<li>Default: False</li>
-</ul>
-<hr />
-<h2 id="algorithmic-details">Algorithmic Details<a class="headerlink" href="#algorithmic-details" title="Permanent link">&para;</a></h2>
-<h3 id="ar1-model-formulation">AR(1) Model Formulation<a class="headerlink" href="#ar1-model-formulation" title="Permanent link">&para;</a></h3>
-<p><strong>General AR(1) model</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Xₜ = φ·Xₜ₋₁ + εₜ
-</span></code></pre></div></p>
-<p><strong>Thomas-Fiering seasonal AR(1)</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>Xᵢ,ₘ - μₘ = ρₘ · (σₘ/σₘ₋₁) · (Xᵢ₋₁,ₘ₋₁ - μₘ₋₁) + √(1 - ρₘ²) · σₘ · εᵢ,ₘ
-</span></code></pre></div></p>
-<p>where:
-- <code>Xᵢ,ₘ</code>: Normalized flow for year i, month m
-- <code>μₘ</code>: Mean for month m
-- <code>σₘ</code>: Standard deviation for month m
-- <code>ρₘ</code>: Lag-1 correlation from month m-1 to month m
-- <code>εᵢ,ₘ ~ N(0, 1)</code>: Independent standard normal innovation</p>
-<p><strong>Key properties</strong>:
-1. <strong>Mean preservation</strong>: <code>E[Xᵢ,ₘ] = μₘ</code>
-2. <strong>Variance preservation</strong>: <code>Var[Xᵢ,ₘ] = σₘ²</code>
-3. <strong>Correlation preservation</strong>: <code>Cov[Xᵢ₋₁,ₘ₋₁, Xᵢ,ₘ] = ρₘ · σₘ₋₁ · σₘ</code></p>
-<h3 id="stedinger-taylor-normalization">Stedinger-Taylor Normalization<a class="headerlink" href="#stedinger-taylor-normalization" title="Permanent link">&para;</a></h3>
-<p><strong>Purpose</strong>: Reduce skewness in streamflow distributions to improve normality assumption.</p>
-<p><strong>Lower bound estimation</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>τₘ = (Qₘₐₓ · Qₘᵢₙ - Qₘₑdian²) / (Qₘₐₓ + Qₘᵢₙ - 2 · Qₘₑdian)
-</span></code></pre></div></p>
-<p><strong>Forward transformation</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>X = log(Q - τ)
-</span></code></pre></div></p>
-<p><strong>Inverse transformation</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>Q = exp(X) + τ
-</span></code></pre></div></p>
-<p><strong>Advantages over simple log</strong>:
-- Better handles skewness
-- Reduces bias in mean and variance
-- More robust to low flows</p>
-<h3 id="statistical-properties-preserved">Statistical Properties Preserved<a class="headerlink" href="#statistical-properties-preserved" title="Permanent link">&para;</a></h3>
-<p><strong>Explicitly preserved (in normalized space)</strong>:
-- Monthly means: <code>μₘ</code>
-- Monthly standard deviations: <code>σₘ</code>
-- Lag-1 serial correlations: <code>ρₘ</code></p>
-<p><strong>Approximately preserved (in original space)</strong>:
-- Monthly mean flows
-- Monthly flow variability
-- Sequential dependence structure</p>
-<p><strong>Not preserved</strong>:
-- Higher-order (lag &gt; 1) correlations (first-order model only)
-- Spatial correlations (univariate method)
-- Exact marginal distributions (transformed to normal)</p>
-<hr />
-<h2 id="algorithm-variations">Algorithm Variations<a class="headerlink" href="#algorithm-variations" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>Disaggregation</strong>: Extend to daily timestep using fragmentat ion methods (e.g., Valencia-Schaake)</li>
-<li><strong>Multi-site extension</strong>: Multivariate AR models (MVAR) preserve spatial correlations</li>
-<li><strong>Higher-order AR</strong>: AR(p) models capture longer memory</li>
-<li><strong>Nonlinear transformations</strong>: Box-Cox instead of log</li>
-<li><strong>Alternative normalization</strong>: NPLN (Normal, Log-Normal) instead of Stedinger-Taylor</li>
-</ul>
-<hr />
-<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">&para;</a></h2>
-<h3 id="computational-complexity">Computational complexity<a class="headerlink" href="#computational-complexity" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Time</strong>: O(n) where n = number of observations</li>
-<li>Single pass to compute monthly statistics</li>
-<li>Generation is O(n_years × 12) per realization</li>
-<li><strong>Space</strong>: O(12) for monthly parameter storage</li>
-<li>Very efficient for typical hydrologic records (10-100 years of monthly data)</li>
-</ul>
-<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>Univariate only</strong>: Cannot model spatial correlations between sites</li>
-<li><strong>First-order only</strong>: Only captures lag-1 dependence (month-to-month)</li>
-<li>Misses multi-month persistence and seasonality in correlation structure</li>
-<li><strong>Normality assumption</strong>: Assumes flows are normal after transformation</li>
-<li>May not capture extreme events well (heavy tails)</li>
-<li><strong>Monthly timestep</strong>: Not suitable for daily analysis</li>
-<li>Use disaggregation methods if daily data needed</li>
-<li><strong>Stationarity</strong>: Assumes parameters are time-invariant</li>
-<li>Not suitable for trending or non-stationary data</li>
-<li><strong>Data requirements</strong>: Needs at least 2 complete years (better with 10+)</li>
-<li>More data improves parameter estimation reliability</li>
-</ul>
-<h3 id="special-handling">Special handling<a class="headerlink" href="#special-handling" title="Permanent link">&para;</a></h3>
-<ul>
-<li><strong>NaN/Inf values</strong>: From Stedinger transform when <code>Q - τ ≤ 0</code></li>
-<li>Filtered before correlation calculation</li>
-<li>Replaced with minimum observed flow in generation</li>
-<li><strong>Negative generated flows</strong>: Rare but possible from transformation</li>
-<li>Replaced with observed minimum for that month</li>
-<li><strong>First month initialization</strong>: Sampled from <code>N(μ₁, σ₁²)</code> without dependence</li>
-<li>Allows generation to start from any month</li>
-<li><strong>December → January transition</strong>: Handled via modular arithmetic</li>
-<li>Month index wraps: <code>(m % 12) + 1</code></li>
-</ul>
-<h3 id="hydrologic-properties-preserved">Hydrologic properties preserved<a class="headerlink" href="#hydrologic-properties-preserved" title="Permanent link">&para;</a></h3>
-<p><strong>Explicitly preserved (by design)</strong>:
-- Monthly mean flows
-- Monthly standard deviations
-- Lag-1 autocorrelation</p>
-<p><strong>Implicitly preserved (approximately)</strong>:
-- Seasonal flow patterns
-- Year-to-year variability
-- Dry/wet spell persistence (via lag-1 correlation)</p>
-<p><strong>Not preserved</strong>:
-- Multi-month droughts (&gt;1 month memory)
-- Spatial correlations (univariate)
-- Exact flow distributions (normality imposed)
-- Trends or non-stationarity</p>
-<hr />
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p><strong>Primary:</strong>
-Thomas, H.A., and Fiering, M.B. (1962). Mathematical synthesis of streamflow sequences for the analysis of river basins by simulation. In <em>Design of Water Resource Systems</em> (eds. Maass et al.), pp. 459-493. Harvard University Press.</p>
-<p><strong>Stedinger-Taylor Normalization:</strong>
-Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. <em>Water Resources Research</em>, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909</p>
-<p><strong>Methodological foundations:</strong>
-- <strong>AR(1) models</strong>: Box, G.E.P., and Jenkins, G.M. (1970). <em>Time Series Analysis: Forecasting and Control</em>. Holden-Day.
-- <strong>Streamflow synthesis</strong>: Fiering, M.B. (1967). <em>Streamflow Synthesis</em>. Harvard University Press.
-- <strong>Operational hydrology</strong>: Loucks, D.P., and van Beek, E. (2017). <em>Water Resource Systems Planning and Management</em>. Springer.</p>
-<p><strong>Extensions:</strong>
-- <strong>Multivariate AR</strong>: Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). <em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.
-- <strong>Disaggregation</strong>: Valencia, D., and Schaake, J.C. (1973). Disaggregation processes in stochastic hydrology. <em>Water Resources Research</em>, 9(3), 580-585.</p>
-<hr />
-<p><strong>SynHydro Implementation:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/parametric/thomas_fiering.py"><code>src/synhydro/methods/generation/parametric/thomas_fiering.py</code></a></p>
-<p><strong>Tests:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/tests/test_thomas_fiering_generator.py"><code>tests/test_thomas_fiering_generator.py</code></a></p>
-<hr />
-<h2 id="usage-example">Usage Example<a class="headerlink" href="#usage-example" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">synhydro.methods.generation.parametric</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThomasFieringGenerator</span>
-</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a>
-</span><span id="__span-9-4"><a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="c1"># Load monthly streamflow data</span>
-</span><span id="__span-9-5"><a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="n">Q_monthly</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;monthly_flows.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-9-6"><a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a>
-</span><span id="__span-9-7"><a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="c1"># Initialize generator</span>
-</span><span id="__span-9-8"><a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">ThomasFieringGenerator</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">)</span>
-</span><span id="__span-9-9"><a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a>
-</span><span id="__span-9-10"><a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="c1"># Preprocess: apply Stedinger-Taylor normalization</span>
-</span><span id="__span-9-11"><a id="__codelineno-9-11" name="__codelineno-9-11" href="#__codelineno-9-11"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-9-12"><a id="__codelineno-9-12" name="__codelineno-9-12" href="#__codelineno-9-12"></a>
-</span><span id="__span-9-13"><a id="__codelineno-9-13" name="__codelineno-9-13" href="#__codelineno-9-13"></a><span class="c1"># Fit: estimate monthly parameters</span>
-</span><span id="__span-9-14"><a id="__codelineno-9-14" name="__codelineno-9-14" href="#__codelineno-9-14"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-9-15"><a id="__codelineno-9-15" name="__codelineno-9-15" href="#__codelineno-9-15"></a>
-</span><span id="__span-9-16"><a id="__codelineno-9-16" name="__codelineno-9-16" href="#__codelineno-9-16"></a><span class="c1"># Examine fitted parameters</span>
-</span><span id="__span-9-17"><a id="__codelineno-9-17" name="__codelineno-9-17" href="#__codelineno-9-17"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Monthly means (normalized):</span><span class="se">\n</span><span class="si">{</span><span class="n">gen</span><span class="o">.</span><span class="n">mu_monthly</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-9-18"><a id="__codelineno-9-18" name="__codelineno-9-18" href="#__codelineno-9-18"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Monthly std devs (normalized):</span><span class="se">\n</span><span class="si">{</span><span class="n">gen</span><span class="o">.</span><span class="n">sigma_monthly</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-9-19"><a id="__codelineno-9-19" name="__codelineno-9-19" href="#__codelineno-9-19"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Monthly lag-1 correlations:</span><span class="se">\n</span><span class="si">{</span><span class="n">gen</span><span class="o">.</span><span class="n">rho_monthly</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-9-20"><a id="__codelineno-9-20" name="__codelineno-9-20" href="#__codelineno-9-20"></a>
-</span><span id="__span-9-21"><a id="__codelineno-9-21" name="__codelineno-9-21" href="#__codelineno-9-21"></a><span class="c1"># Generate 100 realizations of 50 years each</span>
-</span><span id="__span-9-22"><a id="__codelineno-9-22" name="__codelineno-9-22" href="#__codelineno-9-22"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-9-23"><a id="__codelineno-9-23" name="__codelineno-9-23" href="#__codelineno-9-23"></a>
-</span><span id="__span-9-24"><a id="__codelineno-9-24" name="__codelineno-9-24" href="#__codelineno-9-24"></a><span class="c1"># Access results</span>
-</span><span id="__span-9-25"><a id="__codelineno-9-25" name="__codelineno-9-25" href="#__codelineno-9-25"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generated </span><span class="si">{</span><span class="n">ensemble</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">n_realizations</span><span class="si">}</span><span class="s2"> realizations&quot;</span><span class="p">)</span>
-</span><span id="__span-9-26"><a id="__codelineno-9-26" name="__codelineno-9-26" href="#__codelineno-9-26"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Each has </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s2"> months&quot;</span><span class="p">)</span>
-</span><span id="__span-9-27"><a id="__codelineno-9-27" name="__codelineno-9-27" href="#__codelineno-9-27"></a>
-</span><span id="__span-9-28"><a id="__codelineno-9-28" name="__codelineno-9-28" href="#__codelineno-9-28"></a><span class="c1"># Get first realization</span>
-</span><span id="__span-9-29"><a id="__codelineno-9-29" name="__codelineno-9-29" href="#__codelineno-9-29"></a><span class="n">first_real</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-9-30"><a id="__codelineno-9-30" name="__codelineno-9-30" href="#__codelineno-9-30"></a><span class="nb">print</span><span class="p">(</span><span class="n">first_real</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
-</span><span id="__span-9-31"><a id="__codelineno-9-31" name="__codelineno-9-31" href="#__codelineno-9-31"></a>
-</span><span id="__span-9-32"><a id="__codelineno-9-32" name="__codelineno-9-32" href="#__codelineno-9-32"></a><span class="c1"># Get monthly statistics from ensemble</span>
-</span><span id="__span-9-33"><a id="__codelineno-9-33" name="__codelineno-9-33" href="#__codelineno-9-33"></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="__span-9-34"><a id="__codelineno-9-34" name="__codelineno-9-34" href="#__codelineno-9-34"></a><span class="n">all_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="n">r</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">)],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="__span-9-35"><a id="__codelineno-9-35" name="__codelineno-9-35" href="#__codelineno-9-35"></a><span class="n">monthly_stats</span> <span class="o">=</span> <span class="n">all_data</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">all_data</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">month</span><span class="p">)</span><span class="o">.</span><span class="n">agg</span><span class="p">([</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;std&#39;</span><span class="p">])</span>
-</span><span id="__span-9-36"><a id="__codelineno-9-36" name="__codelineno-9-36" href="#__codelineno-9-36"></a><span class="nb">print</span><span class="p">(</span><span class="n">monthly_stats</span><span class="p">)</span>
-</span></code></pre></div>
-<hr />
-<h2 id="advanced-usage">Advanced Usage<a class="headerlink" href="#advanced-usage" title="Permanent link">&para;</a></h2>
-<h3 id="generate-from-daily-data-automatic-resampling">Generate from daily data (automatic resampling)<a class="headerlink" href="#generate-from-daily-data-automatic-resampling" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="c1"># Daily data will be resampled to monthly</span>
-</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="n">Q_daily</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;daily_flows.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
-</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">ThomasFieringGenerator</span><span class="p">(</span><span class="n">Q_daily</span><span class="p">)</span>
-</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>  <span class="c1"># Automatically resamples to monthly</span>
-</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="generate-specific-number-of-timesteps">Generate specific number of timesteps<a class="headerlink" href="#generate-specific-number-of-timesteps" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="c1"># Generate exactly 37 months (3 years + 1 month)</span>
-</span><span id="__span-11-2"><a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_timesteps</span><span class="o">=</span><span class="mi">37</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="access-fitted-parameters">Access fitted parameters<a class="headerlink" href="#access-fitted-parameters" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>
-</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="c1"># FittedParams object</span>
-</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="n">params</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">fitted_params_</span>
-</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
-</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of parameters: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">n_parameters_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># 48 (12 months × 4)</span>
-</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Training period: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">training_period_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Sample size: </span><span class="si">{</span><span class="n">params</span><span class="o">.</span><span class="n">sample_size_</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>
-</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="c1"># Access transformation parameters</span>
-</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="n">tau_values</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">transformations_</span><span class="p">[</span><span class="s1">&#39;stedinger_transform&#39;</span><span class="p">][</span><span class="s1">&#39;tau_monthly&#39;</span><span class="p">]</span>
-</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Lower bounds by month:</span><span class="se">\n</span><span class="si">{</span><span class="n">tau_values</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<hr />
-<h2 id="verification-checklist">Verification Checklist<a class="headerlink" href="#verification-checklist" title="Permanent link">&para;</a></h2>
-<p>When implementing or validating Thomas-Fiering:</p>
-<ul>
-<li>[ ] <strong>Monthly parameters correct</strong>: 12 values for μ, σ, ρ, τ</li>
-<li>[ ] <strong>Lag-1 correlations valid</strong>: All ρₘ ∈ [-1, 1]</li>
-<li>[ ] <strong>Non-negative flows</strong>: No negative values in output</li>
-<li>[ ] <strong>Reproducible</strong>: Same seed gives same results</li>
-<li>[ ] <strong>AR(1) formula</strong>: Correctly implements variance-adjusted correlation</li>
-<li>[ ] <strong>Stedinger transform</strong>: Lower bounds computed correctly</li>
-<li>[ ] <strong>Monthly frequency</strong>: Output has 'MS' frequency</li>
-<li>[ ] <strong>Ensemble structure</strong>: Returns Ensemble object with realizations</li>
-<li>[ ] <strong>Statistical preservation</strong>: Monthly means/stds approximately match (ensemble average)</li>
-<li>[ ] <strong>No NaN/Inf propagation</strong>: Invalid values handled appropriately</li>
-</ul>
-<hr />
-<h2 id="comparison-to-other-methods">Comparison to Other Methods<a class="headerlink" href="#comparison-to-other-methods" title="Permanent link">&para;</a></h2>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Aspect</th>
-<th>Thomas-Fiering</th>
-<th>Multi-Site HMM</th>
-<th>Kirsch-Nowak</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Temporal resolution</strong></td>
-<td>Monthly</td>
-<td>Annual</td>
-<td>Monthly</td>
+<td><code>Q_obs</code></td>
+<td><code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed streamflow with DatetimeIndex</td>
 </tr>
 <tr>
-<td><strong>Spatial</strong></td>
-<td>Univariate</td>
-<td>Multisite</td>
-<td>Multisite</td>
-</tr>
-<tr>
-<td><strong>Correlation</strong></td>
-<td>Lag-1 (AR1)</td>
-<td>Full temporal + spatial</td>
-<td>Full temporal + spatial</td>
-</tr>
-<tr>
-<td><strong>Distributional</strong></td>
-<td>Normal (Stedinger)</td>
-<td>Log-normal mixture</td>
-<td>Normal (transformed)</td>
-</tr>
-<tr>
-<td><strong>Seasonality</strong></td>
-<td>Monthly parameters</td>
-<td>Implicit in states</td>
-<td>Monthly parameters</td>
-</tr>
-<tr>
-<td><strong>Computational</strong></td>
-<td>Very fast</td>
-<td>Moderate (EM)</td>
-<td>Fast</td>
-</tr>
-<tr>
-<td><strong>Sample size</strong></td>
-<td>2+ years</td>
-<td>20+ years</td>
-<td>10+ years</td>
-</tr>
-<tr>
-<td><strong>Parameters</strong></td>
-<td>48 (12 × 4)</td>
-<td>O(n_states · n_sites²)</td>
-<td>O(12 · n_sites²)</td>
-</tr>
-<tr>
-<td><strong>Best for</strong></td>
-<td>Single-site monthly</td>
-<td>Multi-site regimes</td>
-<td>Multi-site monthly</td>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Monthly means and standard deviations (in transformed space)</li>
+<li>Lag-1 serial correlation (month-to-month)</li>
+<li>Seasonal flow patterns (via month-specific parameters)</li>
+</ul>
+<p><strong>Not preserved:</strong>
+- Higher-order autocorrelation (lag &gt; 1)
+- Spatial correlations (univariate method)
+- Exact marginal distributions (normality imposed via transformation)</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Univariate only — no spatial correlation modeling</li>
+<li>First-order memory — misses multi-month drought persistence</li>
+<li>Requires at least 2 complete years; 10+ recommended</li>
+<li>Assumes stationarity (no trends or regime shifts)</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p><strong>Primary:</strong>
+Thomas, H.A., and Fiering, M.B. (1962). Mathematical synthesis of streamflow sequences for the analysis of river basins by simulation. In <em>Design of Water Resource Systems</em> (eds. Maass et al.), pp. 459-493. Harvard University Press.</p>
+<p><strong>See also:</strong>
+- Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. <em>Water Resources Research</em>, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909</p>
 <hr />
-<h2 id="historical-context">Historical Context<a class="headerlink" href="#historical-context" title="Permanent link">&para;</a></h2>
-<p>The Thomas-Fiering method (1962) was one of the first widely-adopted stochastic streamflow generators. It revolutionized reservoir simulation and water resources planning by:</p>
-<ol>
-<li><strong>Enabling Monte Carlo analysis</strong>: Generate many equiprobable sequences</li>
-<li><strong>Preserving key statistics</strong>: Monthly means, std devs, lag-1 correlation</li>
-<li><strong>Computational simplicity</strong>: Fast generation, easy to implement</li>
-<li><strong>Operational applicability</strong>: Suitable for planning horizons (months-years)</li>
-</ol>
-<p>The Stedinger-Taylor improvement (1982) addressed the main limitation: skewness in streamflow distributions. By estimating a lower bound before log transformation, it better approximates normality and reduces bias.</p>
-<p><strong>Legacy</strong>: Thomas-Fiering remains widely used in:
-- Reservoir operation studies
-- Water supply reliability analysis
-- Hydropower planning
-- Educational demonstrations of stochastic hydrology</p>
-<p><strong>Modern alternatives</strong>: For more complex applications (multi-site, extreme events, non-stationarity), consider:
-- Multivariate AR models (spatial correlations)
-- Hidden Markov Models (regime-dependent distributions)
-- Nonparametric methods (fewer assumptions)
-- Machine learning approaches (complex patterns)</p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/thomas_fiering.py</code>
+<strong>Tests:</strong> <code>tests/test_thomas_fiering_generator.py</code></p>
 
 
 

@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#wavelet-auto-regressive-method-warm" class="md-skip">
+        <a href="#warm-wavelet-auto-regressive-method-nowak-et-al-2011" class="md-skip">
           Skip to content
         </a>
       
@@ -797,15 +797,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Specifications
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
@@ -815,123 +806,39 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-preprocessing" class="md-nav__link">
+  <a href="#preprocessing" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Preprocessing
+      Preprocessing
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-fitting-training" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Fitting (Training)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Fitting (Training)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-continuous-wavelet-transform-cwt" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Continuous Wavelet Transform (CWT)
+      Fitting
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2-scale-averaged-wavelet-power-sawp" class="md-nav__link">
+  <a href="#generation" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: Scale Averaged Wavelet Power (SAWP)
+      Generation
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-normalize-by-sawp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3: Normalize by SAWP
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-fit-ar-models-to-each-scale" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4: Fit AR Models to Each Scale
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-generation-synthesis" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Generation (Synthesis)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="3. Generation (Synthesis)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-generate-normalized-coefficients" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Generate Normalized Coefficients
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2-resample-sawp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2: Resample SAWP
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-rescale-coefficients" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3: Rescale Coefficients
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-inverse-wavelet-transform" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4: Inverse Wavelet Transform
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -941,25 +848,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mathematical-formulation-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mathematical Formulation Summary
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Mathematical Formulation Summary">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#input" class="md-nav__link">
-    <span class="md-ellipsis">
-      Input
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Parameters
@@ -967,282 +855,22 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#fitted-quantities" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fitted Quantities
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#output" class="md-nav__link">
-    <span class="md-ellipsis">
-      Output
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters-and-tuning" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters and Tuning
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Parameters and Tuning">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#wavelet-selection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Wavelet Selection
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#number-of-scales" class="md-nav__link">
-    <span class="md-ellipsis">
-      Number of Scales
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ar-order" class="md-nav__link">
-    <span class="md-ellipsis">
-      AR Order
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational Complexity
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations-and-special-handling" class="md-nav__link">
+  <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
-      Limitations and Special Handling
+      Limitations
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Limitations and Special Handling">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-annual-frequency-only" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Annual Frequency Only
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-univariate-single-site" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Univariate (Single Site)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-edge-effects" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Edge Effects
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-non-stationary-mean-trends" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Non-stationary Mean Trends
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-zeronear-zero-flows" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Zero/Near-Zero Flows
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-reconstruction-accuracy" class="md-nav__link">
-    <span class="md-ellipsis">
-      6. Reconstruction Accuracy
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hydrologic-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hydrologic Properties Preserved
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Hydrologic Properties Preserved">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#temporal-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Temporal Properties
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#frequency-domain-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Frequency-Domain Properties
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#distributional-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Distributional Properties
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparison-with-other-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparison with Other Methods
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Comparison with Other Methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#warm-vs-traditional-ar-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      WARM vs. Traditional AR Models
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#warm-vs-kwon-et-al-2007-wavelet-ar" class="md-nav__link">
-    <span class="md-ellipsis">
-      WARM vs. Kwon et al. (2007) Wavelet-AR
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#warm-vs-hmm" class="md-nav__link">
-    <span class="md-ellipsis">
-      WARM vs. HMM
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Custom Parameters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#analyzing-sawp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Analyzing SAWP
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#comparing-wavelets" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparing Wavelets
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1250,57 +878,6 @@
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="References">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#primary-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      Primary Reference
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#related-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related Work
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#software" class="md-nav__link">
-    <span class="md-ellipsis">
-      Software
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#version-history" class="md-nav__link">
-    <span class="md-ellipsis">
-      Version History
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#future-enhancements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Future Enhancements
     </span>
   </a>
   
@@ -1537,15 +1114,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
-    <span class="md-ellipsis">
-      Technical Specifications
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
       Overview
@@ -1555,123 +1123,39 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-preprocessing" class="md-nav__link">
+  <a href="#preprocessing" class="md-nav__link">
     <span class="md-ellipsis">
-      1. Preprocessing
+      Preprocessing
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-fitting-training" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      2. Fitting (Training)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="2. Fitting (Training)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-continuous-wavelet-transform-cwt" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Continuous Wavelet Transform (CWT)
+      Fitting
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#step-2-scale-averaged-wavelet-power-sawp" class="md-nav__link">
+  <a href="#generation" class="md-nav__link">
     <span class="md-ellipsis">
-      Step 2: Scale Averaged Wavelet Power (SAWP)
+      Generation
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-normalize-by-sawp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3: Normalize by SAWP
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-fit-ar-models-to-each-scale" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4: Fit AR Models to Each Scale
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-generation-synthesis" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Generation (Synthesis)
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="3. Generation (Synthesis)">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#step-1-generate-normalized-coefficients" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 1: Generate Normalized Coefficients
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-2-resample-sawp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 2: Resample SAWP
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-3-rescale-coefficients" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 3: Rescale Coefficients
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#step-4-inverse-wavelet-transform" class="md-nav__link">
-    <span class="md-ellipsis">
-      Step 4: Inverse Wavelet Transform
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
         
@@ -1681,25 +1165,6 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#mathematical-formulation-summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      Mathematical Formulation Summary
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Mathematical Formulation Summary">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#input" class="md-nav__link">
-    <span class="md-ellipsis">
-      Input
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
       Parameters
@@ -1707,282 +1172,22 @@
   </a>
   
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#fitted-quantities" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fitted Quantities
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#output" class="md-nav__link">
-    <span class="md-ellipsis">
-      Output
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters-and-tuning" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters and Tuning
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Key Parameters and Tuning">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#wavelet-selection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Wavelet Selection
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#number-of-scales" class="md-nav__link">
-    <span class="md-ellipsis">
-      Number of Scales
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#ar-order" class="md-nav__link">
-    <span class="md-ellipsis">
-      AR Order
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational Complexity
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#limitations-and-special-handling" class="md-nav__link">
+  <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
-      Limitations and Special Handling
+      Limitations
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Limitations and Special Handling">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#1-annual-frequency-only" class="md-nav__link">
-    <span class="md-ellipsis">
-      1. Annual Frequency Only
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#2-univariate-single-site" class="md-nav__link">
-    <span class="md-ellipsis">
-      2. Univariate (Single Site)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#3-edge-effects" class="md-nav__link">
-    <span class="md-ellipsis">
-      3. Edge Effects
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#4-non-stationary-mean-trends" class="md-nav__link">
-    <span class="md-ellipsis">
-      4. Non-stationary Mean Trends
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#5-zeronear-zero-flows" class="md-nav__link">
-    <span class="md-ellipsis">
-      5. Zero/Near-Zero Flows
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#6-reconstruction-accuracy" class="md-nav__link">
-    <span class="md-ellipsis">
-      6. Reconstruction Accuracy
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hydrologic-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hydrologic Properties Preserved
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Hydrologic Properties Preserved">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#temporal-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Temporal Properties
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#frequency-domain-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Frequency-Domain Properties
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#distributional-properties" class="md-nav__link">
-    <span class="md-ellipsis">
-      Distributional Properties
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#comparison-with-other-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparison with Other Methods
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Comparison with Other Methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#warm-vs-traditional-ar-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      WARM vs. Traditional AR Models
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#warm-vs-kwon-et-al-2007-wavelet-ar" class="md-nav__link">
-    <span class="md-ellipsis">
-      WARM vs. Kwon et al. (2007) Wavelet-AR
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#warm-vs-hmm" class="md-nav__link">
-    <span class="md-ellipsis">
-      WARM vs. HMM
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#basic-usage" class="md-nav__link">
-    <span class="md-ellipsis">
-      Basic Usage
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Custom Parameters
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#analyzing-sawp" class="md-nav__link">
-    <span class="md-ellipsis">
-      Analyzing SAWP
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#comparing-wavelets" class="md-nav__link">
-    <span class="md-ellipsis">
-      Comparing Wavelets
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1990,57 +1195,6 @@
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="References">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#primary-reference" class="md-nav__link">
-    <span class="md-ellipsis">
-      Primary Reference
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#related-work" class="md-nav__link">
-    <span class="md-ellipsis">
-      Related Work
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#software" class="md-nav__link">
-    <span class="md-ellipsis">
-      Software
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#version-history" class="md-nav__link">
-    <span class="md-ellipsis">
-      Version History
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#future-enhancements" class="md-nav__link">
-    <span class="md-ellipsis">
-      Future Enhancements
     </span>
   </a>
   
@@ -2065,682 +1219,133 @@
   
 
 
-<h1 id="wavelet-auto-regressive-method-warm">Wavelet Auto-Regressive Method (WARM)<a class="headerlink" href="#wavelet-auto-regressive-method-warm" title="Permanent link">&para;</a></h1>
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
+<h1 id="warm-wavelet-auto-regressive-method-nowak-et-al-2011">WARM — Wavelet Auto-Regressive Method (Nowak et al. 2011)<a class="headerlink" href="#warm-wavelet-auto-regressive-method-nowak-et-al-2011" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Value</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Method Name</strong></td>
-<td>WARM (Wavelet Auto-Regressive Method)</td>
-</tr>
-<tr>
-<td><strong>Implementation</strong></td>
-<td><code>WARMGenerator</code></td>
-</tr>
-<tr>
 <td><strong>Type</strong></td>
-<td>Parametric, Stochastic</td>
+<td>Parametric</td>
 </tr>
 <tr>
-<td><strong>Frequency</strong></td>
+<td><strong>Resolution</strong></td>
 <td>Annual</td>
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
-<td>Univariate (single site)</td>
+<td>Univariate</td>
 </tr>
 <tr>
-<td><strong>Reference</strong></td>
-<td>Nowak et al. (2011)</td>
-</tr>
-<tr>
-<td><strong>Full Citation</strong></td>
-<td>Nowak, K., Rajagopalan, B., &amp; Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12.</td>
+<td><strong>Class</strong></td>
+<td><code>WARMGenerator</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Wavelet Auto-Regressive Method (WARM) is an advanced stochastic generator designed for non-stationary streamflow simulation. WARM combines continuous wavelet transforms with autoregressive modeling to preserve both time-varying spectral characteristics and temporal persistence in synthetic streamflow sequences.</p>
-<p><strong>Key Innovation</strong>: The Scale Averaged Wavelet Power (SAWP) enables WARM to capture and reproduce time-varying power spectral characteristics, making it particularly suitable for streamflows with non-stationary trends, regime shifts, or low-frequency variability (e.g., climate oscillations, long-term droughts).</p>
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
-<p>WARM operates through a 4-step process that decomposes, models, and reconstructs streamflow signals using wavelet analysis and autoregressive modeling.</p>
-<h3 id="1-preprocessing">1. Preprocessing<a class="headerlink" href="#1-preprocessing" title="Permanent link">&para;</a></h3>
-<p><strong>Objective</strong>: Prepare annual streamflow data for wavelet analysis.</p>
-<p><strong>Steps</strong>:
-1. Validate input data (univariate time series)
-2. Resample to annual frequency if needed (monthly → annual via sum, daily → annual via sum)
-3. Store observed annual flows: <span class="arithmatex">\(Q_{\text{obs}}(t)\)</span>, where <span class="arithmatex">\(t = 1, 2, \ldots, T\)</span> years</p>
-<p><strong>Validation</strong>:
-- Minimum recommended: 20 years of data
-- WARM designed specifically for annual streamflow
-- Single-site only (univariate)</p>
-<h3 id="2-fitting-training">2. Fitting (Training)<a class="headerlink" href="#2-fitting-training" title="Permanent link">&para;</a></h3>
-<p>WARM fitting consists of 4 sub-steps:</p>
-<h4 id="step-1-continuous-wavelet-transform-cwt">Step 1: Continuous Wavelet Transform (CWT)<a class="headerlink" href="#step-1-continuous-wavelet-transform-cwt" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Decompose time series into time-frequency components.</p>
-<p>Apply continuous wavelet transform using mother wavelet <span class="arithmatex">\(\psi\)</span>:</p>
-<div class="arithmatex">\[
-W(s, t) = \int_{-\infty}^{\infty} Q(\tau) \cdot \frac{1}{\sqrt{s}} \psi^*\left(\frac{\tau - t}{s}\right) d\tau
-\]</div>
-<p>where:
-- <span class="arithmatex">\(W(s, t)\)</span> = wavelet coefficients at scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span>
-- <span class="arithmatex">\(\psi\)</span> = mother wavelet function (e.g., Morlet, Mexican Hat)
-- <span class="arithmatex">\(s\)</span> = scale parameter (related to frequency: larger scales = lower frequencies)
-- <span class="arithmatex">\(*\)</span> denotes complex conjugate</p>
-<p><strong>Implementation</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="n">scales</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_scales</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="n">coefficients</span><span class="p">,</span> <span class="n">frequencies</span> <span class="o">=</span> <span class="n">pywt</span><span class="o">.</span><span class="n">cwt</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="n">scales</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="s1">&#39;morl&#39;</span><span class="p">)</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Result: coefficients with shape (n_scales, n_years)</span>
-</span></code></pre></div></p>
-<p><strong>Recommended Wavelets</strong>:
-- <strong>Morlet</strong> (<code>'morl'</code>): Best for hydrologic applications, good time-frequency localization
-- <strong>Mexican Hat</strong> (<code>'mexh'</code>): Symmetric, good for detecting peaks
-- <strong>Gaussian</strong> (<code>'gaus1'</code>-<code>'gaus8'</code>): Smooth, varying derivatives</p>
-<h4 id="step-2-scale-averaged-wavelet-power-sawp">Step 2: Scale Averaged Wavelet Power (SAWP)<a class="headerlink" href="#step-2-scale-averaged-wavelet-power-sawp" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Compute time-varying power across all frequency scales.</p>
-<p>SAWP is the <strong>key innovation</strong> of WARM (Nowak et al. 2011) compared to previous methods (Kwon et al. 2007). It captures temporal variations in spectral power.</p>
-<p>Calculate wavelet power at each scale and time:</p>
-<div class="arithmatex">\[
-P(s, t) = |W(s, t)|^2
-\]</div>
-<p>Average across all scales for each time point:</p>
-<div class="arithmatex">\[
-\text{SAWP}(t) = \frac{1}{S} \sum_{s=1}^{S} P(s, t) = \frac{1}{S} \sum_{s=1}^{S} |W(s, t)|^2
-\]</div>
-<p>where <span class="arithmatex">\(S\)</span> = total number of scales.</p>
-<p><strong>Physical Meaning</strong>:
-- High SAWP(t) → High energy/variability at time <span class="arithmatex">\(t\)</span>
-- Low SAWP(t) → Low energy/variability at time <span class="arithmatex">\(t\)</span>
-- Captures non-stationary variance structure</p>
-<p><strong>Implementation</strong>:
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">power</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">coefficients</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="n">sawp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">power</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># Average across scales</span>
-</span></code></pre></div></p>
-<h4 id="step-3-normalize-by-sawp">Step 3: Normalize by SAWP<a class="headerlink" href="#step-3-normalize-by-sawp" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Remove time-varying power to create stationary components.</p>
-<p>For each scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span>:</p>
-<div class="arithmatex">\[
-W_{\text{norm}}(s, t) = \frac{W(s, t)}{\sqrt{\text{SAWP}(t) + \epsilon}}
-\]</div>
-<p>where <span class="arithmatex">\(\epsilon\)</span> is a small constant (<span class="arithmatex">\(10^{-10}\)</span>) to prevent division by zero.</p>
-<p><strong>Result</strong>: Normalized coefficients <span class="arithmatex">\(W_{\text{norm}}(s, t)\)</span> are approximately stationary and suitable for AR modeling.</p>
-<h4 id="step-4-fit-ar-models-to-each-scale">Step 4: Fit AR Models to Each Scale<a class="headerlink" href="#step-4-fit-ar-models-to-each-scale" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Model temporal persistence at each frequency scale.</p>
-<p>For each scale <span class="arithmatex">\(s\)</span>, fit an AR(p) model to the normalized coefficients <span class="arithmatex">\(W_{\text{norm}}(s, \cdot)\)</span>:</p>
-<div class="arithmatex">\[
-W_{\text{norm}}(s, t) = \mu_s + \sum_{i=1}^{p} \phi_{s,i} \left[W_{\text{norm}}(s, t-i) - \mu_s\right] + \epsilon_s(t)
-\]</div>
-<p>where:
-- <span class="arithmatex">\(\mu_s\)</span> = mean of normalized coefficients at scale <span class="arithmatex">\(s\)</span>
-- <span class="arithmatex">\(\phi_{s,i}\)</span> = AR coefficient for lag <span class="arithmatex">\(i\)</span> at scale <span class="arithmatex">\(s\)</span>
-- <span class="arithmatex">\(\epsilon_s(t) \sim N(0, \sigma_s^2)\)</span> = white noise innovation
-- <span class="arithmatex">\(p\)</span> = AR order (typically 1 or 2)</p>
-<p><strong>Parameter Estimation</strong>: Yule-Walker equations</p>
-<p>Given autocorrelation function <span class="arithmatex">\(\rho(k)\)</span>, solve:</p>
-<div class="arithmatex">\[
-\begin{bmatrix}
-1 &amp; \rho(1) &amp; \cdots &amp; \rho(p-1) \\
-\rho(1) &amp; 1 &amp; \cdots &amp; \rho(p-2) \\
-\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
-\rho(p-1) &amp; \rho(p-2) &amp; \cdots &amp; 1
-\end{bmatrix}
-\begin{bmatrix}
-\phi_1 \\
-\phi_2 \\
-\vdots \\
-\phi_p
-\end{bmatrix}
-=
-\begin{bmatrix}
-\rho(1) \\
-\rho(2) \\
-\vdots \\
-\rho(p)
-\end{bmatrix}
-\]</div>
-<p>Innovation variance:</p>
-<div class="arithmatex">\[
-\sigma^2 = \gamma(0) \left(1 - \sum_{i=1}^{p} \phi_i \rho(i)\right)
-\]</div>
-<p>where <span class="arithmatex">\(\gamma(0)\)</span> is the variance of the normalized coefficients.</p>
-<p><strong>Stored Parameters</strong>:
-- For each scale <span class="arithmatex">\(s\)</span>: <span class="arithmatex">\(\{\mu_s, \phi_{s,1}, \ldots, \phi_{s,p}, \sigma_s\}\)</span>
-- SAWP time series: <span class="arithmatex">\(\text{SAWP}(1), \ldots, \text{SAWP}(T)\)</span>
-- Wavelet parameters: wavelet type, scales array</p>
-<h3 id="3-generation-synthesis">3. Generation (Synthesis)<a class="headerlink" href="#3-generation-synthesis" title="Permanent link">&para;</a></h3>
-<p><strong>Objective</strong>: Generate synthetic annual streamflow sequences.</p>
-<h4 id="step-1-generate-normalized-coefficients">Step 1: Generate Normalized Coefficients<a class="headerlink" href="#step-1-generate-normalized-coefficients" title="Permanent link">&para;</a></h4>
-<p>For each scale <span class="arithmatex">\(s\)</span> and each synthetic year <span class="arithmatex">\(t\)</span>:</p>
+<p>WARM combines continuous wavelet transforms with autoregressive modeling to generate synthetic annual streamflow. Its key innovation is the Scale Averaged Wavelet Power (SAWP), which captures time-varying spectral characteristics. This makes WARM particularly suited for non-stationary flows with regime shifts or low-frequency variability (e.g., climate oscillations, multi-decadal droughts).</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
+<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Validate input (univariate time series, minimum ~20 years recommended).</li>
+<li>Resample to annual frequency if needed (sum monthly or daily).</li>
+</ol>
+<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p>Initialize: <span class="arithmatex">\(W_{\text{syn,norm}}(s, 0) = \mu_s\)</span> (or use historical values)</p>
+<p><strong>Continuous Wavelet Transform</strong> — decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>W(s, t) = CWT(Q_obs, scales, wavelet)
+</span></code></pre></div>
+   Result: coefficient matrix of shape (n_scales, n_years).</p>
 </li>
 <li>
-<p>Generate AR process:
-   $$
-   W_{\text{syn,norm}}(s, t) = \mu_s + \sum_{i=1}^{p} \phi_{s,i} \left[W_{\text{syn,norm}}(s, t-i) - \mu_s\right] + \epsilon_s(t)
-   $$</p>
+<p><strong>Scale Averaged Wavelet Power</strong> — compute time-varying power across all scales:
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>SAWP(t) = (1/S) * sum_s |W(s, t)|^2
+</span></code></pre></div>
+   High SAWP indicates high energy/variability at time t.</p>
+</li>
+<li>
+<p><strong>Normalize by SAWP</strong> — remove time-varying power to produce stationary components:
+   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>W_norm(s, t) = W(s, t) / sqrt(SAWP(t) + epsilon)
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Fit AR models</strong> — for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.</p>
 </li>
 </ol>
-<p>where <span class="arithmatex">\(\epsilon_s(t) \sim N(0, \sigma_s^2)\)</span> are independent random innovations.</p>
-<p><strong>Result</strong>: Normalized synthetic coefficients for all scales and times.</p>
-<h4 id="step-2-resample-sawp">Step 2: Resample SAWP<a class="headerlink" href="#step-2-resample-sawp" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Create time-varying power for synthetic sequence.</p>
-<p>Resample SAWP from historical record with replacement:</p>
-<div class="arithmatex">\[
-\text{SAWP}_{\text{syn}}(t) = \text{SAWP}_{\text{obs}}(k_t)
-\]</div>
-<p>where <span class="arithmatex">\(k_t\)</span> is a randomly selected time index from <span class="arithmatex">\(\{1, 2, \ldots, T\}\)</span>.</p>
-<p><strong>Purpose</strong>: Preserve the distribution and range of power variations while allowing different temporal patterns.</p>
-<h4 id="step-3-rescale-coefficients">Step 3: Rescale Coefficients<a class="headerlink" href="#step-3-rescale-coefficients" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Restore time-varying power to synthetic coefficients.</p>
-<p>For each scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span>:</p>
-<div class="arithmatex">\[
-W_{\text{syn}}(s, t) = W_{\text{syn,norm}}(s, t) \cdot \sqrt{\text{SAWP}_{\text{syn}}(t) + \epsilon}
-\]</div>
-<p><strong>Result</strong>: Synthetic wavelet coefficients with time-varying power.</p>
-<h4 id="step-4-inverse-wavelet-transform">Step 4: Inverse Wavelet Transform<a class="headerlink" href="#step-4-inverse-wavelet-transform" title="Permanent link">&para;</a></h4>
-<p><strong>Objective</strong>: Reconstruct synthetic streamflow time series.</p>
-<p>The inverse CWT is approximated by weighted summation across scales:</p>
-<div class="arithmatex">\[
-Q_{\text{syn}}(t) = C \sum_{s=1}^{S} \frac{\Re[W_{\text{syn}}(s, t)]}{\sqrt{s}} \cdot w_s
-\]</div>
-<p>where:
-- <span class="arithmatex">\(\Re[\cdot]\)</span> = real part
-- <span class="arithmatex">\(w_s\)</span> = scale-dependent weights (typically <span class="arithmatex">\(w_s = 1/\sqrt{s}\)</span>)
-- <span class="arithmatex">\(C\)</span> = normalization constant</p>
-<p><strong>Adjustment</strong>:
-After reconstruction, adjust mean and variance to match observed:</p>
-<div class="arithmatex">\[
-Q_{\text{syn,adjusted}}(t) = \sigma_{\text{obs}} \cdot \frac{Q_{\text{syn}}(t) - \bar{Q}_{\text{syn}}}{\sigma_{\text{syn}}} + \bar{Q}_{\text{obs}}
-\]</div>
-<p><strong>Non-negativity</strong>: Ensure <span class="arithmatex">\(Q_{\text{syn}}(t) \geq 0\)</span> (set negative values to 0).</p>
-<h2 id="mathematical-formulation-summary">Mathematical Formulation Summary<a class="headerlink" href="#mathematical-formulation-summary" title="Permanent link">&para;</a></h2>
-<h3 id="input">Input<a class="headerlink" href="#input" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Historical annual flows: <span class="arithmatex">\(Q_{\text{obs}}(t)\)</span>, <span class="arithmatex">\(t = 1, \ldots, T\)</span></li>
-</ul>
-<h3 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Wavelet type: <span class="arithmatex">\(\psi\)</span> (e.g., Morlet)</li>
-<li>Number of scales: <span class="arithmatex">\(S\)</span> (e.g., 64)</li>
-<li>AR order: <span class="arithmatex">\(p\)</span> (e.g., 1)</li>
-</ul>
-<h3 id="fitted-quantities">Fitted Quantities<a class="headerlink" href="#fitted-quantities" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Wavelet coefficients: <span class="arithmatex">\(W(s, t)\)</span> for <span class="arithmatex">\(s = 1, \ldots, S\)</span> and <span class="arithmatex">\(t = 1, \ldots, T\)</span></li>
-<li>SAWP: <span class="arithmatex">\(\text{SAWP}(t)\)</span> for <span class="arithmatex">\(t = 1, \ldots, T\)</span></li>
-<li>AR parameters for each scale: <span class="arithmatex">\(\{\mu_s, \phi_{s,1}, \ldots, \phi_{s,p}, \sigma_s\}\)</span> for <span class="arithmatex">\(s = 1, \ldots, S\)</span></li>
-</ul>
-<h3 id="output">Output<a class="headerlink" href="#output" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Synthetic annual flows: <span class="arithmatex">\(Q_{\text{syn}}(t)\)</span>, <span class="arithmatex">\(t = 1, \ldots, T_{\text{syn}}\)</span></li>
-</ul>
-<h2 id="key-parameters-and-tuning">Key Parameters and Tuning<a class="headerlink" href="#key-parameters-and-tuning" title="Permanent link">&para;</a></h2>
-<h3 id="wavelet-selection">Wavelet Selection<a class="headerlink" href="#wavelet-selection" title="Permanent link">&para;</a></h3>
+<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Generate normalized coefficients</strong> — for each scale, run the fitted AR(p) process forward with Gaussian innovations.</li>
+<li><strong>Resample SAWP</strong> — bootstrap SAWP values from the historical record with replacement.</li>
+<li><strong>Rescale coefficients</strong> — restore time-varying power:
+   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>W_syn(s, t) = W_norm_syn(s, t) * sqrt(SAWP_syn(t) + epsilon)
+</span></code></pre></div></li>
+<li><strong>Inverse wavelet transform</strong> — reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.</li>
+</ol>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Wavelet</th>
-<th>Code</th>
-<th>Characteristics</th>
-<th>Use Case</th>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Morlet</strong></td>
+<td><code>wavelet</code></td>
+<td><code>str</code></td>
 <td><code>'morl'</code></td>
-<td>Complex, good time-frequency localization</td>
-<td><strong>Recommended</strong> for streamflow (default)</td>
+<td>Mother wavelet (Morlet recommended for hydrology)</td>
 </tr>
 <tr>
-<td><strong>Mexican Hat</strong></td>
-<td><code>'mexh'</code></td>
-<td>Symmetric, second derivative of Gaussian</td>
-<td>Detecting peaks/oscillations</td>
+<td><code>scales</code></td>
+<td><code>int</code></td>
+<td><code>64</code></td>
+<td>Number of frequency scales (rule of thumb: T/2 to T)</td>
 </tr>
 <tr>
-<td><strong>Gaussian (1st-8th)</strong></td>
-<td><code>'gaus1'</code>-<code>'gaus8'</code></td>
-<td>Smooth, varying smoothness</td>
-<td>Experimental/smoothing</td>
+<td><code>ar_order</code></td>
+<td><code>int</code></td>
+<td><code>1</code></td>
+<td>AR model order (1 or 2 typically sufficient)</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Recommendation</strong>: Use <strong>Morlet</strong> wavelet (<code>'morl'</code>) as it provides the best balance between time and frequency localization for hydrologic signals.</p>
-<h3 id="number-of-scales">Number of Scales<a class="headerlink" href="#number-of-scales" title="Permanent link">&para;</a></h3>
-<p><strong>Parameter</strong>: <code>scales</code> (default: 64)</p>
-<p><strong>Guidelines</strong>:
-- <strong>Low (8-16)</strong>: Faster computation, captures only major frequencies
-- <strong>Medium (32-64)</strong>: <strong>Recommended</strong>, good frequency resolution
-- <strong>High (128+)</strong>: Very detailed, computationally expensive, may overfit</p>
-<p><strong>Rule of thumb</strong>: Use <span class="arithmatex">\(S \approx T/2\)</span> to <span class="arithmatex">\(T\)</span>, where <span class="arithmatex">\(T\)</span> = number of years.</p>
-<p><strong>Example</strong>:
-- 50 years of data → 32-64 scales
-- 100 years of data → 64-128 scales</p>
-<h3 id="ar-order">AR Order<a class="headerlink" href="#ar-order" title="Permanent link">&para;</a></h3>
-<p><strong>Parameter</strong>: <code>ar_order</code> (default: 1)</p>
-<p><strong>Guidelines</strong>:
-- <strong>AR(1)</strong>: Captures first-order temporal persistence, <strong>recommended for most cases</strong>
-- <strong>AR(2)</strong>: Captures additional lag structure, use if data shows strong 2-year memory
-- <strong>AR(3+)</strong>: Rarely needed, risk of overfitting</p>
-<p><strong>Selection</strong>: Use information criteria (AIC/BIC) or cross-validation if uncertain. Default AR(1) works well for annual streamflow.</p>
-<h2 id="computational-complexity">Computational Complexity<a class="headerlink" href="#computational-complexity" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Operation</th>
-<th>Complexity</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>CWT</strong></td>
-<td><span class="arithmatex">\(O(S \cdot T)\)</span></td>
-<td><span class="arithmatex">\(S\)</span> = scales, <span class="arithmatex">\(T\)</span> = years</td>
-</tr>
-<tr>
-<td><strong>SAWP Calculation</strong></td>
-<td><span class="arithmatex">\(O(S \cdot T)\)</span></td>
-<td>Simple averaging</td>
-</tr>
-<tr>
-<td><strong>AR Fitting</strong></td>
-<td><span class="arithmatex">\(O(S \cdot T \cdot p^2)\)</span></td>
-<td><span class="arithmatex">\(p\)</span> = AR order, Yule-Walker solution</td>
-</tr>
-<tr>
-<td><strong>Generation</strong></td>
-<td><span class="arithmatex">\(O(S \cdot T_{\text{syn}})\)</span></td>
-<td>Per realization</td>
-</tr>
-<tr>
-<td><strong>Inverse CWT</strong></td>
-<td><span class="arithmatex">\(O(S \cdot T_{\text{syn}})\)</span></td>
-<td>Weighted summation</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Total Fitting</strong>: <span class="arithmatex">\(O(S \cdot T \cdot p^2)\)</span></p>
-<p><strong>Total Generation</strong> (per realization): <span class="arithmatex">\(O(S \cdot T_{\text{syn}})\)</span></p>
-<p><strong>Memory</strong>: <span class="arithmatex">\(O(S \cdot T)\)</span> for storing wavelet coefficients.</p>
-<p><strong>Typical Performance</strong> (64 scales, 50 years, AR(1)):
-- Fitting: &lt; 1 second
-- Generation (100 realizations × 100 years): ~ 2-5 seconds</p>
-<h2 id="limitations-and-special-handling">Limitations and Special Handling<a class="headerlink" href="#limitations-and-special-handling" title="Permanent link">&para;</a></h2>
-<h3 id="1-annual-frequency-only">1. Annual Frequency Only<a class="headerlink" href="#1-annual-frequency-only" title="Permanent link">&para;</a></h3>
-<p><strong>Limitation</strong>: WARM is designed for annual streamflow.</p>
-<p><strong>Reason</strong>: Wavelet decomposition for capturing multi-year oscillations (e.g., ENSO, PDO) works best at annual scale.</p>
-<p><strong>Workaround</strong>: For monthly/daily generation, consider:
-- Use WARM for annual totals
-- Disaggregate to finer resolution using separate method (e.g., K-NN, HMM)</p>
-<h3 id="2-univariate-single-site">2. Univariate (Single Site)<a class="headerlink" href="#2-univariate-single-site" title="Permanent link">&para;</a></h3>
-<p><strong>Current Implementation</strong>: Single site only.</p>
-<p><strong>Extension</strong>: Nowak et al. (2011) describes multi-site extension:
-- Generate multiple sites using WARM independently
-- Apply spatial disaggregation method to impose spatial correlation
-- Preserve historical spatial correlation structure</p>
-<p><strong>Future Work</strong>: Multi-site version could use:
-- Coupled AR models at each scale (VAR instead of AR)
-- Joint wavelet analysis with cross-wavelet transforms</p>
-<h3 id="3-edge-effects">3. Edge Effects<a class="headerlink" href="#3-edge-effects" title="Permanent link">&para;</a></h3>
-<p><strong>Issue</strong>: CWT has edge effects (cone of influence) at start/end of time series.</p>
-<p><strong>Handling</strong>:
-- PyWavelets pads signal automatically
-- WARM resamples SAWP, which mitigates edge effect impact
-- For very short series (&lt; 20 years), edge effects may be noticeable</p>
-<p><strong>Recommendation</strong>: Use at least 30 years of data for robust results.</p>
-<h3 id="4-non-stationary-mean-trends">4. Non-stationary Mean Trends<a class="headerlink" href="#4-non-stationary-mean-trends" title="Permanent link">&para;</a></h3>
-<p><strong>Handling</strong>: WARM preserves non-stationary spectral characteristics (via SAWP).</p>
-<p><strong>Strong Linear Trends</strong>: If data has strong deterministic trend:
-- Option 1: Detrend before WARM, re-trend after generation
-- Option 2: Use WARM as-is if trend is part of low-frequency variability</p>
-<p><strong>Recommendation</strong>: Analyze whether trend is deterministic or stochastic before deciding.</p>
-<h3 id="5-zeronear-zero-flows">5. Zero/Near-Zero Flows<a class="headerlink" href="#5-zeronear-zero-flows" title="Permanent link">&para;</a></h3>
-<p><strong>Handling</strong>: WARM can generate negative values (since AR model has Gaussian innovations).</p>
-<p><strong>Correction</strong>: Post-processing in <code>_generate()</code>:
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Q_syn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">Q_syn</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># Truncate to non-negative</span>
-</span></code></pre></div></p>
-<p><strong>Limitation</strong>: For intermittent streams with frequent zeros, consider:
-- Two-stage model (occurrence + magnitude)
-- Non-parametric methods (K-NN, phase randomization)</p>
-<h3 id="6-reconstruction-accuracy">6. Reconstruction Accuracy<a class="headerlink" href="#6-reconstruction-accuracy" title="Permanent link">&para;</a></h3>
-<p><strong>Approximation</strong>: Inverse CWT is approximate (PyWavelets doesn't provide exact inverse for CWT).</p>
-<p><strong>Adjustment</strong>: WARM applies mean/variance adjustment after reconstruction:
-- Preserves observed mean and standard deviation
-- Small reconstruction error is acceptable for stochastic generation</p>
-<h2 id="hydrologic-properties-preserved">Hydrologic Properties Preserved<a class="headerlink" href="#hydrologic-properties-preserved" title="Permanent link">&para;</a></h2>
-<h3 id="temporal-properties">Temporal Properties<a class="headerlink" href="#temporal-properties" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Preserved?</th>
-<th>Method</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Mean</strong></td>
-<td>✅ Exactly</td>
-<td>Post-reconstruction adjustment</td>
-</tr>
-<tr>
-<td><strong>Variance</strong></td>
-<td>✅ Exactly</td>
-<td>Post-reconstruction adjustment</td>
-</tr>
-<tr>
-<td><strong>Lag-1 autocorrelation</strong></td>
-<td>✅ Approximately</td>
-<td>AR models at each scale</td>
-</tr>
-<tr>
-<td><strong>Multi-year persistence</strong></td>
-<td>✅ Strong</td>
-<td>Low-frequency wavelet components + AR</td>
-</tr>
-<tr>
-<td><strong>Non-stationary variance</strong></td>
-<td>✅ Strong</td>
-<td>SAWP resampling</td>
-</tr>
-</tbody>
-</table>
-<h3 id="frequency-domain-properties">Frequency-Domain Properties<a class="headerlink" href="#frequency-domain-properties" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Preserved?</th>
-<th>Method</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Power spectrum</strong></td>
-<td>✅ Strong</td>
-<td>Wavelet decomposition</td>
-</tr>
-<tr>
-<td><strong>Time-varying spectrum</strong></td>
-<td>✅ Strong</td>
-<td><strong>SAWP innovation</strong></td>
-</tr>
-<tr>
-<td><strong>Low-frequency oscillations</strong></td>
-<td>✅ Strong</td>
-<td>Large-scale wavelet components</td>
-</tr>
-<tr>
-<td><strong>High-frequency variability</strong></td>
-<td>✅ Moderate</td>
-<td>Small-scale wavelet components + AR noise</td>
-</tr>
-</tbody>
-</table>
-<h3 id="distributional-properties">Distributional Properties<a class="headerlink" href="#distributional-properties" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Preserved?</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Marginal distribution</strong></td>
-<td>⚠️ Approximate</td>
-<td>Mean/variance preserved, but shape may differ</td>
-</tr>
-<tr>
-<td><strong>Skewness</strong></td>
-<td>⚠️ Moderate</td>
-<td>Not explicitly preserved</td>
-</tr>
-<tr>
-<td><strong>Extremes</strong></td>
-<td>⚠️ Moderate</td>
-<td>AR innovations are Gaussian</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Note</strong>: For better preservation of marginal distribution, consider:
-- Log-transformation before WARM
-- Post-processing to match observed distribution (e.g., quantile mapping)</p>
-<h2 id="comparison-with-other-methods">Comparison with Other Methods<a class="headerlink" href="#comparison-with-other-methods" title="Permanent link">&para;</a></h2>
-<h3 id="warm-vs-traditional-ar-models">WARM vs. Traditional AR Models<a class="headerlink" href="#warm-vs-traditional-ar-models" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Aspect</th>
-<th>WARM</th>
-<th>AR(1) / ARMA</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Non-stationarity</strong></td>
-<td>✅ Handles via SAWP</td>
-<td>❌ Assumes stationarity</td>
-</tr>
-<tr>
-<td><strong>Low-frequency persistence</strong></td>
-<td>✅ Strong (wavelet scales)</td>
-<td>⚠️ Weak (limited memory)</td>
-</tr>
-<tr>
-<td><strong>Computation</strong></td>
-<td>Moderate (CWT)</td>
-<td>Fast</td>
-</tr>
-<tr>
-<td><strong>Interpretability</strong></td>
-<td>Moderate</td>
-<td>High</td>
-</tr>
-</tbody>
-</table>
-<h3 id="warm-vs-kwon-et-al-2007-wavelet-ar">WARM vs. Kwon et al. (2007) Wavelet-AR<a class="headerlink" href="#warm-vs-kwon-et-al-2007-wavelet-ar" title="Permanent link">&para;</a></h3>
-<p><strong>Key Difference</strong>: SAWP normalization</p>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>WARM (Nowak 2011)</th>
-<th>Kwon et al. (2007)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Time-varying power</strong></td>
-<td>✅ SAWP captures</td>
-<td>❌ Not captured</td>
-</tr>
-<tr>
-<td><strong>Non-stationary variance</strong></td>
-<td>✅ Strong</td>
-<td>⚠️ Moderate</td>
-</tr>
-<tr>
-<td><strong>Complexity</strong></td>
-<td>Moderate</td>
-<td>Moderate</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Advantage</strong>: WARM better preserves non-stationary spectral characteristics.</p>
-<h3 id="warm-vs-hmm">WARM vs. HMM<a class="headerlink" href="#warm-vs-hmm" title="Permanent link">&para;</a></h3>
-<table>
-<thead>
-<tr>
-<th>Aspect</th>
-<th>WARM</th>
-<th>HMM</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Regime changes</strong></td>
-<td>⚠️ Implicit (via SAWP)</td>
-<td>✅ Explicit (states)</td>
-</tr>
-<tr>
-<td><strong>Multi-site</strong></td>
-<td>❌ Univariate (current)</td>
-<td>✅ Native multi-site</td>
-</tr>
-<tr>
-<td><strong>Frequency</strong></td>
-<td>Annual</td>
-<td>Annual or Monthly</td>
-</tr>
-<tr>
-<td><strong>Low-frequency persistence</strong></td>
-<td>✅ Strong</td>
-<td>⚠️ Depends on state design</td>
-</tr>
-</tbody>
-</table>
-<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
-<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">synhydro.methods.generation.parametric.warm</span><span class="w"> </span><span class="kn">import</span> <span class="n">WARMGenerator</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="c1"># Load annual streamflow data</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a><span class="n">Q_annual</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;annual_flows.csv&#39;</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parse_dates</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a><span class="c1"># Initialize WARM generator with default parameters</span>
-</span><span id="__span-3-8"><a id="__codelineno-3-8" name="__codelineno-3-8" href="#__codelineno-3-8"></a><span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-</span><span id="__span-3-9"><a id="__codelineno-3-9" name="__codelineno-3-9" href="#__codelineno-3-9"></a>
-</span><span id="__span-3-10"><a id="__codelineno-3-10" name="__codelineno-3-10" href="#__codelineno-3-10"></a><span class="c1"># Preprocess</span>
-</span><span id="__span-3-11"><a id="__codelineno-3-11" name="__codelineno-3-11" href="#__codelineno-3-11"></a><span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-3-12"><a id="__codelineno-3-12" name="__codelineno-3-12" href="#__codelineno-3-12"></a>
-</span><span id="__span-3-13"><a id="__codelineno-3-13" name="__codelineno-3-13" href="#__codelineno-3-13"></a><span class="c1"># Fit model to historical data</span>
-</span><span id="__span-3-14"><a id="__codelineno-3-14" name="__codelineno-3-14" href="#__codelineno-3-14"></a><span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-3-15"><a id="__codelineno-3-15" name="__codelineno-3-15" href="#__codelineno-3-15"></a>
-</span><span id="__span-3-16"><a id="__codelineno-3-16" name="__codelineno-3-16" href="#__codelineno-3-16"></a><span class="c1"># Generate 100 realizations of 100 years each</span>
-</span><span id="__span-3-17"><a id="__codelineno-3-17" name="__codelineno-3-17" href="#__codelineno-3-17"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">warm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-3-18"><a id="__codelineno-3-18" name="__codelineno-3-18" href="#__codelineno-3-18"></a>
-</span><span id="__span-3-19"><a id="__codelineno-3-19" name="__codelineno-3-19" href="#__codelineno-3-19"></a><span class="c1"># Access realizations</span>
-</span><span id="__span-3-20"><a id="__codelineno-3-20" name="__codelineno-3-20" href="#__codelineno-3-20"></a><span class="n">Q_syn_r0</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># First realization</span>
-</span></code></pre></div>
-<h3 id="custom-parameters">Custom Parameters<a class="headerlink" href="#custom-parameters" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="c1"># Use Mexican Hat wavelet, 32 scales, AR(2) model</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span>
-</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>    <span class="n">Q_annual</span><span class="p">,</span>
-</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a>    <span class="n">wavelet</span><span class="o">=</span><span class="s1">&#39;mexh&#39;</span><span class="p">,</span>    <span class="c1"># Mexican Hat wavelet</span>
-</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>    <span class="n">scales</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>          <span class="c1"># 32 frequency scales</span>
-</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>    <span class="n">ar_order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>         <span class="c1"># AR(2) model for temporal persistence</span>
-</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a>    <span class="n">debug</span><span class="o">=</span><span class="kc">True</span>          <span class="c1"># Enable debug logging</span>
-</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="p">)</span>
-</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a>
-</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a><span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">warm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
-</span></code></pre></div>
-<h3 id="analyzing-sawp">Analyzing SAWP<a class="headerlink" href="#analyzing-sawp" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># Fit model</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="p">,</span> <span class="n">scales</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>
-</span><span id="__span-5-5"><a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a><span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-5-6"><a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-5-7"><a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a>
-</span><span id="__span-5-8"><a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a><span class="c1"># Plot SAWP time series</span>
-</span><span id="__span-5-9"><a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-</span><span id="__span-5-10"><a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">warm</span><span class="o">.</span><span class="n">Q_obs_annual</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">warm</span><span class="o">.</span><span class="n">sawp_</span><span class="p">)</span>
-</span><span id="__span-5-11"><a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Year&#39;</span><span class="p">)</span>
-</span><span id="__span-5-12"><a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;SAWP&#39;</span><span class="p">)</span>
-</span><span id="__span-5-13"><a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Scale Averaged Wavelet Power - Captures Time-Varying Energy&#39;</span><span class="p">)</span>
-</span><span id="__span-5-14"><a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a><span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="__span-5-15"><a id="__codelineno-5-15" name="__codelineno-5-15" href="#__codelineno-5-15"></a><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</span><span id="__span-5-16"><a id="__codelineno-5-16" name="__codelineno-5-16" href="#__codelineno-5-16"></a>
-</span><span id="__span-5-17"><a id="__codelineno-5-17" name="__codelineno-5-17" href="#__codelineno-5-17"></a><span class="c1"># SAWP reveals periods of high/low variability</span>
-</span></code></pre></div>
-<h3 id="comparing-wavelets">Comparing Wavelets<a class="headerlink" href="#comparing-wavelets" title="Permanent link">&para;</a></h3>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">wavelets</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;morl&#39;</span><span class="p">,</span> <span class="s1">&#39;mexh&#39;</span><span class="p">,</span> <span class="s1">&#39;gaus4&#39;</span><span class="p">]</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="k">for</span> <span class="n">wavelet</span> <span class="ow">in</span> <span class="n">wavelets</span><span class="p">:</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">warm</span> <span class="o">=</span> <span class="n">WARMGenerator</span><span class="p">(</span><span class="n">Q_annual</span><span class="p">,</span> <span class="n">wavelet</span><span class="o">=</span><span class="n">wavelet</span><span class="p">,</span> <span class="n">scales</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">warm</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">warm</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a>    <span class="n">ensemble</span> <span class="o">=</span> <span class="n">warm</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-6-8"><a id="__codelineno-6-8" name="__codelineno-6-8" href="#__codelineno-6-8"></a>
-</span><span id="__span-6-9"><a id="__codelineno-6-9" name="__codelineno-6-9" href="#__codelineno-6-9"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">wavelet</span><span class="si">}</span><span class="s2"> wavelet:&quot;</span><span class="p">)</span>
-</span><span id="__span-6-10"><a id="__codelineno-6-10" name="__codelineno-6-10" href="#__codelineno-6-10"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Generated mean: </span><span class="si">{</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span><span id="__span-6-11"><a id="__codelineno-6-11" name="__codelineno-6-11" href="#__codelineno-6-11"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Generated std:  </span><span class="si">{</span><span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<h3 id="primary-reference">Primary Reference<a class="headerlink" href="#primary-reference" title="Permanent link">&para;</a></h3>
-<p><strong>Nowak, K., Rajagopalan, B., &amp; Zagona, E. (2011).</strong> A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12.
-- <a href="https://doi.org/10.1016/j.jhydrol.2011.08.049">https://doi.org/10.1016/j.jhydrol.2011.08.049</a></p>
-<h3 id="related-work">Related Work<a class="headerlink" href="#related-work" title="Permanent link">&para;</a></h3>
-<p><strong>Kwon, H.-H., Lall, U., &amp; Khalil, A. F. (2007).</strong> Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition: Applications to rainfall and temperature. <em>Water Resources Research</em>, 43(5).
-- Precursor to WARM, introduced wavelet-AR methodology
-- WARM extends this with SAWP for time-varying power</p>
-<p><strong>Torrence, C., &amp; Compo, G. P. (1998).</strong> A Practical Guide to Wavelet Analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78.
-- Comprehensive guide to wavelet analysis
-- Foundational reference for continuous wavelet transform</p>
-<p><strong>Box, G. E. P., Jenkins, G. M., Reinsel, G. C., &amp; Ljung, G. M. (2015).</strong> <em>Time Series Analysis: Forecasting and Control</em> (5th ed.). Wiley.
-- Yule-Walker equations for AR parameter estimation
-- Theoretical foundation for autoregressive models</p>
-<h3 id="software">Software<a class="headerlink" href="#software" title="Permanent link">&para;</a></h3>
-<p><strong>PyWavelets</strong>: Wavelet transforms in Python
-- <a href="https://pywavelets.readthedocs.io/">https://pywavelets.readthedocs.io/</a>
-- Used for continuous wavelet transform (CWT)</p>
-<h2 id="version-history">Version History<a class="headerlink" href="#version-history" title="Permanent link">&para;</a></h2>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>v0.0.1</strong> (2024): Initial implementation</li>
-<li>Univariate (single-site) WARM</li>
-<li>Morlet, Mexican Hat, Gaussian wavelets supported</li>
-<li>AR(1) through AR(p) models</li>
-<li>SAWP-based time-varying power preservation</li>
-<li>Full test coverage (39 tests)</li>
+<li>Mean and variance (exactly, via post-reconstruction adjustment)</li>
+<li>Lag-1 autocorrelation (approximately, via AR models)</li>
+<li>Multi-year persistence and low-frequency variability (via wavelet decomposition)</li>
+<li>Non-stationary variance structure (via SAWP)</li>
+<li>Power spectrum (via wavelet amplitude preservation)</li>
 </ul>
-<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
-<ol>
-<li><strong>Multi-Site Extension</strong></li>
-<li>Implement VAR (Vector AR) models at each scale</li>
-<li>
-<p>Spatial correlation preservation via coupled wavelets</p>
-</li>
-<li>
-<p><strong>Distribution Preservation</strong></p>
-</li>
-<li>Optional log-transformation for skewed flows</li>
-<li>
-<p>Quantile mapping post-processing</p>
-</li>
-<li>
-<p><strong>Automatic Parameter Selection</strong></p>
-</li>
-<li>AIC/BIC for AR order selection</li>
-<li>
-<p>Cross-validation for scale selection</p>
-</li>
-<li>
-<p><strong>Monthly/Daily Disaggregation</strong></p>
-</li>
-<li>Couple WARM (annual) with K-NN or HMM (monthly/daily)</li>
-<li>
-<p>Preserve both annual structure (WARM) and seasonal patterns</p>
-</li>
-<li>
-<p><strong>Computational Optimization</strong></p>
-</li>
-<li>Parallel AR fitting across scales</li>
-<li>GPU-accelerated wavelet transforms for large datasets</li>
-</ol>
+<p><strong>Not preserved:</strong>
+- Exact marginal distribution shape (Gaussian innovations)
+- Skewness and higher moments (not explicitly modeled)
+- Spatial correlations (univariate method)</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Annual frequency only — for finer resolution, couple with a disaggregation method</li>
+<li>Univariate (single site) — no native multi-site support</li>
+<li>Inverse CWT is approximate (PyWavelets); corrected by mean/variance adjustment</li>
+<li>Edge effects in CWT for short records (&lt; 20 years)</li>
+<li>Gaussian AR innovations may underrepresent extremes</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p><strong>Primary:</strong>
+Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12. https://doi.org/10.1016/j.jhydrol.2011.08.049</p>
+<p><strong>See also:</strong>
+- Kwon, H.-H., Lall, U., and Khalil, A.F. (2007). Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition. <em>Water Resources Research</em>, 43(5).
+- Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78.</p>
+<hr />
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/warm.py</code>
+<strong>Tests:</strong> <code>tests/test_warm_generator.py</code></p>
 
 
 

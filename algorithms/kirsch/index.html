@@ -6,7 +6,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Synthetic Generation Library — stochastic streamflow generation for hydrologic analysis">
+        <meta name="description" content="Stochastic streamflow generation for hydrologic analysis">
       
       
         <meta name="author" content="Trevor Amestoy">
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#kirsch-monthly-bootstrap-generator" class="md-skip">
+        <a href="#kirsch-2013-monthly-bootstrap-generator" class="md-skip">
           Skip to content
         </a>
       
@@ -728,22 +728,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -756,9 +756,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -779,104 +779,29 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#normal-score-transform-nst" class="md-nav__link">
-    <span class="md-ellipsis">
-      Normal Score Transform (NST)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cross-year-correlation-preservation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Cross-Year Correlation Preservation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#matrix-repair-for-non-psd-correlation-matrices" class="md-nav__link">
-    <span class="md-ellipsis">
-      Matrix Repair for Non-PSD Correlation Matrices
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1189,22 +1114,22 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#technical-specifications" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Technical Specifications
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm-description" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm Description
+      Algorithm
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm Description">
+    <nav class="md-nav" aria-label="Algorithm">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -1217,9 +1142,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fittingcalibration" class="md-nav__link">
+  <a href="#fitting" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting/Calibration
+      Fitting
     </span>
   </a>
   
@@ -1240,104 +1165,29 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-parameters" class="md-nav__link">
+  <a href="#parameters" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Parameters
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithmic-details" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithmic Details
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithmic Details">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#normal-score-transform-nst" class="md-nav__link">
-    <span class="md-ellipsis">
-      Normal Score Transform (NST)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#cross-year-correlation-preservation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Cross-Year Correlation Preservation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#matrix-repair-for-non-psd-correlation-matrices" class="md-nav__link">
-    <span class="md-ellipsis">
-      Matrix Repair for Non-PSD Correlation Matrices
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm-variations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm Variations
+      Properties Preserved
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#implementation-notes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Implementation Notes
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Implementation Notes">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#computational-complexity" class="md-nav__link">
-    <span class="md-ellipsis">
-      Computational complexity
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
       Limitations
     </span>
   </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#special-handling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Special handling
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -1369,273 +1219,118 @@
   
 
 
-<h1 id="kirsch-monthly-bootstrap-generator">Kirsch Monthly Bootstrap Generator<a class="headerlink" href="#kirsch-monthly-bootstrap-generator" title="Permanent link">&para;</a></h1>
-<p><strong>Classification:</strong> Nonparametric
-<strong>Temporal Resolution:</strong> Monthly
-<strong>Site Compatibility:</strong> Multisite</p>
-<hr />
-<h2 id="technical-specifications">Technical Specifications<a class="headerlink" href="#technical-specifications" title="Permanent link">&para;</a></h2>
+<h1 id="kirsch-2013-monthly-bootstrap-generator">Kirsch (2013) Monthly Bootstrap Generator<a class="headerlink" href="#kirsch-2013-monthly-bootstrap-generator" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Specification</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Input data</td>
-<td>Monthly streamflow, multisite capable, aggregated from any finer resolution</td>
+<td><strong>Type</strong></td>
+<td>Nonparametric</td>
 </tr>
 <tr>
-<td>Output frequency</td>
-<td>MS (month start)</td>
+<td><strong>Resolution</strong></td>
+<td>Monthly</td>
 </tr>
 <tr>
-<td>Distributional assumption</td>
-<td>Nonparametric (empirical)</td>
+<td><strong>Sites</strong></td>
+<td>Multisite</td>
 </tr>
 <tr>
-<td>Correlation structure</td>
-<td>Spatial (cross-site) and temporal (intra-annual) via Cholesky decomposition</td>
+<td><strong>Class</strong></td>
+<td><code>KirschGenerator</code></td>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="algorithm-description">Algorithm Description<a class="headerlink" href="#algorithm-description" title="Permanent link">&para;</a></h2>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Kirsch method generates synthetic multi-site monthly streamflow by bootstrapping standardized residuals and imposing fitted correlation structure via Cholesky decomposition. A cross-year shifted matrix preserves December-to-January correlations. An optional normal score transform prevents bias when working in log-space.</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Data aggregation to monthly resolution</strong></li>
-<li>Group input data by (year, month) and sum</li>
-<li>Create MultiIndex DataFrame with levels: ['year', 'month']</li>
-<li>
-<p>Store as <code>Qm</code> with shape (n_years × 12, n_sites)</p>
-</li>
-<li>
-<p><strong>Optional log-transformation</strong></p>
-</li>
-<li>If <code>generate_using_log_flow=True</code>: Apply <code>log(Qm)</code> with clipping at 1e-6 to prevent log(0)</li>
-<li>This improves handling of skewed distributions and prevents bias in back-transformation</li>
+<li><strong>Aggregate to monthly</strong> — group by (year, month) and sum.</li>
+<li><strong>Optional log transform</strong> — if <code>generate_using_log_flow=True</code>, apply <code>log(Q)</code> (clipped at 1e-6).</li>
 </ol>
-<h3 id="fittingcalibration">Fitting/Calibration<a class="headerlink" href="#fittingcalibration" title="Permanent link">&para;</a></h3>
+<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Compute monthly statistics</strong></li>
-<li>
-<p>For each month m ∈ {1, 2, ..., 12} and site s:</p>
-<ul>
-<li><code>mean_month[m, s]</code> = mean of all month-m values across years</li>
-<li><code>std_month[m, s]</code> = standard deviation of all month-m values</li>
-</ul>
-</li>
-<li>
-<p><strong>Create standardized residuals</strong></p>
-</li>
-<li>For each year y, month m, site s:
-     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Z_h[y, m, s] = (Qm[y, m, s] - mean_month[m, s]) / std_month[m, s]
+<li><strong>Monthly statistics</strong> — for each month m and site s, compute mean and standard deviation.</li>
+<li><strong>Standardized residuals</strong>:
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Z_h[y, m, s] = (Q[y, m, s] - mean[m, s]) / std[m, s]
 </span></code></pre></div></li>
-<li>
-<p>Shape: (n_years, 12, n_sites)</p>
-</li>
-<li>
-<p><strong>Apply normal score transform</strong> (conditional on log-flow option)</p>
-</li>
-<li>If <code>generate_using_log_flow=True</code>:<ul>
-<li>For each month m and site s:</li>
-<li>Sort <code>Z_h[:, m, s]</code> to get empirical CDF</li>
-<li>Compute plotting positions: <code>pp = (rank - 0.5) / n_years</code> (Hazen formula)</li>
-<li>Map to normal quantiles: <code>nscores = Φ⁻¹(pp)</code></li>
-<li>Store sorted values and normal scores for inverse mapping</li>
-<li>Create <code>Y</code> by interpolating <code>Z_h</code> onto normal scores</li>
-</ul>
-</li>
-<li>Else: <code>Y = Z_h</code></li>
-<li>
-<p>Purpose: Prevents bias from interaction between non-Gaussian residuals and exp() back-transform</p>
-</li>
-<li>
-<p><strong>Create cross-year shifted matrix Y_prime</strong></p>
-</li>
-<li>Preserves correlations between late months of year y and early months of year y+1</li>
-<li>
-<p>Construction (shape: n_years-1 × 12 × n_sites):
-     <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Y_prime[:, 0:6, :] = Y[:-1, 6:12, :]   # Jul-Dec of year i → Jan-Jun position
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Y_prime[:, 6:12, :] = Y[1:, 0:6, :]     # Jan-Jun of year i+1 → Jul-Dec position
-</span></code></pre></div></p>
-</li>
-<li>
-<p><strong>Compute correlation matrices and Cholesky decomposition</strong> (per site)</p>
-</li>
-<li>For each site s:<ul>
-<li>Compute 12×12 correlation matrix from <code>Y[:, :, s]</code> (shape: n_years × 12)</li>
-<li><code>corr_s = np.corrcoef(Y[:, :, s].T)</code></li>
-<li>Compute 12×12 correlation matrix from <code>Y_prime[:, :, s]</code></li>
-<li><code>corr_prime_s = np.corrcoef(Y_prime[:, :, s].T)</code></li>
-<li>Apply matrix repair if not positive semi-definite (spectral method by default)</li>
-<li>Compute Cholesky: <code>U_site[s] = cholesky(corr_s).T</code></li>
-<li>Compute Cholesky: <code>U_prime_site[s] = cholesky(corr_prime_s).T</code></li>
-</ul>
-</li>
+<li><strong>Normal score transform</strong> (if log-flow) — for each month-site pair:</li>
+<li>Rank residuals, map to normal quantiles via Hazen plotting positions</li>
+<li>Store mapping for inverse transform during generation</li>
+<li>Result: <code>Y</code> in standard normal space</li>
+<li><strong>Cross-year shifted matrix</strong> <code>Y_prime</code> — preserves inter-year correlations:
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Y_prime[:, 0:6, :]  = Y[:-1, 6:12, :]   # Jul-Dec of year i
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Y_prime[:, 6:12, :] = Y[1:, 0:6, :]      # Jan-Jun of year i+1
+</span></code></pre></div></li>
+<li><strong>Cholesky decomposition</strong> — for each site, compute 12x12 correlation matrix of Y (and Y_prime), repair if not PSD (spectral method), then Cholesky factor.</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Bootstrap sampling of indices</strong></li>
-<li>Generate random year indices <code>M</code> with shape (n_years+1, 12)</li>
-<li>Each <code>M[i, m]</code> is a random integer in [0, n_historic_years)</li>
-<li>
-<p>Generate separate indices <code>M_prime</code> for Y_prime (max index = n_historic_years - 1)</p>
-</li>
-<li>
-<p><strong>Create bootstrap tensors</strong></p>
-</li>
-<li>For standard tensor:
-     <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>X[i, m, s] = Y[M[i, m], m, s]
+<li><strong>Bootstrap</strong> — sample random year indices for each (year, month) position.</li>
+<li><strong>Cholesky mixing</strong> — multiply bootstrap samples by Cholesky factor to impose correlation:
+   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Z[:, :, s] = X[:, :, s] @ U[s]
 </span></code></pre></div></li>
-<li>
-<p>For shifted tensor:
-     <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>X_prime[i, m, s] = Y_prime[M_prime[i, m], m, s]
-</span></code></pre></div></p>
-</li>
-<li>
-<p><strong>Apply Cholesky mixing</strong> (per site)</p>
-</li>
-<li>For each site s:
-     <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Z[:, :, s] = X[:, :, s] @ U_site[s]
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Z_prime[:, :, s] = X_prime[:, :, s] @ U_prime_site[s]
+<li><strong>Combine</strong> Z and Z_prime to preserve intra-year correlations:
+   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ZC[i, 0:6, :]  = Z_prime[i, 6:12, :]    # first half from shifted
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ZC[i, 6:12, :] = Z[i+1, 6:12, :]         # second half from regular
 </span></code></pre></div></li>
-<li>
-<p>This imposes the fitted correlation structure on the bootstrap samples</p>
-</li>
-<li>
-<p><strong>Combine Z and Z_prime to preserve intra-year correlations</strong></p>
-</li>
-<li>For years 0 to n_years-1:
-     <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>ZC[i, 0:6, :] = Z_prime[i, 6:12, :]    # Late months from shifted
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>ZC[i, 6:12, :] = Z[i+1, 6:12, :]       # Late months from regular
-</span></code></pre></div></li>
-<li>
-<p>This ensures the second half of each synthetic year has proper correlation with the first half</p>
-</li>
-<li>
-<p><strong>Inverse normal score transform</strong> (conditional)</p>
-</li>
-<li>
-<p>If log-flow option was used:</p>
-<ul>
-<li>For each month m, site s:</li>
-<li>Use stored sorted values and normal scores</li>
-<li>Linear extrapolation at tails for out-of-sample values</li>
-<li>Map <code>ZC[:, m, s]</code> back to original standardized space</li>
-</ul>
-</li>
-<li>
-<p><strong>Destandardize</strong></p>
-</li>
-<li>
-<p>For each month m:
-     <div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>Q_syn[:, m, :] = ZC[:, m, :] * std_month[m, :] + mean_month[m, :]
-</span></code></pre></div></p>
-</li>
-<li>
-<p><strong>Back-transform from log space</strong> (conditional)</p>
-</li>
-<li>
-<p>If log-flow: <code>Q_syn = exp(Q_syn)</code></p>
-</li>
-<li>
-<p><strong>Reshape and return</strong></p>
-</li>
-<li>Flatten to (n_years × 12, n_sites) with DatetimeIndex</li>
+<li><strong>Inverse normal score transform</strong> (if log-flow) — map back using stored mappings with linear tail extrapolation.</li>
+<li><strong>Destandardize</strong>: <code>Q_syn = ZC * std[m] + mean[m]</code></li>
+<li><strong>Back-transform</strong> from log space if applicable: <code>Q_syn = exp(Q_syn)</code></li>
 </ol>
-<hr />
-<h2 id="key-parameters">Key Parameters<a class="headerlink" href="#key-parameters" title="Permanent link">&para;</a></h2>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Type</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>generate_using_log_flow</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Log-transform before processing (recommended for skewed data)</td>
+</tr>
+<tr>
+<td><code>matrix_repair_method</code></td>
+<td><code>str</code></td>
+<td><code>'spectral'</code></td>
+<td>Method for repairing non-PSD correlation matrices</td>
+</tr>
+</tbody>
+</table>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong><code>generate_using_log_flow</code></strong>: Apply log transformation before processing</li>
-<li>Type: bool</li>
-<li>Default: <code>True</code></li>
-<li>
-<p>Notes: Improves handling of skewed distributions; prevents bias when using normal score transform with exp() back-transform. Set to <code>False</code> for symmetric or normally-distributed flows.</p>
-</li>
-<li>
-<p><strong><code>matrix_repair_method</code></strong>: Method for repairing non-positive-definite correlation matrices</p>
-</li>
-<li>Type: str</li>
-<li>Default: <code>'spectral'</code></li>
-<li>Options: <code>'spectral'</code> (eigenvalue adjustment)</li>
-<li>Notes: Required when sample correlations yield non-PSD matrices; may cause correlation inflation</li>
+<li>Monthly means and standard deviations (per site)</li>
+<li>Spatial cross-site correlations (via Cholesky decomposition)</li>
+<li>Intra-annual temporal correlation (within and across year boundaries)</li>
+<li>Empirical marginal distributions (nonparametric)</li>
 </ul>
-<hr />
-<h2 id="algorithmic-details">Algorithmic Details<a class="headerlink" href="#algorithmic-details" title="Permanent link">&para;</a></h2>
-<h3 id="normal-score-transform-nst">Normal Score Transform (NST)<a class="headerlink" href="#normal-score-transform-nst" title="Permanent link">&para;</a></h3>
-<p>Applied when generating in log-space to prevent bias. Without NST, standardized residuals that are non-Gaussian would interact poorly with the exp() back-transformation, creating systematic bias.</p>
-<p><strong>Forward transform</strong> (during fitting):
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>For each month m, site s:
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>  1. Sort Z_h[:, m, s] to get sorted_vals
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>  2. Compute plotting positions: pp[k] = (k - 0.5) / n_years
-</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>  3. Map to normal quantiles: nscores[k] = Φ⁻¹(pp[k])
-</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>  4. Store {sorted_vals, nscores} for month-site pair
-</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>  5. Y[:, m, s] = interp(Z_h[:, m, s], sorted_vals, nscores)
-</span></code></pre></div></p>
-<p><strong>Inverse transform</strong> (during generation):
-<div class="highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>For each month m, site s:
-</span><span id="__span-8-2"><a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a>  1. Retrieve {sorted_vals, nscores} for month-site pair
-</span><span id="__span-8-3"><a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a>  2. Extend with linear extrapolation at tails:
-</span><span id="__span-8-4"><a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a>     - Lower tail slope: (sorted[1] - sorted[0]) / (nscore[1] - nscore[0])
-</span><span id="__span-8-5"><a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a>     - Upper tail slope: (sorted[-1] - sorted[-2]) / (nscore[-1] - nscore[-2])
-</span><span id="__span-8-6"><a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a>  3. ZC_orig[:, m, s] = interp(ZC[:, m, s], extended_nscores, extended_sorted)
-</span></code></pre></div></p>
-<h3 id="cross-year-correlation-preservation">Cross-Year Correlation Preservation<a class="headerlink" href="#cross-year-correlation-preservation" title="Permanent link">&para;</a></h3>
-<p>The Y_prime tensor enables preservation of correlations between successive years (e.g., December to January).</p>
-<p><strong>Construction logic:</strong>
-- Y contains standardized flows in calendar order
-- Y_prime contains the same data but with 6-month phase shift
-- When Y and Y_prime are sampled independently and combined, the result has proper within-year correlation without artificially coupling all 12 months to the same historic year</p>
-<p><strong>Combination in generation:</strong>
-- First 6 months of synthetic year i: Use months 7-12 from Y_prime sample i
-- Last 6 months of synthetic year i: Use months 7-12 from Y sample i+1
-- This creates a "seam" at mid-year where cross-year correlation is preserved</p>
-<h3 id="matrix-repair-for-non-psd-correlation-matrices">Matrix Repair for Non-PSD Correlation Matrices<a class="headerlink" href="#matrix-repair-for-non-psd-correlation-matrices" title="Permanent link">&para;</a></h3>
-<p>Sample correlation matrices may not be positive semi-definite, especially with limited data.</p>
-<p><strong>Spectral method:</strong>
-1. Eigendecomposition: <code>corr = Q Λ Q^T</code>
-2. Clip negative eigenvalues: <code>Λ_fixed = max(Λ, ε)</code> where ε is small positive value
-3. Reconstruct: <code>corr_repaired = Q Λ_fixed Q^T</code>
-4. Rescale to unit diagonal: <code>corr_repaired[i,i] = 1</code></p>
-<hr />
-<h2 id="algorithm-variations">Algorithm Variations<a class="headerlink" href="#algorithm-variations" title="Permanent link">&para;</a></h2>
+<p><strong>Not preserved:</strong>
+- Values outside observed range (bootstrap limitation, except via NST tail extrapolation)</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Standard (log-space with NST)</strong>: <code>generate_using_log_flow=True</code> - Recommended for typical skewed streamflow data</li>
-<li><strong>Linear-space</strong>: <code>generate_using_log_flow=False</code> - Appropriate for symmetric distributions or when log-transform is inappropriate</li>
+<li>Requires complete years (all 12 months present per year)</li>
+<li>Y_prime construction loses one year of data</li>
+<li>Sample correlation matrices may require PSD repair, which can inflate correlations</li>
+<li>Bootstrap resampling bounded by historical range</li>
 </ul>
-<hr />
-<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">&para;</a></h2>
-<h3 id="computational-complexity">Computational complexity<a class="headerlink" href="#computational-complexity" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Fitting: O(n_sites × n_years × 12²) for correlation computation and Cholesky decomposition</li>
-<li>Generation: O(n_sites × n_synthetic × 12²) for Cholesky mixing per realization</li>
-</ul>
-<h3 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Requires complete years (all 12 months present for each year)</li>
-<li>Cannot handle missing months within a year</li>
-<li>Y_prime construction loses one year of data (n_years - 1 available for Y_prime)</li>
-<li>Bootstrap resampling cannot generate values outside observed range (except via extrapolation in NST)</li>
-</ul>
-<h3 id="special-handling">Special handling<a class="headerlink" href="#special-handling" title="Permanent link">&para;</a></h3>
-<ul>
-<li>Negative values after generation: Clipped to minimum observed value per month</li>
-<li>Non-PSD matrices: Automatic repair with user warning about potential correlation inflation</li>
-<li>Index bounds: M_prime indices limited to Y_prime.shape[0] to prevent out-of-bounds access</li>
-</ul>
-<hr />
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
-Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of alternative hydro-climate scenarios on transfer agreements: A practical improvement for generating synthetic streamflows. <em>Journal of Water Resources Planning and Management</em>, 139(4), 396-406.</p>
-<p><strong>Implementation details:</strong>
-- Normal score transform: Prevents bias in log-normal generation
-- Matrix repair: Uses spectral method from <code>synhydro.core.statistics.repair_correlation_matrix</code>
-- Monthly statistics: Computed via <code>synhydro.core.statistics.compute_monthly_statistics</code></p>
+Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of alternative hydro-climate scenarios on transfer agreements: A practical improvement for generating synthetic streamflows. <em>Journal of Water Resources Planning and Management</em>, 139(4), 396-406. https://doi.org/10.1061/(ASCE)WR.1943-5452.0000287</p>
 <hr />
-<p><strong>SynHydro Implementation:</strong> <a href="https://github.com/TrevorJA/SynHydro/blob/main/src/synhydro/methods/generation/nonparametric/kirsch.py"><code>src/synhydro/methods/generation/nonparametric/kirsch.py</code></a></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/kirsch.py</code>
+<strong>Tests:</strong> <code>tests/test_kirsch_generator.py</code></p>
 
 
 
