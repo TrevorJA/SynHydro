@@ -12,13 +12,9 @@
         <meta name="author" content="Trevor Amestoy">
       
       
-        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/nowak_disaggregation/">
+        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/arfima/">
       
       
-        <link rel="prev" href="../multisite_hmm/">
-      
-      
-        <link rel="next" href="../../api/generators/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Nowak Disaggregation - SynHydro</title>
+        <title>ARFIMA — Autoregressive Fractionally Integrated Moving Average (Hosking 1984) - SynHydro</title>
       
     
     
@@ -82,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nowak-2010-knn-temporal-disaggregation" class="md-skip">
+        <a href="#arfima-autoregressive-fractionally-integrated-moving-average-hosking-1984" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Nowak Disaggregation
+              ARFIMA — Autoregressive Fractionally Integrated Moving Average (Hosking 1984)
             
           </span>
         </div>
@@ -279,12 +275,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../" class="md-tabs__link">
           
   
@@ -581,31 +575,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -618,7 +607,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Algorithms
@@ -790,32 +779,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Nowak Disaggregation
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../nowak_disaggregation/" class="md-nav__link">
         
   
   
@@ -826,113 +793,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithm">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Preprocessing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fitting
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Disaggregation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Limitations
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      References
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1151,9 +1011,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#generation" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Generation
     </span>
   </a>
   
@@ -1219,7 +1079,7 @@
   
 
 
-<h1 id="nowak-2010-knn-temporal-disaggregation">Nowak (2010) KNN Temporal Disaggregation<a class="headerlink" href="#nowak-2010-knn-temporal-disaggregation" title="Permanent link">&para;</a></h1>
+<h1 id="arfima-autoregressive-fractionally-integrated-moving-average-hosking-1984">ARFIMA — Autoregressive Fractionally Integrated Moving Average (Hosking 1984)<a class="headerlink" href="#arfima-autoregressive-fractionally-integrated-moving-average-hosking-1984" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1230,44 +1090,87 @@
 <tbody>
 <tr>
 <td><strong>Type</strong></td>
-<td>Nonparametric</td>
+<td>Parametric</td>
 </tr>
 <tr>
 <td><strong>Resolution</strong></td>
-<td>Monthly to Daily</td>
+<td>Monthly / Annual</td>
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
-<td>Univariate / Multisite</td>
+<td>Univariate</td>
 </tr>
 <tr>
 <td><strong>Class</strong></td>
-<td><code>NowakDisaggregator</code></td>
+<td><code>ARFIMAGenerator</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, it identifies the K nearest historic months by total flow, randomly selects one using Lall-Sharma kernel weights, and applies its daily proportions to the synthetic total.</p>
+<p>ARFIMA(p,d,q) extends classical ARMA models by allowing the differencing parameter d to take fractional values in (0, 0.5), enabling the model to reproduce long-range dependence (LRD) observed in hydrologic timeseries. The fractional differencing operator produces hyperbolic decay in the autocorrelation function, matching the Hurst phenomenon that standard AR/ARMA models fundamentally cannot capture. This makes ARFIMA particularly important for generating synthetic flows that preserve multi-year drought persistence and low-frequency variability.</p>
+<p>The Hurst exponent H is related to the fractional differencing parameter by H = d + 0.5, providing a direct link between the model parameter and the observed long-memory behavior of the timeseries.</p>
 <h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Validate and store daily observed flows.</li>
-<li>Build historic monthly totals at the index gauge (sum across all sites for multi-site disaggregation).</li>
+<li><strong>Validate input</strong> as univariate timeseries with at least 30 timesteps (50+ recommended for reliable d estimation).</li>
+<li><strong>Deseasonalize</strong> if monthly data: remove monthly means and divide by monthly standard deviations to produce stationary residuals.</li>
+<li><strong>Assess stationarity</strong> via ADF test. If non-stationary, apply integer differencing first, then fit fractional component to the differenced series.</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<p>For each calendar month m, fit a <code>sklearn.NearestNeighbors</code> model on the scalar historic monthly totals. Only historic months within +/- <code>max_month_shift</code> calendar days of month m's center are included in the pool.</p>
-<h3 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h3>
-<p>For each synthetic monthly flow <code>Q_syn_m</code>:</p>
 <ol>
-<li><strong>Find neighbors</strong> — query the KNN model for the K nearest historic months by Euclidean distance on total flow.</li>
-<li><strong>Select one neighbor</strong> — draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>K(i) = (1/i) / sum_{j=1}^{K} (1/j)
+<li><strong>Estimate fractional differencing parameter d</strong> using one of:</li>
+<li><strong>Whittle estimator</strong> (maximum likelihood in frequency domain, recommended):
+     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>d_hat = argmin_d sum[ log f(w_j; d) + I(w_j) / f(w_j; d) ]
 </span></code></pre></div>
-   This harmonic weighting favors closer analogs while maintaining stochastic diversity.</li>
-<li><strong>Disaggregate</strong> — apply the selected month's daily proportions:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>q_d = Q_syn_m * (q*_d / sum(q*_d&#39;))
+     where I(w_j) is the periodogram and f(w_j; d) is the spectral density of the fractionally differenced process.</li>
+<li><strong>R/S analysis</strong> for Hurst exponent: compute H, then d = H - 0.5.</li>
+<li>
+<p><strong>GPH (Geweke-Porter-Hudak)</strong> log-periodogram regression.</p>
+</li>
+<li>
+<p><strong>Apply fractional differencing</strong> to obtain the fractionally differenced series:
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>(1 - B)^d X_t = sum_{k=0}^{inf} pi_k X_{t-k}
 </span></code></pre></div>
-   For multi-site data, each site is disaggregated independently using the same selected analog month.</li>
+   where the fractional differencing coefficients are:
+   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pi_0 = 1
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>pi_k = pi_{k-1} * (k - 1 - d) / k,  for k &gt;= 1
+</span></code></pre></div>
+   Truncate the infinite sum at lag K (default: min(100, n/2)).</p>
+</li>
+<li>
+<p><strong>Fit ARMA(p,q) to the differenced series</strong> via maximum likelihood or Yule-Walker:</p>
+</li>
+<li>Select p, q by AIC/BIC (default: p=1, q=0 for parsimony).</li>
+<li>
+<p>Store AR coefficients phi, MA coefficients theta, innovation variance sigma_eps^2.</p>
+</li>
+<li>
+<p><strong>Store all fitted parameters</strong>: d, phi, theta, sigma_eps^2, seasonal means/stds (if monthly), truncation lag K.</p>
+</li>
+</ol>
+<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Generate ARMA innovations</strong> for the differenced series:
+   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>eps_t ~ N(0, sigma_eps^2)
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Invert fractional differencing</strong> to recover the long-memory process:
+   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>X_t = W_t + sum_{k=1}^{K} psi_k * X_{t-k}
+</span></code></pre></div>
+   where the inverse coefficients are:
+   <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>psi_0 = 1
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>psi_k = psi_{k-1} * (k - 1 + d) / k,  for k &gt;= 1
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Re-seasonalize</strong> if monthly: multiply by monthly standard deviations and add monthly means.</p>
+</li>
+<li>
+<p><strong>Enforce non-negativity</strong>: clip to zero or apply back-transformation if log-space was used.</p>
+</li>
 </ol>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -1281,42 +1184,66 @@
 </thead>
 <tbody>
 <tr>
-<td><code>n_neighbors</code></td>
+<td><code>p</code></td>
 <td><code>int</code></td>
-<td><code>5</code></td>
-<td>K — number of candidate neighbors</td>
+<td><code>1</code></td>
+<td>AR order for the short-memory component</td>
 </tr>
 <tr>
-<td><code>max_month_shift</code></td>
+<td><code>q</code></td>
 <td><code>int</code></td>
-<td><code>7</code></td>
-<td>Days of calendar flexibility around each month</td>
+<td><code>0</code></td>
+<td>MA order for the short-memory component</td>
+</tr>
+<tr>
+<td><code>d_method</code></td>
+<td><code>str</code></td>
+<td><code>'whittle'</code></td>
+<td>Estimation method for d: <code>'whittle'</code>, <code>'gph'</code>, or <code>'rs'</code></td>
+</tr>
+<tr>
+<td><code>truncation_lag</code></td>
+<td><code>int</code></td>
+<td><code>100</code></td>
+<td>Truncation lag K for fractional differencing coefficients</td>
+</tr>
+<tr>
+<td><code>deseasonalize</code></td>
+<td><code>bool</code></td>
+<td><code>True</code></td>
+<td>Remove monthly seasonality before fitting (set False for annual data)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Daily flow patterns within each month (borrowed from historical record)</li>
-<li>Monthly totals (exact, by construction)</li>
-<li>Multi-site consistency (same analog month applied to all sites)</li>
+<li>Long-range dependence / Hurst exponent (directly parameterized via d)</li>
+<li>Lag-1 through lag-p short-memory autocorrelation (via AR component)</li>
+<li>Monthly means and standard deviations (via deseasonalization)</li>
+<li>Power spectrum at low frequencies (hyperbolic decay)</li>
 </ul>
 <p><strong>Not preserved:</strong>
-- Month-to-month daily transitions (each month disaggregated independently)
-- Daily patterns outside historical range</p>
+- Spatial correlations (univariate method)
+- Non-Gaussian marginal distributions (Gaussian innovations assumed)
+- Non-stationarity or trends</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Cannot produce daily patterns not seen in the historical record</li>
-<li>Leap year handling requires proportional adjustment when analog and target months differ</li>
-<li>Quality depends on having a sufficiently long historical record to find good analogs</li>
+<li>Univariate only. For multisite applications, combine with spatial correlation methods</li>
+<li>Requires long records (50+ years) for reliable estimation of d</li>
+<li>Gaussian innovation assumption may underrepresent extreme events</li>
+<li>Truncation of infinite fractional differencing series introduces approximation error</li>
+<li>AIC/BIC model selection for p, q can be sensitive to d estimation</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
-Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. <em>Water Resources Research</em>, 46(8). https://doi.org/10.1029/2009WR008530</p>
+Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using fractional differencing. <em>Water Resources Research</em>, 20(12), 1898-1908. https://doi.org/10.1029/WR020i012p01898</p>
 <p><strong>See also:</strong>
-- Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693.</p>
+- Granger, C.W.J., and Joyeux, R. (1980). An introduction to long-memory time series models and fractional differencing. <em>Journal of Time Series Analysis</em>, 1(1), 15-29. https://doi.org/10.1111/j.1467-9892.1980.tb00297.x
+- Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. <em>Water Resources Research</em>, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
+- Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. <em>Hydrological Sciences Journal</em>, 47(4), 573-595.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/nowak.py</code>
-<strong>Tests:</strong> <code>tests/test_nowak_disaggregator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/arfima.py</code>
+<strong>Tests:</strong> <code>tests/test_arfima_generator.py</code></p>
 
 
 

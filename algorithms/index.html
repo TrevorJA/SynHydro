@@ -1155,6 +1155,20 @@
 <td>Annual</td>
 <td>Multi</td>
 </tr>
+<tr>
+<td><a href="arfima/">ARFIMA</a></td>
+<td><code>ARFIMAGenerator</code></td>
+<td>Parametric</td>
+<td>Monthly/Annual</td>
+<td>Single</td>
+</tr>
+<tr>
+<td><a href="knn_bootstrap/">KNN Bootstrap</a></td>
+<td><code>KNNBootstrapGenerator</code></td>
+<td>Nonparametric</td>
+<td>Monthly/Annual</td>
+<td>Single/Multi</td>
+</tr>
 </tbody>
 </table>
 <h2 id="disaggregation-methods">Disaggregation Methods<a class="headerlink" href="#disaggregation-methods" title="Permanent link">&para;</a></h2>
@@ -1174,6 +1188,18 @@
 <td>Nonparametric</td>
 <td>Monthly→Daily</td>
 </tr>
+<tr>
+<td><a href="valencia_schaake/">Valencia-Schaake</a></td>
+<td><code>ValenciaSchaakeDisaggregator</code></td>
+<td>Parametric</td>
+<td>Annual→Monthly</td>
+</tr>
+<tr>
+<td><a href="grygier_stedinger/">Grygier-Stedinger</a></td>
+<td><code>GrygierStedingerDisaggregator</code></td>
+<td>Parametric</td>
+<td>Annual→Monthly</td>
+</tr>
 </tbody>
 </table>
 <h2 id="key-properties-preserved">Key Properties Preserved<a class="headerlink" href="#key-properties-preserved" title="Permanent link">&para;</a></h2>
@@ -1187,6 +1213,8 @@
 <th style="text-align: center;">Phase Random</th>
 <th style="text-align: center;">WARM</th>
 <th style="text-align: center;">HMM</th>
+<th style="text-align: center;">ARFIMA</th>
+<th style="text-align: center;">KNN Bootstrap</th>
 </tr>
 </thead>
 <tbody>
@@ -1198,9 +1226,13 @@
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
 </tr>
 <tr>
 <td>Temporal correlation</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
@@ -1216,6 +1248,19 @@
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td>Long-range persistence</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
 </tr>
 <tr>
 <td>Non-stationarity</td>
@@ -1224,6 +1269,8 @@
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
 <td style="text-align: center;">—</td>
 </tr>
 <tr>
@@ -1234,6 +1281,8 @@
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">—</td>
 <td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
 </tr>
 <tr>
 <td>Power spectrum</td>
@@ -1243,6 +1292,19 @@
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">✓</td>
 <td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
+</tr>
+<tr>
+<td>Empirical distribution</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">—</td>
+<td style="text-align: center;">✓</td>
 </tr>
 </tbody>
 </table>

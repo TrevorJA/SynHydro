@@ -12,13 +12,9 @@
         <meta name="author" content="Trevor Amestoy">
       
       
-        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/nowak_disaggregation/">
+        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/knn_bootstrap/">
       
       
-        <link rel="prev" href="../multisite_hmm/">
-      
-      
-        <link rel="next" href="../../api/generators/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Nowak Disaggregation - SynHydro</title>
+        <title>KNN Bootstrap Generator (Lall and Sharma 1996) - SynHydro</title>
       
     
     
@@ -82,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nowak-2010-knn-temporal-disaggregation" class="md-skip">
+        <a href="#knn-bootstrap-generator-lall-and-sharma-1996" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Nowak Disaggregation
+              KNN Bootstrap Generator (Lall and Sharma 1996)
             
           </span>
         </div>
@@ -279,12 +275,10 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../" class="md-tabs__link">
           
   
@@ -581,31 +575,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   
@@ -618,7 +607,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             Algorithms
@@ -790,32 +779,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Nowak Disaggregation
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../nowak_disaggregation/" class="md-nav__link">
         
   
   
@@ -826,113 +793,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      Overview
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
-    <span class="md-ellipsis">
-      Algorithm
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Algorithm">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Preprocessing
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Fitting
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Disaggregation
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#limitations" class="md-nav__link">
-    <span class="md-ellipsis">
-      Limitations
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#references" class="md-nav__link">
-    <span class="md-ellipsis">
-      References
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1151,9 +1011,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#generation" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Generation
     </span>
   </a>
   
@@ -1219,7 +1079,7 @@
   
 
 
-<h1 id="nowak-2010-knn-temporal-disaggregation">Nowak (2010) KNN Temporal Disaggregation<a class="headerlink" href="#nowak-2010-knn-temporal-disaggregation" title="Permanent link">&para;</a></h1>
+<h1 id="knn-bootstrap-generator-lall-and-sharma-1996">KNN Bootstrap Generator (Lall and Sharma 1996)<a class="headerlink" href="#knn-bootstrap-generator-lall-and-sharma-1996" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1234,7 +1094,7 @@
 </tr>
 <tr>
 <td><strong>Resolution</strong></td>
-<td>Monthly to Daily</td>
+<td>Monthly / Annual</td>
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
@@ -1242,32 +1102,54 @@
 </tr>
 <tr>
 <td><strong>Class</strong></td>
-<td><code>NowakDisaggregator</code></td>
+<td><code>KNNBootstrapGenerator</code></td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, it identifies the K nearest historic months by total flow, randomly selects one using Lall-Sharma kernel weights, and applies its daily proportions to the synthetic total.</p>
+<p>The K-Nearest Neighbor (KNN) bootstrap generates synthetic streamflow by conditionally resampling from the historical record. At each timestep, the current flow value determines a neighborhood of K similar historical states, and the next value is drawn from the successors of those neighbors using kernel-weighted probabilities. This nonparametric approach preserves the empirical marginal distribution exactly and captures nonlinear dependence structures that parametric models may miss.</p>
+<p>For multisite applications, all sites are resampled jointly using the same selected neighbor index, preserving spatial correlation by construction.</p>
 <h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li>Validate and store daily observed flows.</li>
-<li>Build historic monthly totals at the index gauge (sum across all sites for multi-site disaggregation).</li>
+<li><strong>Validate input</strong> as univariate or multisite DataFrame with DatetimeIndex.</li>
+<li><strong>Construct state vectors</strong>: for each timestep t, define the feature vector used for neighbor search. Default: the flow value(s) at time t.</li>
+<li>For monthly data with lag-1 conditioning: feature = Q(t)</li>
+<li>For monthly data with seasonal conditioning: feature = [Q(t), month(t)]</li>
+<li><strong>Build successor pairs</strong>: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values.</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<p>For each calendar month m, fit a <code>sklearn.NearestNeighbors</code> model on the scalar historic monthly totals. Only historic months within +/- <code>max_month_shift</code> calendar days of month m's center are included in the pool.</p>
-<h3 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h3>
-<p>For each synthetic monthly flow <code>Q_syn_m</code>:</p>
 <ol>
-<li><strong>Find neighbors</strong> — query the KNN model for the K nearest historic months by Euclidean distance on total flow.</li>
-<li><strong>Select one neighbor</strong> — draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>K(i) = (1/i) / sum_{j=1}^{K} (1/j)
+<li>
+<p><strong>Determine K</strong> (number of neighbors). Default heuristic:
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>K = ceil(sqrt(n))
 </span></code></pre></div>
-   This harmonic weighting favors closer analogs while maintaining stochastic diversity.</li>
-<li><strong>Disaggregate</strong> — apply the selected month's daily proportions:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>q_d = Q_syn_m * (q*_d / sum(q*_d&#39;))
+   where n is the number of historical timesteps. Can also be set manually.</p>
+</li>
+<li>
+<p><strong>Fit KNN model</strong> using <code>sklearn.NearestNeighbors</code> on the historical feature vectors.</p>
+</li>
+<li>
+<p><strong>Compute Lall-Sharma kernel weights</strong> for neighbor selection:
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>K(i) = (1/i) / sum_{j=1}^{K} (1/j)
 </span></code></pre></div>
-   For multi-site data, each site is disaggregated independently using the same selected analog month.</li>
+   where i is the rank of the neighbor (i=1 is closest). This harmonic kernel gives the closest neighbor approximately twice the weight of the second-closest.</p>
+</li>
+<li>
+<p><strong>Store</strong> the fitted KNN model, the historical feature-successor pairs, and the kernel weights.</p>
+</li>
+</ol>
+<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Initialize</strong> by randomly selecting a historical timestep as the starting state.</li>
+<li><strong>For each subsequent timestep</strong>:
+   a. Query the KNN model for the K nearest neighbors of the current state.
+   b. Select one neighbor with probability K(i) (Lall-Sharma kernel).
+   c. The generated value is the <strong>successor</strong> of the selected neighbor in the historical record:
+      <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Q_syn(t+1) = Q_obs(neighbor_t + 1)
+</span></code></pre></div>
+   d. Update the current state to Q_syn(t+1) for the next iteration.</li>
+<li><strong>Multisite</strong>: use the index site (or multivariate distance) for neighbor search, then take the successor vector across all sites jointly.</li>
 </ol>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -1283,40 +1165,57 @@
 <tr>
 <td><code>n_neighbors</code></td>
 <td><code>int</code></td>
-<td><code>5</code></td>
-<td>K — number of candidate neighbors</td>
+<td><code>None</code></td>
+<td>K; if None, uses ceil(sqrt(n))</td>
 </tr>
 <tr>
-<td><code>max_month_shift</code></td>
+<td><code>feature_cols</code></td>
+<td><code>list</code></td>
+<td><code>None</code></td>
+<td>Columns to use as features for KNN search. If None, uses all site columns</td>
+</tr>
+<tr>
+<td><code>index_site</code></td>
+<td><code>str</code></td>
+<td><code>None</code></td>
+<td>Site to use for distance computation in multisite mode. If None, uses multivariate distance</td>
+</tr>
+<tr>
+<td><code>block_size</code></td>
 <td><code>int</code></td>
-<td><code>7</code></td>
-<td>Days of calendar flexibility around each month</td>
+<td><code>1</code></td>
+<td>Number of consecutive timesteps to resample as a block (1 = standard KNN)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Daily flow patterns within each month (borrowed from historical record)</li>
-<li>Monthly totals (exact, by construction)</li>
-<li>Multi-site consistency (same analog month applied to all sites)</li>
+<li>Empirical marginal distribution (resampled values are historical observations)</li>
+<li>Nonlinear dependence structure (via conditional resampling)</li>
+<li>Lag-1 autocorrelation (approximately, via nearest-neighbor conditioning)</li>
+<li>Spatial cross-correlations (via joint resampling in multisite mode)</li>
 </ul>
 <p><strong>Not preserved:</strong>
-- Month-to-month daily transitions (each month disaggregated independently)
-- Daily patterns outside historical range</p>
+- Values outside the historical range (bootstrap limitation)
+- Long-range persistence beyond the conditioning lag
+- Trends or non-stationarity</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Cannot produce daily patterns not seen in the historical record</li>
-<li>Leap year handling requires proportional adjustment when analog and target months differ</li>
-<li>Quality depends on having a sufficiently long historical record to find good analogs</li>
+<li>Cannot generate values outside the range of the historical record</li>
+<li>Sensitive to the choice of K: too small causes repetitive sequences, too large destroys temporal structure</li>
+<li>Curse of dimensionality for high-dimensional feature spaces (many sites)</li>
+<li>Successor-based resampling can create discontinuities at December-January boundaries if not handled explicitly</li>
+<li>Requires at least 20 years for monthly data to avoid excessive repetition of analogs</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
-Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. <em>Water Resources Research</em>, 46(8). https://doi.org/10.1029/2009WR008530</p>
+Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693. https://doi.org/10.1029/95WR02966</p>
 <p><strong>See also:</strong>
-- Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693.</p>
+- Rajagopalan, B., and Lall, U. (1999). A k-nearest-neighbor simulator for daily precipitation and other weather variables. <em>Water Resources Research</em>, 35(10), 3089-3101. https://doi.org/10.1029/1999WR900028
+- Lall, U. (1995). Recent advances in nonparametric function estimation: Hydrologic applications. <em>Reviews of Geophysics</em>, 33(S2), 1093-1102.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/nowak.py</code>
-<strong>Tests:</strong> <code>tests/test_nowak_disaggregator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/knn_bootstrap.py</code>
+<strong>Tests:</strong> <code>tests/test_knn_bootstrap_generator.py</code></p>
 
 
 
