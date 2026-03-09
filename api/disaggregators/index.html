@@ -3276,7 +3276,7 @@ Should be at the finer temporal resolution (output resolution).</p>
 
 
 <a href="#synhydro.methods.disaggregation.temporal.nowak.NowakDisaggregator" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">NowakDisaggregator</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_month_shift</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">NowakDisaggregator</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">max_month_shift</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">blend_days</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents first">
@@ -3365,6 +3365,24 @@ when creating historic monthly flow profiles.</p>
             </td>
             <td>
                   <code>7</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>blend_days</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of days on each side of month boundaries to smooth.
+Reduces artificial discontinuities at month transitions.
+Set to None or 0 to disable boundary smoothing.</p>
+              </div>
+            </td>
+            <td>
+                  <code>3</code>
             </td>
           </tr>
           <tr class="doc-section-item">
