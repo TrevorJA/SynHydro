@@ -32,6 +32,7 @@ class NowakDisaggregator(Disaggregator):
                  Q_obs,
                  n_neighbors=5,
                  max_month_shift=7,
+                 blend_days=3,
                  name=None,
                  debug=False):
         """
@@ -50,6 +51,10 @@ class NowakDisaggregator(Disaggregator):
         max_month_shift : int, default=7
             Maximum number of days to shift around each month center
             when creating historic monthly flow profiles.
+        blend_days : int or None, default=3
+            Number of days on each side of month boundaries to smooth.
+            Reduces artificial discontinuities at month transitions.
+            Set to None or 0 to disable boundary smoothing.
         name : str, optional
             Name for this disaggregator instance.
         debug : bool, default=False
@@ -61,13 +66,15 @@ class NowakDisaggregator(Disaggregator):
         # Store algorithm-specific parameters
         self.n_neighbors = n_neighbors
         self.max_month_shift = max_month_shift
+        self.blend_days = blend_days if blend_days else 0
         self.site_names = self._Q_obs_raw.columns.tolist() if isinstance(self._Q_obs_raw, pd.DataFrame) else [self._Q_obs_raw.name if self._Q_obs_raw.name else 'site']
 
         # Update init_params
         self.init_params.algorithm_params = {
             'method': 'Nowak KNN Disaggregation',
             'n_neighbors': n_neighbors,
-            'max_month_shift': max_month_shift
+            'max_month_shift': max_month_shift,
+            'blend_days': self.blend_days
         }
 
         # dict containing trained KNN models for each month
@@ -302,6 +309,78 @@ class NowakDisaggregator(Disaggregator):
 
         return daily_ensemble
 
+    def _smooth_month_boundaries(self, Qs_daily, blend_days: int):
+        """
+        Smooth daily flows around month boundaries while preserving monthly totals.
+
+        Applies a centered rolling mean over a small window around each month
+        boundary to reduce artificial discontinuities from independent monthly
+        KNN sampling. After smoothing, rescales each month's daily values so
+        the monthly total matches the original (pre-smoothing) total.
+
+        Parameters
+        ----------
+        Qs_daily : pd.DataFrame or pd.Series
+            Daily streamflow timeseries with DatetimeIndex.
+        blend_days : int
+            Number of days on each side of each month boundary to smooth.
+
+        Returns
+        -------
+        pd.DataFrame or pd.Series
+            Smoothed daily flows with preserved monthly totals.
+        """
+        if blend_days <= 0:
+            return Qs_daily
+
+        is_series = isinstance(Qs_daily, pd.Series)
+        if is_series:
+            df = Qs_daily.to_frame(name='_site')
+        else:
+            df = Qs_daily.copy()
+
+        # Store original monthly totals per site
+        original_monthly_totals = df.groupby(df.index.to_period('M')).sum()
+
+        # Identify month-boundary indices (where calendar month changes)
+        months = df.index.month
+        boundary_mask = np.zeros(len(df), dtype=bool)
+        for i in range(1, len(df)):
+            if months[i] != months[i - 1]:
+                # Mark days within blend_days of this boundary
+                lo = max(0, i - blend_days)
+                hi = min(len(df), i + blend_days)
+                boundary_mask[lo:hi] = True
+
+        # Apply smoothing column-by-column
+        window = 2 * blend_days + 1
+        for col in df.columns:
+            vals = df[col].values.astype(float)
+            smoothed = pd.Series(vals).rolling(
+                window=window, center=True, min_periods=1
+            ).mean().values
+            # Only replace values near boundaries
+            vals[boundary_mask] = smoothed[boundary_mask]
+            # Clip to non-negative (flows can't be negative)
+            np.clip(vals, 0, None, out=vals)
+            df[col] = vals
+
+        # Rescale each month to preserve original monthly totals
+        periods = df.index.to_period('M')
+        for period in original_monthly_totals.index:
+            period_mask = periods == period
+            for col in df.columns:
+                current_sum = df.loc[period_mask, col].sum()
+                target_sum = original_monthly_totals.loc[period, col]
+                if current_sum > 0 and target_sum > 0:
+                    df.loc[period_mask, col] *= target_sum / current_sum
+                elif current_sum > 0 and target_sum == 0:
+                    df.loc[period_mask, col] = 0.0
+
+        if is_series:
+            return df.iloc[:, 0]
+        return df
+
     def _disaggregate_single_realization(self, Qs_monthly, n_neighbors=None,
                                          sample_method='distance_weighted'):
         """
@@ -454,6 +533,10 @@ class NowakDisaggregator(Disaggregator):
                     Qs_daily.loc[start_date:end_date] = (
                         monthly_flow * daily_flow_proportions_for_month
                     )
+
+        # Smooth month boundaries to reduce artificial discontinuities
+        if self.blend_days > 0:
+            Qs_daily = self._smooth_month_boundaries(Qs_daily, self.blend_days)
 
         # Ensure output is always a DataFrame for consistency with Ensemble class
         if isinstance(Qs_daily, pd.Series):
@@ -910,5 +993,9 @@ class NowakDisaggregator(Disaggregator):
                         msg = f"Disaggregation failed for month {month} and year {month_date.year}. "
                         msg += f"Qs_daily contains NaN or negative values."
                         raise ValueError(msg)
-        
+
+        # Smooth month boundaries to reduce artificial discontinuities
+        if self.blend_days > 0:
+            Qs_daily = self._smooth_month_boundaries(Qs_daily, self.blend_days)
+
         return Qs_daily
