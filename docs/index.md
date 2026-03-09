@@ -17,7 +17,7 @@ SynHydro provides parametric, nonparametric, and machine-learning stochastic gen
 | [`PhaseRandomizationGenerator`][synhydro.methods.generation.nonparametric.phase_randomization.PhaseRandomizationGenerator] | Nonparametric | Daily | Single | Brunner et al. (2019) |
 | [`ThomasFieringGenerator`][synhydro.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator] | Parametric AR(1) | Monthly | Single | Thomas & Fiering (1962) |
 | [`MATALASGenerator`][synhydro.methods.generation.parametric.matalas.MATALASGenerator] | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
-| [`MultiSiteHMMGenerator`][synhydro.methods.generation.parametric.multisite_hmm.MultiSiteHMMGenerator] | Hidden Markov Model | Annual | Multi | Gold et al. (2025) |
+| [`MultiSiteHMMGenerator`][synhydro.methods.generation.parametric.multisite_hmm.MultiSiteHMMGenerator] | Hidden Markov Model | Annual | Multi | Gold et al. (2024) |
 | [`WARMGenerator`][synhydro.methods.generation.parametric.warm.WARMGenerator] | Wavelet AR | Annual | Single | Nowak et al. (2011) |
 
 ## Quick Example

@@ -27,7 +27,11 @@ For each calendar month m, fit a `sklearn.NearestNeighbors` model on the scalar 
 For each synthetic monthly flow `Q_syn_m`:
 
 1. **Find neighbors** — query the KNN model for the K nearest historic months by Euclidean distance on total flow.
-2. **Select one neighbor** — draw with probability proportional to `1/k` (Lall-Sharma kernel, using ranks).
+2. **Select one neighbor** — draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
+   ```
+   K(i) = (1/i) / sum_{j=1}^{K} (1/j)
+   ```
+   This harmonic weighting favors closer analogs while maintaining stochastic diversity.
 3. **Disaggregate** — apply the selected month's daily proportions:
    ```
    q_d = Q_syn_m * (q*_d / sum(q*_d'))
@@ -61,6 +65,9 @@ For each synthetic monthly flow `Q_syn_m`:
 
 **Primary:**
 Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. *Water Resources Research*, 46(8). https://doi.org/10.1029/2009WR008530
+
+**See also:**
+- Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. *Water Resources Research*, 32(3), 679-693.
 
 ---
 
