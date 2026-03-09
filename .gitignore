@@ -172,3 +172,4 @@ local/
 .claude/
 external_source_codes/*
 experiments/*
+.vscode/
