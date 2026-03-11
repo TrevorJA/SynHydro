@@ -15,6 +15,25 @@ from spei.utils import get_data_series, group_yearly_df, validate_series
 # Import distribution utilities from dedicated module
 from synhydro.droughts.distributions import get_distribution, validate_distribution
 
+# Pandas version-aware frequency alias
+_PANDAS_VERSION = tuple(int(x) for x in pd.__version__.split('.')[:2])
+_MONTH_END_FREQ = 'ME' if _PANDAS_VERSION >= (2, 2) else 'M'
+
+
+def _normalize_freq(freq: str | None) -> str | None:
+    """Normalize frequency aliases for cross-pandas-version compatibility.
+
+    Translates between 'M' and 'ME' month-end aliases depending on
+    the installed pandas version (>= 2.2 uses 'ME', < 2.2 uses 'M').
+    """
+    if freq is None:
+        return freq
+    if _PANDAS_VERSION >= (2, 2) and freq == 'M':
+        return 'ME'
+    if _PANDAS_VERSION < (2, 2) and freq == 'ME':
+        return 'M'
+    return freq
+
 
 def get_drought_metrics(ssi, end_drought_threshold_months=3):
     """
@@ -304,8 +323,9 @@ class SSI:
     _dist_obj: ContinuousDist = field(init=False, repr=False, compare=False)
 
     def __post_init__(self):
-        """Convert dist string to distribution object after initialization."""
+        """Convert dist string to distribution object and normalize freq aliases."""
         self._dist_obj = get_distribution(self.dist)
+        self.fit_freq = _normalize_freq(self.fit_freq)
     
     
     def fit(self, training_series: Series) -> 'SSI':
