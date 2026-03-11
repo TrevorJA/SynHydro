@@ -6,6 +6,7 @@ ensembles of synthetic hydrologic timeseries data. The Ensemble class maintains
 dual representations (by-site and by-realization) for flexible data access and
 includes comprehensive I/O, statistical analysis, and visualization capabilities.
 """
+import json
 import logging
 import warnings
 from datetime import datetime
@@ -166,15 +167,18 @@ class Ensemble:
 
         if data_structure == 'realizations':
             self.data_by_realization = data
-            self.data_by_site = self._transform_realizations_to_sites(data)
+            self._data_by_site = None  # lazily computed
         elif data_structure == 'sites':
-            self.data_by_site = data
+            self._data_by_site = data
             self.data_by_realization = self._transform_sites_to_realizations(data)
         else:
             raise ValueError("Unknown data structure type. Expected 'realizations' or 'sites'.")
 
         self.realization_ids = list(self.data_by_realization.keys())
-        self.site_names = list(self.data_by_site.keys())
+        self.site_names = list(
+            self._data_by_site.keys() if self._data_by_site is not None
+            else self._get_site_names_from_realizations()
+        )
 
         # Initialize or update metadata
         if metadata is None:
@@ -218,6 +222,26 @@ class Ensemble:
             List of site names in the ensemble.
         """
         return self.site_names
+
+    @property
+    def data_by_site(self) -> Dict[str, pd.DataFrame]:
+        """Data organized by site name (lazily computed from realization data)."""
+        if self._data_by_site is None:
+            self._data_by_site = self._transform_realizations_to_sites(
+                self.data_by_realization
+            )
+        return self._data_by_site
+
+    @data_by_site.setter
+    def data_by_site(self, value: Dict[str, pd.DataFrame]):
+        self._data_by_site = value
+
+    def _get_site_names_from_realizations(self) -> List[str]:
+        """Extract unique site names from realization DataFrames without building full site dict."""
+        all_sites = set()
+        for df in self.data_by_realization.values():
+            all_sites.update(df.columns)
+        return sorted(all_sites)
 
     def _infer_data_structure(self, data: Dict) -> str:
         """
@@ -269,25 +293,28 @@ class Ensemble:
         if not data_dict:
             return {}
 
-        # Get all unique sites
-        all_sites = set()
-        for df in data_dict.values():
-            all_sites.update(df.columns)
+        # Get sorted realization keys and reference index
+        real_keys = sorted(data_dict.keys())
+        first_df = data_dict[real_keys[0]]
+        all_sites = list(first_df.columns)
+        index = first_df.index
+        n_times = len(index)
+        n_reals = len(real_keys)
 
         result = {}
-
         for site in all_sites:
-            # Collect all series for this site across realizations
-            site_series = []
-            for realization, df in data_dict.items():
+            arr = np.empty((n_times, n_reals), dtype=np.float64)
+            actual_keys = []
+            col_idx = 0
+            for rk in real_keys:
+                df = data_dict[rk]
                 if site in df.columns:
-                    series = df[site].rename(realization)
-                    site_series.append(series)
-
-            # Concatenate all series for this site
-            if site_series:
-                site_df = pd.concat(site_series, axis=1, sort=True)
-                result[site] = site_df
+                    arr[:, col_idx] = df[site].values
+                    actual_keys.append(rk)
+                    col_idx += 1
+            result[site] = pd.DataFrame(
+                arr[:, :col_idx], index=index, columns=actual_keys
+            )
 
         return result
 
@@ -375,21 +402,27 @@ class Ensemble:
             # Load metadata if present
             metadata_dict = {}
             if 'metadata' in f.attrs:
-                import json
                 metadata_dict = json.loads(f.attrs['metadata'])
 
             if stored_by_node:
-                # Get structure info from first node
                 keys = list(f.keys())
                 if not keys:
                     raise ValueError(f"HDF5 file {filename} is empty")
 
                 first_node = f[keys[0]]
                 column_labels = first_node.attrs['column_labels']
-                dates_raw = first_node['date'][:].tolist()
 
-                # Convert bytes to strings if necessary
-                dates = [d.decode('utf-8') if isinstance(d, bytes) else d for d in dates_raw]
+                # Parse dates once — reuse across all realizations
+                dates_ds = first_node['date']
+                if dates_ds.dtype.kind == 'i':
+                    # Int64 nanosecond timestamps (fast path)
+                    dt_index = pd.DatetimeIndex(dates_ds[:].astype('datetime64[ns]'))
+                else:
+                    dates_raw = dates_ds[:]
+                    if dates_raw.dtype.kind == 'S' or dates_raw.dtype.kind == 'O':
+                        dates_raw = dates_raw.astype(str)
+                    dt_index = pd.to_datetime(dates_raw)
+                dt_index.name = 'datetime'
 
                 # Determine which realizations to load
                 if realization_subset is not None:
@@ -402,16 +435,19 @@ class Ensemble:
 
                 logger.info(f"Loading {len(realization_ids)} realizations from {filename}")
 
-                # Load data for all realizations
+                n_times = len(dt_index)
+                n_nodes = len(keys)
+
+                # Bulk-read all node data into a 3-D array: (n_realizations, n_times, n_nodes)
+                # then slice into DataFrames without per-cell dict overhead
                 ensemble_dict = {}
                 for i, realization in enumerate(realization_ids):
-                    data = {}
-                    for node in keys:
-                        node_data = f[node]
-                        data[node] = node_data[str(realization)][:]
+                    real_str = str(realization)
+                    arr = np.empty((n_times, n_nodes), dtype=np.float64)
+                    for j, node in enumerate(keys):
+                        arr[:, j] = f[node][real_str][:]
 
-                    df = pd.DataFrame(data, index=pd.to_datetime(dates))
-                    df.index.name = 'datetime'
+                    df = pd.DataFrame(arr, index=dt_index, columns=keys)
                     ensemble_dict[i] = df
             else:
                 # Data stored by realization
@@ -420,20 +456,38 @@ class Ensemble:
                     keys = [k for k in keys if k in realization_subset]
 
                 ensemble_dict = {}
+                shared_dt_index = None
+
                 for i, realization in enumerate(keys):
                     realization_group = f[str(realization)]
                     column_labels = realization_group.attrs['column_labels']
-                    dates_raw = realization_group['date'][:].tolist()
+                    col_names = [str(label) for label in column_labels]
 
-                    # Convert bytes to strings if necessary
-                    dates = [d.decode('utf-8') if isinstance(d, bytes) else d for d in dates_raw]
+                    # Parse dates once for the first realization, reuse if lengths match
+                    if shared_dt_index is None:
+                        dates_ds = realization_group['date']
+                        if dates_ds.dtype.kind == 'i':
+                            shared_dt_index = pd.DatetimeIndex(
+                                dates_ds[:].astype('datetime64[ns]')
+                            )
+                        else:
+                            dates_raw = dates_ds[:]
+                            if dates_raw.dtype.kind == 'S' or dates_raw.dtype.kind == 'O':
+                                dates_raw = dates_raw.astype(str)
+                            shared_dt_index = pd.to_datetime(dates_raw)
+                        shared_dt_index.name = 'datetime'
+                        dt_index = shared_dt_index
+                    else:
+                        dt_index = shared_dt_index
 
-                    data = {}
-                    for label in column_labels:
-                        data[str(label)] = realization_group[str(label)][:]
+                    # Bulk read into numpy array
+                    n_times = len(dt_index)
+                    n_cols = len(col_names)
+                    arr = np.empty((n_times, n_cols), dtype=np.float64)
+                    for j, label in enumerate(col_names):
+                        arr[:, j] = realization_group[label][:]
 
-                    df = pd.DataFrame(data, index=pd.to_datetime(dates))
-                    df.index.name = 'datetime'
+                    df = pd.DataFrame(arr, index=dt_index, columns=col_names)
                     ensemble_dict[i] = df
 
         # Create metadata
@@ -466,7 +520,6 @@ class Ensemble:
 
         with h5py.File(filename, 'w') as f:
             # Save metadata as attributes
-            import json
             f.attrs['metadata'] = json.dumps(self.metadata.to_dict())
 
             if stored_by_node:
@@ -477,9 +530,9 @@ class Ensemble:
                     # Store metadata
                     grp.attrs['column_labels'] = list(site_df.columns)
 
-                    # Store dates
-                    dates = site_df.index.astype(str).tolist()
-                    grp.create_dataset('date', data=dates, compression=compression)
+                    # Store dates as int64 nanosecond timestamps (fast I/O)
+                    dates_ns = site_df.index.astype(np.int64)
+                    grp.create_dataset('date', data=dates_ns, compression=compression)
 
                     # Store each realization's data for this site
                     for col in site_df.columns:
@@ -494,9 +547,9 @@ class Ensemble:
                     # Store metadata
                     grp.attrs['column_labels'] = list(real_df.columns)
 
-                    # Store dates
-                    dates = real_df.index.astype(str).tolist()
-                    grp.create_dataset('date', data=dates, compression=compression)
+                    # Store dates as int64 nanosecond timestamps (fast I/O)
+                    dates_ns = real_df.index.astype(np.int64)
+                    grp.create_dataset('date', data=dates_ns, compression=compression)
 
                     # Store each site's data for this realization
                     for col in real_df.columns:
