@@ -2,17 +2,18 @@
 Statistical Utilities for SynHydro
 
 Specialized statistical functions for flow data analysis, correlation computations,
-and distribution fitting.
+distribution fitting, long-range dependence estimation, and spectral analysis.
 
 For standardization/normalization, use synhydro.transformations.StandardScaler or
 synhydro.transformations.DeseasonalizeTransform instead.
 """
 
-from typing import Optional, Union, Tuple, Dict, Literal
+from typing import Optional, Union, Tuple, Dict, List, Literal
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 from scipy.linalg import cholesky
+from scipy import signal
 import logging
 
 logger = logging.getLogger(__name__)
@@ -222,3 +223,615 @@ def _nearest_correlation_matrix(
 
     logger.warning(f"Nearest correlation matrix did not converge in {max_iter} iterations")
     return Y
+
+
+# =============================================================================
+# Long-Range Dependence Estimation
+# =============================================================================
+
+def compute_hurst_exponent(
+    data: Union[pd.Series, np.ndarray],
+    method: Literal['rs', 'dfa'] = 'rs',
+    min_window: int = 10,
+    max_window: Optional[int] = None,
+) -> Dict[str, float]:
+    """
+    Estimate the Hurst exponent of a timeseries.
+
+    The Hurst exponent H quantifies long-range dependence:
+    H = 0.5 indicates no long-range dependence (random walk).
+    H > 0.5 indicates persistent (positively autocorrelated) behavior.
+    H < 0.5 indicates anti-persistent behavior.
+
+    For hydrologic timeseries, H is related to the ARFIMA fractional
+    differencing parameter d by H = d + 0.5 (Hosking 1984).
+
+    Parameters
+    ----------
+    data : pd.Series or np.ndarray
+        Input timeseries (1-D).
+    method : {'rs', 'dfa'}, default='rs'
+        Estimation method.
+        'rs': Rescaled range (R/S) analysis (Hurst 1951).
+        'dfa': Detrended fluctuation analysis (Peng et al. 1994).
+    min_window : int, default=10
+        Minimum window size for analysis.
+    max_window : int, optional
+        Maximum window size. If None, defaults to len(data) // 4.
+
+    Returns
+    -------
+    Dict[str, float]
+        Dictionary with keys:
+        'H': estimated Hurst exponent,
+        'c': intercept of log-log regression,
+        'r_squared': R-squared of the log-log fit.
+
+    References
+    ----------
+    Hurst, H.E. (1951). Long-term storage capacity of reservoirs.
+    Transactions of the American Society of Civil Engineers, 116, 770-799.
+
+    Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian
+    noise made easy. Hydrological Sciences Journal, 47(4), 573-595.
+    """
+    if isinstance(data, pd.Series):
+        x = data.dropna().values
+    else:
+        x = np.asarray(data, dtype=np.float64)
+        x = x[~np.isnan(x)]
+
+    n = len(x)
+    if n < 2 * min_window:
+        raise ValueError(
+            f"Timeseries too short ({n}) for Hurst estimation with "
+            f"min_window={min_window}. Need at least {2 * min_window} values."
+        )
+
+    if max_window is None:
+        max_window = n // 4
+
+    if method == 'rs':
+        return _hurst_rs(x, min_window, max_window)
+    elif method == 'dfa':
+        return _hurst_dfa(x, min_window, max_window)
+    else:
+        raise ValueError(f"Unknown method: {method}. Use 'rs' or 'dfa'.")
+
+
+def _hurst_rs(
+    x: np.ndarray,
+    min_window: int,
+    max_window: int,
+) -> Dict[str, float]:
+    """
+    Rescaled range (R/S) analysis for Hurst exponent estimation.
+
+    For each window size w, computes the mean R/S statistic across
+    non-overlapping blocks, then estimates H from the log-log slope.
+    """
+    n = len(x)
+
+    # Generate window sizes (logarithmically spaced)
+    window_sizes = np.unique(
+        np.logspace(
+            np.log10(min_window),
+            np.log10(min(max_window, n // 2)),
+            num=20,
+        ).astype(int)
+    )
+    window_sizes = window_sizes[window_sizes >= min_window]
+
+    log_n = []
+    log_rs = []
+
+    for w in window_sizes:
+        n_blocks = n // w
+        if n_blocks < 1:
+            continue
+
+        rs_values = []
+        for i in range(n_blocks):
+            block = x[i * w : (i + 1) * w]
+            mean_block = block.mean()
+            cumdev = np.cumsum(block - mean_block)
+            R = cumdev.max() - cumdev.min()
+            S = block.std(ddof=1)
+            if S > 0:
+                rs_values.append(R / S)
+
+        if len(rs_values) > 0:
+            log_n.append(np.log(w))
+            log_rs.append(np.log(np.mean(rs_values)))
+
+    log_n = np.array(log_n)
+    log_rs = np.array(log_rs)
+
+    if len(log_n) < 3:
+        logger.warning("Too few window sizes for reliable Hurst estimation.")
+        return {'H': np.nan, 'c': np.nan, 'r_squared': np.nan}
+
+    # Linear regression in log-log space
+    slope, intercept = np.polyfit(log_n, log_rs, 1)
+
+    # R-squared
+    ss_res = np.sum((log_rs - (slope * log_n + intercept)) ** 2)
+    ss_tot = np.sum((log_rs - log_rs.mean()) ** 2)
+    r_squared = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
+
+    return {'H': float(slope), 'c': float(intercept), 'r_squared': float(r_squared)}
+
+
+def _hurst_dfa(
+    x: np.ndarray,
+    min_window: int,
+    max_window: int,
+) -> Dict[str, float]:
+    """
+    Detrended fluctuation analysis for Hurst exponent estimation.
+
+    Computes the RMS of detrended cumulative sums across window sizes,
+    then estimates H from the log-log slope of the fluctuation function.
+    """
+    n = len(x)
+    y = np.cumsum(x - x.mean())
+
+    window_sizes = np.unique(
+        np.logspace(
+            np.log10(min_window),
+            np.log10(min(max_window, n // 2)),
+            num=20,
+        ).astype(int)
+    )
+    window_sizes = window_sizes[window_sizes >= min_window]
+
+    log_n = []
+    log_f = []
+
+    for w in window_sizes:
+        n_blocks = n // w
+        if n_blocks < 1:
+            continue
+
+        fluctuations = []
+        for i in range(n_blocks):
+            segment = y[i * w : (i + 1) * w]
+            t = np.arange(w)
+            # Linear detrending
+            coeffs = np.polyfit(t, segment, 1)
+            trend = np.polyval(coeffs, t)
+            fluctuations.append(np.sqrt(np.mean((segment - trend) ** 2)))
+
+        if len(fluctuations) > 0:
+            log_n.append(np.log(w))
+            log_f.append(np.log(np.mean(fluctuations)))
+
+    log_n = np.array(log_n)
+    log_f = np.array(log_f)
+
+    if len(log_n) < 3:
+        logger.warning("Too few window sizes for reliable DFA estimation.")
+        return {'H': np.nan, 'c': np.nan, 'r_squared': np.nan}
+
+    slope, intercept = np.polyfit(log_n, log_f, 1)
+    ss_res = np.sum((log_f - (slope * log_n + intercept)) ** 2)
+    ss_tot = np.sum((log_f - log_f.mean()) ** 2)
+    r_squared = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
+
+    return {'H': float(slope), 'c': float(intercept), 'r_squared': float(r_squared)}
+
+
+# =============================================================================
+# Spectral Analysis
+# =============================================================================
+
+def compute_power_spectral_density(
+    data: Union[pd.Series, pd.DataFrame],
+    method: Literal['welch', 'periodogram'] = 'welch',
+    nperseg: Optional[int] = None,
+    detrend: str = 'linear',
+) -> Tuple[np.ndarray, Union[np.ndarray, pd.DataFrame]]:
+    """
+    Compute the power spectral density (PSD) of flow timeseries.
+
+    Parameters
+    ----------
+    data : pd.Series or pd.DataFrame
+        Input flow timeseries. If DataFrame, PSD is computed per column.
+    method : {'welch', 'periodogram'}, default='welch'
+        PSD estimation method. Welch's method provides smoother estimates.
+    nperseg : int, optional
+        Segment length for Welch's method. If None, defaults to
+        min(256, len(data)).
+    detrend : str, default='linear'
+        Detrending method applied to each segment: 'linear', 'constant',
+        or False.
+
+    Returns
+    -------
+    frequencies : np.ndarray
+        Array of sample frequencies.
+    psd : np.ndarray or pd.DataFrame
+        Power spectral density estimate. If input is DataFrame,
+        returns DataFrame with same column names.
+    """
+    if isinstance(data, np.ndarray):
+        data = pd.Series(data)
+    if isinstance(data, pd.Series):
+        x = data.dropna().values
+        is_series = True
+    elif isinstance(data, pd.DataFrame):
+        is_series = False
+    else:
+        raise TypeError(f"Expected pd.Series, pd.DataFrame, or np.ndarray, got {type(data)}")
+
+    if is_series:
+        if nperseg is None:
+            nperseg = min(256, len(x))
+        if method == 'welch':
+            freqs, psd = signal.welch(x, fs=1.0, nperseg=nperseg, detrend=detrend)
+        else:
+            freqs, psd = signal.periodogram(x, fs=1.0, detrend=detrend)
+        return freqs, psd
+    else:
+        psd_dict = {}
+        freqs = None
+        for col in data.columns:
+            x = data[col].dropna().values
+            seg = nperseg if nperseg is not None else min(256, len(x))
+            if method == 'welch':
+                f, p = signal.welch(x, fs=1.0, nperseg=seg, detrend=detrend)
+            else:
+                f, p = signal.periodogram(x, fs=1.0, detrend=detrend)
+            if freqs is None:
+                freqs = f
+            psd_dict[col] = p
+        return freqs, pd.DataFrame(psd_dict, index=freqs)
+
+
+def compare_spectral_properties(
+    observed: Union[pd.Series, pd.DataFrame],
+    synthetic: Union[pd.Series, pd.DataFrame],
+    method: Literal['welch', 'periodogram'] = 'welch',
+    nperseg: Optional[int] = None,
+) -> Dict[str, float]:
+    """
+    Compare spectral properties between observed and synthetic timeseries.
+
+    Parameters
+    ----------
+    observed : pd.Series or pd.DataFrame
+        Observed flow timeseries.
+    synthetic : pd.Series or pd.DataFrame
+        Synthetic flow timeseries.
+    method : {'welch', 'periodogram'}, default='welch'
+        PSD estimation method.
+    nperseg : int, optional
+        Segment length for Welch's method.
+
+    Returns
+    -------
+    Dict[str, float]
+        Dictionary containing:
+        'spectral_rmse': RMSE of log-PSD between observed and synthetic.
+        'spectral_correlation': Pearson correlation of log-PSD.
+        'low_freq_ratio': Ratio of low-frequency power (synthetic/observed).
+        'high_freq_ratio': Ratio of high-frequency power (synthetic/observed).
+    """
+    # Compute PSDs
+    if isinstance(observed, pd.DataFrame):
+        observed = observed.iloc[:, 0]
+    if isinstance(synthetic, pd.DataFrame):
+        synthetic = synthetic.iloc[:, 0]
+
+    freq_obs, psd_obs = compute_power_spectral_density(
+        observed, method=method, nperseg=nperseg
+    )
+    freq_syn, psd_syn = compute_power_spectral_density(
+        synthetic, method=method, nperseg=nperseg
+    )
+
+    # Interpolate to common frequency grid if needed
+    if len(freq_obs) != len(freq_syn):
+        common_freqs = np.linspace(
+            max(freq_obs[1], freq_syn[1]),
+            min(freq_obs[-1], freq_syn[-1]),
+            num=min(len(freq_obs), len(freq_syn))
+        )
+        psd_obs = np.interp(common_freqs, freq_obs, psd_obs)
+        psd_syn = np.interp(common_freqs, freq_syn, psd_syn)
+        freq_obs = common_freqs
+
+    # Avoid log(0)
+    eps = 1e-20
+    log_psd_obs = np.log10(psd_obs + eps)
+    log_psd_syn = np.log10(psd_syn + eps)
+
+    # RMSE in log space
+    spectral_rmse = float(np.sqrt(np.mean((log_psd_obs - log_psd_syn) ** 2)))
+
+    # Correlation in log space
+    if np.std(log_psd_obs) > 0 and np.std(log_psd_syn) > 0:
+        spectral_corr = float(np.corrcoef(log_psd_obs, log_psd_syn)[0, 1])
+    else:
+        spectral_corr = 0.0
+
+    # Low vs high frequency power ratio
+    mid_idx = len(freq_obs) // 2
+    low_obs = np.sum(psd_obs[:mid_idx])
+    low_syn = np.sum(psd_syn[:mid_idx])
+    high_obs = np.sum(psd_obs[mid_idx:])
+    high_syn = np.sum(psd_syn[mid_idx:])
+
+    low_freq_ratio = float(low_syn / low_obs) if low_obs > 0 else np.nan
+    high_freq_ratio = float(high_syn / high_obs) if high_obs > 0 else np.nan
+
+    return {
+        'spectral_rmse': spectral_rmse,
+        'spectral_correlation': spectral_corr,
+        'low_freq_ratio': low_freq_ratio,
+        'high_freq_ratio': high_freq_ratio,
+    }
+
+
+# ============================================================================
+# Extreme Value Analysis
+# ============================================================================
+
+def fit_gev(
+    annual_maxima: Union[pd.Series, np.ndarray],
+    method: Literal['mle', 'lmom'] = 'lmom',
+) -> Dict[str, float]:
+    """
+    Fit a Generalized Extreme Value (GEV) distribution to annual maxima.
+
+    The GEV distribution unifies the Gumbel (Type I), Frechet (Type II),
+    and Weibull (Type III) extreme value distributions through the shape
+    parameter.
+
+    Parameters
+    ----------
+    annual_maxima : pd.Series or np.ndarray
+        Annual maximum flow values.
+    method : {'mle', 'lmom'}, default='lmom'
+        Fitting method. 'mle' uses scipy maximum likelihood estimation.
+        'lmom' uses L-moments (preferred for small samples in hydrology).
+
+    Returns
+    -------
+    Dict[str, float]
+        Dictionary with keys:
+        'shape' (xi): shape parameter (xi < 0 = bounded upper tail).
+        'loc' (mu): location parameter.
+        'scale' (sigma): scale parameter.
+        'aic': Akaike Information Criterion (MLE only).
+    """
+    from scipy.stats import genextreme
+
+    if isinstance(annual_maxima, pd.Series):
+        x = annual_maxima.dropna().values
+    else:
+        x = np.asarray(annual_maxima)
+        x = x[~np.isnan(x)]
+
+    if len(x) < 5:
+        raise ValueError("Need at least 5 annual maxima for GEV fitting.")
+
+    if method == 'mle':
+        shape, loc, scale = genextreme.fit(x)
+        n = len(x)
+        log_lik = np.sum(genextreme.logpdf(x, shape, loc=loc, scale=scale))
+        aic = 2 * 3 - 2 * log_lik
+        return {
+            'shape': float(-shape),  # scipy uses negated shape convention
+            'loc': float(loc),
+            'scale': float(scale),
+            'aic': float(aic),
+        }
+    elif method == 'lmom':
+        l1, l2, t3 = _compute_lmoments(x)
+        # Hosking (1997) rational approximation for GEV shape from L-skewness
+        # k is the GEV shape parameter (xi in some notations)
+        c = 2.0 / (3.0 + t3) - np.log(2) / np.log(3)
+        k = 7.8590 * c + 2.9554 * c ** 2
+        if abs(k) > 1e-6:
+            gamma_val = _gamma_func(1 + k)
+            scale = float(l2 * k / (gamma_val * (1 - 2 ** (-k))))
+            loc = float(l1 - scale * (gamma_val - 1) / k)
+        else:
+            # Gumbel limit (k -> 0)
+            scale = float(l2 / np.log(2))
+            loc = float(l1 - scale * 0.5772)
+        return {
+            'shape': float(k),
+            'loc': loc,
+            'scale': scale,
+        }
+    else:
+        raise ValueError(f"Unknown method: {method}")
+
+
+def fit_lp3(
+    annual_maxima: Union[pd.Series, np.ndarray],
+    method: Literal['mle', 'mom'] = 'mom',
+) -> Dict[str, float]:
+    """
+    Fit a Log-Pearson Type III (LP3) distribution to annual maxima.
+
+    LP3 is the standard flood frequency distribution recommended by the
+    U.S. Interagency Advisory Committee on Water Data (Bulletin 17C).
+
+    Parameters
+    ----------
+    annual_maxima : pd.Series or np.ndarray
+        Annual maximum flow values. Must be positive.
+    method : {'mle', 'mom'}, default='mom'
+        Fitting method. 'mom' uses method of moments on log-transformed data
+        (standard Bulletin 17C approach).
+
+    Returns
+    -------
+    Dict[str, float]
+        Dictionary with keys:
+        'mean_log': mean of log-transformed data.
+        'std_log': standard deviation of log-transformed data.
+        'skew_log': skewness of log-transformed data.
+        'alpha', 'beta', 'gamma': Pearson III parameters on log scale.
+    """
+    if isinstance(annual_maxima, pd.Series):
+        x = annual_maxima.dropna().values
+    else:
+        x = np.asarray(annual_maxima)
+        x = x[~np.isnan(x)]
+
+    if np.any(x <= 0):
+        raise ValueError("LP3 requires strictly positive annual maxima.")
+
+    if len(x) < 5:
+        raise ValueError("Need at least 5 annual maxima for LP3 fitting.")
+
+    log_x = np.log10(x)
+    n = len(log_x)
+
+    mean_log = float(np.mean(log_x))
+    std_log = float(np.std(log_x, ddof=1))
+    skew_log = float(
+        n * np.sum((log_x - mean_log) ** 3)
+        / ((n - 1) * (n - 2) * std_log ** 3)
+    ) if std_log > 1e-10 else 0.0
+
+    if abs(skew_log) > 1e-6:
+        alpha = 4.0 / (skew_log ** 2)
+        beta = std_log * abs(skew_log) / 2.0
+        if skew_log < 0:
+            beta = -beta
+        gamma = mean_log - 2.0 * std_log / skew_log
+    else:
+        alpha = np.inf
+        beta = std_log
+        gamma = mean_log
+
+    return {
+        'mean_log': mean_log,
+        'std_log': std_log,
+        'skew_log': skew_log,
+        'alpha': float(alpha),
+        'beta': float(beta),
+        'gamma': float(gamma),
+    }
+
+
+def flood_frequency_quantiles(
+    annual_maxima: Union[pd.Series, np.ndarray],
+    return_periods: Optional[List] = None,
+    distribution: Literal['gev', 'lp3'] = 'gev',
+    **fit_kwargs,
+) -> pd.DataFrame:
+    """
+    Compute flood frequency quantiles for specified return periods.
+
+    Parameters
+    ----------
+    annual_maxima : pd.Series or np.ndarray
+        Annual maximum flow values.
+    return_periods : list of float, optional
+        Return periods in years. Default: [2, 5, 10, 25, 50, 100, 200, 500].
+    distribution : {'gev', 'lp3'}, default='gev'
+        Distribution to use.
+    **fit_kwargs
+        Additional arguments passed to fit_gev or fit_lp3.
+
+    Returns
+    -------
+    pd.DataFrame
+        Columns: return_period, exceedance_prob, quantile.
+    """
+    from scipy.stats import genextreme, pearson3
+
+    if return_periods is None:
+        return_periods = [2, 5, 10, 25, 50, 100, 200, 500]
+
+    if isinstance(annual_maxima, pd.Series):
+        x = annual_maxima.dropna().values
+    else:
+        x = np.asarray(annual_maxima)
+        x = x[~np.isnan(x)]
+
+    exceedance_probs = [1.0 / T for T in return_periods]
+
+    if distribution == 'gev':
+        params = fit_gev(x, **fit_kwargs)
+        # scipy uses negated shape
+        quantiles = [
+            float(genextreme.isf(p, -params['shape'],
+                                  loc=params['loc'], scale=params['scale']))
+            for p in exceedance_probs
+        ]
+    elif distribution == 'lp3':
+        params = fit_lp3(x, **fit_kwargs)
+        # Use Pearson III on log scale, then back-transform
+        if abs(params['skew_log']) > 1e-6:
+            a = params['alpha']
+            b = params['beta']
+            g = params['gamma']
+            quantiles = []
+            for p in exceedance_probs:
+                log_q = float(pearson3.isf(p, params['skew_log'],
+                                            loc=params['mean_log'],
+                                            scale=params['std_log']))
+                quantiles.append(10 ** log_q)
+        else:
+            from scipy.stats import norm
+            quantiles = [
+                float(10 ** norm.isf(p, loc=params['mean_log'],
+                                      scale=params['std_log']))
+                for p in exceedance_probs
+            ]
+    else:
+        raise ValueError(f"Unknown distribution: {distribution}")
+
+    return pd.DataFrame({
+        'return_period': return_periods,
+        'exceedance_prob': exceedance_probs,
+        'quantile': quantiles,
+    })
+
+
+def _compute_lmoments(x: np.ndarray) -> Tuple[float, float, float]:
+    """
+    Compute first three L-moments of a sample.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Sample values.
+
+    Returns
+    -------
+    l1, l2, t3 : float
+        First L-moment (mean), second L-moment (L-scale),
+        L-skewness ratio.
+    """
+    n = len(x)
+    xs = np.sort(x)
+
+    # Probability weighted moments
+    b0 = np.mean(xs)
+    b1 = np.sum(np.arange(1, n) * xs[1:]) / (n * (n - 1))
+    b2 = np.sum(
+        np.arange(1, n - 1) * np.arange(2, n) * xs[2:]
+    ) / (n * (n - 1) * (n - 2))
+
+    l1 = b0
+    l2 = 2 * b1 - b0
+    l3 = 6 * b2 - 6 * b1 + b0
+
+    t3 = l3 / l2 if abs(l2) > 1e-10 else 0.0
+
+    return float(l1), float(l2), float(t3)
+
+
+def _gamma_func(x: float) -> float:
+    """Wrapper for scipy gamma function."""
+    from scipy.special import gamma
+    return float(gamma(x))

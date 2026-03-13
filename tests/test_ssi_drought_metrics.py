@@ -6,7 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-from synhydro.droughts.ssi import SSI, SSIDroughtMetrics, get_drought_metrics
+from synhydro.droughts.ssi import SSI, SSIDroughtMetrics, get_drought_metrics, _MONTH_END_FREQ
 
 
 class TestSSIDroughtMetrics:
@@ -101,7 +101,7 @@ class TestSSI:
         assert ssi.dist == 'lognorm'
         assert ssi._dist_obj == scs.lognorm
         assert ssi.timescale == 6
-        assert ssi.fit_freq == 'ME'
+        assert ssi.fit_freq == _MONTH_END_FREQ
         assert ssi.fit_window == 30
         assert ssi.prob_zero is True
 

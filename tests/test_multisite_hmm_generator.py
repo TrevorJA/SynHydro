@@ -1,7 +1,7 @@
 """
 Tests for Multi-Site Hidden Markov Model (HMM) Generator.
 
-Based on Gold et al. (2025) methodology for multi-site streamflow generation
+Based on Gold et al. (2024) methodology for multi-site streamflow generation
 using Gaussian Mixture Model HMM.
 """
 
@@ -117,7 +117,7 @@ class TestMultiSiteHMMInitialization:
         params = gen.init_params.algorithm_params
         assert params['n_states'] == 3
         assert params['offset'] == 2.0
-        assert params['method'] == 'Multi-Site Hidden Markov Model (Gold et al. 2025)'
+        assert params['method'] == 'Multi-Site Hidden Markov Model (Gold et al. 2024)'
 
 
 class TestMultiSiteHMMPreprocessing:

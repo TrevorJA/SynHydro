@@ -315,22 +315,35 @@ def plot_spatial_correlation(
             raise ValueError("Cannot use provided ax for side-by-side comparison. "
                            "Set ax=None to create new figure.")
 
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(figsize[0] * 2, figsize[1]))
+        # Compute observed correlation
+        obs_corr = compute_spatial_correlation(observed, method=method)
+
+        # Use consistent vmin/vmax from both matrices
+        all_vals = np.concatenate([obs_corr.values.ravel(), ens_corr.values.ravel()])
+        vmin = np.nanmin(all_vals)
+        vmax = np.nanmax(all_vals)
+
+        # Use GridSpec to give both heatmaps equal space with a shared colorbar
+        fig = plt.figure(figsize=(figsize[0] * 2.2, figsize[1]))
+        gs = fig.add_gridspec(1, 3, width_ratios=[1, 1, 0.05], wspace=0.3)
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[0, 1])
+        cbar_ax = fig.add_subplot(gs[0, 2])
 
         # Observed correlation heatmap
-        obs_corr = compute_spatial_correlation(observed, method=method)
         sns.heatmap(obs_corr, ax=ax1, cmap=cmap,
                    square=True, annot=False,
-                   vmin=0, vmax=1, cbar=False,
+                   vmin=vmin, vmax=vmax, cbar=False,
                    **kwargs)
         ax1.set_title('Observed', fontsize=LAYOUT['title_fontsize'])
         ax1.set_xlabel('Site', fontsize=LAYOUT['label_fontsize'])
         ax1.set_ylabel('Site', fontsize=LAYOUT['label_fontsize'])
 
-        # Ensemble correlation heatmap
+        # Ensemble correlation heatmap with shared colorbar
         sns.heatmap(ens_corr, ax=ax2, cmap=cmap,
                    square=True, annot=False,
-                   vmin=0, vmax=1,
+                   vmin=vmin, vmax=vmax,
+                   cbar=True, cbar_ax=cbar_ax,
                    cbar_kws={'label': f'{method.capitalize()} Correlation'},
                    **kwargs)
         ax2.set_title(f'Synthetic (Realization {realization})',

@@ -22,7 +22,7 @@ This package is a work in progress, and many of the methods are incomplete or un
 | `PhaseRandomizationGenerator` | Nonparametric | Daily | Single | Brunner et al. (2019) |
 | `ThomasFieringGenerator` | Parametric AR(1) | Monthly | Single | Thomas & Fiering (1962) |
 | `MATALASGenerator` | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
-| `MultiSiteHMMGenerator` | Hidden Markov Model | Annual | Multi | Gold et al. (2025) |
+| `MultiSiteHMMGenerator` | Hidden Markov Model | Annual | Multi | Gold et al. (2024) |
 | `WARMGenerator` | Wavelet AR | Annual | Single | Nowak et al. (2011) |
 
 ## Planned additions

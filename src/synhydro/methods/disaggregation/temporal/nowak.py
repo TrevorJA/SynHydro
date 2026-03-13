@@ -32,7 +32,7 @@ class NowakDisaggregator(Disaggregator):
                  Q_obs,
                  n_neighbors=5,
                  max_month_shift=7,
-                 blend_days=3,
+                 blend_days=2,
                  name=None,
                  debug=False):
         """
@@ -51,7 +51,7 @@ class NowakDisaggregator(Disaggregator):
         max_month_shift : int, default=7
             Maximum number of days to shift around each month center
             when creating historic monthly flow profiles.
-        blend_days : int or None, default=3
+        blend_days : int or None, default=2
             Number of days on each side of month boundaries to smooth.
             Reduces artificial discontinuities at month transitions.
             Set to None or 0 to disable boundary smoothing.

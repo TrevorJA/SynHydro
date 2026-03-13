@@ -110,6 +110,29 @@ def sample_ensemble_data():
 
 
 @pytest.fixture
+def sample_annual_series():
+    """Generate a sample annual time series for testing."""
+    dates = pd.date_range(start='2000-01-01', end='2020-12-31', freq='AS')
+    np.random.seed(42)
+    values = np.random.gamma(shape=2.0, scale=1000.0, size=len(dates))
+    return pd.Series(values, index=dates, name='site_1')
+
+
+@pytest.fixture
+def sample_annual_dataframe():
+    """Generate a sample annual multi-site DataFrame for testing."""
+    dates = pd.date_range(start='2000-01-01', end='2020-12-31', freq='AS')
+    np.random.seed(42)
+    n_sites = 3
+    data = {}
+    for i in range(n_sites):
+        base = np.random.gamma(shape=2.0, scale=1000.0, size=len(dates))
+        noise = np.random.normal(0, 100, size=len(dates))
+        data[f'site_{i+1}'] = base + noise
+    return pd.DataFrame(data, index=dates)
+
+
+@pytest.fixture
 def sample_ssi_data():
     """Generate sample data for SSI drought metrics testing."""
     dates = pd.date_range(start='2000-01-01', end='2020-12-31', freq='D')

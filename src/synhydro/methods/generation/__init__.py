@@ -3,9 +3,11 @@ Generation methods for SynHydro.
 """
 from synhydro.methods.generation.nonparametric import (
     KirschGenerator,
+    KNNBootstrapGenerator,
     PhaseRandomizationGenerator,
 )
 from synhydro.methods.generation.parametric import (
+    ARFIMAGenerator,
     MATALASGenerator,
     MultiSiteHMMGenerator,
     ThomasFieringGenerator,
@@ -13,7 +15,9 @@ from synhydro.methods.generation.parametric import (
 )
 
 __all__ = [
+    'ARFIMAGenerator',
     'KirschGenerator',
+    'KNNBootstrapGenerator',
     'MATALASGenerator',
     'MultiSiteHMMGenerator',
     'PhaseRandomizationGenerator',

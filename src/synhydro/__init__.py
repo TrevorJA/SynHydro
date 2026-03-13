@@ -31,7 +31,9 @@ from synhydro.droughts.diagnostics import (
 
 # Generators
 from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
+from synhydro.methods.generation.nonparametric.knn_bootstrap import KNNBootstrapGenerator
 from synhydro.methods.generation.nonparametric.phase_randomization import PhaseRandomizationGenerator
+from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.matalas import MATALASGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
@@ -54,7 +56,9 @@ __all__ = [
     "Generator",
     "Disaggregator",
     # Individual generators
+    "ARFIMAGenerator",
     "KirschGenerator",
+    "KNNBootstrapGenerator",
     "PhaseRandomizationGenerator",
     "ThomasFieringGenerator",
     "MATALASGenerator",

@@ -228,11 +228,11 @@ class MATALASGenerator(Generator):
             if m == 11:
                 Z_curr = Z_curr[:-1]   # Dec years 0..T-2
                 Z_next = Z_next[1:]    # Jan years 1..T-1
-            else:
-                # Same year — align by minimum length
-                n = min(len(Z_curr), len(Z_next))
-                Z_curr = Z_curr[:n]
-                Z_next = Z_next[:n]
+
+            # Align to equal length (handles partial years at data boundaries)
+            n = min(len(Z_curr), len(Z_next))
+            Z_curr = Z_curr[:n]
+            Z_next = Z_next[:n]
 
             n_obs = len(Z_curr)
             if n_obs < n_sites + 2:

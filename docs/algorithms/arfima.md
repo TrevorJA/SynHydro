@@ -24,13 +24,21 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 ### Fitting
 
 1. **Estimate fractional differencing parameter d** using one of:
-   - **Whittle estimator** (maximum likelihood in frequency domain, recommended):
+   - **Whittle estimator** (frequency-domain MLE, recommended; Fox & Taqqu 1986):
      ```
-     d_hat = argmin_d sum[ log f(w_j; d) + I(w_j) / f(w_j; d) ]
+     d_hat = argmin_d sum_j [ log f(w_j; d) + I(w_j) / f(w_j; d) ]
      ```
-     where I(w_j) is the periodogram and f(w_j; d) is the spectral density of the fractionally differenced process.
+     where I(w_j) is the periodogram and the spectral density is:
+     ```
+     f(w; d) ∝ [2(1 - cos(w))]^{-d}
+     ```
+     derived from |1 - e^{-iw}|^{-2d} = [2(1 - cos(w))]^{-d} (Hosking 1981, eq. 2.3).
    - **R/S analysis** for Hurst exponent: compute H, then d = H - 0.5.
-   - **GPH (Geweke-Porter-Hudak)** log-periodogram regression.
+   - **GPH (Geweke-Porter-Hudak)** log-periodogram regression (Geweke & Porter-Hudak 1983):
+     ```
+     log I(w_j) = c - d * log[2(1 - cos(w_j))] + u_j
+     ```
+     OLS regression on the m = sqrt(n) lowest Fourier frequencies; slope = -d.
 
 2. **Apply fractional differencing** to obtain the fractionally differenced series:
    ```
@@ -57,15 +65,16 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
    W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
    ```
 
-2. **Invert fractional differencing** to recover the long-memory process:
+2. **Invert fractional differencing** via MA convolution (FIR filter) to recover the long-memory process:
    ```
-   X_t = W_t + sum_{k=1}^{K} psi_k * X_{t-k}
+   X_t = sum_{k=0}^{K} psi_k * W_{t-k}
    ```
    where the inverse coefficients are:
    ```
    psi_0 = 1
    psi_k = psi_{k-1} * (k - 1 + d) / k,  for k >= 1
    ```
+   Note: this is a moving-average (convolution) over the ARMA series W, not an autoregressive recursion over X.
 
 3. **Re-seasonalize** if monthly: multiply by monthly standard deviations and add monthly means.
 
@@ -108,6 +117,8 @@ Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using f
 
 **See also:**
 - Granger, C.W.J., and Joyeux, R. (1980). An introduction to long-memory time series models and fractional differencing. *Journal of Time Series Analysis*, 1(1), 15-29. https://doi.org/10.1111/j.1467-9892.1980.tb00297.x
+- Geweke, J., and Porter-Hudak, S. (1983). The estimation and application of long memory time series models. *Journal of Time Series Analysis*, 4(4), 221-238. https://doi.org/10.1111/j.1467-9892.1983.tb00371.x
+- Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates for strongly dependent stationary Gaussian time series. *The Annals of Statistics*, 14(2), 517-532.
 - Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. *Water Resources Research*, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
 - Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. *Hydrological Sciences Journal*, 47(4), 573-595.
 
