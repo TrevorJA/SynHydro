@@ -44,10 +44,13 @@ The Multi-Site HMM uses a Gaussian Mixture Model HMM to generate synthetic strea
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
 | `n_states` | `int` | `2` | Number of hidden states (2 = dry/wet) |
 | `offset` | `float` | `1.0` | Additive offset before log transform |
 | `max_iterations` | `int` | `1000` | Maximum EM iterations |
 | `covariance_type` | `str` | `'full'` | Covariance structure: `'full'`, `'diag'`, or `'spherical'` |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 

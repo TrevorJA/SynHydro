@@ -57,7 +57,10 @@ The Matalas MAR(1) model is the classical parametric baseline for multi-site sto
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.DataFrame` or `pd.Series` | — | Observed streamflow with DatetimeIndex |
 | `log_transform` | `bool` | `True` | Apply log(Q+1) before standardization |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 

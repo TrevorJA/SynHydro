@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Type** | Parametric |
-| **Resolution** | Annual to Monthly (or Monthly to Weekly) |
+| **Resolution** | Annual to Monthly |
 | **Sites** | Univariate / Multisite |
 | **Class** | `ValenciaSchaakeDisaggregator` |
 
@@ -74,9 +74,12 @@ For each synthetic aggregate value Y_syn:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow at sub-period resolution with DatetimeIndex |
 | `n_subperiods` | `int` | `12` | Number of sub-periods per aggregate period |
 | `transform` | `str` | `'log'` | Transformation before fitting: `'log'`, `'boxcox'`, or `'none'` |
 | `conservation_method` | `str` | `'proportional'` | Method to enforce sum consistency: `'proportional'` or `'none'` |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 

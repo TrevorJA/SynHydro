@@ -19,7 +19,6 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 
 1. **Validate input** as univariate timeseries with at least 30 timesteps (50+ recommended for reliable d estimation).
 2. **Deseasonalize** if monthly data: remove monthly means and divide by monthly standard deviations to produce stationary residuals.
-3. **Assess stationarity** via ADF test. If non-stationary, apply integer differencing first, then fit fractional component to the differenced series.
 
 ### Fitting
 
@@ -49,20 +48,20 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
    pi_0 = 1
    pi_k = pi_{k-1} * (k - 1 - d) / k,  for k >= 1
    ```
-   Truncate the infinite sum at lag K (default: min(100, n/2)).
+   Truncate the infinite sum at lag K (default: 100).
 
-3. **Fit ARMA(p,q) to the differenced series** via maximum likelihood or Yule-Walker:
-   - Select p, q by AIC/BIC (default: p=1, q=0 for parsimony).
-   - Store AR coefficients phi, MA coefficients theta, innovation variance sigma_eps^2.
+3. **Fit AR(p) to the differenced series** via Yule-Walker equations:
+   - p is user-specified (default: 1). The MA component (q > 0) is not yet implemented.
+   - Store AR coefficients phi and innovation variance sigma_eps^2.
 
 4. **Store all fitted parameters**: d, phi, theta, sigma_eps^2, seasonal means/stds (if monthly), truncation lag K.
 
 ### Generation
 
-1. **Generate ARMA innovations** for the differenced series:
+1. **Generate AR innovations** for the differenced series:
    ```
    eps_t ~ N(0, sigma_eps^2)
-   W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
+   W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t
    ```
 
 2. **Invert fractional differencing** via MA convolution (FIR filter) to recover the long-memory process:
@@ -84,11 +83,14 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
 | `p` | `int` | `1` | AR order for the short-memory component |
-| `q` | `int` | `0` | MA order for the short-memory component |
+| `q` | `int` | `0` | MA order (currently only q=0 is supported) |
 | `d_method` | `str` | `'whittle'` | Estimation method for d: `'whittle'`, `'gph'`, or `'rs'` |
 | `truncation_lag` | `int` | `100` | Truncation lag K for fractional differencing coefficients |
 | `deseasonalize` | `bool` | `True` | Remove monthly seasonality before fitting (set False for annual data) |
+| `name` | `str` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 
@@ -108,7 +110,7 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 - Requires long records (50+ years) for reliable estimation of d
 - Gaussian innovation assumption may underrepresent extreme events
 - Truncation of infinite fractional differencing series introduces approximation error
-- AIC/BIC model selection for p, q can be sensitive to d estimation
+- MA component (q > 0) not yet implemented; only AR short-memory component is available
 
 ## References
 

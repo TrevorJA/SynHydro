@@ -37,22 +37,27 @@ For each synthetic monthly flow `Q_syn_m`:
    q_d = Q_syn_m * (q*_d / sum(q*_d'))
    ```
    For multi-site data, each site is disaggregated independently using the same selected analog month.
+4. **Smooth month boundaries** (if `blend_days > 0`) — apply weighted blending across adjacent months to reduce discontinuities at month transitions, then rescale each month to preserve the original monthly total exactly.
 
 ## Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed daily streamflow with DatetimeIndex |
 | `n_neighbors` | `int` | `5` | K — number of candidate neighbors |
 | `max_month_shift` | `int` | `7` | Days of calendar flexibility around each month |
+| `blend_days` | `int` | `2` | Days of overlap smoothing at month boundaries to reduce discontinuities (0 = no blending) |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 
 - Daily flow patterns within each month (borrowed from historical record)
-- Monthly totals (exact, by construction)
+- Monthly totals (exact, by construction — preserved even after boundary blending)
 - Multi-site consistency (same analog month applied to all sites)
 
 **Not preserved:**
-- Month-to-month daily transitions (each month disaggregated independently)
+- Month-to-month daily transitions (partially addressed by `blend_days` boundary smoothing)
 - Daily patterns outside historical range
 
 ## Limitations

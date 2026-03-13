@@ -45,6 +45,9 @@ Grygier, J.C., and Stedinger, J.R. (1988). Condensed disaggregation procedures a
 **Stedinger-Vogel Disaggregation** (serial correlation extension)
 Stedinger, J.R., and Vogel, R.M. (1984). Disaggregation procedures for generating serially correlated flow vectors. *Water Resources Research*, 20(1), 47-56. https://doi.org/10.1029/WR020i001p00047
 
+**LAST stochastic techniques**
+Lane, W.L. (1979). Applied stochastic techniques (LAST computer package). User Manual, Division of Planning Technical Services, Bureau of Reclamation, Denver, CO.
+
 ---
 
 ## Wavelet-Based Methods
@@ -96,6 +99,12 @@ Rajagopalan, B., and Lall, U. (1999). A k-nearest-neighbor simulator for daily p
 
 **Spatial-temporal KNN disaggregation**
 Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2007). A stochastic nonparametric technique for space-time disaggregation of streamflows. *Water Resources Research*, 43, W03432. https://doi.org/10.1029/2005WR004721
+
+**Nonparametric function estimation in hydrology**
+Lall, U. (1995). Recent advances in nonparametric function estimation: Hydrologic applications. *Reviews of Geophysics*, 33(S2), 1093-1102.
+
+**Nonstationary wavelet decomposition**
+Kwon, H.-H., Lall, U., and Khalil, A.F. (2007). Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition. *Water Resources Research*, 43(5).
 
 **Wavelet analysis**
 Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. *Bulletin of the American Meteorological Society*, 79(1), 61-78. https://doi.org/10.1175/1520-0477(1998)079<0061:APGTWA>2.0.CO;2

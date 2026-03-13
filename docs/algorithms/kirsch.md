@@ -56,8 +56,11 @@ The Kirsch method generates synthetic multi-site monthly streamflow by bootstrap
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.DataFrame` | — | Observed multi-site streamflow with DatetimeIndex |
 | `generate_using_log_flow` | `bool` | `True` | Log-transform before processing (recommended for skewed data) |
 | `matrix_repair_method` | `str` | `'spectral'` | Method for repairing non-PSD correlation matrices |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 

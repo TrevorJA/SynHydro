@@ -49,7 +49,8 @@ The Thomas-Fiering method generates synthetic monthly streamflow using a seasona
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
 | `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved

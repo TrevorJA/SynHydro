@@ -27,8 +27,9 @@ Phase randomization generates synthetic daily streamflow by randomizing the Four
    - Fit four-parameter kappa distribution via L-moment matching
 2. **Normal score transform** — for each day d:
    - Rank all observations across years
-   - Map to standard normal quantiles via rank matching
-   - Result: normalized series with N(0,1) marginals per day
+   - Generate a standard normal sample of the same size, sort it
+   - Map observed ranks to sorted normal values (rank-matching)
+   - Result: normalized series with approximately N(0,1) marginals per day
 3. **Fourier transform** of normalized series:
    - Compute FFT; extract modulus (amplitude) and phases
    - Store first-half indices and mirror indices for conjugate symmetry
@@ -50,8 +51,11 @@ Phase randomization generates synthetic daily streamflow by randomizing the Four
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed daily streamflow with DatetimeIndex |
 | `marginal` | `str` | `'kappa'` | Marginal distribution: `'kappa'` (extrapolation) or `'empirical'` |
 | `win_h_length` | `int` | `15` | Half-window for daily distribution fitting (total = 2*h + 1 days) |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 
@@ -69,7 +73,7 @@ Phase randomization generates synthetic daily streamflow by randomizing the Four
 - Univariate only — no spatial correlations between sites
 - Generated series has same length as observed (no temporal extrapolation)
 - Output excludes February 29 dates
-- Kappa fitting may fail for some days — falls back to adjacent day parameters
+- Kappa fitting may fail for some days — falls back to adjacent day parameters or empirical distribution
 - Minimum 2 years of data; 10+ recommended for stable kappa fits
 
 ## References

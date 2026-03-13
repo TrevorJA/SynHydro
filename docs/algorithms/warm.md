@@ -53,9 +53,12 @@ WARM combines continuous wavelet transforms with autoregressive modeling to gene
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `wavelet` | `str` | `'morl'` | Mother wavelet (Morlet recommended for hydrology) |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `wavelet` | `str` | `'morl'` | Mother wavelet; any pywt continuous wavelet (e.g., `'morl'`, `'morlet'`) |
 | `scales` | `int` | `64` | Number of frequency scales (rule of thumb: T/2 to T) |
 | `ar_order` | `int` | `1` | AR model order (1 or 2 typically sufficient) |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 

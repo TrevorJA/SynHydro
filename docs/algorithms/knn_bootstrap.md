@@ -19,9 +19,7 @@ For multisite applications, all sites are resampled jointly using the same selec
 
 1. **Validate input** as univariate or multisite DataFrame with DatetimeIndex.
 2. **Construct state vectors**: for each timestep t, define the feature vector used for neighbor search. Default: the flow value(s) at time t.
-   - For monthly data with lag-1 conditioning: feature = Q(t)
-   - For monthly data with seasonal conditioning: feature = [Q(t), month(t)]
-3. **Build successor pairs**: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values.
+3. **Build successor pairs**: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values. For monthly data, successors are partitioned by calendar month to preserve seasonality.
 
 ### Fitting
 
@@ -58,10 +56,13 @@ For multisite applications, all sites are resampled jointly using the same selec
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `n_neighbors` | `int` | `None` | K; if None, uses ceil(sqrt(n)) |
-| `feature_cols` | `list` | `None` | Columns to use as features for KNN search. If None, uses all site columns |
-| `index_site` | `str` | `None` | Site to use for distance computation in multisite mode. If None, uses multivariate distance |
-| `block_size` | `int` | `1` | Number of consecutive timesteps to resample as a block (1 = standard KNN) |
+| `Q_obs` | `pd.DataFrame` | — | Observed streamflow with DatetimeIndex, sites as columns |
+| `n_neighbors` | `Optional[int]` | `None` | K; if None, uses ceil(sqrt(n)) |
+| `feature_cols` | `Optional[List[str]]` | `None` | Columns to use as features for KNN search. If None, uses all site columns |
+| `index_site` | `Optional[str]` | `None` | Reserved for future use (multisite index site selection) |
+| `block_size` | `int` | `1` | Reserved for future use (block resampling) |
+| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
+| `debug` | `bool` | `False` | Enable debug logging |
 
 ## Properties Preserved
 
