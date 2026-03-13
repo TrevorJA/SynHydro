@@ -1114,7 +1114,6 @@
 <ol>
 <li><strong>Validate input</strong> as univariate timeseries with at least 30 timesteps (50+ recommended for reliable d estimation).</li>
 <li><strong>Deseasonalize</strong> if monthly data: remove monthly means and divide by monthly standard deviations to produce stationary residuals.</li>
-<li><strong>Assess stationarity</strong> via ADF test. If non-stationary, apply integer differencing first, then fit fractional component to the differenced series.</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
@@ -1141,14 +1140,14 @@
    <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pi_0 = 1
 </span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pi_k = pi_{k-1} * (k - 1 - d) / k,  for k &gt;= 1
 </span></code></pre></div>
-   Truncate the infinite sum at lag K (default: min(100, n/2)).</p>
+   Truncate the infinite sum at lag K (default: 100).</p>
 </li>
 <li>
-<p><strong>Fit ARMA(p,q) to the differenced series</strong> via maximum likelihood or Yule-Walker:</p>
+<p><strong>Fit AR(p) to the differenced series</strong> via Yule-Walker equations:</p>
 </li>
-<li>Select p, q by AIC/BIC (default: p=1, q=0 for parsimony).</li>
+<li>p is user-specified (default: 1). The MA component (q &gt; 0) is not yet implemented.</li>
 <li>
-<p>Store AR coefficients phi, MA coefficients theta, innovation variance sigma_eps^2.</p>
+<p>Store AR coefficients phi and innovation variance sigma_eps^2.</p>
 </li>
 <li>
 <p><strong>Store all fitted parameters</strong>: d, phi, theta, sigma_eps^2, seasonal means/stds (if monthly), truncation lag K.</p>
@@ -1157,9 +1156,9 @@
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p><strong>Generate ARMA innovations</strong> for the differenced series:
+<p><strong>Generate AR innovations</strong> for the differenced series:
    <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>eps_t ~ N(0, sigma_eps^2)
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t
 </span></code></pre></div></p>
 </li>
 <li>
@@ -1191,6 +1190,12 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed streamflow with DatetimeIndex</td>
+</tr>
+<tr>
 <td><code>p</code></td>
 <td><code>int</code></td>
 <td><code>1</code></td>
@@ -1200,7 +1205,7 @@
 <td><code>q</code></td>
 <td><code>int</code></td>
 <td><code>0</code></td>
-<td>MA order for the short-memory component</td>
+<td>MA order (currently only q=0 is supported)</td>
 </tr>
 <tr>
 <td><code>d_method</code></td>
@@ -1219,6 +1224,18 @@
 <td><code>bool</code></td>
 <td><code>True</code></td>
 <td>Remove monthly seasonality before fitting (set False for annual data)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>str</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this generator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>
@@ -1239,7 +1256,7 @@
 <li>Requires long records (50+ years) for reliable estimation of d</li>
 <li>Gaussian innovation assumption may underrepresent extreme events</li>
 <li>Truncation of infinite fractional differencing series introduces approximation error</li>
-<li>AIC/BIC model selection for p, q can be sensitive to d estimation</li>
+<li>MA component (q &gt; 0) not yet implemented; only AR short-memory component is available</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>

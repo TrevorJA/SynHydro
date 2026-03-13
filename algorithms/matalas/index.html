@@ -1295,10 +1295,28 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.DataFrame</code> or <code>pd.Series</code></td>
+<td>—</td>
+<td>Observed streamflow with DatetimeIndex</td>
+</tr>
+<tr>
 <td><code>log_transform</code></td>
 <td><code>bool</code></td>
 <td><code>True</code></td>
 <td>Apply log(Q+1) before standardization</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this generator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>

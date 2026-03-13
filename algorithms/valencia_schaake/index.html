@@ -1094,7 +1094,7 @@
 </tr>
 <tr>
 <td><strong>Resolution</strong></td>
-<td>Annual to Monthly (or Monthly to Weekly)</td>
+<td>Annual to Monthly</td>
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
@@ -1170,6 +1170,12 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed streamflow at sub-period resolution with DatetimeIndex</td>
+</tr>
+<tr>
 <td><code>n_subperiods</code></td>
 <td><code>int</code></td>
 <td><code>12</code></td>
@@ -1186,6 +1192,18 @@
 <td><code>str</code></td>
 <td><code>'proportional'</code></td>
 <td>Method to enforce sum consistency: <code>'proportional'</code> or <code>'none'</code></td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this disaggregator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>

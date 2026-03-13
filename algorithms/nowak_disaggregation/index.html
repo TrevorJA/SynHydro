@@ -1268,6 +1268,7 @@
    <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>q_d = Q_syn_m * (q*_d / sum(q*_d&#39;))
 </span></code></pre></div>
    For multi-site data, each site is disaggregated independently using the same selected analog month.</li>
+<li><strong>Smooth month boundaries</strong> (if <code>blend_days &gt; 0</code>) — apply weighted blending across adjacent months to reduce discontinuities at month transitions, then rescale each month to preserve the original monthly total exactly.</li>
 </ol>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -1281,6 +1282,12 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed daily streamflow with DatetimeIndex</td>
+</tr>
+<tr>
 <td><code>n_neighbors</code></td>
 <td><code>int</code></td>
 <td><code>5</code></td>
@@ -1292,16 +1299,34 @@
 <td><code>7</code></td>
 <td>Days of calendar flexibility around each month</td>
 </tr>
+<tr>
+<td><code>blend_days</code></td>
+<td><code>int</code></td>
+<td><code>2</code></td>
+<td>Days of overlap smoothing at month boundaries to reduce discontinuities (0 = no blending)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this disaggregator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
+</tr>
 </tbody>
 </table>
 <h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Daily flow patterns within each month (borrowed from historical record)</li>
-<li>Monthly totals (exact, by construction)</li>
+<li>Monthly totals (exact, by construction — preserved even after boundary blending)</li>
 <li>Multi-site consistency (same analog month applied to all sites)</li>
 </ul>
 <p><strong>Not preserved:</strong>
-- Month-to-month daily transitions (each month disaggregated independently)
+- Month-to-month daily transitions (partially addressed by <code>blend_days</code> boundary smoothing)
 - Daily patterns outside historical range</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>

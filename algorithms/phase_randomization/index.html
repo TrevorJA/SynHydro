@@ -1263,8 +1263,9 @@
 <li>Fit four-parameter kappa distribution via L-moment matching</li>
 <li><strong>Normal score transform</strong> — for each day d:</li>
 <li>Rank all observations across years</li>
-<li>Map to standard normal quantiles via rank matching</li>
-<li>Result: normalized series with N(0,1) marginals per day</li>
+<li>Generate a standard normal sample of the same size, sort it</li>
+<li>Map observed ranks to sorted normal values (rank-matching)</li>
+<li>Result: normalized series with approximately N(0,1) marginals per day</li>
 <li><strong>Fourier transform</strong> of normalized series:</li>
 <li>Compute FFT; extract modulus (amplitude) and phases</li>
 <li>Store first-half indices and mirror indices for conjugate symmetry</li>
@@ -1294,6 +1295,12 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed daily streamflow with DatetimeIndex</td>
+</tr>
+<tr>
 <td><code>marginal</code></td>
 <td><code>str</code></td>
 <td><code>'kappa'</code></td>
@@ -1304,6 +1311,18 @@
 <td><code>int</code></td>
 <td><code>15</code></td>
 <td>Half-window for daily distribution fitting (total = 2*h + 1 days)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this generator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>
@@ -1322,7 +1341,7 @@
 <li>Univariate only — no spatial correlations between sites</li>
 <li>Generated series has same length as observed (no temporal extrapolation)</li>
 <li>Output excludes February 29 dates</li>
-<li>Kappa fitting may fail for some days — falls back to adjacent day parameters</li>
+<li>Kappa fitting may fail for some days — falls back to adjacent day parameters or empirical distribution</li>
 <li>Minimum 2 years of data; 10+ recommended for stable kappa fits</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>

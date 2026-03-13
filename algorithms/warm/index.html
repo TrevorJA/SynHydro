@@ -1298,10 +1298,16 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed streamflow with DatetimeIndex</td>
+</tr>
+<tr>
 <td><code>wavelet</code></td>
 <td><code>str</code></td>
 <td><code>'morl'</code></td>
-<td>Mother wavelet (Morlet recommended for hydrology)</td>
+<td>Mother wavelet; any pywt continuous wavelet (e.g., <code>'morl'</code>, <code>'morlet'</code>)</td>
 </tr>
 <tr>
 <td><code>scales</code></td>
@@ -1314,6 +1320,18 @@
 <td><code>int</code></td>
 <td><code>1</code></td>
 <td>AR model order (1 or 2 typically sufficient)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this generator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>

@@ -1114,9 +1114,7 @@
 <ol>
 <li><strong>Validate input</strong> as univariate or multisite DataFrame with DatetimeIndex.</li>
 <li><strong>Construct state vectors</strong>: for each timestep t, define the feature vector used for neighbor search. Default: the flow value(s) at time t.</li>
-<li>For monthly data with lag-1 conditioning: feature = Q(t)</li>
-<li>For monthly data with seasonal conditioning: feature = [Q(t), month(t)]</li>
-<li><strong>Build successor pairs</strong>: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values.</li>
+<li><strong>Build successor pairs</strong>: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values. For monthly data, successors are partitioned by calendar month to preserve seasonality.</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
@@ -1163,28 +1161,46 @@
 </thead>
 <tbody>
 <tr>
+<td><code>Q_obs</code></td>
+<td><code>pd.DataFrame</code></td>
+<td>—</td>
+<td>Observed streamflow with DatetimeIndex, sites as columns</td>
+</tr>
+<tr>
 <td><code>n_neighbors</code></td>
-<td><code>int</code></td>
+<td><code>Optional[int]</code></td>
 <td><code>None</code></td>
 <td>K; if None, uses ceil(sqrt(n))</td>
 </tr>
 <tr>
 <td><code>feature_cols</code></td>
-<td><code>list</code></td>
+<td><code>Optional[List[str]]</code></td>
 <td><code>None</code></td>
 <td>Columns to use as features for KNN search. If None, uses all site columns</td>
 </tr>
 <tr>
 <td><code>index_site</code></td>
-<td><code>str</code></td>
+<td><code>Optional[str]</code></td>
 <td><code>None</code></td>
-<td>Site to use for distance computation in multisite mode. If None, uses multivariate distance</td>
+<td>Reserved for future use (multisite index site selection)</td>
 </tr>
 <tr>
 <td><code>block_size</code></td>
 <td><code>int</code></td>
 <td><code>1</code></td>
-<td>Number of consecutive timesteps to resample as a block (1 = standard KNN)</td>
+<td>Reserved for future use (block resampling)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td><code>Optional[str]</code></td>
+<td><code>None</code></td>
+<td>Optional name identifier for this generator instance</td>
+</tr>
+<tr>
+<td><code>debug</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Enable debug logging</td>
 </tr>
 </tbody>
 </table>
