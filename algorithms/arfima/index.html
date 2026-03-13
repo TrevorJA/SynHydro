@@ -1119,21 +1119,27 @@
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Estimate fractional differencing parameter d</strong> using one of:</li>
-<li><strong>Whittle estimator</strong> (maximum likelihood in frequency domain, recommended):
-     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>d_hat = argmin_d sum[ log f(w_j; d) + I(w_j) / f(w_j; d) ]
+<li><strong>Whittle estimator</strong> (frequency-domain MLE, recommended; Fox &amp; Taqqu 1986):
+     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>d_hat = argmin_d sum_j [ log f(w_j; d) + I(w_j) / f(w_j; d) ]
 </span></code></pre></div>
-     where I(w_j) is the periodogram and f(w_j; d) is the spectral density of the fractionally differenced process.</li>
+     where I(w_j) is the periodogram and the spectral density is:
+     <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>f(w; d) ∝ [2(1 - cos(w))]^{-d}
+</span></code></pre></div>
+     derived from |1 - e^{-iw}|^{-2d} = [2(1 - cos(w))]^{-d} (Hosking 1981, eq. 2.3).</li>
 <li><strong>R/S analysis</strong> for Hurst exponent: compute H, then d = H - 0.5.</li>
 <li>
-<p><strong>GPH (Geweke-Porter-Hudak)</strong> log-periodogram regression.</p>
+<p><strong>GPH (Geweke-Porter-Hudak)</strong> log-periodogram regression (Geweke &amp; Porter-Hudak 1983):
+     <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>log I(w_j) = c - d * log[2(1 - cos(w_j))] + u_j
+</span></code></pre></div>
+     OLS regression on the m = sqrt(n) lowest Fourier frequencies; slope = -d.</p>
 </li>
 <li>
 <p><strong>Apply fractional differencing</strong> to obtain the fractionally differenced series:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>(1 - B)^d X_t = sum_{k=0}^{inf} pi_k X_{t-k}
+   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>(1 - B)^d X_t = sum_{k=0}^{inf} pi_k X_{t-k}
 </span></code></pre></div>
    where the fractional differencing coefficients are:
-   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>pi_0 = 1
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>pi_k = pi_{k-1} * (k - 1 - d) / k,  for k &gt;= 1
+   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pi_0 = 1
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>pi_k = pi_{k-1} * (k - 1 - d) / k,  for k &gt;= 1
 </span></code></pre></div>
    Truncate the infinite sum at lag K (default: min(100, n/2)).</p>
 </li>
@@ -1152,18 +1158,19 @@
 <ol>
 <li>
 <p><strong>Generate ARMA innovations</strong> for the differenced series:
-   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>eps_t ~ N(0, sigma_eps^2)
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
+   <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>eps_t ~ N(0, sigma_eps^2)
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
 </span></code></pre></div></p>
 </li>
 <li>
-<p><strong>Invert fractional differencing</strong> to recover the long-memory process:
-   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>X_t = W_t + sum_{k=1}^{K} psi_k * X_{t-k}
+<p><strong>Invert fractional differencing</strong> via MA convolution (FIR filter) to recover the long-memory process:
+   <div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>X_t = sum_{k=0}^{K} psi_k * W_{t-k}
 </span></code></pre></div>
    where the inverse coefficients are:
-   <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>psi_0 = 1
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>psi_k = psi_{k-1} * (k - 1 + d) / k,  for k &gt;= 1
-</span></code></pre></div></p>
+   <div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>psi_0 = 1
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>psi_k = psi_{k-1} * (k - 1 + d) / k,  for k &gt;= 1
+</span></code></pre></div>
+   Note: this is a moving-average (convolution) over the ARMA series W, not an autoregressive recursion over X.</p>
 </li>
 <li>
 <p><strong>Re-seasonalize</strong> if monthly: multiply by monthly standard deviations and add monthly means.</p>
@@ -1239,6 +1246,8 @@
 Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using fractional differencing. <em>Water Resources Research</em>, 20(12), 1898-1908. https://doi.org/10.1029/WR020i012p01898</p>
 <p><strong>See also:</strong>
 - Granger, C.W.J., and Joyeux, R. (1980). An introduction to long-memory time series models and fractional differencing. <em>Journal of Time Series Analysis</em>, 1(1), 15-29. https://doi.org/10.1111/j.1467-9892.1980.tb00297.x
+- Geweke, J., and Porter-Hudak, S. (1983). The estimation and application of long memory time series models. <em>Journal of Time Series Analysis</em>, 4(4), 221-238. https://doi.org/10.1111/j.1467-9892.1983.tb00371.x
+- Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates for strongly dependent stationary Gaussian time series. <em>The Annals of Statistics</em>, 14(2), 517-532.
 - Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. <em>Water Resources Research</em>, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
 - Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. <em>Hydrological Sciences Journal</em>, 47(4), 573-595.</p>
 <hr />
