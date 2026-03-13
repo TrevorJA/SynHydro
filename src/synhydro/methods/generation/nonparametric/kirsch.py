@@ -1,3 +1,19 @@
+"""
+Kirsch Nonparametric Bootstrap Generator (Kirsch et al. 2013)
+
+Generates synthetic multi-site monthly streamflow by bootstrapping standardized
+residuals and imposing fitted correlation structure via Cholesky decomposition.
+A cross-year shifted matrix preserves December-to-January correlations.
+
+References
+----------
+Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact
+of alternative hydro-climate scenarios on transfer agreements: A practical
+improvement for generating synthetic streamflows. Journal of Water Resources
+Planning and Management, 139(4), 396-406.
+https://doi.org/10.1061/(ASCE)WR.1943-5452.0000287
+"""
+
 import numpy as np
 import pandas as pd
 import warnings
@@ -11,7 +27,14 @@ class KirschGenerator(Generator):
     """
     Kirsch nonparametric bootstrap generator for monthly streamflow synthesis.
 
-    Generates monthly synthetic flows using bootstrap resampling with correlation preservation.
+    Generates monthly synthetic flows using bootstrap resampling with
+    correlation preservation via Cholesky decomposition.
+
+    References
+    ----------
+    Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the
+    impact of alternative hydro-climate scenarios on transfer agreements.
+    Journal of Water Resources Planning and Management, 139(4), 396-406.
     """
 
     def __init__(self, Q_obs: pd.DataFrame,
