@@ -1,20 +1,20 @@
 """
-Multi-Site Hidden Markov Model Generator (Gold et al. 2024/2025)
+Multi-Site Hidden Markov Model Generator (Gold et al. 2024)
 
 Implements a Gaussian Mixture Model HMM for generating synthetic multi-site
 streamflow that preserves both temporal dependencies (via hidden states) and
 spatial correlations (via multivariate emissions with full covariance matrices).
 
 Based on the methodology from:
-Gold, D.F, Reed, P.M. & Gupta, R.S. (In Revision). Exploring the Spatially
-Compounding Multi-sectoral Drought Vulnerabilities in Colorado's West Slope
-River Basins. Earth's Future
+Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially
+compounding multi-sectoral drought vulnerabilities in Colorado's West Slope
+river basins. Earth's Future. https://doi.org/10.1029/2024EF004841
 
 References
 ----------
-Gold, D.F, Reed, P.M. & Gupta, R.S. (In Revision). Exploring the Spatially
-Compounding Multi-sectoral Drought Vulnerabilities in Colorado's West Slope
-River Basins. Earth's Future
+Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially
+compounding multi-sectoral drought vulnerabilities in Colorado's West Slope
+river basins. Earth's Future. https://doi.org/10.1029/2024EF004841
 """
 
 import logging
@@ -135,7 +135,7 @@ class MultiSiteHMMGenerator(Generator):
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
-            'method': 'Multi-Site Hidden Markov Model (Gold et al. 2025)',
+            'method': 'Multi-Site Hidden Markov Model (Gold et al. 2024)',
             'n_states': n_states,
             'offset': offset,
             'max_iterations': max_iterations,
