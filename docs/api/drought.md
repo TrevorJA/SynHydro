@@ -1,11 +1,5 @@
 # Drought Metrics
 
-## SSIDroughtMetrics
-
-::: synhydro.droughts.ssi.SSIDroughtMetrics
-
----
-
 ## SSI
 
 ::: synhydro.droughts.ssi.SSI

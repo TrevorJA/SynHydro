@@ -36,23 +36,6 @@ class PhaseRandomizationGenerator(Generator):
     The method preserves both short- and long-range temporal dependence by
     conserving the power spectrum while randomizing phases.
 
-    Parameters
-    ----------
-    Q_obs : pd.Series or pd.DataFrame
-        Observed daily streamflow data with DatetimeIndex.
-        If DataFrame with multiple columns, only first column is used (with warning).
-    marginal : str, default='kappa'
-        Marginal distribution type for back-transformation:
-        - 'kappa': Four-parameter kappa distribution (default, allows extrapolation)
-        - 'empirical': Empirical distribution (no extrapolation beyond observed)
-    win_h_length : int, default=15
-        Half-window length for daily distribution fitting. Values within
-        ±win_h_length days are used, giving a total window of 2*win_h_length+1 days.
-    name : str, optional
-        Name identifier for this generator instance.
-    debug : bool, default=False
-        Enable debug logging.
-
     Attributes
     ----------
     par_day_ : dict
@@ -70,8 +53,8 @@ class PhaseRandomizationGenerator(Generator):
     >>> import pandas as pd
     >>> from synhydro.methods.generation.nonparametric import PhaseRandomizationGenerator
     >>> Q_daily = pd.read_csv('daily_flows.csv', index_col=0, parse_dates=True)
-    >>> gen = PhaseRandomizationGenerator(Q_daily, marginal='kappa')
-    >>> gen.preprocessing()
+    >>> gen = PhaseRandomizationGenerator(marginal='kappa')
+    >>> gen.preprocessing(Q_daily)
     >>> gen.fit()
     >>> ensemble = gen.generate(n_realizations=100, seed=42)
 
@@ -82,20 +65,40 @@ class PhaseRandomizationGenerator(Generator):
     - The method generates series of the same length as the observed data
     """
 
+    supports_multisite: bool = False
+    supported_frequencies: tuple = ("D",)
+
     def __init__(
         self,
-        Q_obs: Union[pd.Series, pd.DataFrame],
-        marginal: str = 'kappa',
+        *,
+        marginal: str = "kappa",
         win_h_length: int = 15,
         name: Optional[str] = None,
         debug: bool = False,
-        **kwargs
+        **kwargs,
     ):
-        """Initialize the PhaseRandomizationGenerator."""
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        """Initialize the PhaseRandomizationGenerator.
+
+        Parameters
+        ----------
+        marginal : str, default='kappa'
+            Marginal distribution type for back-transformation:
+            - 'kappa': Four-parameter kappa distribution (default, allows extrapolation)
+            - 'empirical': Empirical distribution (no extrapolation beyond observed)
+        win_h_length : int, default=15
+            Half-window length for daily distribution fitting. Values within
+            +-win_h_length days are used, giving a total window of 2*win_h_length+1 days.
+        name : str, optional
+            Name identifier for this generator instance.
+        debug : bool, default=False
+            Enable debug logging.
+        **kwargs : dict, optional
+            Additional parameters (currently unused).
+        """
+        super().__init__(name=name, debug=debug)
 
         # Validate marginal distribution type
-        if marginal not in ('kappa', 'empirical'):
+        if marginal not in ("kappa", "empirical"):
             raise ValueError(
                 f"marginal must be 'kappa' or 'empirical', got '{marginal}'"
             )
@@ -105,23 +108,22 @@ class PhaseRandomizationGenerator(Generator):
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
-            'method': 'Phase Randomization (Brunner et al. 2019)',
-            'marginal': marginal,
-            'win_h_length': win_h_length
+            "marginal": marginal,
+            "win_h_length": win_h_length,
         }
 
         # Initialize fitted parameter storage
         self.par_day_ = {}  # Kappa parameters per day of year
-        self.norm_ = None   # Normalized data
+        self.norm_ = None  # Normalized data
         self.modulus_ = None  # FFT modulus
         self.phases_ = None  # FFT phases
 
     @property
     def output_frequency(self) -> str:
         """Phase randomization generates daily output."""
-        return 'D'
+        return "D"
 
-    def preprocessing(self, sites: Optional[list] = None, **kwargs) -> None:
+    def preprocessing(self, Q_obs, *, sites=None, **kwargs) -> None:
         """
         Preprocess observed data for phase randomization generation.
 
@@ -129,8 +131,10 @@ class PhaseRandomizationGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed daily streamflow data with DatetimeIndex.
         sites : list, optional
-            Not used (phase randomization is univariate).
+            Sites to keep. If None, uses all columns.
         **kwargs : dict
             Additional preprocessing parameters (currently unused).
 
@@ -139,18 +143,8 @@ class PhaseRandomizationGenerator(Generator):
         ValueError
             If data has fewer than 730 days or has missing days.
         """
-        # Validate input data
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        # Phase randomization is univariate - ensure single site
-        if Q.shape[1] > 1:
-            self.logger.warning(
-                "PhaseRandomizationGenerator is univariate. Using first column only."
-            )
-            Q = Q.iloc[:, 0:1]
-
-        # Store sites
-        self._sites = Q.columns.tolist()
+        # Validate, filter, and store observed data
+        Q = self._store_obs_data(Q_obs, sites=sites)
 
         # Convert to Series for processing
         Q_series = Q.iloc[:, 0]
@@ -220,7 +214,7 @@ class PhaseRandomizationGenerator(Generator):
 
         return day_of_year
 
-    def fit(self, **kwargs) -> None:
+    def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
         """
         Fit the phase randomization model to observed data.
 
@@ -231,13 +225,19 @@ class PhaseRandomizationGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            If provided, calls preprocessing automatically.
+        sites : list, optional
+            Sites to keep. Passed to preprocessing if Q_obs is provided.
         **kwargs : dict
             Additional fitting parameters (currently unused).
         """
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         # Step 1: Fit daily kappa distributions (if using kappa marginal)
-        if self.marginal == 'kappa':
+        if self.marginal == "kappa":
             self._fit_kappa_distributions()
 
         # Step 2: Normal score transform
@@ -291,7 +291,9 @@ class PhaseRandomizationGenerator(Generator):
                 # Use previous day's parameters if fitting failed
                 if d > 1 and d - 1 in self.par_day_:
                     self.par_day_[d] = self.par_day_[d - 1].copy()
-                    self.logger.debug(f"Day {d}: Using previous day's parameters due to: {e}")
+                    self.logger.debug(
+                        f"Day {d}: Using previous day's parameters due to: {e}"
+                    )
                 else:
                     self.par_day_[d] = None
                     self.logger.warning(f"Day {d}: Kappa fitting failed: {e}")
@@ -380,7 +382,7 @@ class PhaseRandomizationGenerator(Generator):
             lca = 2 * (3 * b2 - b0) / denom - 3  # tau3 (L-skewness)
             lkur = 5 * (2 * (2 * b3 - 3 * b2) + b0) / denom + 6  # tau4 (L-kurtosis)
 
-        return {'l1': l1, 'l2': l2, 'lcv': lcv, 'lca': lca, 'lkur': lkur}
+        return {"l1": l1, "l2": l2, "lcv": lcv, "lca": lca, "lkur": lkur}
 
     def _fit_kappa_params(self, lmom: Dict[str, float]) -> Optional[Dict[str, float]]:
         """
@@ -398,10 +400,10 @@ class PhaseRandomizationGenerator(Generator):
         dict or None
             Dictionary with keys 'xi', 'alfa', 'k', 'h' or None if fitting fails.
         """
-        lambda1 = lmom['l1']
-        lambda2 = lmom['l2']
-        tau3 = lmom['lca']
-        tau4 = lmom['lkur']
+        lambda1 = lmom["l1"]
+        lambda2 = lmom["l2"]
+        tau3 = lmom["lca"]
+        tau4 = lmom["lkur"]
 
         def compute_theoretical_tau(k, h):
             """Compute theoretical tau3 and tau4 from k and h."""
@@ -409,16 +411,22 @@ class PhaseRandomizationGenerator(Generator):
                 # GEV case
                 if k == 0:
                     k = 1e-100
-                tau3_th = 2 * (1 - 3**(-k)) / (1 - 2**(-k)) - 3
-                tau4_th = (5 * (1 - 4**(-k)) - 10 * (1 - 3**(-k)) + 6 * (1 - 2**(-k))) / (1 - 2**(-k))
+                tau3_th = 2 * (1 - 3 ** (-k)) / (1 - 2 ** (-k)) - 3
+                tau4_th = (
+                    5 * (1 - 4 ** (-k)) - 10 * (1 - 3 ** (-k)) + 6 * (1 - 2 ** (-k))
+                ) / (1 - 2 ** (-k))
             else:
                 g = np.zeros(4)
                 for r in range(1, 5):
                     try:
                         if h > 0:
-                            g[r-1] = (r * gamma(1 + k) * gamma(r / h)) / (h**(1 + k) * gamma(1 + k + r / h))
+                            g[r - 1] = (r * gamma(1 + k) * gamma(r / h)) / (
+                                h ** (1 + k) * gamma(1 + k + r / h)
+                            )
                         else:
-                            g[r-1] = (r * gamma(1 + k) * gamma(-k - r / h)) / ((-h)**(1 + k) * gamma(1 - r / h))
+                            g[r - 1] = (r * gamma(1 + k) * gamma(-k - r / h)) / (
+                                (-h) ** (1 + k) * gamma(1 - r / h)
+                            )
                     except (ValueError, ZeroDivisionError):
                         return None, None
 
@@ -433,14 +441,14 @@ class PhaseRandomizationGenerator(Generator):
         def objective(kh):
             k, h = kh
             # Check validity constraints
-            if (k < -1 and h >= 0) or (h < 0 and (k <= -1 or k >= -1/h)):
+            if (k < -1 and h >= 0) or (h < 0 and (k <= -1 or k >= -1 / h)):
                 return 1e10
 
             tau3_th, tau4_th = compute_theoretical_tau(k, h)
             if tau3_th is None:
                 return 1e10
 
-            return (tau3 - tau3_th)**2 + (tau4 - tau4_th)**2
+            return (tau3 - tau3_th) ** 2 + (tau4 - tau4_th) ** 2
 
         # Optimize to find k and h
         try:
@@ -449,8 +457,8 @@ class PhaseRandomizationGenerator(Generator):
                 result = minimize(
                     objective,
                     [1.0, 1.0],
-                    method='Nelder-Mead',
-                    options={'maxiter': 1000, 'xatol': 1e-6, 'fatol': 1e-6}
+                    method="Nelder-Mead",
+                    options={"maxiter": 1000, "xatol": 1e-6, "fatol": 1e-6},
                 )
 
             if result.fun > 0.1:  # Poor fit
@@ -464,7 +472,7 @@ class PhaseRandomizationGenerator(Generator):
             if alfa is None or alfa <= 0:
                 return None
 
-            return {'xi': xi, 'alfa': alfa, 'k': k, 'h': h}
+            return {"xi": xi, "alfa": alfa, "k": k, "h": h}
 
         except Exception:
             return None
@@ -496,15 +504,19 @@ class PhaseRandomizationGenerator(Generator):
                 # GEV case
                 if k == 0:
                     k = 1e-100
-                alfa = (lambda2 * k) / ((1 - 2**(-k)) * gamma(1 + k))
+                alfa = (lambda2 * k) / ((1 - 2 ** (-k)) * gamma(1 + k))
                 xi = lambda1 - alfa * (1 - gamma(1 + k)) / k
             else:
                 g = np.zeros(2)
                 for r in range(1, 3):
                     if h > 0:
-                        g[r-1] = (r * gamma(1 + k) * gamma(r / h)) / (h**(1 + k) * gamma(1 + k + r / h))
+                        g[r - 1] = (r * gamma(1 + k) * gamma(r / h)) / (
+                            h ** (1 + k) * gamma(1 + k + r / h)
+                        )
                     else:
-                        g[r-1] = (r * gamma(1 + k) * gamma(-k - r / h)) / ((-h)**(1 + k) * gamma(1 - r / h))
+                        g[r - 1] = (r * gamma(1 + k) * gamma(-k - r / h)) / (
+                            (-h) ** (1 + k) * gamma(1 - r / h)
+                        )
 
                 if g[0] - g[1] == 0:
                     return None, None
@@ -557,31 +569,30 @@ class PhaseRandomizationGenerator(Generator):
     def _compute_fitted_params(self) -> FittedParams:
         """Extract and package fitted parameters."""
         n_params = 0
-        if self.marginal == 'kappa':
+        if self.marginal == "kappa":
             # 365 days × 4 parameters
             n_params = 365 * 4
 
         training_period = (
             str(self.Q_obs_index_[0].date()),
-            str(self.Q_obs_index_[-1].date())
+            str(self.Q_obs_index_[-1].date()),
         )
 
         return FittedParams(
             distributions_={
-                'type': self.marginal,
-                'kappa_params': self.par_day_ if self.marginal == 'kappa' else None
+                "type": self.marginal,
+                "kappa_params": self.par_day_ if self.marginal == "kappa" else None,
             },
-            transformations_={
-                'normal_score': True,
-                'win_h_length': self.win_h_length
-            },
+            transformations_={"normal_score": True, "win_h_length": self.win_h_length},
             fitted_models_={
-                'modulus_shape': self.modulus_.shape if self.modulus_ is not None else None
+                "modulus_shape": (
+                    self.modulus_.shape if self.modulus_ is not None else None
+                )
             },
             n_parameters_=n_params,
             sample_size_=len(self.Q_obs_),
             n_sites_=1,
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def generate(
@@ -590,7 +601,7 @@ class PhaseRandomizationGenerator(Generator):
         n_years: Optional[int] = None,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Ensemble:
         """
         Generate synthetic streamflow realizations using phase randomization.
@@ -635,9 +646,7 @@ class PhaseRandomizationGenerator(Generator):
 
             # Store as DataFrame
             realizations[r] = pd.DataFrame(
-                simulated,
-                index=self.Q_obs_index_,
-                columns=self._sites
+                simulated, index=self.Q_obs_index_, columns=self._sites
             )
 
         self.logger.info(f"Generated {n_realizations} realizations")
@@ -666,7 +675,9 @@ class PhaseRandomizationGenerator(Generator):
         ft_new[0] = self.ft_[0]
 
         # First half: modulus with random phases
-        ft_new[self.first_part_] = self.modulus_[self.first_part_] * np.exp(1j * random_phases)
+        ft_new[self.first_part_] = self.modulus_[self.first_part_] * np.exp(
+            1j * random_phases
+        )
 
         # Second half: conjugate symmetry for real output
         ft_new[self.second_part_] = np.conj(ft_new[self.first_part_])
@@ -704,7 +715,7 @@ class PhaseRandomizationGenerator(Generator):
             if n == 0:
                 continue
 
-            if self.marginal == 'kappa' and self.par_day_.get(d) is not None:
+            if self.marginal == "kappa" and self.par_day_.get(d) is not None:
                 # Generate kappa sample
                 kappa_sample = self._rand_kappa(n, **self.par_day_[d])
 
@@ -791,8 +802,8 @@ class PhaseRandomizationGenerator(Generator):
 
         if h == 0:
             # GEV case
-            x = xi + alfa * (1 - (-np.log(F))**k) / k
+            x = xi + alfa * (1 - (-np.log(F)) ** k) / k
         else:
-            x = xi + (alfa / k) * (1 - ((1 - F**h) / h)**k)
+            x = xi + (alfa / k) * (1 - ((1 - F**h) / h) ** k)
 
         return x

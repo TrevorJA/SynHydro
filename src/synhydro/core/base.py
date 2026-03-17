@@ -13,13 +13,13 @@ import numpy as np
 import pandas as pd
 from dataclasses import dataclass, field, asdict
 
+
 @dataclass
 class GeneratorState:
     """Track generator preprocessing and fitting state."""
+
     is_preprocessed: bool = False
     is_fitted: bool = False
-    preprocessing_params: Dict[str, Any] = field(default_factory=dict)
-    fit_params: Dict[str, Any] = field(default_factory=dict)
     fit_timestamp: Optional[str] = None
 
 
@@ -31,6 +31,7 @@ class GeneratorParams:
     These are user-specified settings that control algorithm behavior,
     not learned from data.
     """
+
     # Common parameters across all generators
     random_seed: Optional[int] = None
     verbose: bool = False
@@ -44,9 +45,9 @@ class GeneratorParams:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to flat dictionary."""
         result = {
-            'random_seed': self.random_seed,
-            'verbose': self.verbose,
-            'debug': self.debug,
+            "random_seed": self.random_seed,
+            "verbose": self.verbose,
+            "debug": self.debug,
         }
         result.update(self.algorithm_params)
         result.update(self.transformation_params)
@@ -88,6 +89,7 @@ class FittedParams:
 
     Following scikit-learn convention, parameter names end with underscore.
     """
+
     # Statistical moments (common across many generators)
     means_: Optional[Union[pd.Series, pd.DataFrame]] = None
     stds_: Optional[Union[pd.Series, pd.DataFrame]] = None
@@ -104,8 +106,8 @@ class FittedParams:
 
     # Metadata about fitting
     n_parameters_: int = 0  # Total number of fitted parameters
-    sample_size_: int = 0   # Training data size (timesteps)
-    n_sites_: int = 0       # Number of sites
+    sample_size_: int = 0  # Training data size (timesteps)
+    n_sites_: int = 0  # Number of sites
     training_period_: Optional[Tuple[str, str]] = None  # (start, end) dates
 
     def to_dict(self) -> Dict[str, Any]:
@@ -130,7 +132,9 @@ class FittedParams:
         lines.append(f"  n_sites: {self.n_sites_}")
 
         if self.training_period_ is not None:
-            lines.append(f"  training_period: {self.training_period_[0]} to {self.training_period_[1]}")
+            lines.append(
+                f"  training_period: {self.training_period_[0]} to {self.training_period_[1]}"
+            )
 
         if self.means_ is not None:
             lines.append(f"  means: fitted ({self._describe_shape(self.means_)})")
@@ -138,7 +142,9 @@ class FittedParams:
             lines.append(f"  stds: fitted ({self._describe_shape(self.stds_)})")
         if self.correlations_ is not None:
             if isinstance(self.correlations_, dict):
-                lines.append(f"  correlations: {len(self.correlations_)} matrices fitted")
+                lines.append(
+                    f"  correlations: {len(self.correlations_)} matrices fitted"
+                )
             else:
                 lines.append(f"  correlations: fitted ({self.correlations_.shape})")
 
@@ -165,27 +171,42 @@ class FittedParams:
 class Generator(ABC):
     """
     Abstract base class for all synthetic generation methods.
-    
+
     All generator implementations should inherit from this class.
+    Follows the scikit-learn pattern: ``__init__`` configures the algorithm,
+    ``fit(Q_obs)`` learns from data, ``generate()`` produces synthetic flows.
+
+    Class Attributes
+    ----------------
+    supports_multisite : bool
+        Whether this generator supports multiple sites. Default False.
+    supported_frequencies : tuple of str
+        Pandas frequency strings this generator accepts (e.g., ``('MS',)``).
     """
-    
+
+    supports_multisite: bool = False
+    supported_frequencies: tuple = ("MS",)
+
     @abstractmethod
-    def __init__(self,
-                 Q_obs: Union[pd.Series, pd.DataFrame],
-                 name: Optional[str] = None,
-                 debug: bool = False,
-                 ) -> None:
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        debug: bool = False,
+    ) -> None:
         """
-        Initialize the generator base class.
+        Initialize the generator with algorithm configuration.
+
+        Subclasses add algorithm-specific keyword-only parameters before
+        ``name`` and ``debug``. Data is not passed here — use ``fit(Q_obs)``
+        or ``preprocessing(Q_obs)`` instead.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Observed historical flow data for training the generator.
         name : str, optional
-            Name identifier for this generator instance
+            Name identifier for this generator instance.
         debug : bool, default False
-            Enable debug logging
+            Enable debug logging.
         """
         self.name = name or self.__class__.__name__
         self.debug = debug
@@ -196,22 +217,16 @@ class Generator(ABC):
         self.init_params = GeneratorParams(debug=debug)
         self.fitted_params_ = None  # Set during _compute_fitted_params()
 
-        # Store raw input data
-        self._Q_obs_raw = Q_obs
-
         # Setup logging
         self._setup_logging(debug)
-        
-        
-    def _setup_logging(self, 
-                       debug: bool) -> None:
+
+    def _setup_logging(self, debug: bool) -> None:
         """Setup logging infrastructure."""
         self.logger = logging.getLogger(f"synhydro.{self.name}")
         if debug:
             self.logger.setLevel(logging.DEBUG)
         else:
-            self.logger.setLevel(logging.INFO)        
-            
+            self.logger.setLevel(logging.INFO)
 
     def validate_input_data(self, data: Union[pd.Series, pd.DataFrame]) -> pd.DataFrame:
         """
@@ -242,7 +257,7 @@ class Generator(ABC):
 
         # Convert Series to DataFrame
         if isinstance(data, pd.Series):
-            data = data.to_frame(name=data.name or 'flow')
+            data = data.to_frame(name=data.name or "flow")
 
         # Index validation
         if not isinstance(data.index, pd.DatetimeIndex):
@@ -286,14 +301,10 @@ class Generator(ABC):
             If fit() has not been run.
         """
         if not self.state.is_fitted:
-            raise ValueError(
-                f"{self.name} must run fit() before generate()"
-            )
+            raise ValueError(f"{self.name} must run fit() before generate()")
 
     def update_state(
-        self,
-        preprocessed: Optional[bool] = None,
-        fitted: Optional[bool] = None
+        self, preprocessed: Optional[bool] = None, fitted: Optional[bool] = None
     ) -> None:
         """
         Update generator state flags.
@@ -340,7 +351,7 @@ class Generator(ABC):
         ValueError
             If preprocessing not yet run.
         """
-        if not hasattr(self, '_sites'):
+        if not hasattr(self, "_sites"):
             raise ValueError("Run preprocessing() first to access n_sites")
         return len(self._sites)
 
@@ -359,7 +370,7 @@ class Generator(ABC):
         ValueError
             If preprocessing not yet run.
         """
-        if not hasattr(self, '_sites'):
+        if not hasattr(self, "_sites"):
             raise ValueError("Run preprocessing() first to access sites")
         return self._sites
 
@@ -410,9 +421,7 @@ class Generator(ABC):
             If generator has not been fitted yet.
         """
         if self.fitted_params_ is None:
-            raise ValueError(
-                f"{self.name} has not been fitted yet. Run fit() first."
-            )
+            raise ValueError(f"{self.name} has not been fitted yet. Run fit() first.")
         return self.fitted_params_.to_dict()
 
     @abstractmethod
@@ -454,17 +463,21 @@ class Generator(ABC):
         lines.append("Model Information")
         lines.append("-" * 80)
         lines.append(f"Generator Type:          {self.__class__.__name__}")
-        lines.append(f"Status:                  {'Fitted' if self.is_fitted else 'Not Fitted'}")
+        lines.append(
+            f"Status:                  {'Fitted' if self.is_fitted else 'Not Fitted'}"
+        )
 
         if self.is_fitted and self.state.fit_timestamp:
             lines.append(f"Fitted:                  {self.state.fit_timestamp}")
 
-        if hasattr(self, '_sites') and self._sites:
+        if hasattr(self, "_sites") and self._sites:
             lines.append(f"Number of Sites:         {len(self._sites)}")
             if len(self._sites) <= 5:
                 lines.append(f"Sites:                   {self._sites}")
             else:
-                lines.append(f"Sites:                   {self._sites[:3]} ... ({len(self._sites)} total)")
+                lines.append(
+                    f"Sites:                   {self._sites[:3]} ... ({len(self._sites)} total)"
+                )
 
         lines.append("")
 
@@ -472,7 +485,7 @@ class Generator(ABC):
         lines.append("Initialization Parameters")
         lines.append("-" * 80)
         params_str = str(self.init_params)
-        for line in params_str.split('\n')[1:]:  # Skip first line "GeneratorParams:"
+        for line in params_str.split("\n")[1:]:  # Skip first line "GeneratorParams:"
             lines.append(line)
         lines.append("")
 
@@ -481,7 +494,7 @@ class Generator(ABC):
             lines.append("Fitted Parameters")
             lines.append("-" * 80)
             fitted_str = str(self.fitted_params_)
-            for line in fitted_str.split('\n')[1:]:  # Skip first line "FittedParams:"
+            for line in fitted_str.split("\n")[1:]:  # Skip first line "FittedParams:"
                 lines.append(line)
             lines.append("")
 
@@ -490,9 +503,10 @@ class Generator(ABC):
         return "\n".join(lines)
 
     def __repr__(self) -> str:
-        """String representation showing key info."""
-        status = "fitted" if self.is_fitted else "not fitted"
-        return f"{self.__class__.__name__}(name='{self.name}', status='{status}')"
+        """Scikit-learn style repr showing algorithm parameters."""
+        params = self.init_params.algorithm_params
+        param_str = ", ".join(f"{k}={v!r}" for k, v in params.items())
+        return f"{self.__class__.__name__}({param_str})"
 
     def get_state_info(self) -> Dict[str, Any]:
         """
@@ -504,29 +518,29 @@ class Generator(ABC):
             Dictionary containing all generator state, parameters, and metadata.
         """
         info = {
-            'name': self.name,
-            'class': self.__class__.__name__,
-            'is_preprocessed': self.state.is_preprocessed,
-            'is_fitted': self.state.is_fitted,
-            'fit_timestamp': self.state.fit_timestamp,
-            'init_params': self.init_params.to_dict(),
+            "name": self.name,
+            "class": self.__class__.__name__,
+            "is_preprocessed": self.state.is_preprocessed,
+            "is_fitted": self.state.is_fitted,
+            "fit_timestamp": self.state.fit_timestamp,
+            "init_params": self.init_params.to_dict(),
         }
 
         if self.is_preprocessed:
-            if hasattr(self, '_sites'):
-                info['n_sites'] = len(self._sites)
-                info['sites'] = self._sites
+            if hasattr(self, "_sites"):
+                info["n_sites"] = len(self._sites)
+                info["sites"] = self._sites
 
         if self.is_fitted and self.fitted_params_:
-            info['fitted_params'] = self.fitted_params_.to_dict()
+            info["fitted_params"] = self.fitted_params_.to_dict()
 
         return info
 
     def _create_output_index(
         self,
         n_timesteps: int,
-        freq: str = 'MS',
-        start_date: Optional[pd.Timestamp] = None
+        freq: str = "MS",
+        start_date: Optional[pd.Timestamp] = None,
     ) -> pd.DatetimeIndex:
         """
         Create DatetimeIndex for generated synthetic data.
@@ -545,20 +559,17 @@ class Generator(ABC):
         pd.DatetimeIndex
             Index for synthetic data.
         """
-        if start_date is None and hasattr(self, '_Q_obs'):
+        if start_date is None and hasattr(self, "_Q_obs"):
             # Start after last observed date
             start_date = self._Q_obs.index[-1] + pd.Timedelta(days=1)
         elif start_date is None:
             # Default to arbitrary start date
-            start_date = pd.Timestamp('2000-01-01')
+            start_date = pd.Timestamp("2000-01-01")
 
         return pd.date_range(start=start_date, periods=n_timesteps, freq=freq)
 
     def _format_output(
-        self,
-        data: np.ndarray,
-        dates: pd.DatetimeIndex,
-        n_realizations: int = 1
+        self, data: np.ndarray, dates: pd.DatetimeIndex, n_realizations: int = 1
     ) -> pd.DataFrame:
         """
         Format output array as DataFrame with proper structure.
@@ -585,13 +596,10 @@ class Generator(ABC):
         else:
             # Multiple realizations: MultiIndex
             idx = pd.MultiIndex.from_product(
-                [range(n_realizations), dates],
-                names=['realization', 'date']
+                [range(n_realizations), dates], names=["realization", "date"]
             )
             return pd.DataFrame(
-                data.reshape(-1, len(self.sites)),
-                index=idx,
-                columns=self.sites
+                data.reshape(-1, len(self.sites)), index=idx, columns=self.sites
             )
 
     def save(self, filepath: str) -> None:
@@ -613,13 +621,13 @@ class Generator(ABC):
         if not self.is_fitted:
             raise ValueError("Cannot save unfitted generator. Run fit() first.")
 
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(self, f)
 
         self.logger.info(f"Generator saved to {filepath}")
 
     @classmethod
-    def load(cls, filepath: str) -> 'Generator':
+    def load(cls, filepath: str) -> "Generator":
         """
         Load fitted generator from file.
 
@@ -635,30 +643,71 @@ class Generator(ABC):
         """
         import pickle
 
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             generator = pickle.load(f)
 
         generator.logger.info(f"Generator loaded from {filepath}")
         return generator
 
+    def _store_obs_data(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        sites: Optional[List[str]] = None,
+    ) -> pd.DataFrame:
+        """
+        Validate, store, and filter observed data. Called at the start of
+        ``preprocessing()`` in every subclass.
+
+        Parameters
+        ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data.
+        sites : list of str, optional
+            Sites to keep. If None, uses all columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            Validated and filtered DataFrame ready for preprocessing.
+        """
+        self._Q_obs_raw = Q_obs
+        Q = self.validate_input_data(Q_obs)
+        if sites is not None:
+            missing = set(sites) - set(Q.columns)
+            if missing:
+                raise ValueError(f"Sites not found in data: {missing}")
+            Q = Q[sites]
+        if not self.supports_multisite and Q.shape[1] > 1:
+            self.logger.warning(
+                "%s is univariate — using first column only.",
+                self.__class__.__name__,
+            )
+            Q = Q.iloc[:, 0:1]
+        self._sites = Q.columns.tolist()
+        return Q
+
     @abstractmethod
     def preprocessing(
         self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        *,
         sites: Optional[List[str]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Preprocess and validate observed flow data.
 
         Implementations should:
-        1. Call validate_input_data() to validate self._Q_obs_raw
-        2. Store preprocessed data as instance attributes
-        3. Call update_state(preprocessed=True) at end
+        1. Call ``_store_obs_data(Q_obs, sites)`` to validate and store data
+        2. Perform generator-specific data preparation
+        3. Call ``update_state(preprocessed=True)`` at end
 
         Parameters
         ----------
-        sites : List[str], optional
-            List of site names to use. If None, uses all columns.
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data.
+        sites : list of str, optional
+            Sites to use. If None, uses all columns.
         **kwargs : Any
             Additional preprocessing parameters.
         """
@@ -667,19 +716,23 @@ class Generator(ABC):
     @abstractmethod
     def fit(
         self,
-        **kwargs: Any
+        Q_obs: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
     ) -> None:
         """
         Fit the generator to observed flow data.
 
-        Implementations should:
-        1. Call validate_preprocessing() at start
-        2. Fit model parameters from preprocessed data
-        3. Store fitted parameters as instance attributes
-        4. Call update_state(fitted=True) at end
+        If ``Q_obs`` is provided, ``preprocessing()`` is called automatically.
+        If omitted, a prior call to ``preprocessing()`` is required.
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed data. If provided, runs preprocessing automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs : Any
             Additional fitting parameters.
         """
@@ -692,8 +745,8 @@ class Generator(ABC):
         n_years: Optional[int] = None,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs: Any
-    ) -> 'Ensemble':
+        **kwargs: Any,
+    ) -> "Ensemble":
         """
         Generate synthetic streamflow realizations.
 
@@ -727,10 +780,9 @@ class Generator(ABC):
 @dataclass
 class DisaggregatorState:
     """Track disaggregator preprocessing and fitting state."""
+
     is_preprocessed: bool = False
     is_fitted: bool = False
-    preprocessing_params: Dict[str, Any] = field(default_factory=dict)
-    fit_params: Dict[str, Any] = field(default_factory=dict)
     fit_timestamp: Optional[str] = None
 
 
@@ -742,6 +794,7 @@ class DisaggregatorParams:
     These are user-specified settings that control algorithm behavior,
     not learned from data.
     """
+
     # Common parameters across all disaggregators
     random_seed: Optional[int] = None
     verbose: bool = False
@@ -754,9 +807,9 @@ class DisaggregatorParams:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to flat dictionary."""
         result = {
-            'random_seed': self.random_seed,
-            'verbose': self.verbose,
-            'debug': self.debug,
+            "random_seed": self.random_seed,
+            "verbose": self.verbose,
+            "debug": self.debug,
         }
         result.update(self.algorithm_params)
         result.update(self.computational_params)
@@ -796,23 +849,25 @@ class Disaggregator(ABC):
     """
 
     @abstractmethod
-    def __init__(self,
-                 Q_obs: Union[pd.Series, pd.DataFrame],
-                 name: Optional[str] = None,
-                 debug: bool = False,
-                 ) -> None:
+    def __init__(
+        self,
+        *,
+        name: Optional[str] = None,
+        debug: bool = False,
+    ) -> None:
         """
-        Initialize the disaggregator base class.
+        Initialize the disaggregator with algorithm configuration.
+
+        Subclasses add algorithm-specific keyword-only parameters before
+        ``name`` and ``debug``. Data is not passed here — use ``fit(Q_obs)``
+        or ``preprocessing(Q_obs)`` instead.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Observed historical flow data used to train disaggregation patterns.
-            Should be at the finer temporal resolution (output resolution).
         name : str, optional
-            Name identifier for this disaggregator instance
+            Name identifier for this disaggregator instance.
         debug : bool, default False
-            Enable debug logging
+            Enable debug logging.
         """
         self.name = name or self.__class__.__name__
         self.debug = debug
@@ -822,9 +877,6 @@ class Disaggregator(ABC):
         # Initialize parameter storage
         self.init_params = DisaggregatorParams(debug=debug)
         self.fitted_params_ = None  # Set during _compute_fitted_params()
-
-        # Store raw input data
-        self._Q_obs_raw = Q_obs
 
         # Setup logging
         self._setup_logging(debug)
@@ -866,7 +918,7 @@ class Disaggregator(ABC):
 
         # Convert Series to DataFrame
         if isinstance(data, pd.Series):
-            data = data.to_frame(name=data.name or 'flow')
+            data = data.to_frame(name=data.name or "flow")
 
         # Index validation
         if not isinstance(data.index, pd.DatetimeIndex):
@@ -909,14 +961,10 @@ class Disaggregator(ABC):
             If fit() has not been run.
         """
         if not self.state.is_fitted:
-            raise ValueError(
-                f"{self.name} must run fit() before disaggregate()"
-            )
+            raise ValueError(f"{self.name} must run fit() before disaggregate()")
 
     def update_state(
-        self,
-        preprocessed: Optional[bool] = None,
-        fitted: Optional[bool] = None
+        self, preprocessed: Optional[bool] = None, fitted: Optional[bool] = None
     ) -> None:
         """
         Update disaggregator state flags.
@@ -963,7 +1011,7 @@ class Disaggregator(ABC):
         ValueError
             If preprocessing not yet run.
         """
-        if not hasattr(self, '_sites'):
+        if not hasattr(self, "_sites"):
             raise ValueError("Run preprocessing() first to access n_sites")
         return len(self._sites)
 
@@ -982,7 +1030,7 @@ class Disaggregator(ABC):
         ValueError
             If preprocessing not yet run.
         """
-        if not hasattr(self, '_sites'):
+        if not hasattr(self, "_sites"):
             raise ValueError("Run preprocessing() first to access sites")
         return self._sites
 
@@ -1012,7 +1060,7 @@ class Disaggregator(ABC):
         """
         pass
 
-    def validate_input_ensemble(self, ensemble: 'Ensemble') -> None:
+    def validate_input_ensemble(self, ensemble: "Ensemble") -> None:
         """
         Validate that input ensemble is compatible with disaggregator.
 
@@ -1032,9 +1080,7 @@ class Disaggregator(ABC):
 
         # Type check
         if not isinstance(ensemble, Ensemble):
-            raise TypeError(
-                f"Input must be an Ensemble object, got {type(ensemble)}"
-            )
+            raise TypeError(f"Input must be an Ensemble object, got {type(ensemble)}")
 
         # Check temporal frequency
         if ensemble.frequency != self.input_frequency:
@@ -1044,13 +1090,15 @@ class Disaggregator(ABC):
             )
 
         # Check site consistency (if disaggregator has been fitted)
-        if self.is_fitted and hasattr(self, '_sites'):
+        if self.is_fitted and hasattr(self, "_sites"):
             ensemble_sites = ensemble.sites
             if set(ensemble_sites) != set(self._sites):
                 missing_in_ensemble = set(self._sites) - set(ensemble_sites)
                 extra_in_ensemble = set(ensemble_sites) - set(self._sites)
 
-                error_msg = f"Site mismatch between fitted disaggregator and input ensemble."
+                error_msg = (
+                    f"Site mismatch between fitted disaggregator and input ensemble."
+                )
                 if missing_in_ensemble:
                     error_msg += f"\n  Missing in ensemble: {missing_in_ensemble}"
                 if extra_in_ensemble:
@@ -1091,9 +1139,7 @@ class Disaggregator(ABC):
             If disaggregator has not been fitted yet.
         """
         if self.fitted_params_ is None:
-            raise ValueError(
-                f"{self.name} has not been fitted yet. Run fit() first."
-            )
+            raise ValueError(f"{self.name} has not been fitted yet. Run fit() first.")
         return self.fitted_params_.to_dict()
 
     @abstractmethod
@@ -1135,19 +1181,23 @@ class Disaggregator(ABC):
         lines.append("Model Information")
         lines.append("-" * 80)
         lines.append(f"Disaggregator Type:      {self.__class__.__name__}")
-        lines.append(f"Status:                  {'Fitted' if self.is_fitted else 'Not Fitted'}")
+        lines.append(
+            f"Status:                  {'Fitted' if self.is_fitted else 'Not Fitted'}"
+        )
         lines.append(f"Input Frequency:         {self.input_frequency}")
         lines.append(f"Output Frequency:        {self.output_frequency}")
 
         if self.is_fitted and self.state.fit_timestamp:
             lines.append(f"Fitted:                  {self.state.fit_timestamp}")
 
-        if hasattr(self, '_sites') and self._sites:
+        if hasattr(self, "_sites") and self._sites:
             lines.append(f"Number of Sites:         {len(self._sites)}")
             if len(self._sites) <= 5:
                 lines.append(f"Sites:                   {self._sites}")
             else:
-                lines.append(f"Sites:                   {self._sites[:3]} ... ({len(self._sites)} total)")
+                lines.append(
+                    f"Sites:                   {self._sites[:3]} ... ({len(self._sites)} total)"
+                )
 
         lines.append("")
 
@@ -1155,7 +1205,7 @@ class Disaggregator(ABC):
         lines.append("Initialization Parameters")
         lines.append("-" * 80)
         params_str = str(self.init_params)
-        for line in params_str.split('\n')[1:]:  # Skip first line
+        for line in params_str.split("\n")[1:]:  # Skip first line
             lines.append(line)
         lines.append("")
 
@@ -1164,7 +1214,7 @@ class Disaggregator(ABC):
             lines.append("Fitted Parameters")
             lines.append("-" * 80)
             fitted_str = str(self.fitted_params_)
-            for line in fitted_str.split('\n')[1:]:  # Skip first line
+            for line in fitted_str.split("\n")[1:]:  # Skip first line
                 lines.append(line)
             lines.append("")
 
@@ -1173,9 +1223,10 @@ class Disaggregator(ABC):
         return "\n".join(lines)
 
     def __repr__(self) -> str:
-        """String representation showing key info."""
-        status = "fitted" if self.is_fitted else "not fitted"
-        return f"{self.__class__.__name__}(name='{self.name}', status='{status}', {self.input_frequency}->{self.output_frequency})"
+        """Scikit-learn style repr showing algorithm parameters."""
+        params = self.init_params.algorithm_params
+        param_str = ", ".join(f"{k}={v!r}" for k, v in params.items())
+        return f"{self.__class__.__name__}({param_str})"
 
     def save(self, filepath: str) -> None:
         """
@@ -1196,13 +1247,13 @@ class Disaggregator(ABC):
         if not self.is_fitted:
             raise ValueError("Cannot save unfitted disaggregator. Run fit() first.")
 
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(self, f)
 
         self.logger.info(f"Disaggregator saved to {filepath}")
 
     @classmethod
-    def load(cls, filepath: str) -> 'Disaggregator':
+    def load(cls, filepath: str) -> "Disaggregator":
         """
         Load fitted disaggregator from file.
 
@@ -1218,53 +1269,91 @@ class Disaggregator(ABC):
         """
         import pickle
 
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             disaggregator = pickle.load(f)
 
         disaggregator.logger.info(f"Disaggregator loaded from {filepath}")
         return disaggregator
 
-    @abstractmethod
-    def preprocessing(self, **kwargs: Any) -> None:
+    def _store_obs_data(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        sites: Optional[List[str]] = None,
+    ) -> pd.DataFrame:
         """
-        Preprocess and validate observed flow data.
-
-        Implementations should:
-        1. Call validate_input_data() to validate self._Q_obs_raw
-        2. Store preprocessed data as instance attributes
-        3. Call update_state(preprocessed=True) at end
+        Validate, store, and filter observed data.
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data.
+        sites : list of str, optional
+            Sites to keep. If None, uses all columns.
+
+        Returns
+        -------
+        pd.DataFrame
+            Validated and filtered DataFrame.
+        """
+        self._Q_obs_raw = Q_obs
+        Q = self.validate_input_data(Q_obs)
+        if sites is not None:
+            missing = set(sites) - set(Q.columns)
+            if missing:
+                raise ValueError(f"Sites not found in data: {missing}")
+            Q = Q[sites]
+        self._sites = Q.columns.tolist()
+        return Q
+
+    @abstractmethod
+    def preprocessing(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
+        """
+        Preprocess and validate observed flow data.
+
+        Parameters
+        ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data at the output resolution.
+        sites : list of str, optional
+            Sites to use. If None, uses all columns.
         **kwargs : Any
             Additional preprocessing parameters.
         """
         pass
 
     @abstractmethod
-    def fit(self, **kwargs: Any) -> None:
+    def fit(
+        self,
+        Q_obs: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Fit the disaggregator to observed flow data.
 
-        Implementations should:
-        1. Call validate_preprocessing() at start
-        2. Learn disaggregation patterns from historic data
-        3. Store fitted parameters as instance attributes
-        4. Call update_state(fitted=True) at end
+        If ``Q_obs`` is provided, ``preprocessing()`` is called automatically.
+        If omitted, a prior call to ``preprocessing()`` is required.
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed data. If provided, runs preprocessing automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs : Any
             Additional fitting parameters.
         """
         pass
 
     @abstractmethod
-    def disaggregate(
-        self,
-        ensemble: 'Ensemble',
-        **kwargs: Any
-    ) -> 'Ensemble':
+    def disaggregate(self, ensemble: "Ensemble", **kwargs: Any) -> "Ensemble":
         """
         Disaggregate synthetic flows from coarser to finer temporal resolution.
 

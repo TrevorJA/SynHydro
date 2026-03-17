@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/TrevorJA/SynHydro/blob/main/LICENSE)
 
-SynHydro provides parametric, nonparametric, and machine-learning stochastic generation methods under a unified API. All generators share the same `preprocessing() → fit() → generate()` workflow.
+SynHydro provides parametric, nonparametric, and machine-learning stochastic generation methods under a unified API. All generators share the same `fit() → generate()` workflow.
 
 ## Generators
 
@@ -28,9 +28,8 @@ import synhydro
 Q_obs = synhydro.load_example_data()                       # daily DataFrame
 Q_monthly = Q_obs.resample("MS").mean()                 # resample to monthly
 
-gen = synhydro.KirschGenerator(Q_monthly)
-gen.preprocessing()
-gen.fit()
+gen = synhydro.KirschGenerator()
+gen.fit(Q_monthly)
 ensemble = gen.generate(n_realizations=50, n_years=30, seed=42)
 ```
 

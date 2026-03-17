@@ -92,6 +92,7 @@ nav:
     - "Multi-Site Monthly (Kirsch)": tutorials/02_multisite.md
     - "Monthly→Daily Pipeline": tutorials/03_pipeline.md
     - "Drought Analysis (SSI)": tutorials/04_drought_analysis.md
+    - "Ensemble Validation": tutorials/05_validation.md
   - Algorithms:
     - Overview: algorithms/index.md
     - Thomas-Fiering AR(1): algorithms/thomas_fiering.md

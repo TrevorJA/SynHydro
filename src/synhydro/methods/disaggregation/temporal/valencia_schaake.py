@@ -42,10 +42,6 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
 
     Parameters
     ----------
-    Q_obs : pd.Series or pd.DataFrame
-        Observed flow data at the finer temporal resolution (e.g., monthly
-        or daily). Used to compute disaggregation statistics.
-        Must have DatetimeIndex.
     n_subperiods : int, default=12
         Number of sub-periods per aggregate period (e.g., 12 for
         annual-to-monthly, 4 for annual-to-seasonal).
@@ -75,20 +71,20 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         (n_subperiods, n_subperiods).
     """
 
-    def __init__(self,
-                 Q_obs: Union[pd.Series, pd.DataFrame],
-                 n_subperiods: int = 12,
-                 transform: str = 'log',
-                 conservation_method: str = 'proportional',
-                 name: Optional[str] = None,
-                 debug: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        n_subperiods: int = 12,
+        transform: str = "log",
+        conservation_method: str = "proportional",
+        name: Optional[str] = None,
+        debug: bool = False,
+    ) -> None:
         """
         Initialize the Valencia-Schaake Disaggregator.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Observed flow data at finer temporal resolution.
         n_subperiods : int, default=12
             Number of sub-periods per aggregate period.
         transform : str, default='log'
@@ -100,17 +96,17 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         debug : bool, default=False
             Enable debug logging.
         """
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         self.n_subperiods = n_subperiods
         self.transform = transform
         self.conservation_method = conservation_method
 
         self.init_params.algorithm_params = {
-            'method': 'Valencia-Schaake Disaggregation',
-            'n_subperiods': n_subperiods,
-            'transform': transform,
-            'conservation_method': conservation_method
+            "method": "Valencia-Schaake Disaggregation",
+            "n_subperiods": n_subperiods,
+            "transform": transform,
+            "conservation_method": conservation_method,
         }
 
         # Fitted parameters (will be set during fit())
@@ -125,14 +121,20 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
     @property
     def input_frequency(self) -> str:
         """Valencia-Schaake expects annual input."""
-        return 'YS'  # Annual Start
+        return "YS"  # Annual Start
 
     @property
     def output_frequency(self) -> str:
         """Valencia-Schaake produces monthly output."""
-        return 'MS'  # Month Start
+        return "MS"  # Month Start
 
-    def preprocessing(self, **kwargs: Any) -> None:
+    def preprocessing(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Preprocess observed flow data.
 
@@ -141,16 +143,19 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed flow data at finer temporal resolution.
+        sites : list of str, optional
+            Sites to use. If None, uses all columns.
         **kwargs : Any
             Additional preprocessing parameters (currently unused).
         """
-        Q_obs_validated = self.validate_input_data(self._Q_obs_raw)
+        Q_obs_validated = self._store_obs_data(Q_obs, sites)
 
         self.Q_obs = Q_obs_validated
-        self._sites = list(Q_obs_validated.columns)
 
         # Aggregate to annual resolution
-        self.Q_annual = Q_obs_validated.resample('YS').sum()
+        self.Q_annual = Q_obs_validated.resample("YS").sum()
 
         self.logger.info(
             f"Preprocessing complete: {self.n_sites} sites, "
@@ -160,7 +165,13 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
 
         self.update_state(preprocessed=True)
 
-    def fit(self, **kwargs: Any) -> None:
+    def fit(
+        self,
+        Q_obs: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Fit the Valencia-Schaake disaggregator.
 
@@ -168,11 +179,22 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         parameters, and conditional covariance. Applies optional
         transformations and Cholesky decomposition.
 
+        If ``Q_obs`` is provided, ``preprocessing()`` is called automatically.
+        If omitted, a prior call to ``preprocessing()`` is required.
+
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed data. If provided, runs preprocessing automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs : Any
             Additional fitting parameters (currently unused).
         """
+        # Auto-call preprocessing if Q_obs is provided
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
+
         self.validate_preprocessing()
 
         # Organize observed data into sub-period matrix
@@ -185,7 +207,7 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             )
 
         # Apply transformation if specified
-        if self.transform != 'none':
+        if self.transform != "none":
             X = self._apply_transform(X)
 
         # Compute statistics
@@ -230,9 +252,9 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             # Aggregate to sub-periods using forward resampling
             # For monthly (n_subperiods=12), use 'MS' (month start)
             if self.n_subperiods == 12:
-                subperiod_freq = 'MS'
+                subperiod_freq = "MS"
             elif self.n_subperiods == 4:
-                subperiod_freq = 'QS'  # Quarterly start
+                subperiod_freq = "QS"  # Quarterly start
             else:
                 # General case: estimate frequency
                 year_start = pd.Timestamp(year=year, month=1, day=1)
@@ -240,17 +262,17 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
                 n_days = (year_end - year_start).days
                 days_per_subperiod = n_days / self.n_subperiods
                 # Use daily resampling as fallback
-                subperiod_freq = 'D'
+                subperiod_freq = "D"
 
             if self.n_subperiods in [12, 4]:
                 year_range = pd.date_range(
-                    start=f"{year}-01-01",
-                    end=f"{year}-12-31",
-                    freq=subperiod_freq
+                    start=f"{year}-01-01", end=f"{year}-12-31", freq=subperiod_freq
                 )
-                subperiod_data = self.Q_obs.loc[
-                    (self.Q_obs.index.year == year)
-                ].resample(subperiod_freq).sum()
+                subperiod_data = (
+                    self.Q_obs.loc[(self.Q_obs.index.year == year)]
+                    .resample(subperiod_freq)
+                    .sum()
+                )
 
                 if len(subperiod_data) == self.n_subperiods:
                     X_list.append(subperiod_data.values)
@@ -259,11 +281,15 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
                 # Fallback: manually partition year into n_subperiods
                 year_start = pd.Timestamp(year=year, month=1, day=1)
                 year_end = pd.Timestamp(year=year + 1, month=1, day=1)
-                year_range = pd.date_range(start=year_start, end=year_end, periods=self.n_subperiods + 1)
+                year_range = pd.date_range(
+                    start=year_start, end=year_end, periods=self.n_subperiods + 1
+                )
 
                 subperiods = []
                 for i in range(self.n_subperiods):
-                    mask = (self.Q_obs.index >= year_range[i]) & (self.Q_obs.index < year_range[i + 1])
+                    mask = (self.Q_obs.index >= year_range[i]) & (
+                        self.Q_obs.index < year_range[i + 1]
+                    )
                     subperiod_sum = self.Q_obs.loc[mask].sum()
                     subperiods.append(subperiod_sum.values)
 
@@ -283,7 +309,9 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             # Multiple sites: shape (n_years, n_subperiods, n_sites)
             self.is_multisite = True
 
-        self.logger.debug(f"Organized {len(complete_years)} complete years into sub-period matrix")
+        self.logger.debug(
+            f"Organized {len(complete_years)} complete years into sub-period matrix"
+        )
 
         return X
 
@@ -301,14 +329,14 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         np.ndarray
             Transformed data.
         """
-        if self.transform == 'log':
+        if self.transform == "log":
             # Add small constant to avoid log(0)
             epsilon = 1e-6
             X_transformed = np.log(X + epsilon)
-            self.transform_params_['type'] = 'log'
-            self.transform_params_['epsilon'] = epsilon
+            self.transform_params_["type"] = "log"
+            self.transform_params_["epsilon"] = epsilon
 
-        elif self.transform == 'boxcox':
+        elif self.transform == "boxcox":
             # Apply Box-Cox transformation
             # Flatten to 1D, apply transform, reshape back
             X_flat = X.flatten()
@@ -317,12 +345,12 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             X_transformed_flat, lambda_bc = boxcox(X_flat)
             X_transformed = X_transformed_flat.reshape(X.shape)
 
-            self.transform_params_['type'] = 'boxcox'
-            self.transform_params_['lambda'] = lambda_bc
+            self.transform_params_["type"] = "boxcox"
+            self.transform_params_["lambda"] = lambda_bc
 
         else:
             X_transformed = X.copy()
-            self.transform_params_['type'] = 'none'
+            self.transform_params_["type"] = "none"
 
         self.logger.debug(f"Applied {self.transform} transformation")
 
@@ -342,13 +370,13 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         np.ndarray
             Data in original scale.
         """
-        if self.transform_params_.get('type') == 'log':
-            epsilon = self.transform_params_.get('epsilon', 1e-6)
+        if self.transform_params_.get("type") == "log":
+            epsilon = self.transform_params_.get("epsilon", 1e-6)
             X_inv = np.exp(X) - epsilon
             X_inv = np.clip(X_inv, a_min=0, a_max=None)
 
-        elif self.transform_params_.get('type') == 'boxcox':
-            lambda_bc = self.transform_params_.get('lambda')
+        elif self.transform_params_.get("type") == "boxcox":
+            lambda_bc = self.transform_params_.get("lambda")
             X_inv = inv_boxcox(X, lambda_bc)
             X_inv = np.clip(X_inv, a_min=0, a_max=None)
 
@@ -472,33 +500,41 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             Dataclass containing all fitted parameters.
         """
         n_params = (
-            self.n_subperiods +  # mu_X
-            self.n_subperiods * self.n_subperiods +  # S_XX
-            1 +  # mu_Y
-            1 +  # sigma_Y^2
-            self.n_subperiods +  # A
-            self.n_subperiods * self.n_subperiods  # C
+            self.n_subperiods  # mu_X
+            + self.n_subperiods * self.n_subperiods  # S_XX
+            + 1  # mu_Y
+            + 1  # sigma_Y^2
+            + self.n_subperiods  # A
+            + self.n_subperiods * self.n_subperiods  # C
         )
 
         training_period = (
             str(self.Q_obs.index[0].date()),
-            str(self.Q_obs.index[-1].date())
+            str(self.Q_obs.index[-1].date()),
         )
 
         return FittedParams(
-            means_=pd.Series(self.mu_X_, index=[f'subperiod_{i}' for i in range(self.n_subperiods)]),
-            stds_=pd.Series(np.sqrt(np.diag(self.S_XX_)), index=[f'subperiod_{i}' for i in range(self.n_subperiods)]),
+            means_=pd.Series(
+                self.mu_X_, index=[f"subperiod_{i}" for i in range(self.n_subperiods)]
+            ),
+            stds_=pd.Series(
+                np.sqrt(np.diag(self.S_XX_)),
+                index=[f"subperiod_{i}" for i in range(self.n_subperiods)],
+            ),
             correlations_=self._get_correlation_matrix(),
-            distributions_={'type': 'multivariate_normal', 'method': 'Valencia-Schaake'},
+            distributions_={
+                "type": "multivariate_normal",
+                "method": "Valencia-Schaake",
+            },
             fitted_models_={
-                'n_subperiods': self.n_subperiods,
-                'transform': self.transform,
-                'conservation_method': self.conservation_method
+                "n_subperiods": self.n_subperiods,
+                "transform": self.transform,
+                "conservation_method": self.conservation_method,
             },
             n_parameters_=n_params,
             sample_size_=len(self.Q_obs),
             n_sites_=self.n_sites,
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def _get_correlation_matrix(self) -> np.ndarray:
@@ -514,8 +550,9 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         corr = self.S_XX_ / np.outer(stds, stds)
         return corr
 
-    def disaggregate(self, ensemble: Ensemble, seed: Optional[int] = None,
-                     **kwargs: Any) -> Ensemble:
+    def disaggregate(
+        self, ensemble: Ensemble, seed: Optional[int] = None, **kwargs: Any
+    ) -> Ensemble:
         """
         Disaggregate annual ensemble to monthly.
 
@@ -560,8 +597,8 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             time_resolution=self.output_frequency,
             time_period=(
                 str(monthly_realization_dict[0].index[0].date()),
-                str(monthly_realization_dict[0].index[-1].date())
-            )
+                str(monthly_realization_dict[0].index[-1].date()),
+            ),
         )
 
         monthly_ensemble = Ensemble(monthly_realization_dict, metadata=metadata)
@@ -590,7 +627,11 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             Shape: (n_months, n_sites).
         """
         # Extract annual flows
-        Y_syn = annual_df.iloc[:, 0].values if annual_df.shape[1] == 1 else annual_df.sum(axis=1).values
+        Y_syn = (
+            annual_df.iloc[:, 0].values
+            if annual_df.shape[1] == 1
+            else annual_df.sum(axis=1).values
+        )
 
         n_years = len(Y_syn)
         monthly_flows = []
@@ -604,11 +645,11 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             X_month = self._sample_conditional_distribution(annual_flow)
 
             # Inverse transform
-            if self.transform != 'none':
+            if self.transform != "none":
                 X_month = self._inverse_transform(X_month)
 
             # Proportional adjustment to enforce sum consistency
-            if self.conservation_method == 'proportional':
+            if self.conservation_method == "proportional":
                 X_month_sum = X_month.sum()
                 if X_month_sum > 0:
                     X_month = X_month * (annual_flow / X_month_sum)
@@ -629,7 +670,7 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         monthly_df = pd.DataFrame(
             monthly_flows_array,
             index=pd.DatetimeIndex(monthly_dates),
-            columns=annual_df.columns
+            columns=annual_df.columns,
         )
 
         return monthly_df

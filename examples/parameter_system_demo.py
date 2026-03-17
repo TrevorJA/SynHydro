@@ -14,10 +14,14 @@ from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringG
 
 # Create synthetic monthly flow data for demonstration
 np.random.seed(42)
-dates = pd.date_range('2000-01-01', '2020-12-31', freq='MS')
-flows = 1000 + 500 * np.sin(np.arange(len(dates)) * 2 * np.pi / 12) + np.random.normal(0, 100, len(dates))
+dates = pd.date_range("2000-01-01", "2020-12-31", freq="MS")
+flows = (
+    1000
+    + 500 * np.sin(np.arange(len(dates)) * 2 * np.pi / 12)
+    + np.random.normal(0, 100, len(dates))
+)
 flows = np.maximum(flows, 50)  # Ensure positive
-Q_monthly = pd.Series(flows, index=dates, name='site_A')
+Q_monthly = pd.Series(flows, index=dates, name="site_A")
 
 print("=" * 80)
 print("Generator Parameter System Demonstration")
@@ -30,7 +34,7 @@ print()
 print("1. Initializing Thomas-Fiering Generator")
 print("-" * 80)
 
-tf_gen = ThomasFieringGenerator(Q_monthly, name='TF_Demo', debug=False)
+tf_gen = ThomasFieringGenerator(name="TF_Demo", debug=False)
 
 print(f"Generator created: {tf_gen}")
 print()
@@ -58,8 +62,7 @@ print()
 print("3. Fitting the Generator")
 print("-" * 80)
 
-tf_gen.preprocessing()
-tf_gen.fit()
+tf_gen.fit(Q_monthly)
 
 print(f"Generator fitted: {tf_gen}")
 print()

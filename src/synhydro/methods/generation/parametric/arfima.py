@@ -39,8 +39,8 @@ class ARFIMAGenerator(Generator):
     >>> import pandas as pd
     >>> from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
     >>> Q_monthly = pd.read_csv('monthly_flows.csv', index_col=0, parse_dates=True)
-    >>> arfima = ARFIMAGenerator(Q_monthly.iloc[:, 0])
-    >>> arfima.preprocessing()
+    >>> arfima = ARFIMAGenerator()
+    >>> arfima.preprocessing(Q_monthly.iloc[:, 0])
     >>> arfima.fit()
     >>> ensemble = arfima.generate(n_years=50, n_realizations=100)
 
@@ -51,30 +51,26 @@ class ARFIMAGenerator(Generator):
     https://doi.org/10.1029/WR020i012p01898
     """
 
+    supports_multisite: bool = False
+    supported_frequencies: tuple = ("MS", "YS")
+
     def __init__(
         self,
-        Q_obs: Union[pd.Series, pd.DataFrame],
-        name: Optional[str] = None,
-        debug: bool = False,
+        *,
         p: int = 1,
         q: int = 0,
-        d_method: str = 'whittle',
+        d_method: str = "whittle",
         truncation_lag: int = 100,
         deseasonalize: bool = True,
-        **kwargs
+        name: Optional[str] = None,
+        debug: bool = False,
+        **kwargs,
     ) -> None:
         """
         Initialize the ARFIMAGenerator.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Observed historical flow data for training. Must be single site.
-            Should contain at least 50 timesteps for reliable d estimation.
-        name : str, optional
-            Name identifier for this generator instance.
-        debug : bool, default=False
-            Enable debug logging.
         p : int, default=1
             AR order for the short-memory ARMA(p,q) component.
         q : int, default=0
@@ -87,10 +83,14 @@ class ARFIMAGenerator(Generator):
         deseasonalize : bool, default=True
             Remove seasonal component (monthly means/stds) before fitting.
             Set False for annual data.
+        name : str, optional
+            Name identifier for this generator instance.
+        debug : bool, default=False
+            Enable debug logging.
         **kwargs : dict, optional
             Additional parameters (stored in init_params).
         """
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         self.p = p
         self.q = q
@@ -100,26 +100,21 @@ class ARFIMAGenerator(Generator):
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
-            'model': f'ARFIMA({p},{{}},{q})',  # d will be filled during fit
-            'p': p,
-            'q': q,
-            'd_method': d_method,
-            'truncation_lag': truncation_lag,
-            'deseasonalize': deseasonalize
+            "p": p,
+            "q": q,
+            "d_method": d_method,
+            "truncation_lag": truncation_lag,
+            "deseasonalize": deseasonalize,
         }
 
     @property
     def output_frequency(self) -> str:
         """Return output frequency based on input data."""
-        if hasattr(self, '_output_freq'):
+        if hasattr(self, "_output_freq"):
             return self._output_freq
-        return 'MS'  # Default to monthly
+        return "MS"  # Default to monthly
 
-    def preprocessing(
-        self,
-        sites: Optional[list] = None,
-        **kwargs
-    ) -> None:
+    def preprocessing(self, Q_obs, *, sites=None, **kwargs) -> None:
         """
         Preprocess observed data for ARFIMA generation.
 
@@ -128,8 +123,10 @@ class ARFIMAGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data.
         sites : list, optional
-            Not used (ARFIMA is univariate).
+            Sites to keep. If None, uses all columns.
         **kwargs : dict, optional
             Additional preprocessing parameters.
 
@@ -138,37 +135,30 @@ class ARFIMAGenerator(Generator):
         ValueError
             If data has insufficient length or multiple sites.
         """
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        if Q.shape[1] > 1:
-            self.logger.warning("ARFIMA is univariate. Using first column only.")
-            Q = Q.iloc[:, 0:1]
+        Q = self._store_obs_data(Q_obs, sites=sites)
 
         if len(Q) < 30:
-            raise ValueError(
-                f"ARFIMA requires at least 30 timesteps, got {len(Q)}"
-            )
+            raise ValueError(f"ARFIMA requires at least 30 timesteps, got {len(Q)}")
 
         # Detect frequency from index or infer from median spacing
-        freq = getattr(Q.index, 'freq', None)
+        freq = getattr(Q.index, "freq", None)
         if freq is None and len(Q) > 1:
             median_days = (Q.index[1:] - Q.index[:-1]).median().days
             if 25 <= median_days <= 35:
-                freq = 'MS'
+                freq = "MS"
             elif 350 <= median_days <= 380:
-                freq = 'AS'
+                freq = "AS"
 
-        if freq is not None and str(freq) in ('MS', 'M', 'ME'):
-            self._output_freq = 'MS'
+        if freq is not None and str(freq) in ("MS", "M", "ME"):
+            self._output_freq = "MS"
             self._is_monthly = True
-        elif freq is not None and str(freq) in ('AS', 'YS', 'Y', 'A', 'AS-JAN'):
-            self._output_freq = 'YS'
+        elif freq is not None and str(freq) in ("AS", "YS", "Y", "A", "AS-JAN"):
+            self._output_freq = "YS"
             self._is_monthly = False
         else:
-            self._output_freq = 'MS'
+            self._output_freq = "MS"
             self._is_monthly = len(Q) > 24  # assume monthly if enough data
 
-        self._sites = Q.columns.tolist()
         self.Q_obs = Q.iloc[:, 0]  # Convert to Series
 
         # Deseasonalize if monthly
@@ -199,15 +189,14 @@ class ARFIMAGenerator(Generator):
 
         # Standardize by month
         months = self.Q_obs.index.month
-        self.Q_norm = (self.Q_obs - monthly_means[months].values) / monthly_stds[months].values
+        self.Q_norm = (self.Q_obs - monthly_means[months].values) / monthly_stds[
+            months
+        ].values
         self.Q_norm.index = self.Q_obs.index
 
-        self.seasonal_params = {
-            'means': monthly_means,
-            'stds': monthly_stds
-        }
+        self.seasonal_params = {"means": monthly_means, "stds": monthly_stds}
 
-    def fit(self, **kwargs) -> None:
+    def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
         """
         Estimate ARFIMA model parameters from preprocessed data.
 
@@ -219,6 +208,10 @@ class ARFIMAGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            If provided, calls preprocessing automatically.
+        sites : list, optional
+            Sites to keep. Passed to preprocessing if Q_obs is provided.
         **kwargs : dict, optional
             Additional fitting parameters.
 
@@ -227,12 +220,16 @@ class ARFIMAGenerator(Generator):
         ValueError
             If fitting fails (e.g., ARMA estimation error).
         """
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         # Estimate d
         self.logger.info(f"Estimating d using {self.d_method} method...")
         self.d = self._estimate_d()
-        self.logger.info(f"Estimated d = {self.d:.4f}, Hurst exponent H = {self.d + 0.5:.4f}")
+        self.logger.info(
+            f"Estimated d = {self.d:.4f}, Hurst exponent H = {self.d + 0.5:.4f}"
+        )
 
         # Compute fractional differencing coefficients
         self.pi_coeffs = self._compute_fractional_diff_coefficients(self.d)
@@ -260,11 +257,10 @@ class ARFIMAGenerator(Generator):
             residuals = np.zeros(len(W_vals))
             for i in range(len(W_vals)):
                 prediction = sum(
-                    self.phi[k] * W_vals[i - 1 - k]
-                    for k in range(min(self.p, i))
+                    self.phi[k] * W_vals[i - 1 - k] for k in range(min(self.p, i))
                 )
                 residuals[i] = W_vals[i] - prediction
-            self.sigma_eps_sq = np.var(residuals[self.p:])  # skip burn-in
+            self.sigma_eps_sq = np.var(residuals[self.p :])  # skip burn-in
         else:
             self.sigma_eps_sq = np.var(W_vals)
 
@@ -289,11 +285,11 @@ class ARFIMAGenerator(Generator):
         ValueError
             If estimation fails.
         """
-        if self.d_method == 'whittle':
+        if self.d_method == "whittle":
             return self._whittle_estimator()
-        elif self.d_method == 'rs':
+        elif self.d_method == "rs":
             return self._rs_estimator()
-        elif self.d_method == 'gph':
+        elif self.d_method == "gph":
             return self._gph_estimator()
         else:
             raise ValueError(f"Unknown d_method: {self.d_method}")
@@ -346,14 +342,13 @@ class ARFIMAGenerator(Generator):
 
         # Optimize
         result = minimize(
-            whittle_likelihood,
-            x0=0.3,
-            bounds=[(0.01, 0.49)],
-            method='L-BFGS-B'
+            whittle_likelihood, x0=0.3, bounds=[(0.01, 0.49)], method="L-BFGS-B"
         )
 
         d_hat = float(result.x[0])
-        self.logger.debug(f"Whittle optimization result: d={d_hat:.4f}, loss={result.fun:.4f}")
+        self.logger.debug(
+            f"Whittle optimization result: d={d_hat:.4f}, loss={result.fun:.4f}"
+        )
         return d_hat
 
     def _rs_estimator(self) -> float:
@@ -424,7 +419,9 @@ class ARFIMAGenerator(Generator):
         self.logger.debug(f"GPH estimator: d={d_hat:.4f}")
         return float(d_hat)
 
-    def _compute_hurst_exponent(self, data: np.ndarray, lags: Optional[int] = None) -> float:
+    def _compute_hurst_exponent(
+        self, data: np.ndarray, lags: Optional[int] = None
+    ) -> float:
         """
         Compute Hurst exponent via R/S analysis.
 
@@ -453,13 +450,13 @@ class ARFIMAGenerator(Generator):
             if n_chunks == 0:
                 break
 
-            y_reshaped = y[:n_chunks * k].reshape(n_chunks, k)
+            y_reshaped = y[: n_chunks * k].reshape(n_chunks, k)
 
             # Range for each chunk
             R = np.max(y_reshaped, axis=1) - np.min(y_reshaped, axis=1)
 
             # Standard deviation for each chunk
-            S = np.std(data[:n_chunks * k].reshape(n_chunks, k), axis=1)
+            S = np.std(data[: n_chunks * k].reshape(n_chunks, k), axis=1)
 
             # Avoid division by zero
             S[S == 0] = 1
@@ -548,8 +545,12 @@ class ARFIMAGenerator(Generator):
         data = data - np.mean(data)  # Center
 
         # Autocovariance
-        acov = np.array([np.mean(data[:-k] * data[k:]) if k > 0 else np.var(data)
-                        for k in range(p + 1)])
+        acov = np.array(
+            [
+                np.mean(data[:-k] * data[k:]) if k > 0 else np.var(data)
+                for k in range(p + 1)
+            ]
+        )
 
         # Yule-Walker system
         R = np.zeros((p, p))
@@ -557,7 +558,7 @@ class ARFIMAGenerator(Generator):
             for j in range(p):
                 R[i, j] = acov[abs(i - j)]
 
-        r = acov[1:p + 1]
+        r = acov[1 : p + 1]
 
         try:
             phi = np.linalg.solve(R, r)
@@ -582,22 +583,22 @@ class ARFIMAGenerator(Generator):
 
         training_period = (
             str(self.Q_obs.index[0].date()),
-            str(self.Q_obs.index[-1].date())
+            str(self.Q_obs.index[-1].date()),
         )
 
         fitted_models = {
-            'd': self.d,
-            'phi': self.phi.tolist() if len(self.phi) > 0 else None,
-            'theta': self.theta.tolist() if len(self.theta) > 0 else None,
-            'sigma_eps_sq': float(self.sigma_eps_sq),
-            'pi_coefficients': self.pi_coeffs.tolist(),
-            'truncation_lag': self.truncation_lag
+            "d": self.d,
+            "phi": self.phi.tolist() if len(self.phi) > 0 else None,
+            "theta": self.theta.tolist() if len(self.theta) > 0 else None,
+            "sigma_eps_sq": float(self.sigma_eps_sq),
+            "pi_coefficients": self.pi_coeffs.tolist(),
+            "truncation_lag": self.truncation_lag,
         }
 
         if self.seasonal_params:
-            fitted_models['seasonal'] = {
-                'means': self.seasonal_params['means'].to_dict(),
-                'stds': self.seasonal_params['stds'].to_dict()
+            fitted_models["seasonal"] = {
+                "means": self.seasonal_params["means"].to_dict(),
+                "stds": self.seasonal_params["stds"].to_dict(),
             }
 
         return FittedParams(
@@ -605,14 +606,14 @@ class ARFIMAGenerator(Generator):
             stds_=None,
             correlations_=None,
             distributions_={
-                'type': 'normal_with_fractional_differencing',
-                'assumption': f'ARFIMA({self.p},{self.d:.4f},{self.q}) with Gaussian innovations'
+                "type": "normal_with_fractional_differencing",
+                "assumption": f"ARFIMA({self.p},{self.d:.4f},{self.q}) with Gaussian innovations",
             },
             fitted_models_=fitted_models,
             n_parameters_=n_params,
             sample_size_=len(self.Q_obs),
             n_sites_=1,
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def generate(
@@ -621,7 +622,7 @@ class ARFIMAGenerator(Generator):
         n_years: Optional[int] = None,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Ensemble:
         """
         Generate synthetic streamflow realizations.
@@ -691,8 +692,8 @@ class ARFIMAGenerator(Generator):
             generator_params=self.get_params(),
             n_realizations=n_realizations,
             n_sites=1,
-            time_resolution='monthly' if self._is_monthly else 'annual',
-            description=f"ARFIMA({self.p},{self.d:.4f},{self.q}) with d_method={self.d_method}"
+            time_resolution="monthly" if self._is_monthly else "annual",
+            description=f"ARFIMA({self.p},{self.d:.4f},{self.q}) with d_method={self.d_method}",
         )
 
         return Ensemble(realizations, metadata=metadata)
@@ -734,10 +735,10 @@ class ARFIMAGenerator(Generator):
         # Create index first so we know the start month
         if self._is_monthly:
             start_date = self.Q_obs.index[-1] + pd.DateOffset(months=1)
-            index = pd.date_range(start=start_date, periods=n_timesteps, freq='MS')
+            index = pd.date_range(start=start_date, periods=n_timesteps, freq="MS")
         else:
             start_date = self.Q_obs.index[-1] + pd.DateOffset(years=1)
-            index = pd.date_range(start=start_date, periods=n_timesteps, freq='YS')
+            index = pd.date_range(start=start_date, periods=n_timesteps, freq="YS")
 
         # Re-seasonalize if monthly
         if self._is_monthly and self.seasonal_params:
@@ -793,8 +794,8 @@ class ARFIMAGenerator(Generator):
         if not self.seasonal_params:
             return X
 
-        means = self.seasonal_params['means'].values
-        stds = self.seasonal_params['stds'].values
+        means = self.seasonal_params["means"].values
+        stds = self.seasonal_params["stds"].values
 
         # Build month indices aligned to the actual start month
         months = np.array([(start_month - 1 + i) % 12 for i in range(len(X))])

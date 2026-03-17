@@ -17,7 +17,7 @@ from synhydro.core.ensemble import Ensemble
 @pytest.fixture
 def sample_annual_dataframe():
     """Generate sample annual multi-site DataFrame for HMM testing."""
-    dates = pd.date_range(start='2000-01-01', end='2029-12-31', freq='YS')
+    dates = pd.date_range(start="2000-01-01", end="2029-12-31", freq="YS")
     np.random.seed(42)
     n_sites = 3
     n_years = len(dates)
@@ -34,7 +34,7 @@ def sample_annual_dataframe():
 
         # Blend based on states
         flows = np.where(states == 0, base_dry, base_wet)
-        data[f'site_{i+1}'] = flows
+        data[f"site_{i+1}"] = flows
 
     return pd.DataFrame(data, index=dates)
 
@@ -42,7 +42,7 @@ def sample_annual_dataframe():
 @pytest.fixture
 def sample_annual_series():
     """Generate sample annual single-site Series for testing."""
-    dates = pd.date_range(start='2000-01-01', end='2029-12-31', freq='YS')
+    dates = pd.date_range(start="2000-01-01", end="2029-12-31", freq="YS")
     np.random.seed(42)
 
     base_dry = np.random.gamma(shape=2.0, scale=50.0, size=len(dates))
@@ -50,7 +50,7 @@ def sample_annual_series():
     states = (np.arange(len(dates)) % 3 > 0).astype(int)
     flows = np.where(states == 0, base_dry, base_wet)
 
-    return pd.Series(flows, index=dates, name='site_1')
+    return pd.Series(flows, index=dates, name="site_1")
 
 
 class TestMultiSiteHMMInitialization:
@@ -58,12 +58,12 @@ class TestMultiSiteHMMInitialization:
 
     def test_initialization_default_params(self, sample_annual_dataframe):
         """Test initialization with default parameters."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
+        gen = MultiSiteHMMGenerator()
 
         assert gen.n_states == 2
         assert gen.offset == 1.0
         assert gen.max_iterations == 1000
-        assert gen.covariance_type == 'full'
+        assert gen.covariance_type == "full"
         assert gen.is_preprocessed is False
         assert gen.is_fitted is False
         assert gen.debug is False
@@ -71,53 +71,48 @@ class TestMultiSiteHMMInitialization:
     def test_initialization_custom_params(self, sample_annual_dataframe):
         """Test initialization with custom parameters."""
         gen = MultiSiteHMMGenerator(
-            sample_annual_dataframe,
             n_states=3,
             offset=0.5,
             max_iterations=500,
-            covariance_type='diag',
-            name='test_hmm',
-            debug=True
+            covariance_type="diag",
+            name="test_hmm",
+            debug=True,
         )
 
         assert gen.n_states == 3
         assert gen.offset == 0.5
         assert gen.max_iterations == 500
-        assert gen.covariance_type == 'diag'
-        assert gen.name == 'test_hmm'
+        assert gen.covariance_type == "diag"
+        assert gen.name == "test_hmm"
         assert gen.debug is True
 
     def test_initialization_invalid_n_states(self, sample_annual_dataframe):
         """Test initialization with invalid n_states."""
         with pytest.raises(ValueError, match="n_states must be >= 2"):
-            MultiSiteHMMGenerator(sample_annual_dataframe, n_states=1)
+            MultiSiteHMMGenerator(n_states=1)
 
     def test_initialization_invalid_offset(self, sample_annual_dataframe):
         """Test initialization with invalid offset."""
         with pytest.raises(ValueError, match="offset must be positive"):
-            MultiSiteHMMGenerator(sample_annual_dataframe, offset=-1.0)
+            MultiSiteHMMGenerator(offset=-1.0)
 
         with pytest.raises(ValueError, match="offset must be positive"):
-            MultiSiteHMMGenerator(sample_annual_dataframe, offset=0.0)
+            MultiSiteHMMGenerator(offset=0.0)
 
     def test_initialization_invalid_covariance_type(self, sample_annual_dataframe):
         """Test initialization with invalid covariance type."""
         with pytest.raises(ValueError, match="covariance_type must be"):
-            MultiSiteHMMGenerator(sample_annual_dataframe, covariance_type='invalid')
+            MultiSiteHMMGenerator(covariance_type="invalid")
 
     def test_initialization_stores_algorithm_params(self, sample_annual_dataframe):
         """Test that initialization stores algorithm parameters."""
-        gen = MultiSiteHMMGenerator(
-            sample_annual_dataframe,
-            n_states=3,
-            offset=2.0
-        )
+        gen = MultiSiteHMMGenerator(n_states=3, offset=2.0)
 
-        assert 'algorithm_params' in gen.init_params.__dict__
+        assert "algorithm_params" in gen.init_params.__dict__
         params = gen.init_params.algorithm_params
-        assert params['n_states'] == 3
-        assert params['offset'] == 2.0
-        assert params['method'] == 'Multi-Site Hidden Markov Model (Gold et al. 2024)'
+        assert params["n_states"] == 3
+        assert params["offset"] == 2.0
+        assert params["method"] == "Multi-Site Hidden Markov Model (Gold et al. 2024)"
 
 
 class TestMultiSiteHMMPreprocessing:
@@ -125,20 +120,20 @@ class TestMultiSiteHMMPreprocessing:
 
     def test_preprocessing_multi_site(self, sample_annual_dataframe):
         """Test preprocessing with multi-site DataFrame."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
 
         assert gen.is_preprocessed is True
-        assert hasattr(gen, 'Q_log_')
-        assert hasattr(gen, '_Q_obs')
-        assert hasattr(gen, '_sites')
+        assert hasattr(gen, "Q_log_")
+        assert hasattr(gen, "_Q_obs")
+        assert hasattr(gen, "_sites")
         assert len(gen._sites) == 3
         assert gen.Q_log_.shape == (30, 3)
 
     def test_preprocessing_site_subset(self, sample_annual_dataframe):
         """Test preprocessing with site subset."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing(sites=['site_1', 'site_2'])
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe, sites=["site_1", "site_2"])
 
         assert gen.is_preprocessed is True
         assert len(gen._sites) == 2
@@ -146,8 +141,8 @@ class TestMultiSiteHMMPreprocessing:
 
     def test_preprocessing_log_transformation(self, sample_annual_dataframe):
         """Test that log transformation is applied correctly."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, offset=1.0)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(offset=1.0)
+        gen.preprocessing(sample_annual_dataframe)
 
         # Manually compute expected log values
         Q_adj = gen._Q_obs + gen.offset
@@ -162,26 +157,26 @@ class TestMultiSiteHMMPreprocessing:
         data.iloc[0, 0] = 0.0
         data.iloc[5, 1] = 0.0
 
-        gen = MultiSiteHMMGenerator(data, offset=1.0)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(offset=1.0)
+        gen.preprocessing(data)
 
         # Should not have any non-finite values
         assert np.all(np.isfinite(gen.Q_log_))
 
     def test_preprocessing_invalid_sites(self, sample_annual_dataframe):
         """Test preprocessing with invalid site names."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
+        gen = MultiSiteHMMGenerator()
 
         with pytest.raises(ValueError, match="Sites not found"):
-            gen.preprocessing(sites=['invalid_site'])
+            gen.preprocessing(sample_annual_dataframe, sites=["invalid_site"])
 
     def test_preprocessing_single_site_warning(self, sample_annual_series):
         """Test preprocessing warns for single-site data."""
         df = sample_annual_series.to_frame()
-        gen = MultiSiteHMMGenerator(df)
+        gen = MultiSiteHMMGenerator()
 
         # Should process but warn
-        gen.preprocessing()
+        gen.preprocessing(df)
         assert gen.is_preprocessed is True
         assert len(gen._sites) == 1
 
@@ -191,10 +186,10 @@ class TestMultiSiteHMMPreprocessing:
         data = sample_annual_dataframe.copy()
         data.iloc[0, 0] = -5.0
 
-        gen = MultiSiteHMMGenerator(data, offset=1.0)
+        gen = MultiSiteHMMGenerator(offset=1.0)
 
         with pytest.raises(ValueError, match="non-finite values"):
-            gen.preprocessing()
+            gen.preprocessing(data)
 
 
 class TestMultiSiteHMMFitting:
@@ -202,23 +197,23 @@ class TestMultiSiteHMMFitting:
 
     def test_fit_basic(self, sample_annual_dataframe):
         """Test basic fitting functionality."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=2)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=2)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         assert gen.is_fitted is True
-        assert hasattr(gen, 'means_')
-        assert hasattr(gen, 'covariances_')
-        assert hasattr(gen, 'transition_matrix_')
-        assert hasattr(gen, 'stationary_distribution_')
+        assert hasattr(gen, "means_")
+        assert hasattr(gen, "covariances_")
+        assert hasattr(gen, "transition_matrix_")
+        assert hasattr(gen, "stationary_distribution_")
 
     def test_fit_parameter_shapes(self, sample_annual_dataframe):
         """Test fitted parameter shapes are correct."""
         n_states = 2
         n_sites = 3
 
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=n_states)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=n_states)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         assert gen.means_.shape == (n_states, n_sites)
@@ -228,8 +223,8 @@ class TestMultiSiteHMMFitting:
 
     def test_fit_state_ordering(self, sample_annual_dataframe):
         """Test that states are ordered by mean (dry to wet)."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=2)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=2)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # State 0 should have lower mean than state 1 for first site
@@ -237,8 +232,8 @@ class TestMultiSiteHMMFitting:
 
     def test_fit_transition_matrix_valid(self, sample_annual_dataframe):
         """Test transition matrix is valid (rows sum to 1)."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=2)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=2)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Each row should sum to 1
@@ -251,8 +246,8 @@ class TestMultiSiteHMMFitting:
 
     def test_fit_stationary_distribution_valid(self, sample_annual_dataframe):
         """Test stationary distribution is valid (sums to 1)."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=2)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=2)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Should sum to 1
@@ -264,8 +259,8 @@ class TestMultiSiteHMMFitting:
 
     def test_fit_covariance_matrices_psd(self, sample_annual_dataframe):
         """Test covariance matrices are positive semi-definite."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=2)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=2)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Check each state's covariance matrix
@@ -277,42 +272,49 @@ class TestMultiSiteHMMFitting:
 
     def test_fit_creates_fitted_params(self, sample_annual_dataframe):
         """Test that fit creates FittedParams object."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
-        assert hasattr(gen, 'fitted_params_')
+        assert hasattr(gen, "fitted_params_")
         assert gen.fitted_params_.n_parameters_ > 0
         assert gen.fitted_params_.sample_size_ == 30
         assert gen.fitted_params_.n_sites_ == 3
 
     def test_fit_without_preprocessing(self, sample_annual_dataframe):
         """Test fit raises error without preprocessing."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
+        gen = MultiSiteHMMGenerator()
 
         with pytest.raises(ValueError, match="preprocessing"):
             gen.fit()
 
+    def test_fit_with_q_obs(self, sample_annual_dataframe):
+        """Test fit with Q_obs runs preprocessing automatically."""
+        gen = MultiSiteHMMGenerator()
+        gen.fit(sample_annual_dataframe, random_state=42)
+
+        assert gen.is_preprocessed is True
+        assert gen.is_fitted is True
+
     def test_fit_reproducible_with_seed(self, sample_annual_dataframe):
         """Test fit is reproducible with same random seed."""
-        gen1 = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen1.preprocessing()
+        gen1 = MultiSiteHMMGenerator()
+        gen1.preprocessing(sample_annual_dataframe)
         gen1.fit(random_state=42)
 
-        gen2 = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen2.preprocessing()
+        gen2 = MultiSiteHMMGenerator()
+        gen2.preprocessing(sample_annual_dataframe)
         gen2.fit(random_state=42)
 
         np.testing.assert_array_almost_equal(gen1.means_, gen2.means_)
         np.testing.assert_array_almost_equal(
-            gen1.transition_matrix_,
-            gen2.transition_matrix_
+            gen1.transition_matrix_, gen2.transition_matrix_
         )
 
     def test_fit_different_n_states(self, sample_annual_dataframe):
         """Test fitting with different number of states."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=3)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=3)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         assert gen.means_.shape[0] == 3
@@ -325,8 +327,8 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_basic(self, sample_annual_dataframe):
         """Test basic generation functionality."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=5, n_years=20, seed=42)
@@ -336,8 +338,8 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_shape(self, sample_annual_dataframe):
         """Test generated data has correct shape."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         n_years = 15
@@ -349,8 +351,8 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_n_timesteps(self, sample_annual_dataframe):
         """Test generation with n_timesteps parameter."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=2, n_timesteps=25, seed=42)
@@ -360,8 +362,8 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_non_negative(self, sample_annual_dataframe):
         """Test that generated flows are non-negative."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=10, n_years=20, seed=42)
@@ -372,8 +374,8 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_reproducible(self, sample_annual_dataframe):
         """Test generation is reproducible with seed."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result1 = gen.generate(n_realizations=3, n_years=10, seed=123)
@@ -386,16 +388,16 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_without_fit(self, sample_annual_dataframe):
         """Test generation raises error without fitting."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
 
         with pytest.raises(ValueError, match="fit"):
             gen.generate(n_realizations=1, n_years=10)
 
     def test_generate_missing_n_years_and_timesteps(self, sample_annual_dataframe):
         """Test generation raises error without n_years or n_timesteps."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         with pytest.raises(ValueError, match="Must provide either"):
@@ -403,8 +405,8 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_has_datetime_index(self, sample_annual_dataframe):
         """Test generated data has DatetimeIndex."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=1, n_years=10, seed=42)
@@ -414,14 +416,14 @@ class TestMultiSiteHMMGeneration:
 
     def test_generate_preserves_site_names(self, sample_annual_dataframe):
         """Test generated data preserves site names."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=1, n_years=10, seed=42)
         df = result.data_by_realization[0]
 
-        assert list(df.columns) == ['site_1', 'site_2', 'site_3']
+        assert list(df.columns) == ["site_1", "site_2", "site_3"]
 
 
 class TestMultiSiteHMMStationary:
@@ -429,8 +431,8 @@ class TestMultiSiteHMMStationary:
 
     def test_stationary_eigenvector_method(self, sample_annual_dataframe):
         """Test stationary distribution via eigenvector method."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Verify it's the stationary distribution
@@ -443,17 +445,15 @@ class TestMultiSiteHMMStationary:
 
     def test_stationary_distribution_uniqueness(self, sample_annual_dataframe):
         """Test stationary distribution is consistent."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Recompute manually
         pi = gen._compute_stationary_distribution()
 
         np.testing.assert_array_almost_equal(
-            pi,
-            gen.stationary_distribution_,
-            decimal=10
+            pi, gen.stationary_distribution_, decimal=10
         )
 
 
@@ -462,8 +462,8 @@ class TestMultiSiteHMMStateTrajectory:
 
     def test_state_trajectory_length(self, sample_annual_dataframe):
         """Test state trajectory has correct length."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         np.random.seed(42)
@@ -473,8 +473,8 @@ class TestMultiSiteHMMStateTrajectory:
 
     def test_state_trajectory_valid_states(self, sample_annual_dataframe):
         """Test state trajectory contains only valid state indices."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=3)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=3)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         np.random.seed(42)
@@ -484,8 +484,8 @@ class TestMultiSiteHMMStateTrajectory:
 
     def test_state_trajectory_uses_transition_matrix(self, sample_annual_dataframe):
         """Test state trajectory respects transition probabilities."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe, n_states=2)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator(n_states=2)
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Generate many trajectories
@@ -498,7 +498,7 @@ class TestMultiSiteHMMStateTrajectory:
         for _ in range(n_trajectories):
             states = gen._generate_state_trajectory(n_steps)
             for i in range(len(states) - 1):
-                transitions[states[i], states[i+1]] += 1
+                transitions[states[i], states[i + 1]] += 1
 
         # Normalize to probabilities
         transition_probs = transitions / transitions.sum(axis=1, keepdims=True)
@@ -507,7 +507,7 @@ class TestMultiSiteHMMStateTrajectory:
         np.testing.assert_array_almost_equal(
             transition_probs,
             gen.transition_matrix_,
-            decimal=1  # Allow some sampling variation
+            decimal=1,  # Allow some sampling variation
         )
 
 
@@ -516,17 +516,17 @@ class TestMultiSiteHMMSerialization:
 
     def test_pickle_save_load(self, sample_annual_dataframe, tmp_path):
         """Test saving and loading via pickle."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Save
         filepath = tmp_path / "hmm_generator.pkl"
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(gen, f)
 
         # Load
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             gen_loaded = pickle.load(f)
 
         # Verify attributes preserved
@@ -534,22 +534,21 @@ class TestMultiSiteHMMSerialization:
         assert gen_loaded.is_preprocessed is True
         np.testing.assert_array_almost_equal(gen.means_, gen_loaded.means_)
         np.testing.assert_array_almost_equal(
-            gen.transition_matrix_,
-            gen_loaded.transition_matrix_
+            gen.transition_matrix_, gen_loaded.transition_matrix_
         )
 
     def test_pickle_generate_after_load(self, sample_annual_dataframe, tmp_path):
         """Test generation works after loading from pickle."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Save and load
         filepath = tmp_path / "hmm_generator.pkl"
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(gen, f)
 
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             gen_loaded = pickle.load(f)
 
         # Generate from loaded generator
@@ -564,8 +563,8 @@ class TestMultiSiteHMMStatisticalProperties:
 
     def test_generated_mean_reasonable(self, sample_annual_dataframe):
         """Test generated data has reasonable mean."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=100, n_years=30, seed=42)
@@ -586,8 +585,8 @@ class TestMultiSiteHMMStatisticalProperties:
 
     def test_generated_variance_reasonable(self, sample_annual_dataframe):
         """Test generated data has reasonable variance."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         result = gen.generate(n_realizations=100, n_years=30, seed=42)
@@ -607,8 +606,8 @@ class TestMultiSiteHMMStatisticalProperties:
 
     def test_spatial_correlation_preserved(self, sample_annual_dataframe):
         """Test spatial correlations are approximately preserved."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
         # Generate large ensemble
@@ -635,17 +634,17 @@ class TestMultiSiteHMMOutputFrequency:
 
     def test_output_frequency_annual(self, sample_annual_dataframe):
         """Test output frequency matches input (annual)."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = MultiSiteHMMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
 
         freq = gen.output_frequency
         # Annual frequencies can have various formats (YS, AS, AS-JAN, etc.)
         assert freq is not None
-        assert 'A' in freq or 'Y' in freq  # Should be some form of annual
+        assert "A" in freq or "Y" in freq  # Should be some form of annual
 
     def test_output_frequency_before_preprocessing(self, sample_annual_dataframe):
         """Test output frequency returns default before preprocessing."""
-        gen = MultiSiteHMMGenerator(sample_annual_dataframe)
+        gen = MultiSiteHMMGenerator()
 
         freq = gen.output_frequency
-        assert freq == 'YS'  # Default
+        assert freq == "YS"  # Default

@@ -18,7 +18,7 @@ from synhydro.core import (
 from synhydro.utils import load_example_data
 
 # Drought analysis tools
-from synhydro.droughts.ssi import SSIDroughtMetrics, SSI, get_drought_metrics
+from synhydro.droughts.ssi import SSI, get_drought_metrics
 from synhydro.droughts.distributions import (
     list_distributions,
     get_distribution,
@@ -29,10 +29,17 @@ from synhydro.droughts.diagnostics import (
     distribution_summary,
 )
 
+# Validation
+from synhydro.core.validation import validate_ensemble, ValidationResult
+
 # Generators
 from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
-from synhydro.methods.generation.nonparametric.knn_bootstrap import KNNBootstrapGenerator
-from synhydro.methods.generation.nonparametric.phase_randomization import PhaseRandomizationGenerator
+from synhydro.methods.generation.nonparametric.knn_bootstrap import (
+    KNNBootstrapGenerator,
+)
+from synhydro.methods.generation.nonparametric.phase_randomization import (
+    PhaseRandomizationGenerator,
+)
 from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.matalas import MATALASGenerator
@@ -47,7 +54,6 @@ from synhydro.pipelines import (
     KirschNowakPipeline,
     ThomasFieringNowakPipeline,
 )
-
 
 
 # Public API
@@ -75,8 +81,10 @@ __all__ = [
     "EnsembleMetadata",
     # Data utilities
     "load_example_data",
+    # Validation
+    "validate_ensemble",
+    "ValidationResult",
     # Drought analysis - SSI calculation
-    "SSIDroughtMetrics",
     "SSI",
     "get_drought_metrics",
     # Drought analysis - distributions

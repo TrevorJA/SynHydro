@@ -6,9 +6,9 @@ ensembles of synthetic hydrologic timeseries data. The Ensemble class maintains
 dual representations (by-site and by-realization) for flexible data access and
 includes comprehensive I/O, statistical analysis, and visualization capabilities.
 """
+
 import json
 import logging
-import warnings
 from datetime import datetime
 from typing import Dict, List, Optional, Tuple, Union, Any
 from dataclasses import dataclass, field
@@ -45,6 +45,7 @@ class EnsembleMetadata:
     custom_attrs : Dict, optional
         Additional user-defined metadata attributes.
     """
+
     generator_class: Optional[str] = None
     generator_params: Optional[Dict[str, Any]] = None
     creation_timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
@@ -58,15 +59,15 @@ class EnsembleMetadata:
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
         return {
-            'generator_class': self.generator_class,
-            'generator_params': self.generator_params,
-            'creation_timestamp': self.creation_timestamp,
-            'n_realizations': self.n_realizations,
-            'n_sites': self.n_sites,
-            'time_resolution': self.time_resolution,
-            'time_period': self.time_period,
-            'description': self.description,
-            'custom_attrs': self.custom_attrs,
+            "generator_class": self.generator_class,
+            "generator_params": self.generator_params,
+            "creation_timestamp": self.creation_timestamp,
+            "n_realizations": self.n_realizations,
+            "n_sites": self.n_sites,
+            "time_resolution": self.time_resolution,
+            "time_period": self.time_period,
+            "description": self.description,
+            "custom_attrs": self.custom_attrs,
         }
 
 
@@ -111,11 +112,10 @@ class Ensemble:
     --------
     Create ensemble from generator output:
 
-    >>> from synhydro import ThomasFieringGenerator, Ensemble
+    >>> from synhydro import ThomasFieringGenerator
     >>> gen = ThomasFieringGenerator(Q_hist)
     >>> gen.fit()
-    >>> Q_syn = gen.generate(n_years=50, n_realizations=100)
-    >>> ensemble = Ensemble.from_generator(gen, n_years=50, n_realizations=100)
+    >>> ensemble = gen.generate(n_realizations=100, n_years=50)
 
     Save and load ensemble:
 
@@ -133,9 +133,11 @@ class Ensemble:
     >>> percentiles = ensemble.percentile([10, 50, 90], by='site')
     """
 
-    def __init__(self,
-                 data: Dict[Union[int, str], pd.DataFrame],
-                 metadata: Optional[EnsembleMetadata] = None):
+    def __init__(
+        self,
+        data: Dict[Union[int, str], pd.DataFrame],
+        metadata: Optional[EnsembleMetadata] = None,
+    ):
         """
         Initialize Ensemble with data and optional metadata.
 
@@ -165,26 +167,28 @@ class Ensemble:
         data_structure = self._infer_data_structure(data)
         logger.debug(f"Detected data structure: {data_structure}")
 
-        if data_structure == 'realizations':
+        if data_structure == "realizations":
             self.data_by_realization = data
             self._data_by_site = None  # lazily computed
-        elif data_structure == 'sites':
+        elif data_structure == "sites":
             self._data_by_site = data
             self.data_by_realization = self._transform_sites_to_realizations(data)
         else:
-            raise ValueError("Unknown data structure type. Expected 'realizations' or 'sites'.")
+            raise ValueError(
+                "Unknown data structure type. Expected 'realizations' or 'sites'."
+            )
 
         self.realization_ids = list(self.data_by_realization.keys())
         self.site_names = list(
-            self._data_by_site.keys() if self._data_by_site is not None
+            self._data_by_site.keys()
+            if self._data_by_site is not None
             else self._get_site_names_from_realizations()
         )
 
         # Initialize or update metadata
         if metadata is None:
             self.metadata = EnsembleMetadata(
-                n_realizations=len(self.realization_ids),
-                n_sites=len(self.site_names)
+                n_realizations=len(self.realization_ids), n_sites=len(self.site_names)
             )
         else:
             self.metadata = metadata
@@ -196,8 +200,10 @@ class Ensemble:
         if self.metadata.time_period is None:
             self._infer_time_period()
 
-        logger.info(f"Ensemble initialized: {len(self.realization_ids)} realizations, "
-                   f"{len(self.site_names)} sites")
+        logger.info(
+            f"Ensemble initialized: {len(self.realization_ids)} realizations, "
+            f"{len(self.site_names)} sites"
+        )
 
     @property
     def frequency(self) -> Optional[str]:
@@ -266,15 +272,18 @@ class Ensemble:
 
         # Primary heuristic: check key type
         if isinstance(first_key, int):
-            return 'realizations'
+            return "realizations"
         elif isinstance(first_key, str):
-            return 'sites'
+            return "sites"
         else:
-            raise ValueError(f"Unknown key type: {type(first_key)}. "
-                           "Expected int (realization) or str (site)")
+            raise ValueError(
+                f"Unknown key type: {type(first_key)}. "
+                "Expected int (realization) or str (site)"
+            )
 
-    def _transform_realizations_to_sites(self,
-                                         data_dict: Dict[int, pd.DataFrame]) -> Dict[str, pd.DataFrame]:
+    def _transform_realizations_to_sites(
+        self, data_dict: Dict[int, pd.DataFrame]
+    ) -> Dict[str, pd.DataFrame]:
         """
         Transform from realization-indexed to site-indexed structure.
 
@@ -318,8 +327,9 @@ class Ensemble:
 
         return result
 
-    def _transform_sites_to_realizations(self,
-                                         site_dict: Dict[str, pd.DataFrame]) -> Dict[int, pd.DataFrame]:
+    def _transform_sites_to_realizations(
+        self, site_dict: Dict[str, pd.DataFrame]
+    ) -> Dict[int, pd.DataFrame]:
         """
         Transform from site-indexed to realization-indexed structure.
 
@@ -364,16 +374,18 @@ class Ensemble:
         """Infer time period from data."""
         if self.data_by_realization:
             first_real = self.data_by_realization[self.realization_ids[0]]
-            if hasattr(first_real.index, 'min') and hasattr(first_real.index, 'max'):
+            if hasattr(first_real.index, "min") and hasattr(first_real.index, "max"):
                 start = str(first_real.index.min().date())
                 end = str(first_real.index.max().date())
                 self.metadata.time_period = (start, end)
 
     @classmethod
-    def from_hdf5(cls,
-                  filename: str,
-                  realization_subset: Optional[List[int]] = None,
-                  stored_by_node: bool = True) -> 'Ensemble':
+    def from_hdf5(
+        cls,
+        filename: str,
+        realization_subset: Optional[List[int]] = None,
+        stored_by_node: bool = True,
+    ) -> "Ensemble":
         """
         Load ensemble from HDF5 file.
 
@@ -398,11 +410,11 @@ class Ensemble:
         """
         logger.info(f"Loading ensemble from {filename}")
 
-        with h5py.File(filename, 'r') as f:
+        with h5py.File(filename, "r") as f:
             # Load metadata if present
             metadata_dict = {}
-            if 'metadata' in f.attrs:
-                metadata_dict = json.loads(f.attrs['metadata'])
+            if "metadata" in f.attrs:
+                metadata_dict = json.loads(f.attrs["metadata"])
 
             if stored_by_node:
                 keys = list(f.keys())
@@ -410,30 +422,34 @@ class Ensemble:
                     raise ValueError(f"HDF5 file {filename} is empty")
 
                 first_node = f[keys[0]]
-                column_labels = first_node.attrs['column_labels']
+                column_labels = first_node.attrs["column_labels"]
 
                 # Parse dates once — reuse across all realizations
-                dates_ds = first_node['date']
-                if dates_ds.dtype.kind == 'i':
+                dates_ds = first_node["date"]
+                if dates_ds.dtype.kind == "i":
                     # Int64 nanosecond timestamps (fast path)
-                    dt_index = pd.DatetimeIndex(dates_ds[:].astype('datetime64[ns]'))
+                    dt_index = pd.DatetimeIndex(dates_ds[:].astype("datetime64[ns]"))
                 else:
                     dates_raw = dates_ds[:]
-                    if dates_raw.dtype.kind == 'S' or dates_raw.dtype.kind == 'O':
+                    if dates_raw.dtype.kind == "S" or dates_raw.dtype.kind == "O":
                         dates_raw = dates_raw.astype(str)
                     dt_index = pd.to_datetime(dates_raw)
-                dt_index.name = 'datetime'
+                dt_index.name = "datetime"
 
                 # Determine which realizations to load
                 if realization_subset is not None:
                     missing = [r for r in realization_subset if r not in column_labels]
                     if missing:
-                        raise ValueError(f"Realizations {missing} not found in HDF5 file")
+                        raise ValueError(
+                            f"Realizations {missing} not found in HDF5 file"
+                        )
                     realization_ids = realization_subset
                 else:
                     realization_ids = list(column_labels)
 
-                logger.info(f"Loading {len(realization_ids)} realizations from {filename}")
+                logger.info(
+                    f"Loading {len(realization_ids)} realizations from {filename}"
+                )
 
                 n_times = len(dt_index)
                 n_nodes = len(keys)
@@ -460,22 +476,25 @@ class Ensemble:
 
                 for i, realization in enumerate(keys):
                     realization_group = f[str(realization)]
-                    column_labels = realization_group.attrs['column_labels']
+                    column_labels = realization_group.attrs["column_labels"]
                     col_names = [str(label) for label in column_labels]
 
                     # Parse dates once for the first realization, reuse if lengths match
                     if shared_dt_index is None:
-                        dates_ds = realization_group['date']
-                        if dates_ds.dtype.kind == 'i':
+                        dates_ds = realization_group["date"]
+                        if dates_ds.dtype.kind == "i":
                             shared_dt_index = pd.DatetimeIndex(
-                                dates_ds[:].astype('datetime64[ns]')
+                                dates_ds[:].astype("datetime64[ns]")
                             )
                         else:
                             dates_raw = dates_ds[:]
-                            if dates_raw.dtype.kind == 'S' or dates_raw.dtype.kind == 'O':
+                            if (
+                                dates_raw.dtype.kind == "S"
+                                or dates_raw.dtype.kind == "O"
+                            ):
                                 dates_raw = dates_raw.astype(str)
                             shared_dt_index = pd.to_datetime(dates_raw)
-                        shared_dt_index.name = 'datetime'
+                        shared_dt_index.name = "datetime"
                         dt_index = shared_dt_index
                     else:
                         dt_index = shared_dt_index
@@ -495,10 +514,12 @@ class Ensemble:
 
         return cls(ensemble_dict, metadata=metadata)
 
-    def to_hdf5(self,
-                filename: str,
-                compression: Optional[str] = 'gzip',
-                stored_by_node: bool = True):
+    def to_hdf5(
+        self,
+        filename: str,
+        compression: Optional[str] = "gzip",
+        stored_by_node: bool = True,
+    ):
         """
         Save ensemble to HDF5 file.
 
@@ -518,9 +539,9 @@ class Ensemble:
         """
         logger.info(f"Saving ensemble to {filename}")
 
-        with h5py.File(filename, 'w') as f:
+        with h5py.File(filename, "w") as f:
             # Save metadata as attributes
-            f.attrs['metadata'] = json.dumps(self.metadata.to_dict())
+            f.attrs["metadata"] = json.dumps(self.metadata.to_dict())
 
             if stored_by_node:
                 # Store by site (nodes as top-level groups)
@@ -528,111 +549,38 @@ class Ensemble:
                     grp = f.create_group(str(site))
 
                     # Store metadata
-                    grp.attrs['column_labels'] = list(site_df.columns)
+                    grp.attrs["column_labels"] = list(site_df.columns)
 
                     # Store dates as int64 nanosecond timestamps (fast I/O)
                     dates_ns = site_df.index.astype(np.int64)
-                    grp.create_dataset('date', data=dates_ns, compression=compression)
+                    grp.create_dataset("date", data=dates_ns, compression=compression)
 
                     # Store each realization's data for this site
                     for col in site_df.columns:
-                        grp.create_dataset(str(col),
-                                         data=site_df[col].values,
-                                         compression=compression)
+                        grp.create_dataset(
+                            str(col), data=site_df[col].values, compression=compression
+                        )
             else:
                 # Store by realization
                 for real_id, real_df in self.data_by_realization.items():
                     grp = f.create_group(str(real_id))
 
                     # Store metadata
-                    grp.attrs['column_labels'] = list(real_df.columns)
+                    grp.attrs["column_labels"] = list(real_df.columns)
 
                     # Store dates as int64 nanosecond timestamps (fast I/O)
                     dates_ns = real_df.index.astype(np.int64)
-                    grp.create_dataset('date', data=dates_ns, compression=compression)
+                    grp.create_dataset("date", data=dates_ns, compression=compression)
 
                     # Store each site's data for this realization
                     for col in real_df.columns:
-                        grp.create_dataset(str(col),
-                                         data=real_df[col].values,
-                                         compression=compression)
+                        grp.create_dataset(
+                            str(col), data=real_df[col].values, compression=compression
+                        )
 
         logger.info(f"Ensemble saved successfully to {filename}")
 
-    @classmethod
-    def from_generator(cls,
-                       generator,
-                       n_years: int,
-                       n_realizations: int,
-                       **gen_kwargs) -> 'Ensemble':
-        """
-        Create ensemble directly from a fitted Generator.
-
-        Parameters
-        ----------
-        generator : Generator
-            A fitted generator instance.
-        n_years : int
-            Number of years to generate.
-        n_realizations : int
-            Number of realizations to generate.
-        **gen_kwargs
-            Additional keyword arguments passed to generator.generate().
-
-        Returns
-        -------
-        Ensemble
-            New ensemble with metadata from generator.
-
-        Examples
-        --------
-        >>> from synhydro import ThomasFieringGenerator, Ensemble
-        >>> gen = ThomasFieringGenerator(Q_hist)
-        >>> gen.fit()
-        >>> ensemble = Ensemble.from_generator(gen, n_years=50, n_realizations=100)
-        """
-        logger.info(f"Creating ensemble from {generator.__class__.__name__}")
-
-        # Generate synthetic data
-        Q_syn = generator.generate(n_years, n_realizations, **gen_kwargs)
-
-        # Check if generator already returned an Ensemble (e.g., from pipelines with disaggregation)
-        if isinstance(Q_syn, cls):
-            logger.debug(f"Generator returned Ensemble directly")
-            return Q_syn
-
-        # Convert generator output to ensemble format
-        # Assuming generator returns DataFrame with columns as realizations
-        ensemble_dict = {}
-
-        # Try to get site name from generator
-        if hasattr(generator, '_sites') and len(generator._sites) > 0:
-            site_name = generator._sites[0]
-        else:
-            site_name = 'site_0'
-
-        for i in range(n_realizations):
-            if n_realizations == 1:
-                # Single realization: keep Q_syn as is, just rename column
-                df = Q_syn.copy()
-                df.columns = [site_name]
-                ensemble_dict[i] = df
-            else:
-                # Multiple realizations: extract column i and rename
-                ensemble_dict[i] = Q_syn[[i]].copy()
-                ensemble_dict[i].columns = [site_name]
-
-        # Create metadata from generator
-        metadata = EnsembleMetadata(
-            generator_class=generator.__class__.__name__,
-            generator_params=generator.get_params() if hasattr(generator, 'get_params') else None,
-            n_realizations=n_realizations,
-            description=f"Generated with {generator.__class__.__name__}"
-        )
-
-        return cls(ensemble_dict, metadata=metadata)
-
-    def summary(self, by: str = 'site') -> pd.DataFrame:
+    def summary(self, by: str = "site") -> pd.DataFrame:
         """
         Compute statistical summary across realizations or sites.
 
@@ -651,36 +599,36 @@ class Ensemble:
         >>> stats = ensemble.summary(by='site')
         >>> print(stats)
         """
-        if by == 'site':
+        if by == "site":
             results = []
             for site_name, site_df in self.data_by_site.items():
                 stats = {
-                    'site': site_name,
-                    'mean': site_df.mean(axis=1).mean(),
-                    'std': site_df.std(axis=1).mean(),
-                    'min': site_df.min(axis=1).min(),
-                    'max': site_df.max(axis=1).max(),
+                    "site": site_name,
+                    "mean": site_df.mean(axis=1).mean(),
+                    "std": site_df.std(axis=1).mean(),
+                    "min": site_df.min(axis=1).min(),
+                    "max": site_df.max(axis=1).max(),
                 }
                 results.append(stats)
-            return pd.DataFrame(results).set_index('site')
-        elif by == 'realization':
+            return pd.DataFrame(results).set_index("site")
+        elif by == "realization":
             results = []
             for real_id, real_df in self.data_by_realization.items():
                 stats = {
-                    'realization': real_id,
-                    'mean': real_df.mean().mean(),
-                    'std': real_df.std().mean(),
-                    'min': real_df.min().min(),
-                    'max': real_df.max().max(),
+                    "realization": real_id,
+                    "mean": real_df.mean().mean(),
+                    "std": real_df.std().mean(),
+                    "min": real_df.min().min(),
+                    "max": real_df.max().max(),
                 }
                 results.append(stats)
-            return pd.DataFrame(results).set_index('realization')
+            return pd.DataFrame(results).set_index("realization")
         else:
             raise ValueError("by must be 'site' or 'realization'")
 
-    def percentile(self,
-                   q: Union[float, List[float]],
-                   by: str = 'site') -> Dict[str, pd.DataFrame]:
+    def percentile(
+        self, q: Union[float, List[float]], by: str = "site"
+    ) -> Dict[str, pd.DataFrame]:
         """
         Compute percentiles across realizations.
 
@@ -706,28 +654,34 @@ class Ensemble:
 
         results = {}
 
-        if by == 'site':
+        if by == "site":
             for site_name, site_df in self.data_by_site.items():
                 percentiles = {}
                 for percentile in q:
-                    percentiles[f'p{percentile}'] = site_df.quantile(percentile/100, axis=1)
+                    percentiles[f"p{percentile}"] = site_df.quantile(
+                        percentile / 100, axis=1
+                    )
                 results[site_name] = pd.DataFrame(percentiles)
-        elif by == 'realization':
+        elif by == "realization":
             for real_id, real_df in self.data_by_realization.items():
                 percentiles = {}
                 for percentile in q:
-                    percentiles[f'p{percentile}'] = real_df.quantile(percentile/100, axis=1)
+                    percentiles[f"p{percentile}"] = real_df.quantile(
+                        percentile / 100, axis=1
+                    )
                 results[real_id] = pd.DataFrame(percentiles)
         else:
             raise ValueError("by must be 'site' or 'realization'")
 
         return results
 
-    def subset(self,
-               sites: Optional[List[str]] = None,
-               realizations: Optional[List[int]] = None,
-               start_date: Optional[str] = None,
-               end_date: Optional[str] = None) -> 'Ensemble':
+    def subset(
+        self,
+        sites: Optional[List[str]] = None,
+        realizations: Optional[List[int]] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+    ) -> "Ensemble":
         """
         Create subset of ensemble by sites, realizations, or time period.
 
@@ -781,12 +735,12 @@ class Ensemble:
         new_metadata = EnsembleMetadata(
             generator_class=self.metadata.generator_class,
             generator_params=self.metadata.generator_params,
-            description=f"Subset of {self.metadata.description or 'ensemble'}"
+            description=f"Subset of {self.metadata.description or 'ensemble'}",
         )
 
         return Ensemble(data, metadata=new_metadata)
 
-    def resample(self, freq: str) -> 'Ensemble':
+    def resample(self, freq: str) -> "Ensemble":
         """
         Resample time series to different frequency.
 
@@ -812,16 +766,18 @@ class Ensemble:
             generator_class=self.metadata.generator_class,
             generator_params=self.metadata.generator_params,
             time_resolution=freq,
-            description=f"Resampled to {freq}"
+            description=f"Resampled to {freq}",
         )
 
         return Ensemble(resampled_data, metadata=new_metadata)
 
     def __repr__(self) -> str:
         """String representation of Ensemble."""
-        return (f"Ensemble(n_realizations={len(self.realization_ids)}, "
-                f"n_sites={len(self.site_names)}, "
-                f"generator={self.metadata.generator_class or 'unknown'})")
+        return (
+            f"Ensemble(n_realizations={len(self.realization_ids)}, "
+            f"n_sites={len(self.site_names)}, "
+            f"generator={self.metadata.generator_class or 'unknown'})"
+        )
 
     def __str__(self) -> str:
         """Detailed string representation."""
@@ -834,7 +790,9 @@ class Ensemble:
         ]
 
         if self.metadata.time_period:
-            lines.append(f"Time Period: {self.metadata.time_period[0]} to {self.metadata.time_period[1]}")
+            lines.append(
+                f"Time Period: {self.metadata.time_period[0]} to {self.metadata.time_period[1]}"
+            )
 
         if self.metadata.generator_class:
             lines.append(f"Generator: {self.metadata.generator_class}")

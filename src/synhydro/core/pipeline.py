@@ -4,9 +4,12 @@ Pipeline classes for composing generators and disaggregators.
 This module provides the GeneratorDisaggregatorPipeline class that allows
 flexible composition of any generator with any compatible disaggregator.
 """
+
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Union, List, Dict, Any
 import pickle
+
+import pandas as pd
 
 from synhydro.core.base import Generator, Disaggregator
 from synhydro.core.ensemble import Ensemble
@@ -20,12 +23,15 @@ class GeneratorDisaggregatorPipeline:
     ensuring compatibility between components and managing the complete
     workflow.
 
+    Data is not passed at construction time. Use ``preprocessing(Q_obs)``
+    or ``fit(Q_obs)`` to supply observed flow data.
+
     Parameters
     ----------
     generator : Generator
-        A fitted or unfitted generator instance.
+        An unfitted generator instance (constructed without data).
     disaggregator : Disaggregator
-        A fitted or unfitted disaggregator instance.
+        An unfitted disaggregator instance (constructed without data).
     name : str, optional
         Name for this pipeline instance.
     debug : bool, default=False
@@ -33,28 +39,30 @@ class GeneratorDisaggregatorPipeline:
 
     Examples
     --------
-    >>> from synhydro.methods.generate.nonparametric.kirsch import KirschGenerator
-    >>> from synhydro.methods.disaggregate.temporal.nowak import NowakDisaggregator
+    >>> from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
+    >>> from synhydro.methods.disaggregation.temporal.nowak import NowakDisaggregator
     >>> from synhydro.core.pipeline import GeneratorDisaggregatorPipeline
     >>>
-    >>> # Create components
-    >>> generator = KirschGenerator(Q_daily)
-    >>> disaggregator = NowakDisaggregator(Q_daily)
+    >>> # Create components (no data)
+    >>> generator = KirschGenerator()
+    >>> disaggregator = NowakDisaggregator()
     >>>
     >>> # Create pipeline
     >>> pipeline = GeneratorDisaggregatorPipeline(generator, disaggregator)
     >>>
     >>> # Fit and generate
-    >>> pipeline.preprocessing()
+    >>> pipeline.preprocessing(Q_daily)
     >>> pipeline.fit()
     >>> daily_ensemble = pipeline.generate(n_realizations=10, n_years=50)
     """
 
-    def __init__(self,
-                 generator: Generator,
-                 disaggregator: Disaggregator,
-                 name: Optional[str] = None,
-                 debug: bool = False):
+    def __init__(
+        self,
+        generator: Generator,
+        disaggregator: Disaggregator,
+        name: Optional[str] = None,
+        debug: bool = False,
+    ):
         """
         Initialize the pipeline with generator and disaggregator components.
 
@@ -73,8 +81,6 @@ class GeneratorDisaggregatorPipeline:
         ------
         TypeError
             If components are not proper Generator/Disaggregator instances.
-        ValueError
-            If generator output frequency doesn't match disaggregator input frequency.
         """
         # Validate component types
         if not isinstance(generator, Generator):
@@ -91,7 +97,10 @@ class GeneratorDisaggregatorPipeline:
         self.disaggregator = disaggregator
 
         # Set name
-        self.name = name or f"{generator.__class__.__name__}_{disaggregator.__class__.__name__}_Pipeline"
+        self.name = (
+            name
+            or f"{generator.__class__.__name__}_{disaggregator.__class__.__name__}_Pipeline"
+        )
 
         # Setup logging
         self.debug = debug
@@ -101,10 +110,9 @@ class GeneratorDisaggregatorPipeline:
         else:
             self.logger.setLevel(logging.INFO)
 
-        # Validate compatibility
-        self.validate_compatibility()
-
-        self.logger.info(f"Pipeline created: {generator.__class__.__name__} -> {disaggregator.__class__.__name__}")
+        self.logger.info(
+            f"Pipeline created: {generator.__class__.__name__} -> {disaggregator.__class__.__name__}"
+        )
 
     def validate_compatibility(self) -> None:
         """
@@ -127,7 +135,9 @@ class GeneratorDisaggregatorPipeline:
                 f"but Disaggregator expects '{dis_input_freq}'"
             )
 
-        self.logger.debug(f"Compatibility validated: {gen_output_freq} -> {self.disaggregator.output_frequency}")
+        self.logger.debug(
+            f"Compatibility validated: {gen_output_freq} -> {self.disaggregator.output_frequency}"
+        )
 
     @property
     def is_preprocessed(self) -> bool:
@@ -165,14 +175,25 @@ class GeneratorDisaggregatorPipeline:
         """
         return self.disaggregator.output_frequency
 
-    def preprocessing(self, **kwargs) -> None:
+    def preprocessing(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs,
+    ) -> None:
         """
         Preprocess both generator and disaggregator.
 
-        Calls preprocessing() on both components in sequence.
+        Passes ``Q_obs`` to both components' ``preprocessing()`` methods
+        in sequence.
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data.
+        sites : list of str, optional
+            Sites to use. If None, uses all columns.
         **kwargs
             Additional preprocessing parameters passed to both components.
         """
@@ -180,35 +201,57 @@ class GeneratorDisaggregatorPipeline:
 
         # Preprocess generator
         self.logger.info("Preprocessing generator...")
-        self.generator.preprocessing(**kwargs)
+        self.generator.preprocessing(Q_obs, sites=sites, **kwargs)
 
         # Preprocess disaggregator
         self.logger.info("Preprocessing disaggregator...")
-        self.disaggregator.preprocessing(**kwargs)
+        self.disaggregator.preprocessing(Q_obs, sites=sites, **kwargs)
 
         self.logger.info("Pipeline preprocessing complete")
 
-    def fit(self, **kwargs) -> None:
+    def fit(
+        self,
+        Q_obs: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs,
+    ) -> None:
         """
         Fit both generator and disaggregator.
 
-        Calls fit() on both components in sequence. Validates that
-        preprocessing has been completed first.
+        If ``Q_obs`` is provided, ``preprocessing()`` is called automatically
+        before fitting. If omitted, a prior call to ``preprocessing()`` is
+        required.
+
+        After preprocessing, validates frequency compatibility between
+        generator and disaggregator before fitting.
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed data. If provided, runs preprocessing automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs
             Additional fitting parameters passed to both components.
 
         Raises
         ------
         ValueError
-            If preprocessing has not been completed.
+            If preprocessing has not been completed and Q_obs is not provided.
         """
+        # If Q_obs provided, run preprocessing first
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
+
         if not self.is_preprocessed:
             raise ValueError(
-                "Pipeline must be preprocessed before fitting. Call preprocessing() first."
+                "Pipeline must be preprocessed before fitting. "
+                "Call preprocessing(Q_obs) first or pass Q_obs to fit()."
             )
+
+        # Validate compatibility after preprocessing (frequencies now known)
+        self.validate_compatibility()
 
         self.logger.info("Starting pipeline fitting...")
 
@@ -222,12 +265,14 @@ class GeneratorDisaggregatorPipeline:
 
         self.logger.info("Pipeline fitting complete")
 
-    def generate(self,
-                 n_realizations: int = 1,
-                 n_years: Optional[int] = None,
-                 n_timesteps: Optional[int] = None,
-                 seed: Optional[int] = None,
-                 **kwargs) -> Ensemble:
+    def generate(
+        self,
+        n_realizations: int = 1,
+        n_years: Optional[int] = None,
+        n_timesteps: Optional[int] = None,
+        seed: Optional[int] = None,
+        **kwargs,
+    ) -> Ensemble:
         """
         Generate and disaggregate synthetic flows through the pipeline.
 
@@ -270,13 +315,15 @@ class GeneratorDisaggregatorPipeline:
         )
 
         # Step 1: Generate with generator
-        self.logger.info(f"Step 1: Generating flows with {self.generator.__class__.__name__}...")
+        self.logger.info(
+            f"Step 1: Generating flows with {self.generator.__class__.__name__}..."
+        )
         monthly_ensemble = self.generator.generate(
             n_realizations=n_realizations,
             n_years=n_years,
             n_timesteps=n_timesteps,
             seed=seed,
-            **kwargs
+            **kwargs,
         )
         self.logger.info(
             f"Generated {len(monthly_ensemble.data_by_realization)} realizations "
@@ -284,11 +331,10 @@ class GeneratorDisaggregatorPipeline:
         )
 
         # Step 2: Disaggregate with disaggregator
-        self.logger.info(f"Step 2: Disaggregating flows with {self.disaggregator.__class__.__name__}...")
-        daily_ensemble = self.disaggregator.disaggregate(
-            monthly_ensemble,
-            **kwargs
+        self.logger.info(
+            f"Step 2: Disaggregating flows with {self.disaggregator.__class__.__name__}..."
         )
+        daily_ensemble = self.disaggregator.disaggregate(monthly_ensemble, **kwargs)
         self.logger.info(
             f"Disaggregated to {daily_ensemble.frequency} frequency, "
             f"{len(daily_ensemble.data_by_realization)} realizations"
@@ -317,8 +363,12 @@ class GeneratorDisaggregatorPipeline:
         lines.append("Pipeline Information")
         lines.append("-" * 80)
         lines.append(f"Generator:               {self.generator.__class__.__name__}")
-        lines.append(f"Disaggregator:           {self.disaggregator.__class__.__name__}")
-        lines.append(f"Flow:                    {self.generator.output_frequency} -> {self.disaggregator.output_frequency}")
+        lines.append(
+            f"Disaggregator:           {self.disaggregator.__class__.__name__}"
+        )
+        lines.append(
+            f"Flow:                    {self.generator.output_frequency} -> {self.disaggregator.output_frequency}"
+        )
         lines.append("")
 
         # Status
@@ -334,17 +384,19 @@ class GeneratorDisaggregatorPipeline:
         lines.append(f"Type:                    {self.generator.__class__.__name__}")
         lines.append(f"Preprocessed:            {self.generator.is_preprocessed}")
         lines.append(f"Fitted:                  {self.generator.is_fitted}")
-        if self.generator.is_preprocessed and hasattr(self.generator, '_sites'):
+        if self.generator.is_preprocessed and hasattr(self.generator, "_sites"):
             lines.append(f"Sites:                   {self.generator.sites}")
         lines.append("")
 
         # Disaggregator Status
         lines.append("Disaggregator Status")
         lines.append("-" * 80)
-        lines.append(f"Type:                    {self.disaggregator.__class__.__name__}")
+        lines.append(
+            f"Type:                    {self.disaggregator.__class__.__name__}"
+        )
         lines.append(f"Preprocessed:            {self.disaggregator.is_preprocessed}")
         lines.append(f"Fitted:                  {self.disaggregator.is_fitted}")
-        if self.disaggregator.is_preprocessed and hasattr(self.disaggregator, '_sites'):
+        if self.disaggregator.is_preprocessed and hasattr(self.disaggregator, "_sites"):
             lines.append(f"Sites:                   {self.disaggregator.sites}")
         lines.append("")
 
@@ -385,13 +437,13 @@ class GeneratorDisaggregatorPipeline:
                 "Cannot save unfitted pipeline. Call preprocessing() and fit() first."
             )
 
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(self, f)
 
         self.logger.info(f"Pipeline saved to {filepath}")
 
     @classmethod
-    def load(cls, filepath: str) -> 'GeneratorDisaggregatorPipeline':
+    def load(cls, filepath: str) -> "GeneratorDisaggregatorPipeline":
         """
         Load a pipeline from file.
 
@@ -405,7 +457,7 @@ class GeneratorDisaggregatorPipeline:
         GeneratorDisaggregatorPipeline
             Loaded pipeline instance.
         """
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             pipeline = pickle.load(f)
 
         pipeline.logger.info(f"Pipeline loaded from {filepath}")

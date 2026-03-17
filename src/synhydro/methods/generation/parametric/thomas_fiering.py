@@ -4,6 +4,7 @@ Thomas-Fiering generator for synthetic monthly streamflow generation.
 Implements the Thomas-Fiering method (1962) with Stedinger-Taylor (1982)
 normalization for generating synthetic streamflow sequences.
 """
+
 import logging
 from typing import Optional, Union, Dict, Any
 
@@ -17,6 +18,7 @@ from synhydro.core.statistics import compute_monthly_statistics
 from synhydro.transformations import SteddingerTransform
 
 logger = logging.getLogger(__name__)
+
 
 class ThomasFieringGenerator(Generator):
     """
@@ -33,9 +35,8 @@ class ThomasFieringGenerator(Generator):
     >>> import pandas as pd
     >>> from synhydro.methods.generate.parametric.thomas_fiering import ThomasFieringGenerator
     >>> Q_monthly = pd.read_csv('monthly_flows.csv', index_col=0, parse_dates=True)
-    >>> tf = ThomasFieringGenerator(Q_monthly.iloc[:, 0])
-    >>> tf.preprocessing()
-    >>> tf.fit()
+    >>> tf = ThomasFieringGenerator()
+    >>> tf.fit(Q_monthly.iloc[:, 0])
     >>> ensemble = tf.generate(n_years=10, n_realizations=5)
 
     References
@@ -46,21 +47,16 @@ class ThomasFieringGenerator(Generator):
     Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation:
     1. Model verification and validation. Water Resources Research, 18(4), 909-918.
     """
-    def __init__(
-        self,
-        Q_obs: Union[pd.Series, pd.DataFrame],
-        name: Optional[str] = None,
-        debug: bool = False,
-        **kwargs
-    ):
+
+    supports_multisite = False
+    supported_frequencies = ("MS",)
+
+    def __init__(self, *, name: Optional[str] = None, debug: bool = False, **kwargs):
         """
         Initialize the ThomasFieringGenerator.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Streamflow data with DatetimeIndex. Must be single site.
-            If not monthly frequency, will be resampled during preprocessing.
         name : str, optional
             Name for this generator instance.
         debug : bool, default=False
@@ -68,28 +64,27 @@ class ThomasFieringGenerator(Generator):
         **kwargs : dict, optional
             Additional parameters (currently unused).
         """
-        # Initialize base class with Q_obs
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         # Initialize Stedinger transform
         self.stedinger_transform = SteddingerTransform(by_month=True)
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
-            'method': 'Thomas-Fiering AR(1)',
-            'distribution': 'Normal (after Stedinger transformation)'
+            "method": "Thomas-Fiering AR(1)",
+            "distribution": "Normal (after Stedinger transformation)",
         }
         self.init_params.transformation_params = {
-            'transformation': 'SteddingerTransform',
-            'by_month': True
+            "transformation": "SteddingerTransform",
+            "by_month": True,
         }
 
     @property
     def output_frequency(self) -> str:
         """Thomas-Fiering generator produces monthly output."""
-        return 'MS'  # Month Start
-    
-    def preprocessing(self, sites: Optional[list] = None, **kwargs) -> None:
+        return "MS"  # Month Start
+
+    def preprocessing(self, Q_obs, *, sites: Optional[list] = None, **kwargs) -> None:
         """
         Preprocess observed data for Thomas-Fiering generation.
 
@@ -98,27 +93,20 @@ class ThomasFieringGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Streamflow data with DatetimeIndex. Must be single site.
         sites : list, optional
             Not used (Thomas-Fiering is univariate).
         **kwargs : dict, optional
             Additional parameters (currently unused).
         """
-        # Validate input data
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        # Thomas-Fiering is univariate - ensure single site
-        if Q.shape[1] > 1:
-            self.logger.warning(f"Thomas-Fiering is univariate. Using first column only.")
-            Q = Q.iloc[:, 0:1]
-
-        # Store sites
-        self._sites = Q.columns.tolist()
+        Q = self._store_obs_data(Q_obs, sites)
 
         # Resample to monthly if needed
-        if Q.index.freq not in ['MS', 'M']:
-            if Q.index.freq in ['D', 'W']:
+        if Q.index.freq not in ["MS", "M"]:
+            if Q.index.freq in ["D", "W"]:
                 self.logger.info(f"Resampling from {Q.index.freq} to monthly")
-                Q = Q.resample('MS').sum()
+                Q = Q.resample("MS").sum()
 
         # Store monthly data
         self.Q_obs_monthly = Q.iloc[:, 0]  # Convert to Series for Thomas-Fiering
@@ -129,8 +117,8 @@ class ThomasFieringGenerator(Generator):
         # Update state
         self.update_state(preprocessed=True)
         self.logger.info(f"Preprocessing complete: {len(self.Q_obs_monthly)} months")
-        
-    def fit(self, **kwargs) -> None:
+
+    def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
         """
         Estimate Thomas-Fiering model parameters from normalized flows.
 
@@ -139,16 +127,21 @@ class ThomasFieringGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            If provided, calls preprocessing automatically.
+        sites : list, optional
+            Sites to use (passed to preprocessing if Q_obs provided).
         **kwargs : dict, optional
             Additional parameters (currently unused).
         """
-        # Validate preprocessing
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         # Compute monthly statistics using centralized function
         monthly_stats = compute_monthly_statistics(self.Q_norm)
-        self.mu_monthly = monthly_stats['mean']
-        self.sigma_monthly = monthly_stats['std']
+        self.mu_monthly = monthly_stats["mean"]
+        self.sigma_monthly = monthly_stats["std"]
 
         # Compute monthly lag-1 correlation
         self.rho_monthly = self._compute_lag1_correlation(self.Q_norm)
@@ -189,7 +182,10 @@ class ThomasFieringGenerator(Generator):
             second_values = []
 
             for i in range(len(data) - 1):
-                if data.index[i].month == first_month and data.index[i + 1].month == second_month:
+                if (
+                    data.index[i].month == first_month
+                    and data.index[i + 1].month == second_month
+                ):
                     first_values.append(data.iloc[i])
                     second_values.append(data.iloc[i + 1])
 
@@ -205,7 +201,11 @@ class ThomasFieringGenerator(Generator):
                 second_clean = second_arr[valid_mask]
 
                 # Compute Pearson correlation if enough valid data
-                if len(first_clean) > 1 and np.std(first_clean) > 0 and np.std(second_clean) > 0:
+                if (
+                    len(first_clean) > 1
+                    and np.std(first_clean) > 0
+                    and np.std(second_clean) > 0
+                ):
                     try:
                         corr, _ = pearsonr(first_clean, second_clean)
                         # Replace NaN with 0
@@ -234,14 +234,14 @@ class ThomasFieringGenerator(Generator):
         # Get training period
         training_period = (
             str(self.Q_obs_monthly.index[0].date()),
-            str(self.Q_obs_monthly.index[-1].date())
+            str(self.Q_obs_monthly.index[-1].date()),
         )
 
         # Package transformation parameters
         transform_params = {
-            'stedinger_transform': {
-                'tau_monthly': self.stedinger_transform.params_.get('tau'),
-                'by_month': True
+            "stedinger_transform": {
+                "tau_monthly": self.stedinger_transform.params_.get("tau"),
+                "by_month": True,
             }
         }
 
@@ -250,14 +250,14 @@ class ThomasFieringGenerator(Generator):
             stds_=self.sigma_monthly,
             correlations_=self.rho_monthly,
             distributions_={
-                'type': 'normal',
-                'assumption': 'AR(1) with normal innovations after Stedinger transformation'
+                "type": "normal",
+                "assumption": "AR(1) with normal innovations after Stedinger transformation",
             },
             transformations_=transform_params,
             n_parameters_=n_params,
             sample_size_=len(self.Q_obs_monthly),
             n_sites_=1,  # Thomas-Fiering is univariate
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def _generate(self, n_years: int, **kwargs) -> pd.DataFrame:
@@ -278,30 +278,40 @@ class ThomasFieringGenerator(Generator):
         """
 
         # Generate synthetic sequences
-        self.x_syn = np.zeros((n_years*12))
+        self.x_syn = np.zeros((n_years * 12))
         for i in range(n_years):
             for m in range(12):
                 prev_month = m if m > 0 else 12
                 month = m + 1
-                
-                if (i==0) and (m==0):
-                    self.x_syn[0] = self.mu_monthly[month] + np.random.normal(0, 1)*self.sigma_monthly[month]
+
+                if (i == 0) and (m == 0):
+                    self.x_syn[0] = (
+                        self.mu_monthly[month]
+                        + np.random.normal(0, 1) * self.sigma_monthly[month]
+                    )
 
                 else:
-                    
+
                     e_rand = np.random.normal(0, 1)
-                    
-                    self.x_syn[i*12+m] = self.mu_monthly[month] + \
-                                        self.rho_monthly[month]*(self.sigma_monthly[month]/self.sigma_monthly[prev_month])*\
-                                            (self.x_syn[i*12+m-1] - self.mu_monthly[prev_month]) + \
-                                                np.sqrt(1-self.rho_monthly[month]**2)*self.sigma_monthly[month]*e_rand
-                        
+
+                    self.x_syn[i * 12 + m] = (
+                        self.mu_monthly[month]
+                        + self.rho_monthly[month]
+                        * (self.sigma_monthly[month] / self.sigma_monthly[prev_month])
+                        * (self.x_syn[i * 12 + m - 1] - self.mu_monthly[prev_month])
+                        + np.sqrt(1 - self.rho_monthly[month] ** 2)
+                        * self.sigma_monthly[month]
+                        * e_rand
+                    )
+
         # Convert to DataFrame
         syn_start_year = self.Q_obs_monthly.index[0].year
-        syn_start_date = f'{syn_start_year}-01-01'
+        syn_start_date = f"{syn_start_year}-01-01"
         x_syn_df = pd.DataFrame(
             self.x_syn,
-            index=pd.date_range(start=syn_start_date, periods=len(self.x_syn), freq='MS')
+            index=pd.date_range(
+                start=syn_start_date, periods=len(self.x_syn), freq="MS"
+            ),
         )
 
         # Replace negative values in normalized space
@@ -315,14 +325,14 @@ class ThomasFieringGenerator(Generator):
         Q_syn = Q_syn.fillna(self.Q_obs_monthly.min())
 
         return Q_syn
-    
+
     def generate(
         self,
         n_years: Optional[int] = None,
         n_realizations: int = 1,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Ensemble:
         """
         Generate synthetic monthly streamflows.
@@ -383,7 +393,8 @@ class ThomasFieringGenerator(Generator):
             # Convert Series to DataFrame for Ensemble
             realizations[i] = Q_syn.to_frame(name=self._sites[0])
 
-        self.logger.info(f"Generated {n_realizations} realizations of {n_years} years each")
+        self.logger.info(
+            f"Generated {n_realizations} realizations of {n_years} years each"
+        )
 
         return Ensemble(realizations)
-    

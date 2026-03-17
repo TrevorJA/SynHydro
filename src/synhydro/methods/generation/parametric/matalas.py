@@ -5,6 +5,7 @@ The classical MAR(1) model is the standard parametric multi-site baseline in
 stochastic hydrology, appearing in virtually every comparison study as the
 reference against which modern methods are evaluated.
 """
+
 import logging
 from typing import Optional, Dict, List
 
@@ -59,9 +60,6 @@ class MATALASGenerator(Generator):
 
     Parameters
     ----------
-    Q_obs : pd.DataFrame or pd.Series
-        Monthly streamflow with DatetimeIndex. If Series, treated as single
-        site (equivalent to Thomas-Fiering). Columns are sites.
     log_transform : bool, default=True
         Apply log(Q + 1) transformation before standardization to reduce
         skewness and improve normality assumption.
@@ -84,9 +82,8 @@ class MATALASGenerator(Generator):
 
     Examples
     --------
-    >>> gen = MATALASGenerator(Q_monthly)
-    >>> gen.preprocessing()
-    >>> gen.fit()
+    >>> gen = MATALASGenerator(log_transform=True)
+    >>> gen.fit(Q_monthly)
     >>> ensemble = gen.generate(n_years=100, n_realizations=50, seed=42)
 
     References
@@ -98,64 +95,67 @@ class MATALASGenerator(Generator):
     Applied Modeling of Hydrologic Time Series. Water Resources Publications.
     """
 
+    supports_multisite = True
+    supported_frequencies = ("MS",)
+
     def __init__(
         self,
-        Q_obs,
+        *,
         log_transform: bool = True,
         name: Optional[str] = None,
         debug: bool = False,
         **kwargs,
     ):
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         self.log_transform = log_transform
 
         self.init_params.algorithm_params = {
-            'method': 'Matalas MAR(1)',
-            'reference': 'Matalas (1967)',
+            "method": "Matalas MAR(1)",
+            "reference": "Matalas (1967)",
+            "log_transform": log_transform,
         }
         self.init_params.transformation_params = {
-            'log_transform': log_transform,
+            "log_transform": log_transform,
         }
 
         # Fitted attributes (set during fit)
-        self._mu: Optional[pd.DataFrame] = None       # shape (12, n_sites)
-        self._sigma: Optional[pd.DataFrame] = None    # shape (12, n_sites)
-        self._A: Optional[List[NDArray]] = None        # list of 12 (n×n) matrices
-        self._B: Optional[List[NDArray]] = None        # list of 12 (n×n) matrices
+        self._mu: Optional[pd.DataFrame] = None  # shape (12, n_sites)
+        self._sigma: Optional[pd.DataFrame] = None  # shape (12, n_sites)
+        self._A: Optional[List[NDArray]] = None  # list of 12 (n×n) matrices
+        self._B: Optional[List[NDArray]] = None  # list of 12 (n×n) matrices
 
     @property
     def output_frequency(self) -> str:
-        return 'MS'
+        return "MS"
 
     # ------------------------------------------------------------------
     # Preprocessing
     # ------------------------------------------------------------------
 
-    def preprocessing(self, sites: Optional[list] = None, **kwargs) -> None:
+    def preprocessing(self, Q_obs, *, sites: Optional[list] = None, **kwargs) -> None:
         """
         Validate input and resample to monthly frequency.
 
         Parameters
         ----------
+        Q_obs : pd.DataFrame or pd.Series
+            Monthly streamflow with DatetimeIndex. Columns are sites.
         sites : list, optional
             Subset of site columns to use. Uses all columns if None.
         **kwargs : dict, optional
             Unused.
         """
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        if sites is not None:
-            Q = Q[sites]
-
-        self._sites = Q.columns.tolist()
+        Q = self._store_obs_data(Q_obs, sites)
         self._n_sites = len(self._sites)
 
         # Resample to monthly if needed (check resolution, not freq string)
-        inferred = pd.infer_freq(Q.index[:min(30, len(Q))])
-        if inferred is not None and (inferred.startswith('D') or inferred.startswith('W')):
+        inferred = pd.infer_freq(Q.index[: min(30, len(Q))])
+        if inferred is not None and (
+            inferred.startswith("D") or inferred.startswith("W")
+        ):
             self.logger.info("Resampling from %s to monthly (sum)", inferred)
-            Q = Q.resample('MS').sum()
+            Q = Q.resample("MS").sum()
 
         # Ensure positive values before log transform
         Q = Q.clip(lower=1e-6)
@@ -164,14 +164,15 @@ class MATALASGenerator(Generator):
         self.update_state(preprocessed=True)
         self.logger.info(
             "Preprocessing complete: %d months, %d sites",
-            len(Q), self._n_sites,
+            len(Q),
+            self._n_sites,
         )
 
     # ------------------------------------------------------------------
     # Fit
     # ------------------------------------------------------------------
 
-    def fit(self, **kwargs) -> None:
+    def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
         """
         Estimate MAR(1) coefficient matrices from observed monthly flows.
 
@@ -180,9 +181,15 @@ class MATALASGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.DataFrame or pd.Series, optional
+            If provided, calls preprocessing automatically.
+        sites : list, optional
+            Sites to use (passed to preprocessing if Q_obs provided).
         **kwargs : dict, optional
             Unused.
         """
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         Q = self.Q_obs_monthly.copy()
@@ -221,13 +228,15 @@ class MATALASGenerator(Generator):
 
             # Collect Z(m, y) and Z(m+1, y) pairs
             # For Dec→Jan, pair Dec of year y with Jan of year y+1
-            Z_curr = self._extract_month_vectors(Z, m + 1)       # shape (n_years, n_sites)
-            Z_next = self._extract_month_vectors(Z, next_m + 1)  # shape (n_years, n_sites)
+            Z_curr = self._extract_month_vectors(Z, m + 1)  # shape (n_years, n_sites)
+            Z_next = self._extract_month_vectors(
+                Z, next_m + 1
+            )  # shape (n_years, n_sites)
 
             # Align Dec→Jan across year boundary
             if m == 11:
-                Z_curr = Z_curr[:-1]   # Dec years 0..T-2
-                Z_next = Z_next[1:]    # Jan years 1..T-1
+                Z_curr = Z_curr[:-1]  # Dec years 0..T-2
+                Z_next = Z_next[1:]  # Jan years 1..T-1
 
             # Align to equal length (handles partial years at data boundaries)
             n = min(len(Z_curr), len(Z_next))
@@ -239,7 +248,9 @@ class MATALASGenerator(Generator):
                 self.logger.warning(
                     "Month %d: only %d observations for %d sites; "
                     "A may be poorly conditioned",
-                    m + 1, n_obs, n_sites,
+                    m + 1,
+                    n_obs,
+                    n_sites,
                 )
 
             # Lag-0 cross-correlation at month m (contemporaneous)
@@ -258,7 +269,9 @@ class MATALASGenerator(Generator):
             try:
                 A = S1 @ np.linalg.solve(S0, np.eye(n_sites))
             except np.linalg.LinAlgError:
-                self.logger.warning("Singular S0 at month %d; using pseudo-inverse", m + 1)
+                self.logger.warning(
+                    "Singular S0 at month %d; using pseudo-inverse", m + 1
+                )
                 A = S1 @ np.linalg.pinv(S0)
 
             # Residual covariance: M = S0(m+1) - A · S0(m) · Aᵀ
@@ -282,9 +295,7 @@ class MATALASGenerator(Generator):
 
         self.update_state(fitted=True)
         self.fitted_params_ = self._compute_fitted_params()
-        self.logger.info(
-            "Fitting complete: 12 A/B matrices for %d sites", n_sites
-        )
+        self.logger.info("Fitting complete: 12 A/B matrices for %d sites", n_sites)
 
     def _extract_month_vectors(self, Z: pd.DataFrame, month: int) -> NDArray:
         """Return rows of Z for the given calendar month (1-indexed)."""
@@ -311,7 +322,7 @@ class MATALASGenerator(Generator):
         """
         n_sites = self._n_sites
         n_steps = n_years * 12
-        mu = self._mu.values    # (12, n_sites)
+        mu = self._mu.values  # (12, n_sites)
         sigma = self._sigma.values  # (12, n_sites)
 
         # Initialize: draw first month from marginal (standard normal)
@@ -321,7 +332,7 @@ class MATALASGenerator(Generator):
         Z_all[0] = Z_prev
 
         for t in range(1, n_steps):
-            m_prev = (t - 1) % 12   # 0-indexed month of previous step
+            m_prev = (t - 1) % 12  # 0-indexed month of previous step
             eps = np.random.randn(n_sites)
             Z_curr = self._A[m_prev] @ Z_prev + self._B[m_prev] @ eps
             Z_all[t] = Z_curr
@@ -341,7 +352,7 @@ class MATALASGenerator(Generator):
 
         # Build DataFrame with monthly DatetimeIndex
         start = pd.Timestamp(f"{self.Q_obs_monthly.index[0].year}-01-01")
-        dates = pd.date_range(start=start, periods=n_steps, freq='MS')
+        dates = pd.date_range(start=start, periods=n_steps, freq="MS")
         return pd.DataFrame(Q_syn, index=dates, columns=self._sites)
 
     def generate(
@@ -395,7 +406,9 @@ class MATALASGenerator(Generator):
 
         self.logger.info(
             "Generated %d realizations of %d years × %d sites",
-            n_realizations, n_years, self._n_sites,
+            n_realizations,
+            n_years,
+            self._n_sites,
         )
         return Ensemble(realizations)
 
@@ -416,10 +429,10 @@ class MATALASGenerator(Generator):
             means_=self._mu.stack(),
             stds_=self._sigma.stack(),
             correlations_=None,
-            distributions_={'type': 'Multivariate Normal with AR(1) structure'},
+            distributions_={"type": "Multivariate Normal with AR(1) structure"},
             transformations_={
-                'log_transform': self.log_transform,
-                'n_transition_matrices': 12,
+                "log_transform": self.log_transform,
+                "n_transition_matrices": 12,
             },
             n_parameters_=n_params,
             sample_size_=len(self.Q_obs_monthly),

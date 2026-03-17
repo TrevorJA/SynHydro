@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from synhydro.methods.generation.nonparametric.phase_randomization import (
-    PhaseRandomizationGenerator
+    PhaseRandomizationGenerator,
 )
 from synhydro.core.ensemble import Ensemble
 
@@ -16,7 +16,7 @@ from synhydro.core.ensemble import Ensemble
 def sample_daily_series_long():
     """Generate a sample daily time series with at least 2 full years (730+ days)."""
     # Create exactly 3 years of data (no leap days will be handled by preprocessing)
-    dates = pd.date_range(start='2010-01-01', end='2012-12-31', freq='D')
+    dates = pd.date_range(start="2010-01-01", end="2012-12-31", freq="D")
     np.random.seed(42)
 
     # Generate seasonal flow data
@@ -25,13 +25,13 @@ def sample_daily_series_long():
     noise = np.random.gamma(shape=2.0, scale=20.0, size=n)
     values = seasonal + noise
 
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 @pytest.fixture
 def sample_daily_dataframe_long():
     """Generate a sample daily multi-site DataFrame with at least 2 full years."""
-    dates = pd.date_range(start='2010-01-01', end='2012-12-31', freq='D')
+    dates = pd.date_range(start="2010-01-01", end="2012-12-31", freq="D")
     np.random.seed(42)
 
     n = len(dates)
@@ -42,7 +42,7 @@ def sample_daily_dataframe_long():
         # Generate seasonal flow data with noise
         seasonal = 100 + 50 * np.sin(2 * np.pi * np.arange(n) / 365)
         noise = np.random.gamma(shape=2.0, scale=20.0, size=n)
-        data[f'site_{i+1}'] = seasonal + noise
+        data[f"site_{i+1}"] = seasonal + noise
 
     return pd.DataFrame(data, index=dates)
 
@@ -50,10 +50,10 @@ def sample_daily_dataframe_long():
 @pytest.fixture
 def sample_daily_series_short():
     """Generate a short daily time series (less than 2 years) for error testing."""
-    dates = pd.date_range(start='2010-01-01', end='2010-12-31', freq='D')
+    dates = pd.date_range(start="2010-01-01", end="2010-12-31", freq="D")
     np.random.seed(42)
     values = np.random.gamma(shape=2.0, scale=50.0, size=len(dates))
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 class TestPhaseRandomizationGeneratorInit:
@@ -61,50 +61,41 @@ class TestPhaseRandomizationGeneratorInit:
 
     def test_initialization_default_params(self, sample_daily_series_long):
         """Test initialization with default parameters."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         assert gen.is_preprocessed is False
         assert gen.is_fitted is False
         assert gen.debug is False
-        assert gen.marginal == 'kappa'
+        assert gen.marginal == "kappa"
         assert gen.win_h_length == 15
 
     def test_initialization_with_empirical_marginal(self, sample_daily_series_long):
         """Test initialization with empirical marginal distribution."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='empirical'
-        )
+        gen = PhaseRandomizationGenerator(marginal="empirical")
 
-        assert gen.marginal == 'empirical'
+        assert gen.marginal == "empirical"
 
     def test_initialization_with_custom_window(self, sample_daily_series_long):
         """Test initialization with custom window length."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            win_h_length=20
-        )
+        gen = PhaseRandomizationGenerator(win_h_length=20)
 
         assert gen.win_h_length == 20
 
     def test_initialization_invalid_marginal(self, sample_daily_series_long):
         """Test that invalid marginal raises ValueError."""
         with pytest.raises(ValueError, match="marginal must be"):
-            PhaseRandomizationGenerator(
-                sample_daily_series_long,
-                marginal='invalid'
-            )
+            PhaseRandomizationGenerator(marginal="invalid")
 
     def test_initialization_with_dataframe(self, sample_daily_dataframe_long):
-        """Test initialization with DataFrame input."""
-        gen = PhaseRandomizationGenerator(sample_daily_dataframe_long)
+        """Test initialization without data (data provided later)."""
+        gen = PhaseRandomizationGenerator()
 
         assert gen.is_preprocessed is False
 
     def test_output_frequency(self, sample_daily_series_long):
         """Test that output frequency is daily."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        assert gen.output_frequency == 'D'
+        gen = PhaseRandomizationGenerator()
+        assert gen.output_frequency == "D"
 
 
 class TestPhaseRandomizationGeneratorPreprocessing:
@@ -112,41 +103,41 @@ class TestPhaseRandomizationGeneratorPreprocessing:
 
     def test_preprocessing_basic(self, sample_daily_series_long):
         """Test basic preprocessing."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
+        gen = PhaseRandomizationGenerator()
+        gen.preprocessing(sample_daily_series_long)
 
         assert gen.is_preprocessed is True
-        assert hasattr(gen, 'Q_obs_')
-        assert hasattr(gen, 'day_index_')
-        assert hasattr(gen, 'n_years_')
+        assert hasattr(gen, "Q_obs_")
+        assert hasattr(gen, "day_index_")
+        assert hasattr(gen, "n_years_")
 
     def test_preprocessing_removes_leap_days(self, sample_daily_series_long):
         """Test that preprocessing removes February 29."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
+        gen = PhaseRandomizationGenerator()
+        gen.preprocessing(sample_daily_series_long)
 
         # Data length should be multiple of 365
         assert len(gen.Q_obs_) % 365 == 0
 
     def test_preprocessing_day_index_range(self, sample_daily_series_long):
         """Test that day index is in range 1-365."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
+        gen = PhaseRandomizationGenerator()
+        gen.preprocessing(sample_daily_series_long)
 
         assert gen.day_index_.min() >= 1
         assert gen.day_index_.max() <= 365
 
     def test_preprocessing_minimum_data_requirement(self, sample_daily_series_short):
         """Test that preprocessing fails with insufficient data."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_short)
+        gen = PhaseRandomizationGenerator()
 
         with pytest.raises(ValueError, match="At least 730 days"):
-            gen.preprocessing()
+            gen.preprocessing(sample_daily_series_short)
 
     def test_preprocessing_multisite_warning(self, sample_daily_dataframe_long):
         """Test that multi-site data produces warning and uses first column."""
-        gen = PhaseRandomizationGenerator(sample_daily_dataframe_long)
-        gen.preprocessing()
+        gen = PhaseRandomizationGenerator()
+        gen.preprocessing(sample_daily_dataframe_long)
 
         # Should have preprocessed successfully using first column
         assert gen.is_preprocessed is True
@@ -158,27 +149,19 @@ class TestPhaseRandomizationGeneratorFit:
 
     def test_fit_kappa_marginal(self, sample_daily_series_long):
         """Test fitting with kappa marginal distribution."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='kappa'
-        )
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator(marginal="kappa")
+        gen.fit(sample_daily_series_long)
 
         assert gen.is_fitted is True
-        assert hasattr(gen, 'par_day_')
-        assert hasattr(gen, 'norm_')
-        assert hasattr(gen, 'modulus_')
-        assert hasattr(gen, 'phases_')
+        assert hasattr(gen, "par_day_")
+        assert hasattr(gen, "norm_")
+        assert hasattr(gen, "modulus_")
+        assert hasattr(gen, "phases_")
 
     def test_fit_empirical_marginal(self, sample_daily_series_long):
         """Test fitting with empirical marginal distribution."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='empirical'
-        )
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator(marginal="empirical")
+        gen.fit(sample_daily_series_long)
 
         assert gen.is_fitted is True
         # Empirical marginal doesn't fit kappa params
@@ -186,12 +169,8 @@ class TestPhaseRandomizationGeneratorFit:
 
     def test_fit_kappa_params_structure(self, sample_daily_series_long):
         """Test that kappa parameters have correct structure."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='kappa'
-        )
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator(marginal="kappa")
+        gen.fit(sample_daily_series_long)
 
         # Should have parameters for most days
         assert len(gen.par_day_) > 0
@@ -199,17 +178,16 @@ class TestPhaseRandomizationGeneratorFit:
         # Check structure of a valid parameter set
         for day, params in gen.par_day_.items():
             if params is not None:
-                assert 'xi' in params
-                assert 'alfa' in params
-                assert 'k' in params
-                assert 'h' in params
+                assert "xi" in params
+                assert "alfa" in params
+                assert "k" in params
+                assert "h" in params
                 break
 
     def test_fit_normal_score_transform(self, sample_daily_series_long):
         """Test that normal score transform is applied."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         # Normalized data should have zero mean approximately
         assert gen.norm_ is not None
@@ -217,9 +195,8 @@ class TestPhaseRandomizationGeneratorFit:
 
     def test_fit_fft_computation(self, sample_daily_series_long):
         """Test that FFT is computed correctly."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         # FFT should have same length as data
         assert len(gen.modulus_) == len(gen.Q_obs_)
@@ -234,18 +211,17 @@ class TestPhaseRandomizationGeneratorFit:
 
     def test_fit_without_preprocessing_raises(self, sample_daily_series_long):
         """Test that fit without preprocessing raises error."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         with pytest.raises(Exception):  # Will raise due to validation
             gen.fit()
 
     def test_fit_creates_fitted_params(self, sample_daily_series_long):
         """Test that fit creates FittedParams object."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
-        assert hasattr(gen, 'fitted_params_')
+        assert hasattr(gen, "fitted_params_")
         assert gen.fitted_params_.n_sites_ == 1
 
 
@@ -254,9 +230,8 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_single_realization(self, sample_daily_series_long):
         """Test generating a single realization."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=1, seed=42)
 
@@ -265,9 +240,8 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_multiple_realizations(self, sample_daily_series_long):
         """Test generating multiple realizations."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=5, seed=42)
 
@@ -276,39 +250,34 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_reproducibility(self, sample_daily_series_long):
         """Test that seed produces reproducible results."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         result1 = gen.generate(n_realizations=1, seed=42)
         result2 = gen.generate(n_realizations=1, seed=42)
 
         # Same seed should produce same results
         np.testing.assert_array_almost_equal(
-            result1.data_by_realization[0].values,
-            result2.data_by_realization[0].values
+            result1.data_by_realization[0].values, result2.data_by_realization[0].values
         )
 
     def test_generate_different_seeds(self, sample_daily_series_long):
         """Test that different seeds produce different results."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         result1 = gen.generate(n_realizations=1, seed=42)
         result2 = gen.generate(n_realizations=1, seed=123)
 
         # Different seeds should produce different results
         assert not np.allclose(
-            result1.data_by_realization[0].values,
-            result2.data_by_realization[0].values
+            result1.data_by_realization[0].values, result2.data_by_realization[0].values
         )
 
     def test_generate_output_length(self, sample_daily_series_long):
         """Test that output has same length as input."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=1, seed=42)
 
@@ -317,9 +286,8 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_non_negative(self, sample_daily_series_long):
         """Test that generated flows are non-negative."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=10, seed=42)
 
@@ -328,12 +296,8 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_kappa_marginal(self, sample_daily_series_long):
         """Test generation with kappa marginal."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='kappa'
-        )
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator(marginal="kappa")
+        gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=1, seed=42)
 
@@ -342,12 +306,8 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_empirical_marginal(self, sample_daily_series_long):
         """Test generation with empirical marginal."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='empirical'
-        )
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator(marginal="empirical")
+        gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=1, seed=42)
 
@@ -356,8 +316,8 @@ class TestPhaseRandomizationGeneratorGenerate:
 
     def test_generate_without_fit_raises(self, sample_daily_series_long):
         """Test that generate without fit raises error."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
+        gen = PhaseRandomizationGenerator()
+        gen.preprocessing(sample_daily_series_long)
 
         with pytest.raises(Exception):  # Will raise due to validation
             gen.generate(n_realizations=1)
@@ -368,7 +328,7 @@ class TestLMomentsComputation:
 
     def test_lmoments_basic(self, sample_daily_series_long):
         """Test basic L-moments computation."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         # Generate test data
         np.random.seed(42)
@@ -376,15 +336,15 @@ class TestLMomentsComputation:
 
         lmom = gen._compute_lmoments(data)
 
-        assert 'l1' in lmom
-        assert 'l2' in lmom
-        assert 'lcv' in lmom
-        assert 'lca' in lmom
-        assert 'lkur' in lmom
+        assert "l1" in lmom
+        assert "l2" in lmom
+        assert "lcv" in lmom
+        assert "lca" in lmom
+        assert "lkur" in lmom
 
     def test_lmoments_l1_is_mean(self, sample_daily_series_long):
         """Test that L1 is approximately the sample mean."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         np.random.seed(42)
         data = np.random.gamma(shape=2.0, scale=50.0, size=1000)
@@ -392,11 +352,11 @@ class TestLMomentsComputation:
         lmom = gen._compute_lmoments(data)
 
         # L1 should be the mean
-        np.testing.assert_almost_equal(lmom['l1'], np.mean(data), decimal=5)
+        np.testing.assert_almost_equal(lmom["l1"], np.mean(data), decimal=5)
 
     def test_lmoments_insufficient_data(self, sample_daily_series_long):
         """Test that L-moments computation fails with insufficient data."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         data = np.array([1.0, 2.0, 3.0])  # Only 3 observations
 
@@ -409,7 +369,7 @@ class TestKappaDistribution:
 
     def test_invF_kappa_basic(self, sample_daily_series_long):
         """Test inverse kappa CDF basic functionality."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         F = np.array([0.1, 0.5, 0.9])
         x = gen._invF_kappa(F, xi=0, alfa=1, k=0.5, h=0.5)
@@ -422,7 +382,7 @@ class TestKappaDistribution:
 
     def test_invF_kappa_gev_case(self, sample_daily_series_long):
         """Test inverse kappa CDF when h=0 (GEV case)."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         F = np.array([0.1, 0.5, 0.9])
         x = gen._invF_kappa(F, xi=0, alfa=1, k=0.5, h=0)
@@ -431,7 +391,7 @@ class TestKappaDistribution:
 
     def test_rand_kappa_basic(self, sample_daily_series_long):
         """Test random kappa generation."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
+        gen = PhaseRandomizationGenerator()
 
         np.random.seed(42)
         samples = gen._rand_kappa(n=1000, xi=0, alfa=1, k=0.5, h=0.5)
@@ -445,9 +405,8 @@ class TestStatisticalProperties:
 
     def test_mean_within_tolerance(self, sample_daily_series_long):
         """Test that generated mean is within tolerance of observed."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         # Generate many realizations
         result = gen.generate(n_realizations=50, seed=42)
@@ -456,8 +415,7 @@ class TestStatisticalProperties:
 
         # Compute ensemble mean
         ensemble_means = [
-            result.data_by_realization[r].values.mean()
-            for r in result.realization_ids
+            result.data_by_realization[r].values.mean() for r in result.realization_ids
         ]
         sim_mean = np.mean(ensemble_means)
 
@@ -467,9 +425,8 @@ class TestStatisticalProperties:
 
     def test_std_within_tolerance(self, sample_daily_series_long):
         """Test that generated std is within tolerance of observed."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         # Generate many realizations
         result = gen.generate(n_realizations=50, seed=42)
@@ -478,8 +435,7 @@ class TestStatisticalProperties:
 
         # Compute ensemble std
         ensemble_stds = [
-            result.data_by_realization[r].values.std()
-            for r in result.realization_ids
+            result.data_by_realization[r].values.std() for r in result.realization_ids
         ]
         sim_std = np.mean(ensemble_stds)
 
@@ -493,13 +449,8 @@ class TestPhaseRandomizationGeneratorSaveLoad:
 
     def test_save_and_load(self, sample_daily_series_long, tmp_path):
         """Test saving and loading generator."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            marginal='kappa',
-            win_h_length=15
-        )
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator(marginal="kappa", win_h_length=15)
+        gen.fit(sample_daily_series_long)
 
         # Save
         save_path = tmp_path / "phase_rand_gen.pkl"
@@ -510,14 +461,13 @@ class TestPhaseRandomizationGeneratorSaveLoad:
 
         assert loaded_gen.is_preprocessed is True
         assert loaded_gen.is_fitted is True
-        assert loaded_gen.marginal == 'kappa'
+        assert loaded_gen.marginal == "kappa"
         assert loaded_gen.win_h_length == 15
 
     def test_load_and_generate(self, sample_daily_series_long, tmp_path):
         """Test that loaded generator can generate."""
-        gen = PhaseRandomizationGenerator(sample_daily_series_long)
-        gen.preprocessing()
-        gen.fit()
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
 
         # Generate before saving
         original_result = gen.generate(n_realizations=1, seed=42)
@@ -531,7 +481,10 @@ class TestPhaseRandomizationGeneratorSaveLoad:
         loaded_result = loaded_gen.generate(n_realizations=1, seed=42)
 
         # Results should have same shape
-        assert original_result.data_by_realization[0].shape == loaded_result.data_by_realization[0].shape
+        assert (
+            original_result.data_by_realization[0].shape
+            == loaded_result.data_by_realization[0].shape
+        )
 
 
 class TestWindowDays:
@@ -539,23 +492,17 @@ class TestWindowDays:
 
     def test_get_window_days_middle(self, sample_daily_series_long):
         """Test window days for middle of year."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            win_h_length=15
-        )
+        gen = PhaseRandomizationGenerator(win_h_length=15)
 
         window = gen._get_window_days(100)  # Day 100
 
-        # Should include day 100 and days within ±15
+        # Should include day 100 and days within +/-15
         assert 100 in window
         assert len(window) == 31  # 15 before + 15 after + target
 
     def test_get_window_days_wrap_around_start(self, sample_daily_series_long):
         """Test window days wraps around at start of year."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            win_h_length=15
-        )
+        gen = PhaseRandomizationGenerator(win_h_length=15)
 
         window = gen._get_window_days(5)  # Day 5
 
@@ -565,10 +512,7 @@ class TestWindowDays:
 
     def test_get_window_days_wrap_around_end(self, sample_daily_series_long):
         """Test window days wraps around at end of year."""
-        gen = PhaseRandomizationGenerator(
-            sample_daily_series_long,
-            win_h_length=15
-        )
+        gen = PhaseRandomizationGenerator(win_h_length=15)
 
         window = gen._get_window_days(360)  # Day 360
 

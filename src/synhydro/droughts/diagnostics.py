@@ -14,14 +14,11 @@ import scipy.stats as scs
 from scipy.stats import kstest, anderson, chisquare
 
 from synhydro.droughts.distributions import DISTRIBUTION_REGISTRY, get_distribution
-from synhydro.droughts.ssi import SSIDroughtMetrics
 from spei._typing import ContinuousDist
 
 
 def kolmogorov_smirnov_test(
-    data: pd.Series,
-    dist: Union[str, ContinuousDist],
-    significance_level: float = 0.05
+    data: pd.Series, dist: Union[str, ContinuousDist], significance_level: float = 0.05
 ) -> Dict[str, float]:
     """
     Perform Kolmogorov-Smirnov goodness-of-fit test.
@@ -57,16 +54,19 @@ def kolmogorov_smirnov_test(
     statistic, pvalue = kstest(data_clean, dist_obj.name, args=params)
 
     return {
-        'statistic': statistic,
-        'pvalue': pvalue,
-        'reject_null': pvalue < significance_level,
-        'interpretation': 'reject distribution' if pvalue < significance_level else 'accept distribution'
+        "statistic": statistic,
+        "pvalue": pvalue,
+        "reject_null": pvalue < significance_level,
+        "interpretation": (
+            "reject distribution"
+            if pvalue < significance_level
+            else "accept distribution"
+        ),
     }
 
 
 def anderson_darling_test(
-    data: pd.Series,
-    dist: Union[str, ContinuousDist] = 'norm'
+    data: pd.Series, dist: Union[str, ContinuousDist] = "norm"
 ) -> Dict[str, Union[float, np.ndarray]]:
     """
     Perform Anderson-Darling goodness-of-fit test.
@@ -98,23 +98,22 @@ def anderson_darling_test(
     try:
         result = anderson(data_clean, dist=dist_obj.name)
         return {
-            'statistic': result.statistic,
-            'critical_values': result.critical_values,
-            'significance_levels': result.significance_level,
+            "statistic": result.statistic,
+            "critical_values": result.critical_values,
+            "significance_levels": result.significance_level,
         }
     except ValueError as e:
         warnings.warn(f"Anderson-Darling test not available for {dist_obj.name}: {e}")
         return {
-            'statistic': np.nan,
-            'critical_values': np.array([]),
-            'significance_levels': np.array([]),
-            'error': str(e)
+            "statistic": np.nan,
+            "critical_values": np.array([]),
+            "significance_levels": np.array([]),
+            "error": str(e),
         }
 
 
 def compute_aic_bic(
-    data: pd.Series,
-    dist: Union[str, ContinuousDist]
+    data: pd.Series, dist: Union[str, ContinuousDist]
 ) -> Dict[str, float]:
     """
     Compute Akaike Information Criterion (AIC) and Bayesian Information Criterion (BIC).
@@ -159,11 +158,11 @@ def compute_aic_bic(
     bic = k * np.log(n) - 2 * log_likelihood
 
     return {
-        'aic': aic,
-        'bic': bic,
-        'log_likelihood': log_likelihood,
-        'n_params': k,
-        'sample_size': n
+        "aic": aic,
+        "bic": bic,
+        "log_likelihood": log_likelihood,
+        "n_params": k,
+        "sample_size": n,
     }
 
 
@@ -171,7 +170,7 @@ def compare_distributions(
     data: pd.Series,
     distributions: Optional[List[Union[str, ContinuousDist]]] = None,
     window: int = 12,
-    tests: Optional[List[str]] = None
+    tests: Optional[List[str]] = None,
 ) -> pd.DataFrame:
     """
     Compare multiple distributions for SSI calculation.
@@ -212,10 +211,10 @@ def compare_distributions(
     """
     if distributions is None:
         # Use common hydrological distributions
-        distributions = ['gamma', 'lognorm', 'pearson3', 'weibull', 'norm']
+        distributions = ["gamma", "lognorm", "pearson3", "weibull", "norm"]
 
     if tests is None:
-        tests = ['ks', 'aic', 'bic']
+        tests = ["ks", "aic", "bic"]
 
     # Prepare data (aggregate as done for SSI)
     data_agg = data.rolling(window, min_periods=window).sum().dropna()
@@ -226,33 +225,33 @@ def compare_distributions(
         dist_obj = get_distribution(dist)
         dist_name = dist if isinstance(dist, str) else dist_obj.name
 
-        row = {'distribution': dist_name}
+        row = {"distribution": dist_name}
 
         try:
             # Kolmogorov-Smirnov test
-            if 'ks' in tests:
+            if "ks" in tests:
                 ks_result = kolmogorov_smirnov_test(data_agg, dist)
-                row['ks_statistic'] = ks_result['statistic']
-                row['ks_pvalue'] = ks_result['pvalue']
-                row['ks_pass'] = not ks_result['reject_null']
+                row["ks_statistic"] = ks_result["statistic"]
+                row["ks_pvalue"] = ks_result["pvalue"]
+                row["ks_pass"] = not ks_result["reject_null"]
 
             # AIC/BIC
-            if 'aic' in tests or 'bic' in tests:
+            if "aic" in tests or "bic" in tests:
                 ic_result = compute_aic_bic(data_agg, dist)
-                if 'aic' in tests:
-                    row['aic'] = ic_result['aic']
-                if 'bic' in tests:
-                    row['bic'] = ic_result['bic']
-                row['log_likelihood'] = ic_result['log_likelihood']
-                row['n_params'] = ic_result['n_params']
+                if "aic" in tests:
+                    row["aic"] = ic_result["aic"]
+                if "bic" in tests:
+                    row["bic"] = ic_result["bic"]
+                row["log_likelihood"] = ic_result["log_likelihood"]
+                row["n_params"] = ic_result["n_params"]
 
-            row['fit_success'] = True
-            row['error'] = None
+            row["fit_success"] = True
+            row["error"] = None
 
         except Exception as e:
             # Distribution failed to fit
-            row['fit_success'] = False
-            row['error'] = str(e)
+            row["fit_success"] = False
+            row["error"] = str(e)
             warnings.warn(f"Failed to fit {dist_name}: {e}")
 
         results.append(row)
@@ -260,20 +259,18 @@ def compare_distributions(
     df = pd.DataFrame(results)
 
     # Rank distributions
-    if 'aic' in df.columns:
-        df['aic_rank'] = df['aic'].rank()
-    if 'bic' in df.columns:
-        df['bic_rank'] = df['bic'].rank()
-    if 'ks_pvalue' in df.columns:
-        df['ks_rank'] = df['ks_pvalue'].rank(ascending=False)
+    if "aic" in df.columns:
+        df["aic_rank"] = df["aic"].rank()
+    if "bic" in df.columns:
+        df["bic_rank"] = df["bic"].rank()
+    if "ks_pvalue" in df.columns:
+        df["ks_rank"] = df["ks_pvalue"].rank(ascending=False)
 
     return df
 
 
 def distribution_summary(
-    data: pd.Series,
-    dist: Union[str, ContinuousDist],
-    window: int = 12
+    data: pd.Series, dist: Union[str, ContinuousDist], window: int = 12
 ) -> Dict:
     """
     Generate comprehensive summary of distribution fit quality.
@@ -312,19 +309,19 @@ def distribution_summary(
     ic_result = compute_aic_bic(data_agg, dist)
 
     # Generate recommendation
-    if ks_result['pvalue'] > 0.05:
+    if ks_result["pvalue"] > 0.05:
         recommendation = f"{dist_name} appears to be a good fit (KS p-value = {ks_result['pvalue']:.4f})"
     else:
         recommendation = f"{dist_name} may not be appropriate (KS p-value = {ks_result['pvalue']:.4f})"
 
     return {
-        'distribution': dist_name,
-        'fitted_params': params,
-        'ks_test': ks_result,
-        'aic': ic_result['aic'],
-        'bic': ic_result['bic'],
-        'log_likelihood': ic_result['log_likelihood'],
-        'n_params': ic_result['n_params'],
-        'sample_size': len(data_agg),
-        'recommendation': recommendation
+        "distribution": dist_name,
+        "fitted_params": params,
+        "ks_test": ks_result,
+        "aic": ic_result["aic"],
+        "bic": ic_result["bic"],
+        "log_likelihood": ic_result["log_likelihood"],
+        "n_params": ic_result["n_params"],
+        "sample_size": len(data_agg),
+        "recommendation": recommendation,
     }

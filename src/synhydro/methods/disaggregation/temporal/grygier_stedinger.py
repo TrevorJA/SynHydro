@@ -42,21 +42,19 @@ class GrygierStedingerDisaggregator(Disaggregator):
     Water Resources Research, 24(10), 1574-1584.
     """
 
-    def __init__(self,
-                 Q_obs: Union[pd.Series, pd.DataFrame],
-                 n_subperiods: int = 12,
-                 transform: str = 'log',
-                 name: Optional[str] = None,
-                 debug: bool = False) -> None:
+    def __init__(
+        self,
+        *,
+        n_subperiods: int = 12,
+        transform: str = "log",
+        name: Optional[str] = None,
+        debug: bool = False,
+    ) -> None:
         """
         Initialize the Grygier-Stedinger Disaggregator.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Observed historical flow data at monthly resolution (finer temporal
-            resolution, i.e., input/output of disaggregation). Must have
-            DatetimeIndex with monthly frequency (MS - month start).
         n_subperiods : int, default=12
             Number of sub-periods per aggregate period (typically 12 for
             annual to monthly). Must equal the number of columns if aggregating.
@@ -68,19 +66,21 @@ class GrygierStedingerDisaggregator(Disaggregator):
         debug : bool, default=False
             Enable debug logging.
         """
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         # Store algorithm-specific parameters
         self.n_subperiods = n_subperiods
         self.transform = transform
-        if transform not in ('log', 'wilson_hilferty', 'none'):
-            raise ValueError(f"transform must be 'log', 'wilson_hilferty', or 'none', got '{transform}'")
+        if transform not in ("log", "wilson_hilferty", "none"):
+            raise ValueError(
+                f"transform must be 'log', 'wilson_hilferty', or 'none', got '{transform}'"
+            )
 
         # Update init_params
         self.init_params.algorithm_params = {
-            'method': 'Grygier-Stedinger Condensed Disaggregation',
-            'n_subperiods': n_subperiods,
-            'transform': transform,
+            "method": "Grygier-Stedinger Condensed Disaggregation",
+            "n_subperiods": n_subperiods,
+            "transform": transform,
         }
 
         # Fitted parameters (computed during fit())
@@ -96,14 +96,20 @@ class GrygierStedingerDisaggregator(Disaggregator):
     @property
     def input_frequency(self) -> str:
         """Grygier-Stedinger disaggregator expects annual input."""
-        return 'YS'  # Year Start
+        return "YS"  # Year Start
 
     @property
     def output_frequency(self) -> str:
         """Grygier-Stedinger disaggregator produces monthly output."""
-        return 'MS'  # Monthly Start
+        return "MS"  # Monthly Start
 
-    def preprocessing(self, **kwargs: Any) -> None:
+    def preprocessing(
+        self,
+        Q_obs: Union[pd.Series, pd.DataFrame],
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Preprocess observed monthly flow data.
 
@@ -112,27 +118,34 @@ class GrygierStedingerDisaggregator(Disaggregator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data at monthly resolution (finer temporal
+            resolution, i.e., input/output of disaggregation). Must have
+            DatetimeIndex with monthly frequency (MS - month start).
+        sites : list of str, optional
+            Sites to use. If None, uses all columns.
         **kwargs : Any
             Additional preprocessing parameters (currently unused).
         """
-        # Validate input data
-        Q_monthly = self.validate_input_data(self._Q_obs_raw)
+        # Validate and store observed data
+        Q_monthly = self._store_obs_data(Q_obs, sites)
 
         # Store validated data
         self.Q_monthly_ = Q_monthly
 
         # Detect single-site vs multisite
-        self.is_multisite = isinstance(self.Q_monthly_, pd.DataFrame) and self.Q_monthly_.shape[1] > 1
+        self.is_multisite = (
+            isinstance(self.Q_monthly_, pd.DataFrame) and self.Q_monthly_.shape[1] > 1
+        )
 
         if self.is_multisite:
-            self._sites = list(self.Q_monthly_.columns)
             # Create aggregate (index gauge) as sum of all sites
             self.Q_aggregate_ = self.Q_monthly_.sum(axis=1)
         else:
             # Convert to Series if single column DataFrame
             if isinstance(self.Q_monthly_, pd.DataFrame):
                 self.Q_monthly_ = self.Q_monthly_.iloc[:, 0]
-            self._sites = [self.Q_monthly_.name if self.Q_monthly_.name else 'site']
+            self._sites = [self.Q_monthly_.name if self.Q_monthly_.name else "site"]
             self.Q_aggregate_ = self.Q_monthly_
 
         # Aggregate monthly to annual (sum of 12 months)
@@ -142,7 +155,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
         self.n_years_fit_ = len(self.Q_annual_)
 
         if self.n_years_fit_ == 0:
-            raise ValueError("No complete years found. Grygier-Stedinger requires monthly data with at least one complete annual cycle.")
+            raise ValueError(
+                "No complete years found. Grygier-Stedinger requires monthly data with at least one complete annual cycle."
+            )
 
         # Update state
         self.update_state(preprocessed=True)
@@ -151,7 +166,13 @@ class GrygierStedingerDisaggregator(Disaggregator):
             f"{len(self.Q_monthly_)} monthly observations"
         )
 
-    def fit(self, **kwargs: Any) -> None:
+    def fit(
+        self,
+        Q_obs: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        *,
+        sites: Optional[List[str]] = None,
+        **kwargs: Any,
+    ) -> None:
         """
         Fit the Grygier-Stedinger Disaggregator to the data.
 
@@ -159,11 +180,21 @@ class GrygierStedingerDisaggregator(Disaggregator):
         coefficients, conditional covariance, and conservation correction
         matrix. Applies transformation (log or Wilson-Hilferty) if specified.
 
+        If ``Q_obs`` is provided, ``preprocessing()`` is called automatically.
+        If omitted, a prior call to ``preprocessing()`` is required.
+
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed data. If provided, runs preprocessing automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs : Any
             Additional fitting parameters (currently unused).
         """
+        # Auto-call preprocessing if Q_obs is provided
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         # Validate preprocessing
         self.validate_preprocessing()
 
@@ -171,7 +202,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
         Q_monthly_transformed = self._apply_transformation(self.Q_monthly_)
 
         # Organize monthly sub-periods into annual vectors
-        X_array = self._organize_subperiods(Q_monthly_transformed)  # (n_years, m, n_sites) or (n_years, m)
+        X_array = self._organize_subperiods(
+            Q_monthly_transformed
+        )  # (n_years, m, n_sites) or (n_years, m)
 
         # Compute annual aggregates from the organized subperiods
         # This guarantees alignment (only complete years) and correct shape
@@ -219,10 +252,12 @@ class GrygierStedingerDisaggregator(Disaggregator):
 
         # Group by year and sum
         annual = monthly_index.groupby(monthly_index.index.year).sum()
-        annual.index = pd.to_datetime(annual.index, format='%Y')
+        annual.index = pd.to_datetime(annual.index, format="%Y")
         return annual
 
-    def _apply_transformation(self, Q: Union[pd.Series, pd.DataFrame]) -> Union[pd.Series, pd.DataFrame]:
+    def _apply_transformation(
+        self, Q: Union[pd.Series, pd.DataFrame]
+    ) -> Union[pd.Series, pd.DataFrame]:
         """
         Apply log or Wilson-Hilferty transformation.
 
@@ -236,20 +271,22 @@ class GrygierStedingerDisaggregator(Disaggregator):
         pd.Series or pd.DataFrame
             Transformed data.
         """
-        if self.transform == 'none':
+        if self.transform == "none":
             return Q.copy()
 
         # Add small epsilon to avoid log(0)
         epsilon = 1e-6
         Q_safe = Q.clip(lower=epsilon)
 
-        if self.transform == 'log':
+        if self.transform == "log":
             return np.log(Q_safe)
-        elif self.transform == 'wilson_hilferty':
+        elif self.transform == "wilson_hilferty":
             # Wilson-Hilferty (cube-root) transformation
             return np.cbrt(Q_safe)
 
-    def _inverse_transformation(self, Q_transformed: Union[np.ndarray, pd.Series]) -> Union[np.ndarray, pd.Series]:
+    def _inverse_transformation(
+        self, Q_transformed: Union[np.ndarray, pd.Series]
+    ) -> Union[np.ndarray, pd.Series]:
         """
         Inverse transformation (exp or cube for transformed data).
 
@@ -263,15 +300,17 @@ class GrygierStedingerDisaggregator(Disaggregator):
         np.ndarray or pd.Series
             Original-scale data.
         """
-        if self.transform == 'none':
+        if self.transform == "none":
             return Q_transformed
 
-        if self.transform == 'log':
+        if self.transform == "log":
             return np.exp(Q_transformed)
-        elif self.transform == 'wilson_hilferty':
+        elif self.transform == "wilson_hilferty":
             return np.power(Q_transformed, 3)
 
-    def _organize_subperiods(self, Q_monthly_transformed: Union[pd.Series, pd.DataFrame]) -> np.ndarray:
+    def _organize_subperiods(
+        self, Q_monthly_transformed: Union[pd.Series, pd.DataFrame]
+    ) -> np.ndarray:
         """
         Organize monthly flows into annual vectors.
 
@@ -363,22 +402,22 @@ class GrygierStedingerDisaggregator(Disaggregator):
             n_sites = self.n_sites
 
             # Regression coefficients (m*n_sites,)
-            self.A_ = self.S_XY_ / (self.sigma_Y_ ** 2)
+            self.A_ = self.S_XY_ / (self.sigma_Y_**2)
 
             # Conditional covariance (m*n_sites, m*n_sites)
             S_XY_outer = np.outer(self.S_XY_, self.S_XY_)
-            self.S_e_ = self.S_XX_ - S_XY_outer / (self.sigma_Y_ ** 2)
+            self.S_e_ = self.S_XX_ - S_XY_outer / (self.sigma_Y_**2)
 
             # Ensure symmetry and positive definiteness
             self.S_e_ = (self.S_e_ + self.S_e_.T) / 2
             self.S_e_ = np.maximum(self.S_e_, np.eye(m * n_sites) * 1e-10)
         else:
             # Single-site
-            self.A_ = self.S_XY_ / (self.sigma_Y_ ** 2)
+            self.A_ = self.S_XY_ / (self.sigma_Y_**2)
 
             # Conditional covariance (m, m)
             S_XY_outer = np.outer(self.S_XY_, self.S_XY_)
-            self.S_e_ = self.S_XX_ - S_XY_outer / (self.sigma_Y_ ** 2)
+            self.S_e_ = self.S_XX_ - S_XY_outer / (self.sigma_Y_**2)
 
             # Ensure symmetry and positive definiteness
             self.S_e_ = (self.S_e_ + self.S_e_.T) / 2
@@ -413,7 +452,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
 
             # Avoid division by zero
             if abs(denominator) < 1e-10:
-                self.logger.warning("denominator in conservation correction is near zero")
+                self.logger.warning(
+                    "denominator in conservation correction is near zero"
+                )
                 denominator = 1e-10
 
             # D = S_e * ones / denominator
@@ -432,7 +473,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
 
             # Avoid division by zero
             if abs(denominator) < 1e-10:
-                self.logger.warning("denominator in conservation correction is near zero")
+                self.logger.warning(
+                    "denominator in conservation correction is near zero"
+                )
                 denominator = 1e-10
 
             # D = S_e * ones / denominator
@@ -458,7 +501,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
             self.S_e_ = self.S_e_ + np.eye(size) * 1e-8
             self.C_ = np.linalg.cholesky(self.S_e_)
 
-    def disaggregate(self, ensemble: Ensemble, seed: Optional[int] = None, **kwargs: Any) -> Ensemble:
+    def disaggregate(
+        self, ensemble: Ensemble, seed: Optional[int] = None, **kwargs: Any
+    ) -> Ensemble:
         """
         Disaggregate annual ensemble to monthly flows using Grygier-Stedinger method.
 
@@ -508,8 +553,8 @@ class GrygierStedingerDisaggregator(Disaggregator):
             time_resolution=self.output_frequency,
             time_period=(
                 str(monthly_realization_dict[0].index[0].date()),
-                str(monthly_realization_dict[0].index[-1].date())
-            )
+                str(monthly_realization_dict[0].index[-1].date()),
+            ),
         )
 
         # Create and return monthly ensemble
@@ -522,7 +567,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
 
         return monthly_ensemble
 
-    def _disaggregate_single_realization(self, Y_syn_annual: pd.DataFrame) -> pd.DataFrame:
+    def _disaggregate_single_realization(
+        self, Y_syn_annual: pd.DataFrame
+    ) -> pd.DataFrame:
         """
         Disaggregate a single realization from annual to monthly.
 
@@ -544,10 +591,14 @@ class GrygierStedingerDisaggregator(Disaggregator):
         m = self.n_subperiods
 
         # Create monthly output index
-        start_year = Y_syn_annual.index[0].year if hasattr(Y_syn_annual.index[0], 'year') else Y_syn_annual.index[0]
+        start_year = (
+            Y_syn_annual.index[0].year
+            if hasattr(Y_syn_annual.index[0], "year")
+            else Y_syn_annual.index[0]
+        )
         start_date = pd.Timestamp(year=start_year, month=1, day=1)
         end_date = pd.Timestamp(year=start_year + n_years - 1, month=12, day=31)
-        monthly_index = pd.date_range(start=start_date, end=end_date, freq='MS')
+        monthly_index = pd.date_range(start=start_date, end=end_date, freq="MS")
 
         if self.is_multisite:
             X_syn_monthly = np.zeros((n_years, m, self.n_sites))
@@ -560,7 +611,9 @@ class GrygierStedingerDisaggregator(Disaggregator):
 
             if self.is_multisite:
                 # Conditional mean for each site
-                mu_X_y = self.mu_X_ + self.A_.reshape(m, self.n_sites) * (Y_y - self.mu_Y_)
+                mu_X_y = self.mu_X_ + self.A_.reshape(m, self.n_sites) * (
+                    Y_y - self.mu_Y_
+                )
 
                 # Generate uncorrected sub-periods
                 Z = np.random.standard_normal(m * self.n_sites)
@@ -601,17 +654,13 @@ class GrygierStedingerDisaggregator(Disaggregator):
             # Shape: (n_years * 12, n_sites)
             X_syn_flat = X_syn_monthly.reshape(-1, self.n_sites)
             monthly_df = pd.DataFrame(
-                X_syn_flat,
-                index=monthly_index,
-                columns=self._sites
+                X_syn_flat, index=monthly_index, columns=self._sites
             )
         else:
             # Shape: (n_years * 12,)
             X_syn_flat = X_syn_monthly.flatten()
             monthly_df = pd.DataFrame(
-                X_syn_flat,
-                index=monthly_index,
-                columns=[self._sites[0]]
+                X_syn_flat, index=monthly_index, columns=[self._sites[0]]
             )
 
         return monthly_df
@@ -700,27 +749,31 @@ class GrygierStedingerDisaggregator(Disaggregator):
         # Get training period
         training_period = (
             str(self.Q_monthly_.index[0].date()),
-            str(self.Q_monthly_.index[-1].date())
+            str(self.Q_monthly_.index[-1].date()),
         )
 
         # Package fitted model info
         fitted_models_info = {
-            'method': 'Grygier-Stedinger Condensed Disaggregation',
-            'n_subperiods': self.n_subperiods,
-            'transform': self.transform,
-            'A_shape': tuple(self.A_.shape) if hasattr(self.A_, 'shape') else None,
-            'S_e_shape': tuple(self.S_e_.shape),
-            'C_shape': tuple(self.C_.shape),
-            'D_shape': tuple(self.D_.shape),
+            "method": "Grygier-Stedinger Condensed Disaggregation",
+            "n_subperiods": self.n_subperiods,
+            "transform": self.transform,
+            "A_shape": tuple(self.A_.shape) if hasattr(self.A_, "shape") else None,
+            "S_e_shape": tuple(self.S_e_.shape),
+            "C_shape": tuple(self.C_.shape),
+            "D_shape": tuple(self.D_.shape),
         }
 
         return FittedParams(
-            means_=pd.Series(self.mu_X_, index=[f'month_{i+1}' for i in range(self.n_subperiods)]),
-            stds_=pd.Series(self.sigma_X_, index=[f'month_{i+1}' for i in range(self.n_subperiods)]),
-            correlations_={'S_e': self.S_e_, 'A': self.A_, 'D': self.D_},
+            means_=pd.Series(
+                self.mu_X_, index=[f"month_{i+1}" for i in range(self.n_subperiods)]
+            ),
+            stds_=pd.Series(
+                self.sigma_X_, index=[f"month_{i+1}" for i in range(self.n_subperiods)]
+            ),
+            correlations_={"S_e": self.S_e_, "A": self.A_, "D": self.D_},
             fitted_models_=fitted_models_info,
             n_parameters_=n_params,
             sample_size_=len(self.Q_monthly_),
             n_sites_=self.n_sites,
-            training_period_=training_period
+            training_period_=training_period,
         )

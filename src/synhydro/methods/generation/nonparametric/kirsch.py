@@ -21,7 +21,11 @@ from scipy.stats import norm
 
 from synhydro.core.base import Generator, GeneratorParams, FittedParams
 from synhydro.core.ensemble import Ensemble, EnsembleMetadata
-from synhydro.core.statistics import compute_monthly_statistics, repair_correlation_matrix
+from synhydro.core.statistics import (
+    compute_monthly_statistics,
+    repair_correlation_matrix,
+)
+
 
 class KirschGenerator(Generator):
     """
@@ -37,19 +41,23 @@ class KirschGenerator(Generator):
     Journal of Water Resources Planning and Management, 139(4), 396-406.
     """
 
-    def __init__(self, Q_obs: pd.DataFrame,
-                 generate_using_log_flow=True,
-                 matrix_repair_method='spectral',
-                 name=None,
-                 debug=False,
-                 **kwargs):
+    supports_multisite = True
+    supported_frequencies = ("MS",)
+
+    def __init__(
+        self,
+        *,
+        generate_using_log_flow=True,
+        matrix_repair_method="spectral",
+        name=None,
+        debug=False,
+        **kwargs,
+    ):
         """
         Initialize Kirsch generator.
 
         Parameters
         ----------
-        Q_obs : pd.DataFrame
-            Observed historical flow data with DatetimeIndex.
         generate_using_log_flow : bool, default=True
             If True, generates in log-space for better handling of skewed distributions.
         matrix_repair_method : str, default='spectral'
@@ -59,8 +67,7 @@ class KirschGenerator(Generator):
         debug : bool, default=False
             Enable debug logging.
         """
-        # Initialize base class with Q_obs
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         # Store algorithm-specific parameters
         self.generate_using_log_flow = generate_using_log_flow
@@ -68,9 +75,9 @@ class KirschGenerator(Generator):
 
         # Update init_params
         self.init_params.algorithm_params = {
-            'method': 'Kirsch',
-            'generate_using_log_flow': generate_using_log_flow,
-            'matrix_repair_method': matrix_repair_method,
+            "method": "Kirsch",
+            "generate_using_log_flow": generate_using_log_flow,
+            "matrix_repair_method": matrix_repair_method,
         }
 
         self.n_months = 12
@@ -80,13 +87,15 @@ class KirschGenerator(Generator):
     @property
     def output_frequency(self) -> str:
         """Kirsch generator produces monthly output."""
-        return 'MS'  # Month Start
+        return "MS"  # Month Start
 
     @property
     def Q_obs_monthly(self):
         """Get observed monthly data (alias for Qm for consistency with other generators)."""
-        if not hasattr(self, 'Qm'):
-            raise AttributeError("Generator must be preprocessed before accessing Q_obs_monthly")
+        if not hasattr(self, "Qm"):
+            raise AttributeError(
+                "Generator must be preprocessed before accessing Q_obs_monthly"
+            )
 
         # Convert back from log space if needed
         if self.generate_using_log_flow:
@@ -97,7 +106,9 @@ class KirschGenerator(Generator):
         # Convert MultiIndex (year, month) to DatetimeIndex for compatibility with plotting
         if isinstance(data.index, pd.MultiIndex):
             # Create DatetimeIndex from year/month MultiIndex
-            dates = pd.to_datetime([f"{year}-{month:02d}-01" for year, month in data.index])
+            dates = pd.to_datetime(
+                [f"{year}-{month:02d}-01" for year, month in data.index]
+            )
             data = data.copy()
             data.index = dates
 
@@ -105,14 +116,20 @@ class KirschGenerator(Generator):
 
     def _get_synthetic_index(self, n_years):
         """Generate DatetimeIndex for synthetic flows."""
-        return pd.date_range(start=f"{self.Q.index.year.max() + 1}-01-01", periods=n_years * self.n_months, freq='MS')
+        return pd.date_range(
+            start=f"{self.Q.index.year.max() + 1}-01-01",
+            periods=n_years * self.n_months,
+            freq="MS",
+        )
 
-    def preprocessing(self, sites=None, timestep='monthly', **kwargs):
+    def preprocessing(self, Q_obs, *, sites=None, timestep="monthly", **kwargs):
         """
         Preprocess observed data for Kirsch generation.
 
         Parameters
         ----------
+        Q_obs : pd.DataFrame
+            Observed historical flow data with DatetimeIndex.
         sites : list, optional
             Sites to use. If None, uses all sites.
         timestep : str, default='monthly'
@@ -120,22 +137,16 @@ class KirschGenerator(Generator):
         **kwargs
             Additional preprocessing parameters.
         """
-        if timestep != 'monthly':
+        if timestep != "monthly":
             raise NotImplementedError("Currently only monthly timestep is supported.")
 
-        # Validate input data
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        # Select sites if specified
-        if sites is not None:
-            Q = Q[sites]
-
-        # Store sites
-        self._sites = Q.columns.tolist()
+        Q = self._store_obs_data(Q_obs, sites)
 
         # Aggregate to monthly
         monthly = Q.groupby([Q.index.year, Q.index.month]).sum()
-        monthly.index = pd.MultiIndex.from_tuples(monthly.index, names=['year', 'month'])
+        monthly.index = pd.MultiIndex.from_tuples(
+            monthly.index, names=["year", "month"]
+        )
         self.Qm = monthly
 
         # Apply log transformation if requested
@@ -148,34 +159,41 @@ class KirschGenerator(Generator):
 
         # Update state
         self.update_state(preprocessed=True)
-        self.logger.info(f"Preprocessing complete: {self.n_sites} sites, {self.n_historic_years} years")
+        self.logger.info(
+            f"Preprocessing complete: {self.n_sites} sites, {self.n_historic_years} years"
+        )
 
-
-
-    def fit(self, **kwargs):
+    def fit(self, Q_obs=None, *, sites=None, **kwargs):
         """
         Fit Kirsch generator to preprocessed data.
 
         Parameters
         ----------
+        Q_obs : pd.DataFrame, optional
+            If provided, calls preprocessing automatically.
+        sites : list, optional
+            Sites to use (passed to preprocessing if Q_obs provided).
         **kwargs
             Additional fitting parameters.
         """
-        # Validate preprocessing
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         # Compute monthly statistics using centralized function
         # Need to convert from MultiIndex to DatetimeIndex for compute_monthly_statistics
         temp_df = self.Qm.copy()
         temp_df.index = pd.to_datetime(
-            temp_df.index.get_level_values('year').astype(str) + '-' +
-            temp_df.index.get_level_values('month').astype(str).str.zfill(2) + '-01'
+            temp_df.index.get_level_values("year").astype(str)
+            + "-"
+            + temp_df.index.get_level_values("month").astype(str).str.zfill(2)
+            + "-01"
         )
         monthly_stats = compute_monthly_statistics(temp_df)
-        self.mean_month = monthly_stats['mean']
-        self.std_month = monthly_stats['std']
+        self.mean_month = monthly_stats["mean"]
+        self.std_month = monthly_stats["std"]
 
-        years = self.Qm.index.get_level_values('year').unique()
+        years = self.Qm.index.get_level_values("year").unique()
         Z_h = []
         valid_years = []
 
@@ -183,7 +201,10 @@ class KirschGenerator(Generator):
             try:
                 year_data = []
                 for m in range(1, 13):
-                    row = ((self.Qm.loc[(year, m)] - self.mean_month.loc[m]) / self.std_month.loc[m]).values
+                    row = (
+                        (self.Qm.loc[(year, m)] - self.mean_month.loc[m])
+                        / self.std_month.loc[m]
+                    ).values
                     year_data.append(row)
                 Z_h.append(year_data)
                 valid_years.append(year)
@@ -206,10 +227,10 @@ class KirschGenerator(Generator):
         self.Y_prime[:, 6:, :] = self.Y[1:, :6, :]
 
         for s in range(self.n_sites):
-            y_s = self.Y[:, :, s]           # shape: (n_years, 12)
+            y_s = self.Y[:, :, s]  # shape: (n_years, 12)
             y_prime_s = self.Y_prime[:, :, s]
 
-            corr_s = np.corrcoef(y_s.T)     # shape: (12, 12)
+            corr_s = np.corrcoef(y_s.T)  # shape: (12, 12)
             corr_prime_s = np.corrcoef(y_prime_s.T)
 
             self.U_site[s] = self._repair_and_cholesky(corr_s)
@@ -221,7 +242,9 @@ class KirschGenerator(Generator):
         # Compute and store fitted parameters
         self.fitted_params_ = self._compute_fitted_params()
 
-        self.logger.info(f"Fitting complete: {self.n_historic_years} years, {self.n_sites} sites")
+        self.logger.info(
+            f"Fitting complete: {self.n_historic_years} years, {self.n_sites} sites"
+        )
 
     def _compute_fitted_params(self) -> FittedParams:
         """
@@ -238,16 +261,10 @@ class KirschGenerator(Generator):
         n_params = (self.n_sites * 12 * 2) + (self.n_sites * 12 * 12 * 2)
 
         # Get training period from original data
-        training_period = (
-            str(self.Q.index[0].date()),
-            str(self.Q.index[-1].date())
-        )
+        training_period = (str(self.Q.index[0].date()), str(self.Q.index[-1].date()))
 
         # Package correlation matrices
-        corr_matrices = {
-            'U_site': self.U_site,
-            'U_prime_site': self.U_prime_site
-        }
+        corr_matrices = {"U_site": self.U_site, "U_prime_site": self.U_prime_site}
 
         return FittedParams(
             means_=self.mean_month,
@@ -257,7 +274,7 @@ class KirschGenerator(Generator):
             n_parameters_=n_params,
             sample_size_=self.n_historic_years * 12,  # Total months
             n_sites_=self.n_sites,
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def _repair_and_cholesky(self, corr):
@@ -279,9 +296,13 @@ class KirschGenerator(Generator):
         try:
             return np.linalg.cholesky(corr).T
         except np.linalg.LinAlgError:
-            self.logger.warning("Matrix not positive definite, repairing... This may cause correlation inflation.")
+            self.logger.warning(
+                "Matrix not positive definite, repairing... This may cause correlation inflation."
+            )
             # Use centralized repair function
-            repaired_corr = repair_correlation_matrix(corr, method=self.matrix_repair_method)
+            repaired_corr = repair_correlation_matrix(
+                corr, method=self.matrix_repair_method
+            )
             return np.linalg.cholesky(repaired_corr).T
 
     def _fit_normal_score_transforms(self):
@@ -324,9 +345,7 @@ class KirschGenerator(Generator):
         for m in range(self.n_months):
             for s in range(self.n_sites):
                 Z_norm[:, m, s] = np.interp(
-                    Z[:, m, s],
-                    self._nst_sorted[(m, s)],
-                    self._nst_nscores[(m, s)]
+                    Z[:, m, s], self._nst_sorted[(m, s)], self._nst_nscores[(m, s)]
                 )
         return Z_norm
 
@@ -354,13 +373,17 @@ class KirschGenerator(Generator):
                 sv = self._nst_sorted[(m, s)]
                 # Linear extrapolation at tails
                 slope_lo = (sv[1] - sv[0]) / (ns[1] - ns[0]) if ns[1] != ns[0] else 1.0
-                slope_hi = (sv[-1] - sv[-2]) / (ns[-1] - ns[-2]) if ns[-1] != ns[-2] else 1.0
+                slope_hi = (
+                    (sv[-1] - sv[-2]) / (ns[-1] - ns[-2]) if ns[-1] != ns[-2] else 1.0
+                )
                 ns_ext = np.concatenate([[-10.0], ns, [10.0]])
-                sv_ext = np.concatenate([
-                    [sv[0] + slope_lo * (-10.0 - ns[0])],
-                    sv,
-                    [sv[-1] + slope_hi * (10.0 - ns[-1])]
-                ])
+                sv_ext = np.concatenate(
+                    [
+                        [sv[0] + slope_lo * (-10.0 - ns[0])],
+                        sv,
+                        [sv[-1] + slope_hi * (10.0 - ns[-1])],
+                    ]
+                )
                 ZC_orig[:, m, s] = np.interp(ZC[:, m, s], ns_ext, sv_ext)
         return ZC_orig
 
@@ -374,7 +397,7 @@ class KirschGenerator(Generator):
             Number of years for which to generate bootstrap indices.
         max_idx : int, optional
             Maximum index for the historic years. If None, uses the number of historic years.
-        
+
         Returns
         -------
         np.ndarray
@@ -386,14 +409,14 @@ class KirschGenerator(Generator):
     def _create_bootstrap_tensor(self, M, use_Y_prime=False):
         """
         Create the 'Z' tensor of boostrapped standardized flows.
-        
+
         Parameters
         ----------
         M : np.ndarray
             Bootstrap indices with shape (n_years, n_months).
         use_Y_prime : bool
             If True, uses Y_prime; otherwise uses Y.
-        
+
         Returns
         -------
         np.ndarray
@@ -431,18 +454,18 @@ class KirschGenerator(Generator):
         n_years = Z.shape[0] - 1
         ZC = np.zeros((n_years, self.n_months, self.n_sites))
         ZC[:, :6, :] = Z_prime[:n_years, 6:, :]
-        ZC[:, 6:, :] = Z[1:n_years+1, 6:, :]
+        ZC[:, 6:, :] = Z[1 : n_years + 1, 6:, :]
         return ZC
 
     def _destandardize_flows(self, Z_combined):
         """
         Reapply mean and standard deviation to standardized flows.
-        
+
         Parameters
         ----------
         Z_combined : np.ndarray
             Standardized flows with shape (n_years, n_months, n_sites).
-            
+
         Returns
         -------
         np.ndarray
@@ -450,17 +473,18 @@ class KirschGenerator(Generator):
         """
         Q_syn = np.zeros_like(Z_combined)
         for m in range(self.n_months):
-            Q_syn[:, m, :] = Z_combined[:, m, :] * self.std_month.iloc[m].values + self.mean_month.iloc[m].values
+            Q_syn[:, m, :] = (
+                Z_combined[:, m, :] * self.std_month.iloc[m].values
+                + self.mean_month.iloc[m].values
+            )
         return Q_syn
 
     def _reshape_output(self, Q_syn):
         return Q_syn.reshape(-1, self.n_sites)
 
-    def generate_single_series(self,
-                               n_years,
-                               M=None,
-                               as_array=True,
-                               synthetic_index=None):
+    def generate_single_series(
+        self, n_years, M=None, as_array=True, synthetic_index=None
+    ):
         """
         Generate a single synthetic time series.
 
@@ -487,12 +511,16 @@ class KirschGenerator(Generator):
         else:
             M = np.asarray(M)
             if M.shape != (n_years_buffered, self.n_months):
-                raise ValueError(f"M must have shape ({n_years_buffered}, {self.n_months})")
+                raise ValueError(
+                    f"M must have shape ({n_years_buffered}, {self.n_months})"
+                )
 
         # Generate separate bootstrap indices for Y_prime with correct bounds
         # Y_prime has one fewer year than Y due to cross-year correlation structure
         # Using M.copy() would allow indices up to Y.shape[0]-1, but Y_prime only has indices up to Y.shape[0]-2
-        M_prime = self._get_bootstrap_indices(n_years_buffered, max_idx=self.Y_prime.shape[0])
+        M_prime = self._get_bootstrap_indices(
+            n_years_buffered, max_idx=self.Y_prime.shape[0]
+        )
 
         X = self._create_bootstrap_tensor(M, use_Y_prime=False)
         X_prime = self._create_bootstrap_tensor(M_prime, use_Y_prime=True)
@@ -525,12 +553,9 @@ class KirschGenerator(Generator):
                 synthetic_index = self._get_synthetic_index(n_years)
             return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
 
-    def generate(self,
-                 n_realizations=1,
-                 n_years=None,
-                 n_timesteps=None,
-                 seed=None,
-                 **kwargs):
+    def generate(
+        self, n_realizations=1, n_years=None, n_timesteps=None, seed=None, **kwargs
+    ):
         """
         Generate an ensemble of synthetic monthly flows.
 
@@ -577,14 +602,15 @@ class KirschGenerator(Generator):
             time_resolution=self.output_frequency,
             time_period=(
                 str(realization_dict[0].index[0].date()),
-                str(realization_dict[0].index[-1].date())
-            )
+                str(realization_dict[0].index[-1].date()),
+            ),
         )
 
         # Create and return Ensemble
         ensemble = Ensemble(realization_dict, metadata=metadata)
 
-        self.logger.info(f"Generated {n_realizations} realizations of {n_years} years each")
+        self.logger.info(
+            f"Generated {n_realizations} realizations of {n_years} years each"
+        )
 
         return ensemble
-

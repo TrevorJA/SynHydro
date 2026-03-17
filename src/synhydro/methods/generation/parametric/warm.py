@@ -4,6 +4,7 @@ Wavelet Auto-Regressive Method (WARM) for streamflow generation.
 Implements the WARM methodology from Nowak et al. (2011) for generating
 synthetic streamflow sequences that preserve non-stationary spectral characteristics.
 """
+
 import logging
 from typing import Optional, Union, Dict, Any, Tuple
 
@@ -39,8 +40,8 @@ class WARMGenerator(Generator):
     >>> import pandas as pd
     >>> from synhydro.methods.generation.parametric.warm import WARMGenerator
     >>> Q_annual = pd.read_csv('annual_flows.csv', index_col=0, parse_dates=True)
-    >>> warm = WARMGenerator(Q_annual.iloc[:, 0], wavelet='morlet', scales=64)
-    >>> warm.preprocessing()
+    >>> warm = WARMGenerator(wavelet='morl', scales=64)
+    >>> warm.preprocessing(Q_annual.iloc[:, 0])
     >>> warm.fit()
     >>> ensemble = warm.generate(n_years=100, n_realizations=50, seed=42)
 
@@ -55,24 +56,24 @@ class WARMGenerator(Generator):
     Applications to rainfall and temperature. Water Resources Research, 43(5).
     """
 
+    supports_multisite: bool = False
+    supported_frequencies: tuple = ("YS",)
+
     def __init__(
         self,
-        Q_obs: Union[pd.Series, pd.DataFrame],
-        wavelet: str = 'morl',
+        *,
+        wavelet: str = "morl",
         scales: int = 64,
         ar_order: int = 1,
         name: Optional[str] = None,
         debug: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize the WARM Generator.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Annual streamflow data with DatetimeIndex. Must be single site.
-            If DataFrame provided, will use first column only.
         wavelet : str, default='morl'
             Wavelet type for continuous wavelet transform.
             Options: 'morl' (Morlet), 'mexh' (Mexican Hat), 'gaus1'-'gaus8'.
@@ -96,7 +97,7 @@ class WARMGenerator(Generator):
             If scales < 2 or ar_order < 1.
         """
         # Initialize base class
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         # Validate parameters
         if scales < 2:
@@ -110,7 +111,7 @@ class WARMGenerator(Generator):
         self.ar_order = ar_order
 
         # Validate wavelet type
-        if wavelet not in pywt.wavelist(kind='continuous'):
+        if wavelet not in pywt.wavelist(kind="continuous"):
             raise ValueError(
                 f"wavelet '{wavelet}' not recognized. "
                 f"Must be one of {pywt.wavelist(kind='continuous')}"
@@ -124,19 +125,17 @@ class WARMGenerator(Generator):
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
-            'method': 'WARM (Wavelet Auto-Regressive Method)',
-            'wavelet': wavelet,
-            'scales': scales,
-            'ar_order': ar_order,
-            'reference': 'Nowak et al. (2011)'
+            "wavelet": wavelet,
+            "scales": scales,
+            "ar_order": ar_order,
         }
 
     @property
     def output_frequency(self) -> str:
         """WARM generator produces annual output."""
-        return 'YS'  # Year Start
+        return "YS"  # Year Start
 
-    def preprocessing(self, sites: Optional[list] = None, **kwargs) -> None:
+    def preprocessing(self, Q_obs, *, sites=None, **kwargs) -> None:
         """
         Preprocess observed data for WARM generation.
 
@@ -145,39 +144,32 @@ class WARMGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Annual streamflow data with DatetimeIndex.
         sites : list, optional
-            Not used (WARM is univariate).
+            Sites to keep. If None, uses all columns.
         **kwargs : dict, optional
             Additional parameters (currently unused).
         """
-        # Validate input data
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        # WARM is univariate - ensure single site
-        if Q.shape[1] > 1:
-            self.logger.warning("WARM is univariate. Using first column only.")
-            Q = Q.iloc[:, 0:1]
-
-        # Store sites
-        self._sites = Q.columns.tolist()
+        # Validate, filter, and store observed data
+        Q = self._store_obs_data(Q_obs, sites=sites)
 
         # Convert to Series
         Q_series = Q.iloc[:, 0]
 
         # Check/resample to annual frequency
-        if Q_series.index.freq not in ['YS', 'Y', 'A', 'AS']:
+        if Q_series.index.freq not in ["YS", "Y", "A", "AS"]:
             # If monthly data, resample to annual
-            if Q_series.index.freq in ['MS', 'M']:
+            if Q_series.index.freq in ["MS", "M"]:
                 self.logger.info("Resampling from monthly to annual (sum)")
-                Q_series = Q_series.resample('YS').sum()
+                Q_series = Q_series.resample("YS").sum()
             # If daily data, resample to annual
-            elif Q_series.index.freq in ['D']:
+            elif Q_series.index.freq in ["D"]:
                 self.logger.info("Resampling from daily to annual (sum)")
-                Q_series = Q_series.resample('YS').sum()
+                Q_series = Q_series.resample("YS").sum()
             else:
                 self.logger.warning(
-                    f"Unknown frequency {Q_series.index.freq}. "
-                    "Assuming annual data."
+                    f"Unknown frequency {Q_series.index.freq}. " "Assuming annual data."
                 )
 
         # Store annual data
@@ -196,7 +188,7 @@ class WARMGenerator(Generator):
             f"Preprocessing complete: {len(self.Q_obs_annual)} annual values"
         )
 
-    def fit(self, **kwargs) -> None:
+    def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
         """
         Fit WARM model to observed annual flows.
 
@@ -208,10 +200,15 @@ class WARMGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            If provided, calls preprocessing automatically.
+        sites : list, optional
+            Sites to keep. Passed to preprocessing if Q_obs is provided.
         **kwargs : dict, optional
             Additional parameters (currently unused).
         """
-        # Validate preprocessing
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         # Extract observed flows as numpy array
@@ -222,10 +219,7 @@ class WARMGenerator(Generator):
         # Step 1: Continuous Wavelet Transform
         scales_array = np.arange(1, self.scales + 1)
         coefficients, frequencies = pywt.cwt(
-            Q,
-            scales_array,
-            self.wavelet,
-            sampling_period=1.0
+            Q, scales_array, self.wavelet, sampling_period=1.0
         )
 
         # Store coefficients and scales
@@ -288,11 +282,7 @@ class WARMGenerator(Generator):
 
         return sawp
 
-    def _fit_ar_model(
-        self,
-        data: NDArray,
-        order: int
-    ) -> Dict[str, Any]:
+    def _fit_ar_model(self, data: NDArray, order: int) -> Dict[str, Any]:
         """
         Fit autoregressive model to time series data.
 
@@ -324,14 +314,14 @@ class WARMGenerator(Generator):
                 "Using simpler model."
             )
             return {
-                'coeffs': np.zeros(order),
-                'sigma': np.std(data_centered) if len(data) > 1 else 1.0,
-                'mean': mean
+                "coeffs": np.zeros(order),
+                "sigma": np.std(data_centered) if len(data) > 1 else 1.0,
+                "mean": mean,
             }
 
         # Compute autocorrelation function
-        acf = np.correlate(data_centered, data_centered, mode='full')
-        acf = acf[len(acf)//2:]
+        acf = np.correlate(data_centered, data_centered, mode="full")
+        acf = acf[len(acf) // 2 :]
         acf = acf / acf[0]  # Normalize
 
         # Build Yule-Walker system: R * phi = r
@@ -341,13 +331,15 @@ class WARMGenerator(Generator):
             for j in range(order):
                 R[i, j] = acf[abs(i - j)]
 
-        r = acf[1:order+1]
+        r = acf[1 : order + 1]
 
         # Solve for AR coefficients
         try:
             phi = np.linalg.solve(R, r)
         except np.linalg.LinAlgError:
-            self.logger.warning("Singular matrix in AR fitting. Using ridge regression.")
+            self.logger.warning(
+                "Singular matrix in AR fitting. Using ridge regression."
+            )
             # Add small regularization
             phi = np.linalg.solve(R + 1e-6 * np.eye(order), r)
 
@@ -359,11 +351,7 @@ class WARMGenerator(Generator):
         # Ensure positive variance
         innovation_var = max(innovation_var, 1e-10)
 
-        return {
-            'coeffs': phi,
-            'sigma': np.sqrt(innovation_var),
-            'mean': mean
-        }
+        return {"coeffs": phi, "sigma": np.sqrt(innovation_var), "mean": mean}
 
     def _compute_fitted_params(self) -> FittedParams:
         """
@@ -382,39 +370,39 @@ class WARMGenerator(Generator):
         # Get training period
         training_period = (
             str(self.Q_obs_annual.index[0].date()),
-            str(self.Q_obs_annual.index[-1].date())
+            str(self.Q_obs_annual.index[-1].date()),
         )
 
         # Extract AR parameters for summary
         ar_coeffs_summary = {}
         ar_sigma_summary = {}
         for scale_idx, params in self.ar_params_.items():
-            ar_coeffs_summary[f'scale_{scale_idx}'] = params['coeffs']
-            ar_sigma_summary[f'scale_{scale_idx}'] = params['sigma']
+            ar_coeffs_summary[f"scale_{scale_idx}"] = params["coeffs"]
+            ar_sigma_summary[f"scale_{scale_idx}"] = params["sigma"]
 
         return FittedParams(
-            means_=pd.Series({'annual_mean': self.Q_obs_annual.mean()}),
-            stds_=pd.Series({'annual_std': self.Q_obs_annual.std()}),
+            means_=pd.Series({"annual_mean": self.Q_obs_annual.mean()}),
+            stds_=pd.Series({"annual_std": self.Q_obs_annual.std()}),
             correlations_=None,  # Not directly applicable for WARM
             distributions_={
-                'type': 'Wavelet-based with AR innovations',
-                'wavelet': self.wavelet,
-                'scales': self.scales,
-                'ar_order': self.ar_order
+                "type": "Wavelet-based with AR innovations",
+                "wavelet": self.wavelet,
+                "scales": self.scales,
+                "ar_order": self.ar_order,
             },
             transformations_={
-                'wavelet_transform': {
-                    'wavelet': self.wavelet,
-                    'n_scales': self.scales,
-                    'sawp_shape': self.sawp_.shape
+                "wavelet_transform": {
+                    "wavelet": self.wavelet,
+                    "n_scales": self.scales,
+                    "sawp_shape": self.sawp_.shape,
                 },
-                'ar_coefficients': ar_coeffs_summary,
-                'innovation_std': ar_sigma_summary
+                "ar_coefficients": ar_coeffs_summary,
+                "innovation_std": ar_sigma_summary,
             },
             n_parameters_=n_params,
             sample_size_=len(self.Q_obs_annual),
             n_sites_=1,  # WARM is univariate
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def _generate(self, n_years: int, **kwargs) -> pd.DataFrame:
@@ -445,9 +433,9 @@ class WARMGenerator(Generator):
             ar_params = self.ar_params_[scale_idx]
 
             # Generate AR(p) time series
-            coeffs = ar_params['coeffs']
-            sigma = ar_params['sigma']
-            mean = ar_params['mean']
+            coeffs = ar_params["coeffs"]
+            sigma = ar_params["sigma"]
+            mean = ar_params["mean"]
 
             # Initialize with zeros (or could use historical values)
             series = np.zeros(n_years)
@@ -458,7 +446,7 @@ class WARMGenerator(Generator):
                 ar_component = 0.0
                 for lag in range(1, self.ar_order + 1):
                     if t >= lag:
-                        ar_component += coeffs[lag-1] * series[t - lag]
+                        ar_component += coeffs[lag - 1] * series[t - lag]
 
                 series[t] = mean + ar_component + innovations[t]
 
@@ -485,21 +473,13 @@ class WARMGenerator(Generator):
 
         # Create DataFrame with annual dates
         start_year = self.Q_obs_annual.index[0].year
-        dates = pd.date_range(start=f'{start_year}-01-01', periods=n_years, freq='YS')
+        dates = pd.date_range(start=f"{start_year}-01-01", periods=n_years, freq="YS")
 
-        Q_syn_df = pd.DataFrame(
-            Q_syn,
-            index=dates,
-            columns=[self._sites[0]]
-        )
+        Q_syn_df = pd.DataFrame(Q_syn, index=dates, columns=[self._sites[0]])
 
         return Q_syn_df
 
-    def _inverse_cwt(
-        self,
-        coefficients: NDArray,
-        scales: NDArray
-    ) -> NDArray:
+    def _inverse_cwt(self, coefficients: NDArray, scales: NDArray) -> NDArray:
         """
         Approximate inverse continuous wavelet transform.
 
@@ -553,7 +533,7 @@ class WARMGenerator(Generator):
         n_realizations: int = 1,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Ensemble:
         """
         Generate synthetic annual streamflows using WARM.

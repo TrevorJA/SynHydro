@@ -16,7 +16,7 @@ from synhydro.core.ensemble import Ensemble
 @pytest.fixture
 def sample_annual_series():
     """Generate a sample annual time series for testing WARM."""
-    dates = pd.date_range(start='1950-01-01', end='2020-12-31', freq='YS')
+    dates = pd.date_range(start="1950-01-01", end="2020-12-31", freq="YS")
     np.random.seed(42)
 
     # Generate realistic annual streamflow with some low-frequency variation
@@ -33,13 +33,13 @@ def sample_annual_series():
     values = base + low_freq + high_freq + noise
     values = np.maximum(values, 10)  # Ensure positive
 
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 @pytest.fixture
 def sample_annual_dataframe():
     """Generate a sample annual multi-site DataFrame for testing."""
-    dates = pd.date_range(start='1950-01-01', end='2020-12-31', freq='YS')
+    dates = pd.date_range(start="1950-01-01", end="2020-12-31", freq="YS")
     np.random.seed(42)
     n_years = len(dates)
 
@@ -48,7 +48,7 @@ def sample_annual_dataframe():
         base = 500 + np.linspace(0, 50, n_years)
         low_freq = 100 * np.sin(2 * np.pi * np.arange(n_years) / 20 + i)
         noise = np.random.normal(0, 50, n_years)
-        data[f'site_{i+1}'] = base + low_freq + noise
+        data[f"site_{i+1}"] = base + low_freq + noise
 
     return pd.DataFrame(data, index=dates)
 
@@ -56,7 +56,7 @@ def sample_annual_dataframe():
 @pytest.fixture
 def short_annual_series():
     """Generate a short annual series (30 years) for faster testing."""
-    dates = pd.date_range(start='1990-01-01', end='2020-12-31', freq='YS')
+    dates = pd.date_range(start="1990-01-01", end="2020-12-31", freq="YS")
     np.random.seed(123)
 
     n_years = len(dates)
@@ -64,7 +64,7 @@ def short_annual_series():
     values += np.random.normal(0, 30, n_years)
     values = np.maximum(values, 10)
 
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 class TestWARMInitialization:
@@ -72,26 +72,20 @@ class TestWARMInitialization:
 
     def test_initialization_default_params(self, sample_annual_series):
         """Test initialization with default parameters."""
-        gen = WARMGenerator(sample_annual_series)
+        gen = WARMGenerator()
 
         assert gen.is_preprocessed is False
         assert gen.is_fitted is False
         assert gen.debug is False
-        assert gen.wavelet == 'morl'
+        assert gen.wavelet == "morl"
         assert gen.scales == 64
         assert gen.ar_order == 1
 
     def test_initialization_custom_params(self, sample_annual_series):
         """Test initialization with custom parameters."""
-        gen = WARMGenerator(
-            sample_annual_series,
-            wavelet='mexh',
-            scales=32,
-            ar_order=2,
-            debug=True
-        )
+        gen = WARMGenerator(wavelet="mexh", scales=32, ar_order=2, debug=True)
 
-        assert gen.wavelet == 'mexh'
+        assert gen.wavelet == "mexh"
         assert gen.scales == 32
         assert gen.ar_order == 2
         assert gen.debug is True
@@ -99,26 +93,27 @@ class TestWARMInitialization:
     def test_initialization_invalid_scales(self, sample_annual_series):
         """Test initialization raises error for invalid scales."""
         with pytest.raises(ValueError, match="scales must be >= 2"):
-            WARMGenerator(sample_annual_series, scales=1)
+            WARMGenerator(scales=1)
 
     def test_initialization_invalid_ar_order(self, sample_annual_series):
         """Test initialization raises error for invalid AR order."""
         with pytest.raises(ValueError, match="ar_order must be >= 1"):
-            WARMGenerator(sample_annual_series, ar_order=0)
+            WARMGenerator(ar_order=0)
 
     def test_initialization_invalid_wavelet(self, sample_annual_series):
         """Test initialization raises error for invalid wavelet."""
         with pytest.raises(ValueError, match="not recognized"):
-            WARMGenerator(sample_annual_series, wavelet='invalid_wavelet')
+            WARMGenerator(wavelet="invalid_wavelet")
 
     def test_initialization_stores_algorithm_params(self, sample_annual_series):
         """Test that initialization stores algorithm parameters."""
-        gen = WARMGenerator(sample_annual_series)
+        gen = WARMGenerator()
 
-        assert 'algorithm_params' in gen.init_params.__dict__
+        assert "algorithm_params" in gen.init_params.__dict__
         params = gen.init_params.algorithm_params
-        assert params['method'] == 'WARM (Wavelet Auto-Regressive Method)'
-        assert params['wavelet'] == 'morl'
+        assert params["wavelet"] == "morl"
+        assert params["scales"] == 64
+        assert params["ar_order"] == 1
 
 
 class TestWARMPreprocessing:
@@ -126,17 +121,19 @@ class TestWARMPreprocessing:
 
     def test_preprocessing_annual_series(self, sample_annual_series):
         """Test preprocessing with annual Series."""
-        gen = WARMGenerator(sample_annual_series)
-        gen.preprocessing()
+        gen = WARMGenerator()
+        gen.preprocessing(sample_annual_series)
 
         assert gen.is_preprocessed is True
-        assert hasattr(gen, 'Q_obs_annual')
+        assert hasattr(gen, "Q_obs_annual")
         assert isinstance(gen.Q_obs_annual, pd.Series)
 
-    def test_preprocessing_annual_dataframe_uses_first_column(self, sample_annual_dataframe):
+    def test_preprocessing_annual_dataframe_uses_first_column(
+        self, sample_annual_dataframe
+    ):
         """Test preprocessing with DataFrame uses first column only."""
-        gen = WARMGenerator(sample_annual_dataframe)
-        gen.preprocessing()
+        gen = WARMGenerator()
+        gen.preprocessing(sample_annual_dataframe)
 
         assert gen.is_preprocessed is True
         assert isinstance(gen.Q_obs_annual, pd.Series)
@@ -144,8 +141,8 @@ class TestWARMPreprocessing:
 
     def test_preprocessing_monthly_to_annual(self, sample_monthly_series):
         """Test preprocessing resamples monthly to annual."""
-        gen = WARMGenerator(sample_monthly_series)
-        gen.preprocessing()
+        gen = WARMGenerator()
+        gen.preprocessing(sample_monthly_series)
 
         assert gen.is_preprocessed is True
         # Should have roughly 1/12 the number of observations
@@ -155,10 +152,10 @@ class TestWARMPreprocessing:
         """Test preprocessing warns for short data."""
         # Create very short series
         short_data = sample_annual_series.iloc[:15]
-        gen = WARMGenerator(short_data)
+        gen = WARMGenerator()
 
         # Should still preprocess but with warning
-        gen.preprocessing()
+        gen.preprocessing(short_data)
         assert gen.is_preprocessed is True
 
 
@@ -167,9 +164,8 @@ class TestWARMFitting:
 
     def test_fit_basic(self, short_annual_series):
         """Test basic fitting functionality."""
-        gen = WARMGenerator(short_annual_series, scales=16)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16)
+        gen.fit(short_annual_series)
 
         assert gen.is_fitted is True
         assert gen.wavelet_coeffs_ is not None
@@ -178,18 +174,16 @@ class TestWARMFitting:
 
     def test_fit_wavelet_coeffs_shape(self, short_annual_series):
         """Test wavelet coefficients have correct shape."""
-        gen = WARMGenerator(short_annual_series, scales=16)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16)
+        gen.fit(short_annual_series)
 
         n_years = len(gen.Q_obs_annual)
         assert gen.wavelet_coeffs_.shape == (16, n_years)
 
     def test_fit_sawp_shape(self, short_annual_series):
         """Test SAWP has correct shape."""
-        gen = WARMGenerator(short_annual_series, scales=16)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16)
+        gen.fit(short_annual_series)
 
         n_years = len(gen.Q_obs_annual)
         assert gen.sawp_.shape == (n_years,)
@@ -197,9 +191,8 @@ class TestWARMFitting:
 
     def test_fit_ar_params_structure(self, short_annual_series):
         """Test AR parameters have correct structure."""
-        gen = WARMGenerator(short_annual_series, scales=16, ar_order=2)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16, ar_order=2)
+        gen.fit(short_annual_series)
 
         # Should have parameters for each scale
         assert len(gen.ar_params_) == 16
@@ -207,36 +200,34 @@ class TestWARMFitting:
         # Each scale should have coeffs, sigma, mean
         for scale_idx in range(16):
             params = gen.ar_params_[scale_idx]
-            assert 'coeffs' in params
-            assert 'sigma' in params
-            assert 'mean' in params
-            assert len(params['coeffs']) == 2  # AR(2)
-            assert params['sigma'] > 0
+            assert "coeffs" in params
+            assert "sigma" in params
+            assert "mean" in params
+            assert len(params["coeffs"]) == 2  # AR(2)
+            assert params["sigma"] > 0
 
     def test_fit_creates_fitted_params(self, short_annual_series):
         """Test that fit creates FittedParams object."""
-        gen = WARMGenerator(short_annual_series, scales=16)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16)
+        gen.fit(short_annual_series)
 
-        assert hasattr(gen, 'fitted_params_')
+        assert hasattr(gen, "fitted_params_")
         assert gen.fitted_params_.n_sites_ == 1
 
     def test_fit_without_preprocessing_raises(self, sample_annual_series):
-        """Test fit raises error without preprocessing."""
-        gen = WARMGenerator(sample_annual_series)
+        """Test fit raises error without preprocessing (and no Q_obs)."""
+        gen = WARMGenerator()
 
         with pytest.raises(ValueError, match="preprocessing"):
             gen.fit()
 
     def test_fit_different_wavelets(self, short_annual_series):
         """Test fitting with different wavelet types."""
-        wavelets = ['morl', 'mexh', 'gaus1']
+        wavelets = ["morl", "mexh", "gaus1"]
 
         for wavelet in wavelets:
-            gen = WARMGenerator(short_annual_series, wavelet=wavelet, scales=8)
-            gen.preprocessing()
-            gen.fit()
+            gen = WARMGenerator(wavelet=wavelet, scales=8)
+            gen.fit(short_annual_series)
 
             assert gen.is_fitted is True
             assert gen.wavelet_coeffs_ is not None
@@ -247,9 +238,8 @@ class TestWARMGeneration:
 
     def test_generate_basic(self, short_annual_series):
         """Test basic generation functionality."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=20, n_realizations=3, seed=42)
 
@@ -258,9 +248,8 @@ class TestWARMGeneration:
 
     def test_generate_shape(self, short_annual_series):
         """Test generated data has correct shape."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         n_years = 25
         result = gen.generate(n_years=n_years, n_realizations=2, seed=42)
@@ -271,9 +260,8 @@ class TestWARMGeneration:
 
     def test_generate_non_negative(self, short_annual_series):
         """Test that generated flows are non-negative."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=30, n_realizations=5, seed=42)
 
@@ -283,9 +271,8 @@ class TestWARMGeneration:
 
     def test_generate_reproducible(self, short_annual_series):
         """Test generation is reproducible with seed."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result1 = gen.generate(n_years=20, n_realizations=2, seed=123)
         result2 = gen.generate(n_years=20, n_realizations=2, seed=123)
@@ -297,17 +284,16 @@ class TestWARMGeneration:
 
     def test_generate_without_fit_raises(self, sample_annual_series):
         """Test generation raises error without fitting."""
-        gen = WARMGenerator(sample_annual_series)
-        gen.preprocessing()
+        gen = WARMGenerator()
+        gen.preprocessing(sample_annual_series)
 
         with pytest.raises(ValueError, match="fit"):
             gen.generate(n_years=10)
 
     def test_generate_has_datetime_index(self, short_annual_series):
         """Test generated data has DatetimeIndex."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=15, n_realizations=1, seed=42)
         df = result.data_by_realization[0]
@@ -316,21 +302,19 @@ class TestWARMGeneration:
 
     def test_generate_annual_frequency(self, short_annual_series):
         """Test generated data has annual frequency."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=15, n_realizations=1, seed=42)
         df = result.data_by_realization[0]
 
         # Check frequency is annual
-        assert df.index.freq in ['YS', '<YearBegin>']
+        assert df.index.freq in ["YS", "<YearBegin>"]
 
     def test_generate_default_n_years(self, short_annual_series):
         """Test generation with default n_years."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         # Default should use length of historical data
         result = gen.generate(n_realizations=1, seed=42)
@@ -340,9 +324,8 @@ class TestWARMGeneration:
 
     def test_generate_n_timesteps(self, short_annual_series):
         """Test generation with n_timesteps parameter."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         n_timesteps = 25
         result = gen.generate(n_timesteps=n_timesteps, n_realizations=1, seed=42)
@@ -356,9 +339,8 @@ class TestWARMWaveletProperties:
 
     def test_sawp_captures_variability(self, short_annual_series):
         """Test that SAWP varies over time."""
-        gen = WARMGenerator(short_annual_series, scales=16)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16)
+        gen.fit(short_annual_series)
 
         # SAWP should have variation (not constant)
         assert np.std(gen.sawp_) > 0
@@ -366,9 +348,8 @@ class TestWARMWaveletProperties:
 
     def test_multiple_realizations_differ(self, short_annual_series):
         """Test that multiple realizations are different."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=20, n_realizations=5, seed=42)
 
@@ -385,9 +366,8 @@ class TestWARMWaveletProperties:
 
     def test_wavelet_scales_used(self, short_annual_series):
         """Test that scales are correctly stored."""
-        gen = WARMGenerator(short_annual_series, scales=16)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=16)
+        gen.fit(short_annual_series)
 
         assert gen.scales_used_ is not None
         assert len(gen.scales_used_) == 16
@@ -399,17 +379,16 @@ class TestWARMSerialization:
 
     def test_pickle_save_load(self, short_annual_series, tmp_path):
         """Test saving and loading via pickle."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         # Save
         filepath = tmp_path / "warm_generator.pkl"
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(gen, f)
 
         # Load
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             gen_loaded = pickle.load(f)
 
         # Verify attributes preserved
@@ -419,16 +398,15 @@ class TestWARMSerialization:
 
     def test_pickle_generate_after_load(self, short_annual_series, tmp_path):
         """Test generation works after loading from pickle."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         # Save and load
         filepath = tmp_path / "warm_generator.pkl"
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(gen, f)
 
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             gen_loaded = pickle.load(f)
 
         # Generate from loaded generator
@@ -443,9 +421,8 @@ class TestWARMStatisticalProperties:
 
     def test_generated_mean_reasonable(self, short_annual_series):
         """Test generated data has reasonable mean."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=30, n_realizations=20, seed=42)
 
@@ -465,9 +442,8 @@ class TestWARMStatisticalProperties:
 
     def test_generated_has_variability(self, short_annual_series):
         """Test generated data has reasonable variability."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         result = gen.generate(n_years=30, n_realizations=10, seed=42)
 
@@ -482,10 +458,10 @@ class TestWARMOutputFrequency:
 
     def test_output_frequency_annual(self, sample_annual_series):
         """Test output frequency is annual."""
-        gen = WARMGenerator(sample_annual_series)
+        gen = WARMGenerator()
 
         freq = gen.output_frequency
-        assert freq == 'YS'
+        assert freq == "YS"
 
 
 class TestWARMARModels:
@@ -493,25 +469,23 @@ class TestWARMARModels:
 
     def test_ar_model_fitting_ar1(self, short_annual_series):
         """Test AR(1) model fitting."""
-        gen = WARMGenerator(short_annual_series, scales=4, ar_order=1)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=4, ar_order=1)
+        gen.fit(short_annual_series)
 
         # Each scale should have 1 AR coefficient
         for scale_idx in range(4):
             params = gen.ar_params_[scale_idx]
-            assert len(params['coeffs']) == 1
+            assert len(params["coeffs"]) == 1
 
     def test_ar_model_fitting_ar2(self, short_annual_series):
         """Test AR(2) model fitting."""
-        gen = WARMGenerator(short_annual_series, scales=4, ar_order=2)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=4, ar_order=2)
+        gen.fit(short_annual_series)
 
         # Each scale should have 2 AR coefficients
         for scale_idx in range(4):
             params = gen.ar_params_[scale_idx]
-            assert len(params['coeffs']) == 2
+            assert len(params["coeffs"]) == 2
 
 
 class TestWARMIntegration:
@@ -519,10 +493,10 @@ class TestWARMIntegration:
 
     def test_full_workflow(self, short_annual_series):
         """Test complete workflow."""
-        gen = WARMGenerator(short_annual_series, scales=8)
+        gen = WARMGenerator(scales=8)
 
         # Preprocessing
-        gen.preprocessing()
+        gen.preprocessing(short_annual_series)
         assert gen.is_preprocessed is True
 
         # Fit
@@ -544,20 +518,18 @@ class TestWARMIntegration:
     def test_workflow_different_ar_orders(self, short_annual_series):
         """Test workflow with different AR orders."""
         for ar_order in [1, 2, 3]:
-            gen = WARMGenerator(short_annual_series, scales=8, ar_order=ar_order)
-            gen.preprocessing()
-            gen.fit()
+            gen = WARMGenerator(scales=8, ar_order=ar_order)
+            gen.fit(short_annual_series)
             result = gen.generate(n_years=15, n_realizations=2, seed=42)
 
             assert isinstance(result, Ensemble)
 
     def test_get_params(self, short_annual_series):
         """Test get_params method."""
-        gen = WARMGenerator(short_annual_series, scales=8)
-        gen.preprocessing()
-        gen.fit()
+        gen = WARMGenerator(scales=8)
+        gen.fit(short_annual_series)
 
         params = gen.get_params()
         assert isinstance(params, dict)
         # Check for expected parameter keys
-        assert 'debug' in params or 'wavelet' in params
+        assert "debug" in params or "wavelet" in params

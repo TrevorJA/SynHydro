@@ -1,12 +1,14 @@
 # Tutorials
 
-Concise examples covering the core SynHydro workflows.
+Step-by-step guides, each focused on a single SynHydro workflow.
 
-| Tutorial | Generator | Description |
-|----------|-----------|-------------|
-| [Quickstart](01_quickstart.md) | `ThomasFieringGenerator` | Single-site monthly generation |
-| [Multi-Site Monthly](02_multisite.md) | `KirschGenerator` | Multi-site nonparametric bootstrap |
-| [Monthly→Daily Pipeline](03_pipeline.md) | `KirschNowakPipeline` | Full monthly-to-daily workflow |
-| [Drought Analysis](04_drought_analysis.md) | `SSIDroughtMetrics` | SSI calculation and drought metrics |
+| Tutorial | What you'll learn |
+|----------|-------------------|
+| [01 — Quickstart](01_quickstart.md) | Three-step generator workflow: preprocessing, fit, generate |
+| [02 — Multi-Site](02_multisite.md) | Multi-site generation with spatial correlation preservation |
+| [03 — Pipeline](03_pipeline.md) | Monthly-to-daily disaggregation via `KirschNowakPipeline` |
+| [04 — Drought Analysis](04_drought_analysis.md) | SSI calculation and drought event extraction |
+| [05 — Ensemble Validation](05_validation.md) | `validate_ensemble` metrics and `plot_validation_panel` |
 
-All examples use `synhydro.load_example_data()`, which returns a multi-site daily streamflow `DataFrame`.
+All examples use `synhydro.load_example_data()`, which returns a multi-site
+daily streamflow `DataFrame`.

@@ -59,13 +59,12 @@ Q_monthly = Q_daily.resample("MS").mean()           # aggregate to monthly
 
 ## Basic Workflow
 
-Every generator follows the same three-step pattern:
+Every generator follows the same two-step pattern:
 
 ```python
-gen = synhydro.ThomasFieringGenerator(Q_obs)
-gen.preprocessing()                                 # validate and prepare data
-gen.fit()                                           # estimate parameters
-ensemble = gen.generate(n_realizations=10,          # synthetic flows
+gen = synhydro.ThomasFieringGenerator()
+gen.fit(Q_obs)                                      # validate, prepare, and estimate parameters
+ensemble = gen.generate(n_realizations=10,           # synthetic flows
                         n_years=30,
                         seed=42)
 ```

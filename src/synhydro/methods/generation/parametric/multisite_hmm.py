@@ -44,9 +44,6 @@ class MultiSiteHMMGenerator(Generator):
 
     Parameters
     ----------
-    Q_obs : pd.Series or pd.DataFrame
-        Observed streamflow data with DatetimeIndex. Must be DataFrame for
-        multi-site generation (multiple columns = multiple sites).
     n_states : int, default=2
         Number of hidden states. Default is 2 (dry/wet states).
     offset : float, default=1.0
@@ -86,8 +83,8 @@ class MultiSiteHMMGenerator(Generator):
     >>> Q_annual = pd.read_csv('annual_flows.csv', index_col=0, parse_dates=True)
     >>>
     >>> # Initialize generator
-    >>> gen = MultiSiteHMMGenerator(Q_annual, n_states=2)
-    >>> gen.preprocessing()
+    >>> gen = MultiSiteHMMGenerator(n_states=2)
+    >>> gen.preprocessing(Q_annual)
     >>> gen.fit()
     >>>
     >>> # Generate 100 realizations of 50 years each
@@ -101,19 +98,22 @@ class MultiSiteHMMGenerator(Generator):
     - State ordering: states sorted by mean (low mean = dry state)
     """
 
+    supports_multisite = True
+    supported_frequencies = ("YS",)
+
     def __init__(
         self,
-        Q_obs: Union[pd.Series, pd.DataFrame],
+        *,
         n_states: int = 2,
         offset: float = 1.0,
         max_iterations: int = 1000,
-        covariance_type: str = 'full',
+        covariance_type: str = "full",
         name: Optional[str] = None,
         debug: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """Initialize the MultiSiteHMMGenerator."""
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         # Validate parameters
         if n_states < 2:
@@ -122,7 +122,7 @@ class MultiSiteHMMGenerator(Generator):
         if offset <= 0:
             raise ValueError(f"offset must be positive, got {offset}")
 
-        if covariance_type not in ('full', 'diag', 'spherical'):
+        if covariance_type not in ("full", "diag", "spherical"):
             raise ValueError(
                 f"covariance_type must be 'full', 'diag', or 'spherical', "
                 f"got '{covariance_type}'"
@@ -135,11 +135,11 @@ class MultiSiteHMMGenerator(Generator):
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
-            'method': 'Multi-Site Hidden Markov Model (Gold et al. 2024)',
-            'n_states': n_states,
-            'offset': offset,
-            'max_iterations': max_iterations,
-            'covariance_type': covariance_type
+            "method": "Multi-Site Hidden Markov Model (Gold et al. 2024)",
+            "n_states": n_states,
+            "offset": offset,
+            "max_iterations": max_iterations,
+            "covariance_type": covariance_type,
         }
 
         # Initialize fitted parameter storage
@@ -157,12 +157,14 @@ class MultiSiteHMMGenerator(Generator):
 
         Typically used for annual data ('YS' or 'AS'), but flexible.
         """
-        if hasattr(self, '_Q_obs') and self._Q_obs is not None:
+        if hasattr(self, "_Q_obs") and self._Q_obs is not None:
             # Infer from preprocessed data
-            return pd.infer_freq(self._Q_obs.index) or 'YS'
-        return 'YS'  # Default to annual start
+            return pd.infer_freq(self._Q_obs.index) or "YS"
+        return "YS"  # Default to annual start
 
-    def preprocessing(self, sites: Optional[List[str]] = None, **kwargs) -> None:
+    def preprocessing(
+        self, Q_obs, *, sites: Optional[List[str]] = None, **kwargs
+    ) -> None:
         """
         Preprocess observed data for HMM fitting.
 
@@ -171,6 +173,8 @@ class MultiSiteHMMGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed streamflow data with DatetimeIndex.
         sites : List[str], optional
             Subset of sites to use. If None, uses all columns.
         **kwargs : dict
@@ -181,17 +185,7 @@ class MultiSiteHMMGenerator(Generator):
         ValueError
             If data has fewer than 2 sites for multi-site modeling.
         """
-        # Validate input data
-        Q = self.validate_input_data(self._Q_obs_raw)
-
-        # Handle site selection
-        if sites is not None:
-            missing_sites = set(sites) - set(Q.columns)
-            if missing_sites:
-                raise ValueError(f"Sites not found in data: {missing_sites}")
-            Q = Q[sites]
-
-        self._sites = Q.columns.tolist()
+        Q = self._store_obs_data(Q_obs, sites=sites)
 
         # Validate minimum sites for multi-site HMM
         if len(self._sites) < 2:
@@ -221,7 +215,7 @@ class MultiSiteHMMGenerator(Generator):
         # Update state
         self.update_state(preprocessed=True)
 
-    def fit(self, random_state: Optional[int] = None, **kwargs) -> None:
+    def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
         """
         Fit the multi-site HMM to observed data.
 
@@ -230,10 +224,14 @@ class MultiSiteHMMGenerator(Generator):
 
         Parameters
         ----------
-        random_state : int, optional
-            Random seed for reproducible fitting. If None, fitting may vary.
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed streamflow data. If provided, preprocessing is called
+            automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs : dict
-            Additional fitting parameters (currently unused).
+            Additional fitting parameters. May include ``random_state`` for
+            reproducible fitting.
 
         Notes
         -----
@@ -241,7 +239,11 @@ class MultiSiteHMMGenerator(Generator):
         represents the dry state and higher-numbered states represent
         progressively wetter states.
         """
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
+
+        random_state = kwargs.pop("random_state", None)
 
         self.logger.debug(
             f"Fitting GMMHMM with {self.n_states} states, "
@@ -256,7 +258,7 @@ class MultiSiteHMMGenerator(Generator):
                 n_components=self.n_states,
                 n_iter=self.max_iterations,
                 covariance_type=self.covariance_type,
-                random_state=random_state
+                random_state=random_state,
             )
 
             self._hmm_model.fit(self.Q_log_)
@@ -274,10 +276,10 @@ class MultiSiteHMMGenerator(Generator):
         # Need to squeeze the n_mix dimension and handle different covariance types
         n_sites = len(self._sites)
 
-        if self.covariance_type == 'full':
+        if self.covariance_type == "full":
             # Shape: (n_states, 1, n_sites, n_sites) -> (n_states, n_sites, n_sites)
             covariances = covariances_raw.squeeze(axis=1)
-        elif self.covariance_type == 'diag':
+        elif self.covariance_type == "diag":
             # Shape: (n_states, 1, n_sites) -> (n_states, n_sites, n_sites)
             diag_covs = covariances_raw.squeeze(axis=1)  # (n_states, n_sites)
             covariances = np.array([np.diag(cov) for cov in diag_covs])
@@ -334,7 +336,7 @@ class MultiSiteHMMGenerator(Generator):
         n_years: Optional[int] = None,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs
+        **kwargs,
     ) -> Ensemble:
         """
         Generate synthetic streamflow realizations.
@@ -392,8 +394,7 @@ class MultiSiteHMMGenerator(Generator):
             Q_log_syn = np.zeros((n_steps, len(self._sites)))
             for t, state in enumerate(states):
                 Q_log_syn[t, :] = np.random.multivariate_normal(
-                    self.means_[state],
-                    self.covariances_[state]
+                    self.means_[state], self.covariances_[state]
                 )
 
             # Back-transform from log space
@@ -405,16 +406,10 @@ class MultiSiteHMMGenerator(Generator):
             # Create DataFrame with appropriate index
             start_date = self._Q_obs.index[0]
             dates = pd.date_range(
-                start=start_date,
-                periods=n_steps,
-                freq=self.output_frequency
+                start=start_date, periods=n_steps, freq=self.output_frequency
             )
 
-            realizations[r] = pd.DataFrame(
-                Q_syn,
-                index=dates,
-                columns=self._sites
-            )
+            realizations[r] = pd.DataFrame(Q_syn, index=dates, columns=self._sites)
 
         self.logger.info(f"Generated {n_realizations} realizations")
 
@@ -435,19 +430,13 @@ class MultiSiteHMMGenerator(Generator):
             Sequence of hidden states.
         """
         # Sample initial state from stationary distribution
-        state = np.random.choice(
-            self.n_states,
-            p=self.stationary_distribution_
-        )
+        state = np.random.choice(self.n_states, p=self.stationary_distribution_)
 
         states = [state]
 
         # Generate remaining states using transition matrix
         for _ in range(1, n_timesteps):
-            state = np.random.choice(
-                self.n_states,
-                p=self.transition_matrix_[state, :]
-            )
+            state = np.random.choice(self.n_states, p=self.transition_matrix_[state, :])
             states.append(state)
 
         return states
@@ -456,34 +445,34 @@ class MultiSiteHMMGenerator(Generator):
         """Extract and package fitted parameters."""
         # Count parameters
         n_params = (
-            self.n_states * len(self._sites) +  # Means
-            self.n_states * len(self._sites) * (len(self._sites) + 1) // 2 +  # Covariances (triangular)
-            self.n_states * (self.n_states - 1)  # Transition matrix (non-diagonal)
+            self.n_states * len(self._sites)  # Means
+            + self.n_states
+            * len(self._sites)
+            * (len(self._sites) + 1)
+            // 2  # Covariances (triangular)
+            + self.n_states * (self.n_states - 1)  # Transition matrix (non-diagonal)
         )
 
         training_period = (
             str(self._Q_obs.index[0].date()),
-            str(self._Q_obs.index[-1].date())
+            str(self._Q_obs.index[-1].date()),
         )
 
         return FittedParams(
             means_=self.means_,
             correlations_={
-                'covariance_matrices': self.covariances_,
-                'transition_matrix': self.transition_matrix_,
-                'stationary_distribution': self.stationary_distribution_
+                "covariance_matrices": self.covariances_,
+                "transition_matrix": self.transition_matrix_,
+                "stationary_distribution": self.stationary_distribution_,
             },
             distributions_={
-                'type': 'Multivariate Gaussian per state',
-                'n_states': self.n_states,
-                'covariance_type': self.covariance_type
+                "type": "Multivariate Gaussian per state",
+                "n_states": self.n_states,
+                "covariance_type": self.covariance_type,
             },
-            transformations_={
-                'log_transform': True,
-                'offset': self.offset
-            },
+            transformations_={"log_transform": True, "offset": self.offset},
             n_parameters_=n_params,
             sample_size_=len(self._Q_obs),
             n_sites_=len(self._sites),
-            training_period_=training_period
+            training_period_=training_period,
         )

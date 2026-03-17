@@ -18,38 +18,32 @@ class TestThomasFieringInitialization:
 
     def test_initialization_default_params(self, sample_monthly_series):
         """Test initialization with default parameters."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
+        gen = ThomasFieringGenerator()
 
         assert gen.is_preprocessed is False
         assert gen.is_fitted is False
         assert gen.debug is False
-        assert hasattr(gen, 'stedinger_transform')
+        assert hasattr(gen, "stedinger_transform")
 
     def test_initialization_with_debug(self, sample_monthly_series):
         """Test initialization with debug mode."""
-        gen = ThomasFieringGenerator(sample_monthly_series, debug=True)
+        gen = ThomasFieringGenerator(debug=True)
         assert gen.debug is True
 
     def test_initialization_invalid_input(self):
-        """Test initialization with invalid input."""
-        # Lists should be rejected by validate_input_data during preprocessing
-        # At initialization, it's stored as-is
-        try:
-            gen = ThomasFieringGenerator([1, 2, 3, 4, 5])
-            # Should fail during preprocessing
-            with pytest.raises((TypeError, AttributeError, ValueError)):
-                gen.preprocessing()
-        except (TypeError, AttributeError):
-            # Or may fail at initialization
-            pass
+        """Test that invalid input raises error during preprocessing/fit."""
+        gen = ThomasFieringGenerator()
+        # Should fail during preprocessing or fit with invalid data
+        with pytest.raises((TypeError, AttributeError, ValueError)):
+            gen.fit([1, 2, 3, 4, 5])
 
     def test_initialization_stores_algorithm_params(self, sample_monthly_series):
         """Test that initialization stores algorithm parameters."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
+        gen = ThomasFieringGenerator()
 
-        assert 'algorithm_params' in gen.init_params.__dict__
+        assert "algorithm_params" in gen.init_params.__dict__
         params = gen.init_params.algorithm_params
-        assert params['method'] == 'Thomas-Fiering AR(1)'
+        assert params["method"] == "Thomas-Fiering AR(1)"
 
 
 class TestThomasFieringPreprocessing:
@@ -57,26 +51,26 @@ class TestThomasFieringPreprocessing:
 
     def test_preprocessing_monthly_series(self, sample_monthly_series):
         """Test preprocessing with monthly Series."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
+        gen = ThomasFieringGenerator()
+        gen.preprocessing(sample_monthly_series)
 
         assert gen.is_preprocessed is True
-        assert hasattr(gen, 'Q_obs_monthly')
-        assert hasattr(gen, 'Q_norm')
+        assert hasattr(gen, "Q_obs_monthly")
+        assert hasattr(gen, "Q_norm")
         assert gen.stedinger_transform.is_fitted is True
 
     def test_preprocessing_daily_series_resamples(self, sample_daily_series):
         """Test preprocessing resamples daily to monthly."""
-        gen = ThomasFieringGenerator(sample_daily_series)
-        gen.preprocessing()
+        gen = ThomasFieringGenerator()
+        gen.preprocessing(sample_daily_series)
 
         assert gen.is_preprocessed is True
-        assert gen.Q_obs_monthly.index.freq in ['MS', '<MonthBegin>']
+        assert gen.Q_obs_monthly.index.freq in ["MS", "<MonthBegin>"]
 
     def test_preprocessing_dataframe_uses_first_column(self, sample_monthly_dataframe):
         """Test preprocessing with DataFrame uses first column only."""
-        gen = ThomasFieringGenerator(sample_monthly_dataframe)
-        gen.preprocessing()
+        gen = ThomasFieringGenerator()
+        gen.preprocessing(sample_monthly_dataframe)
 
         assert gen.is_preprocessed is True
         assert isinstance(gen.Q_obs_monthly, pd.Series)
@@ -84,8 +78,8 @@ class TestThomasFieringPreprocessing:
 
     def test_preprocessing_stedinger_transform(self, sample_monthly_series):
         """Test that Stedinger transform is applied."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
+        gen = ThomasFieringGenerator()
+        gen.preprocessing(sample_monthly_series)
 
         # Q_norm should be different from Q_obs due to transformation
         assert not gen.Q_norm.equals(gen.Q_obs_monthly)
@@ -97,20 +91,18 @@ class TestThomasFieringFitting:
 
     def test_fit_basic(self, sample_monthly_series):
         """Test basic fitting functionality."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         assert gen.is_fitted is True
-        assert hasattr(gen, 'mu_monthly')
-        assert hasattr(gen, 'sigma_monthly')
-        assert hasattr(gen, 'rho_monthly')
+        assert hasattr(gen, "mu_monthly")
+        assert hasattr(gen, "sigma_monthly")
+        assert hasattr(gen, "rho_monthly")
 
     def test_fit_monthly_parameters_shape(self, sample_monthly_series):
         """Test fitted monthly parameters have correct shape."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         assert len(gen.mu_monthly) == 12
         assert len(gen.sigma_monthly) == 12
@@ -118,9 +110,8 @@ class TestThomasFieringFitting:
 
     def test_fit_parameters_reasonable(self, sample_monthly_series):
         """Test that fitted parameters are reasonable."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         # Check all months
         for month in range(1, 13):
@@ -133,17 +124,16 @@ class TestThomasFieringFitting:
 
     def test_fit_creates_fitted_params(self, sample_monthly_series):
         """Test that fit creates FittedParams object."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
-        assert hasattr(gen, 'fitted_params_')
-        assert gen.fitted_params_.n_parameters_ == 36  # 12 months × 3 params
+        assert hasattr(gen, "fitted_params_")
+        assert gen.fitted_params_.n_parameters_ == 36  # 12 months x 3 params
         assert gen.fitted_params_.n_sites_ == 1
 
     def test_fit_without_preprocessing_raises(self, sample_monthly_series):
-        """Test fit raises error without preprocessing."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
+        """Test fit raises error without preprocessing (and no Q_obs)."""
+        gen = ThomasFieringGenerator()
 
         with pytest.raises(ValueError, match="preprocessing"):
             gen.fit()
@@ -154,9 +144,8 @@ class TestThomasFieringGeneration:
 
     def test_generate_basic(self, sample_monthly_series):
         """Test basic generation functionality."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=5, n_realizations=3, seed=42)
 
@@ -165,9 +154,8 @@ class TestThomasFieringGeneration:
 
     def test_generate_shape(self, sample_monthly_series):
         """Test generated data has correct shape."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         n_years = 5
         result = gen.generate(n_years=n_years, n_realizations=2, seed=42)
@@ -178,9 +166,8 @@ class TestThomasFieringGeneration:
 
     def test_generate_n_timesteps(self, sample_monthly_series):
         """Test generation with n_timesteps parameter."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         n_timesteps = 37  # Odd number to test truncation
         result = gen.generate(n_timesteps=n_timesteps, n_realizations=1, seed=42)
@@ -190,9 +177,8 @@ class TestThomasFieringGeneration:
 
     def test_generate_non_negative(self, sample_monthly_series):
         """Test that generated flows are non-negative."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=10, n_realizations=5, seed=42)
 
@@ -202,9 +188,8 @@ class TestThomasFieringGeneration:
 
     def test_generate_reproducible(self, sample_monthly_series):
         """Test generation is reproducible with seed."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result1 = gen.generate(n_years=3, n_realizations=2, seed=123)
         result2 = gen.generate(n_years=3, n_realizations=2, seed=123)
@@ -216,17 +201,16 @@ class TestThomasFieringGeneration:
 
     def test_generate_without_fit_raises(self, sample_monthly_series):
         """Test generation raises error without fitting."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
+        gen = ThomasFieringGenerator()
+        gen.preprocessing(sample_monthly_series)
 
         with pytest.raises(ValueError, match="fit"):
             gen.generate(n_years=5)
 
     def test_generate_has_datetime_index(self, sample_monthly_series):
         """Test generated data has DatetimeIndex."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=2, n_realizations=1, seed=42)
         df = result.data_by_realization[0]
@@ -235,20 +219,18 @@ class TestThomasFieringGeneration:
 
     def test_generate_monthly_frequency(self, sample_monthly_series):
         """Test generated data has monthly frequency."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=2, n_realizations=1, seed=42)
         df = result.data_by_realization[0]
 
-        assert df.index.freq in ['MS', '<MonthBegin>']
+        assert df.index.freq in ["MS", "<MonthBegin>"]
 
     def test_generate_default_n_years(self, sample_monthly_series):
         """Test generation with default n_years."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         # Default should use length of historical data
         result = gen.generate(n_realizations=1, seed=42)
@@ -263,9 +245,8 @@ class TestThomasFieringAR1Properties:
 
     def test_ar1_lag1_correlation_exists(self, sample_monthly_series):
         """Test that lag-1 correlations are computed."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         # All monthly lag-1 correlations should be defined
         for month in range(1, 13):
@@ -274,9 +255,8 @@ class TestThomasFieringAR1Properties:
 
     def test_multiple_realizations_differ(self, sample_monthly_series):
         """Test that multiple realizations are different."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=5, n_realizations=5, seed=42)
 
@@ -297,17 +277,16 @@ class TestThomasFieringSerialization:
 
     def test_pickle_save_load(self, sample_monthly_series, tmp_path):
         """Test saving and loading via pickle."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         # Save
         filepath = tmp_path / "tf_generator.pkl"
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(gen, f)
 
         # Load
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             gen_loaded = pickle.load(f)
 
         # Verify attributes preserved
@@ -317,16 +296,15 @@ class TestThomasFieringSerialization:
 
     def test_pickle_generate_after_load(self, sample_monthly_series, tmp_path):
         """Test generation works after loading from pickle."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         # Save and load
         filepath = tmp_path / "tf_generator.pkl"
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             pickle.dump(gen, f)
 
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             gen_loaded = pickle.load(f)
 
         # Generate from loaded generator
@@ -341,9 +319,8 @@ class TestThomasFieringStatisticalProperties:
 
     def test_generated_mean_reasonable(self, sample_monthly_series):
         """Test generated data has reasonable mean."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=20, n_realizations=50, seed=42)
 
@@ -363,9 +340,8 @@ class TestThomasFieringStatisticalProperties:
 
     def test_generated_variance_reasonable(self, sample_monthly_series):
         """Test generated data has reasonable variance."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         result = gen.generate(n_years=20, n_realizations=50, seed=42)
 
@@ -389,10 +365,10 @@ class TestThomasFieringOutputFrequency:
 
     def test_output_frequency_monthly(self, sample_monthly_series):
         """Test output frequency is monthly."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
+        gen = ThomasFieringGenerator()
 
         freq = gen.output_frequency
-        assert freq == 'MS'
+        assert freq == "MS"
 
 
 class TestThomasFieringIntegration:
@@ -400,10 +376,10 @@ class TestThomasFieringIntegration:
 
     def test_full_workflow(self, sample_monthly_series):
         """Test complete workflow."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
+        gen = ThomasFieringGenerator()
 
         # Preprocessing
-        gen.preprocessing()
+        gen.preprocessing(sample_monthly_series)
         assert gen.is_preprocessed is True
 
         # Fit
@@ -424,11 +400,11 @@ class TestThomasFieringIntegration:
 
     def test_workflow_from_daily_data(self, sample_daily_series):
         """Test complete workflow starting from daily data."""
-        gen = ThomasFieringGenerator(sample_daily_series)
+        gen = ThomasFieringGenerator()
 
         # Should automatically resample to monthly
-        gen.preprocessing()
-        assert gen.Q_obs_monthly.index.freq in ['MS', '<MonthBegin>']
+        gen.preprocessing(sample_daily_series)
+        assert gen.Q_obs_monthly.index.freq in ["MS", "<MonthBegin>"]
 
         gen.fit()
         result = gen.generate(n_years=2, n_realizations=3, seed=42)
@@ -440,11 +416,10 @@ class TestThomasFieringIntegration:
 
     def test_get_params(self, sample_monthly_series):
         """Test get_params method."""
-        gen = ThomasFieringGenerator(sample_monthly_series)
-        gen.preprocessing()
-        gen.fit()
+        gen = ThomasFieringGenerator()
+        gen.fit(sample_monthly_series)
 
         params = gen.get_params()
         assert isinstance(params, dict)
         # Check for expected parameter keys
-        assert 'debug' in params or 'method' in params
+        assert "debug" in params or "method" in params

@@ -4,17 +4,24 @@ Drought-specific plotting functions for SynHydro.
 This module provides functions for visualizing drought characteristics,
 SSI timeseries, and drought frequency analyses.
 """
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from typing import Optional, Tuple
 from synhydro.core.ensemble import Ensemble
-from synhydro.droughts.ssi import SSIDroughtMetrics, get_drought_metrics
+from synhydro.droughts.ssi import SSI, get_drought_metrics
 from synhydro.plotting.config import COLORS, STYLE, LAYOUT, LABELS
 from synhydro.plotting._utils import (
-    setup_axes, apply_default_styling, save_figure, get_site_data,
-    subset_date_range, compute_ensemble_percentiles, format_date_axis,
-    validate_ensemble_input, validate_observed_input
+    setup_axes,
+    apply_default_styling,
+    save_figure,
+    get_site_data,
+    subset_date_range,
+    compute_ensemble_percentiles,
+    format_date_axis,
+    validate_ensemble_input,
+    validate_observed_input,
 )
 
 
@@ -22,22 +29,22 @@ def plot_drought_characteristics(
     ensemble: Ensemble,
     observed: Optional[pd.Series] = None,
     site: Optional[str] = None,
-    x_metric: str = 'magnitude',
-    y_metric: str = 'duration',
-    color_metric: str = 'severity',
+    x_metric: str = "magnitude",
+    y_metric: str = "duration",
+    color_metric: str = "severity",
     threshold: float = -1.0,
-    method: str = 'ssi',
+    method: str = "ssi",
     window: int = 12,
     ax: Optional[plt.Axes] = None,
-    figsize: Tuple[float, float] = LAYOUT['square_figsize'],
+    figsize: Tuple[float, float] = LAYOUT["square_figsize"],
     title: Optional[str] = None,
     xlabel: Optional[str] = None,
     ylabel: Optional[str] = None,
     legend: bool = True,
-    cmap: str = 'viridis_r',
+    cmap: str = "viridis_r",
     filename: Optional[str] = None,
-    dpi: int = LAYOUT['save_dpi'],
-    **kwargs
+    dpi: int = LAYOUT["save_dpi"],
+    **kwargs,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
     Scatter plot of drought characteristics.
@@ -100,14 +107,19 @@ def plot_drought_characteristics(
     validate_ensemble_input(ensemble)
     observed = validate_observed_input(observed, required=False)
 
-    if method != 'ssi':
+    if method != "ssi":
         raise ValueError(f"Only 'ssi' method is currently supported, got '{method}'")
 
-    valid_metrics = ['magnitude', 'duration', 'severity']
-    for metric_name, metric_val in [('x_metric', x_metric), ('y_metric', y_metric),
-                                     ('color_metric', color_metric)]:
+    valid_metrics = ["magnitude", "duration", "severity"]
+    for metric_name, metric_val in [
+        ("x_metric", x_metric),
+        ("y_metric", y_metric),
+        ("color_metric", color_metric),
+    ]:
         if metric_val not in valid_metrics:
-            raise ValueError(f"{metric_name} must be one of {valid_metrics}, got '{metric_val}'")
+            raise ValueError(
+                f"{metric_name} must be one of {valid_metrics}, got '{metric_val}'"
+            )
 
     # Setup axes
     fig, ax = setup_axes(ax, figsize)
@@ -119,21 +131,22 @@ def plot_drought_characteristics(
     # Aggregate ensemble to get median realization for drought analysis
     ensemble_median = site_data.median(axis=1)
 
-    ssi_calc = SSIDroughtMetrics(timescale='M', window=window)
-    ssi_ensemble = ssi_calc.calculate_ssi(ensemble_median)
+    ssi_calc = SSI(timescale=window, fit_freq="ME")
+    ssi_ensemble = ssi_calc.fit_transform(ensemble_median)
     drought_metrics_ensemble = get_drought_metrics(ssi_ensemble)
 
     # Calculate for observed if provided
     drought_metrics_obs = None
     if observed is not None:
-        ssi_obs = ssi_calc.calculate_ssi(observed)
+        ssi_obs = ssi_calc.transform(observed)
         drought_metrics_obs = get_drought_metrics(ssi_obs)
 
     # Determine color scale range (use both datasets if available)
     max_color_val = drought_metrics_ensemble[color_metric].abs().max()
     if drought_metrics_obs is not None:
-        max_color_val = max(max_color_val,
-                           drought_metrics_obs[color_metric].abs().max())
+        max_color_val = max(
+            max_color_val, drought_metrics_obs[color_metric].abs().max()
+        )
 
     # Plot ensemble drought characteristics
     if len(drought_metrics_ensemble) > 0:
@@ -144,11 +157,11 @@ def plot_drought_characteristics(
             cmap=cmap,
             s=100,
             alpha=0.5,
-            edgecolor='none',
+            edgecolor="none",
             vmin=0,
             vmax=max_color_val,
-            label='Ensemble',
-            **kwargs
+            label="Ensemble",
+            **kwargs,
         )
 
     # Plot observed drought characteristics
@@ -160,32 +173,32 @@ def plot_drought_characteristics(
             cmap=cmap,
             s=100,
             alpha=1.0,
-            edgecolor='k',
+            edgecolor="k",
             linewidth=1.5,
             vmin=0,
             vmax=max_color_val,
-            label='Observed',
-            **kwargs
+            label="Observed",
+            **kwargs,
         )
 
     # Add colorbar
     if len(drought_metrics_ensemble) > 0:
         cbar = plt.colorbar(scatter_ens, ax=ax)
-        cbar.set_label(color_metric.capitalize(), fontsize=LAYOUT['label_fontsize'])
+        cbar.set_label(color_metric.capitalize(), fontsize=LAYOUT["label_fontsize"])
 
     # Set labels
     if xlabel is None:
         xlabel = x_metric.capitalize()
     if ylabel is None:
-        ylabel = f'-{y_metric.capitalize()}'  # Negative sign for duration
+        ylabel = f"-{y_metric.capitalize()}"  # Negative sign for duration
     if title is None:
-        title = f'Drought Characteristics - {site_name}'
+        title = f"Drought Characteristics - {site_name}"
 
     # Apply styling
     apply_default_styling(ax, title, xlabel, ylabel, legend, grid=True, log_scale=False)
 
     # Tight layout
-    if LAYOUT['tight_layout']:
+    if LAYOUT["tight_layout"]:
         fig.tight_layout()
 
     # Save if filename provided
@@ -204,15 +217,15 @@ def plot_ssi_timeseries(
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
     ax: Optional[plt.Axes] = None,
-    figsize: Tuple[float, float] = LAYOUT['default_figsize'],
+    figsize: Tuple[float, float] = LAYOUT["default_figsize"],
     title: Optional[str] = None,
     xlabel: Optional[str] = None,
     ylabel: Optional[str] = None,
     legend: bool = True,
     grid: bool = True,
     filename: Optional[str] = None,
-    dpi: int = LAYOUT['save_dpi'],
-    **kwargs
+    dpi: int = LAYOUT["save_dpi"],
+    **kwargs,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
     Plot SSI timeseries with drought period shading.
@@ -278,12 +291,12 @@ def plot_ssi_timeseries(
     site_data, site_name = get_site_data(ensemble, site)
 
     # Calculate SSI for each realization
-    ssi_calc = SSIDroughtMetrics(timescale='M', window=window)
     ssi_realizations = {}
 
     for real_id in site_data.columns:
         try:
-            ssi_realizations[real_id] = ssi_calc.calculate_ssi(site_data[real_id])
+            ssi_calc = SSI(timescale=window, fit_freq="ME")
+            ssi_realizations[real_id] = ssi_calc.fit_transform(site_data[real_id])
         except Exception as e:
             # Skip realizations that fail SSI calculation
             continue
@@ -299,15 +312,30 @@ def plot_ssi_timeseries(
 
     # Add drought threshold shading
     # Moderate drought: SSI < -1
-    ax.axhspan(-3, -2, alpha=0.1, color=COLORS['drought_extreme'],
-              label='Extreme Drought (SSI < -2)')
-    ax.axhspan(-2, -1, alpha=0.1, color=COLORS['drought_severe'],
-              label='Severe Drought (-2 < SSI < -1)')
-    ax.axhspan(-1, 0, alpha=0.1, color=COLORS['drought_moderate'],
-              label='Moderate Drought (-1 < SSI < 0)')
+    ax.axhspan(
+        -3,
+        -2,
+        alpha=0.1,
+        color=COLORS["drought_extreme"],
+        label="Extreme Drought (SSI < -2)",
+    )
+    ax.axhspan(
+        -2,
+        -1,
+        alpha=0.1,
+        color=COLORS["drought_severe"],
+        label="Severe Drought (-2 < SSI < -1)",
+    )
+    ax.axhspan(
+        -1,
+        0,
+        alpha=0.1,
+        color=COLORS["drought_moderate"],
+        label="Moderate Drought (-1 < SSI < 0)",
+    )
 
     # Add zero line
-    ax.axhline(0, color=COLORS['zero_line'], linewidth=1, linestyle='--')
+    ax.axhline(0, color=COLORS["zero_line"], linewidth=1, linestyle="--")
 
     # Plot percentiles
     if percentiles is not None and len(percentiles) > 0:
@@ -317,37 +345,46 @@ def plot_ssi_timeseries(
 
         # Fill between outer percentiles
         if len(sorted_percs) >= 2:
-            ax.fill_between(perc_data.index,
-                          perc_data[f'p{sorted_percs[0]}'],
-                          perc_data[f'p{sorted_percs[-1]}'],
-                          color=COLORS['ensemble_fill'],
-                          alpha=STYLE['fill_alpha'],
-                          label=f'Ensemble {sorted_percs[0]}-{sorted_percs[-1]}th %ile')
+            ax.fill_between(
+                perc_data.index,
+                perc_data[f"p{sorted_percs[0]}"],
+                perc_data[f"p{sorted_percs[-1]}"],
+                color=COLORS["ensemble_fill"],
+                alpha=STYLE["fill_alpha"],
+                label=f"Ensemble {sorted_percs[0]}-{sorted_percs[-1]}th %ile",
+            )
 
         # Plot median
         if 50 in percentiles:
-            ax.plot(perc_data.index, perc_data['p50'],
-                   color=COLORS['ensemble_median'],
-                   linewidth=STYLE['ensemble_linewidth'],
-                   label='Ensemble Median')
+            ax.plot(
+                perc_data.index,
+                perc_data["p50"],
+                color=COLORS["ensemble_median"],
+                linewidth=STYLE["ensemble_linewidth"],
+                label="Ensemble Median",
+            )
 
     # Plot observed SSI if provided
     if observed is not None:
-        ssi_obs = ssi_calc.calculate_ssi(observed)
+        ssi_obs_calc = SSI(timescale=window, fit_freq="ME")
+        ssi_obs = ssi_obs_calc.fit_transform(observed)
         ssi_obs = subset_date_range(ssi_obs.to_frame(), start_date, end_date).iloc[:, 0]
 
-        ax.plot(ssi_obs.index, ssi_obs.values,
-               color=COLORS['observed'],
-               linewidth=STYLE['observed_linewidth'],
-               label='Observed')
+        ax.plot(
+            ssi_obs.index,
+            ssi_obs.values,
+            color=COLORS["observed"],
+            linewidth=STYLE["observed_linewidth"],
+            label="Observed",
+        )
 
     # Set labels
     if xlabel is None:
-        xlabel = 'Date'
+        xlabel = "Date"
     if ylabel is None:
-        ylabel = 'Standardized Streamflow Index (SSI)'
+        ylabel = "Standardized Streamflow Index (SSI)"
     if title is None:
-        title = f'SSI Timeseries ({window}-month window) - {site_name}'
+        title = f"SSI Timeseries ({window}-month window) - {site_name}"
 
     # Format date axis
     format_date_axis(ax, ssi_df)
@@ -361,7 +398,7 @@ def plot_ssi_timeseries(
     ax.set_ylim(y_min, y_max)
 
     # Tight layout
-    if LAYOUT['tight_layout']:
+    if LAYOUT["tight_layout"]:
         fig.tight_layout()
 
     # Save if filename provided

@@ -48,24 +48,25 @@ class KNNBootstrapGenerator(Generator):
     hydrologic time series. Water Resources Research, 32(3), 679-693.
     """
 
+    supports_multisite = True
+    supported_frequencies = ("MS", "YS", "D")
+
     def __init__(
         self,
-        Q_obs: pd.DataFrame,
+        *,
         n_neighbors: Optional[int] = None,
         feature_cols: Optional[List[str]] = None,
         index_site: Optional[str] = None,
         block_size: int = 1,
         name: Optional[str] = None,
         debug: bool = False,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Initialize KNN Bootstrap generator.
 
         Parameters
         ----------
-        Q_obs : pd.DataFrame
-            Observed historical flow data with DatetimeIndex.
         n_neighbors : int, optional
             Number of neighbors K. If None, uses ceil(sqrt(n)) where n is the
             number of historical timesteps.
@@ -83,7 +84,7 @@ class KNNBootstrapGenerator(Generator):
         **kwargs : Any
             Additional parameters (stored but not used).
         """
-        super().__init__(Q_obs=Q_obs, name=name, debug=debug)
+        super().__init__(name=name, debug=debug)
 
         # Store algorithm-specific parameters
         self.n_neighbors = n_neighbors
@@ -93,18 +94,18 @@ class KNNBootstrapGenerator(Generator):
 
         # Update init_params
         self.init_params.algorithm_params = {
-            'method': 'KNNBootstrap',
-            'n_neighbors': n_neighbors,
-            'feature_cols': feature_cols,
-            'index_site': index_site,
-            'block_size': block_size,
+            "method": "KNNBootstrap",
+            "n_neighbors": n_neighbors,
+            "feature_cols": feature_cols,
+            "index_site": index_site,
+            "block_size": block_size,
         }
 
         # Will be initialized during preprocessing/fitting
         self._knn_model = None
         self._feature_vectors = None  # Historical feature vectors for KNN
         self._successor_values = None  # Q_{t+1} for each historical t
-        self._kernel_weights = None   # Lall-Sharma kernel weights
+        self._kernel_weights = None  # Lall-Sharma kernel weights
         self._Q_obs = None
         self._frequency = None
 
@@ -120,9 +121,7 @@ class KNNBootstrapGenerator(Generator):
         return self._frequency
 
     def preprocessing(
-        self,
-        sites: Optional[List[str]] = None,
-        **kwargs: Any
+        self, Q_obs, *, sites: Optional[List[str]] = None, **kwargs: Any
     ) -> None:
         """
         Preprocess and validate observed flow data.
@@ -132,24 +131,17 @@ class KNNBootstrapGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame
+            Observed historical flow data with DatetimeIndex.
         sites : list, optional
             Sites to use. If None, uses all columns.
         **kwargs : Any
             Additional preprocessing parameters.
         """
-        # Validate input data
-        Q_obs = self.validate_input_data(self._Q_obs_raw)
+        Q = self._store_obs_data(Q_obs, sites=sites)
 
-        # Select sites if specified
-        if sites is not None:
-            missing = set(sites) - set(Q_obs.columns)
-            if missing:
-                raise ValueError(f"Sites not found in data: {missing}")
-            Q_obs = Q_obs[sites]
-
-        # Store preprocessed data and sites
-        self._Q_obs = Q_obs
-        self._sites = Q_obs.columns.tolist()
+        # Store preprocessed data
+        self._Q_obs = Q
 
         # Determine temporal frequency
         self._detect_frequency()
@@ -203,7 +195,7 @@ class KNNBootstrapGenerator(Generator):
         Sets self._frequency to 'MS' (month start) or 'YS' (annual start).
         """
         if len(self._Q_obs) < 2:
-            self._frequency = 'MS'  # Default
+            self._frequency = "MS"  # Default
             return
 
         # Get time differences between consecutive timestamps
@@ -211,13 +203,15 @@ class KNNBootstrapGenerator(Generator):
         median_diff = np.median([td.days for td in time_diffs])
 
         if median_diff < 10:  # Daily or weekly
-            self._frequency = 'D'
+            self._frequency = "D"
         elif median_diff < 200:  # Monthly
-            self._frequency = 'MS'
+            self._frequency = "MS"
         else:  # Annual
-            self._frequency = 'YS'
+            self._frequency = "YS"
 
-        self.logger.debug(f"Detected frequency: {self._frequency} (median diff: {median_diff} days)")
+        self.logger.debug(
+            f"Detected frequency: {self._frequency} (median diff: {median_diff} days)"
+        )
 
     def _build_feature_successor_pairs(self) -> None:
         """
@@ -234,7 +228,7 @@ class KNNBootstrapGenerator(Generator):
         successors_all = self._Q_obs.values[1:]
         months_all = self._Q_obs.index[:-1].month  # month of the feature row
 
-        self._is_monthly_conditioned = self._frequency in ('MS', 'M', 'ME')
+        self._is_monthly_conditioned = self._frequency in ("MS", "M", "ME")
 
         if self._is_monthly_conditioned:
             # Build per-month pools
@@ -244,9 +238,7 @@ class KNNBootstrapGenerator(Generator):
                 mask = months_all == m
                 self._monthly_features[m] = features_all[mask]
                 self._monthly_successors[m] = successors_all[mask]
-                self.logger.debug(
-                    "Month %d: %d feature-successor pairs", m, mask.sum()
-                )
+                self.logger.debug("Month %d: %d feature-successor pairs", m, mask.sum())
             # Also keep global pool as fallback
             self._feature_vectors = features_all
             self._successor_values = successors_all
@@ -256,7 +248,9 @@ class KNNBootstrapGenerator(Generator):
 
         self.logger.debug(
             "Built %d feature-successor pairs (features: %d, successors: %d)",
-            len(features_all), features_all.shape[1], successors_all.shape[1],
+            len(features_all),
+            features_all.shape[1],
+            successors_all.shape[1],
         )
 
     def _make_kernel_weights(self, k: int) -> np.ndarray:
@@ -276,7 +270,7 @@ class KNNBootstrapGenerator(Generator):
         harmonic_sum = np.sum([1.0 / i for i in range(1, k + 1)])
         return np.array([1.0 / (i + 1) / harmonic_sum for i in range(k)])
 
-    def fit(self, **kwargs: Any) -> None:
+    def fit(self, Q_obs=None, *, sites=None, **kwargs: Any) -> None:
         """
         Fit KNN model(s) to preprocessed data.
 
@@ -288,9 +282,16 @@ class KNNBootstrapGenerator(Generator):
 
         Parameters
         ----------
+        Q_obs : pd.Series or pd.DataFrame, optional
+            Observed historical flow data. If provided, preprocessing is called
+            automatically.
+        sites : list of str, optional
+            Sites to use (only when Q_obs is provided).
         **kwargs : Any
             Additional fitting parameters.
         """
+        if Q_obs is not None:
+            self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
         if self._is_monthly_conditioned:
@@ -301,7 +302,7 @@ class KNNBootstrapGenerator(Generator):
                 n_m = len(self._monthly_features[m])
                 k_m = min(self._n_neighbors, n_m - 1) if n_m > 1 else 1
                 knn = NearestNeighbors(
-                    n_neighbors=k_m, algorithm='auto', metric='euclidean'
+                    n_neighbors=k_m, algorithm="auto", metric="euclidean"
                 )
                 knn.fit(self._monthly_features[m])
                 self._monthly_knn[m] = knn
@@ -314,8 +315,8 @@ class KNNBootstrapGenerator(Generator):
             # Global KNN model
             self._knn_model = NearestNeighbors(
                 n_neighbors=self._n_neighbors,
-                algorithm='auto',
-                metric='euclidean',
+                algorithm="auto",
+                metric="euclidean",
             )
             self._knn_model.fit(self._feature_vectors)
             self.logger.info(
@@ -344,7 +345,7 @@ class KNNBootstrapGenerator(Generator):
         # Get training period from original data
         training_period = (
             str(self._Q_obs.index[0].date()),
-            str(self._Q_obs.index[-1].date())
+            str(self._Q_obs.index[-1].date()),
         )
 
         return FittedParams(
@@ -352,11 +353,11 @@ class KNNBootstrapGenerator(Generator):
             stds_=None,
             correlations_=None,
             distributions_=None,
-            fitted_models_={'knn_model': self._knn_model},
+            fitted_models_={"knn_model": self._knn_model},
             n_parameters_=n_params,
             sample_size_=len(self._feature_vectors),
             n_sites_=self.n_sites,
-            training_period_=training_period
+            training_period_=training_period,
         )
 
     def generate(
@@ -365,7 +366,7 @@ class KNNBootstrapGenerator(Generator):
         n_years: Optional[int] = None,
         n_timesteps: Optional[int] = None,
         seed: Optional[int] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Ensemble:
         """
         Generate synthetic streamflow realizations.
@@ -403,9 +404,9 @@ class KNNBootstrapGenerator(Generator):
             n_generate = n_timesteps
         elif n_years is not None:
             # Estimate timesteps per year based on frequency
-            if self._frequency == 'D':
+            if self._frequency == "D":
                 n_generate = n_years * 365
-            elif self._frequency == 'YS':
+            elif self._frequency == "YS":
                 n_generate = n_years
             else:  # 'MS' or monthly
                 n_generate = n_years * 12
@@ -428,8 +429,8 @@ class KNNBootstrapGenerator(Generator):
             time_resolution=self._frequency,
             time_period=(
                 str(realization_dict[0].index[0].date()),
-                str(realization_dict[0].index[-1].date())
-            )
+                str(realization_dict[0].index[-1].date()),
+            ),
         )
 
         # Create and return Ensemble
@@ -461,15 +462,18 @@ class KNNBootstrapGenerator(Generator):
             Synthetic flow data with DatetimeIndex and site columns.
         """
         # Build date index first so we know each timestep's month
-        if self._frequency == 'D':
-            freq = 'D'
-        elif self._frequency == 'YS':
-            freq = 'YS'
+        if self._frequency == "D":
+            freq = "D"
+        elif self._frequency == "YS":
+            freq = "YS"
         else:
-            freq = 'MS'
+            freq = "MS"
 
-        start_date = self._Q_obs.index[-1] + pd.DateOffset(months=1) \
-            if freq == 'MS' else self._Q_obs.index[-1] + pd.Timedelta(days=1)
+        start_date = (
+            self._Q_obs.index[-1] + pd.DateOffset(months=1)
+            if freq == "MS"
+            else self._Q_obs.index[-1] + pd.Timedelta(days=1)
+        )
         date_index = pd.date_range(start=start_date, periods=n_timesteps, freq=freq)
 
         Q_syn = np.zeros((n_timesteps, len(self._sites)))

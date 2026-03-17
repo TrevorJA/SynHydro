@@ -4,8 +4,11 @@ Pre-built pipeline configurations.
 This module provides convenience wrapper classes for common generator-disaggregator
 combinations. These classes internally use the GeneratorDisaggregatorPipeline but
 provide a simplified interface for frequently used combinations.
+
+Data is not passed at construction time. Use ``preprocessing(Q_obs)`` or
+``fit(Q_obs)`` to supply observed flow data.
 """
-import pandas as pd
+
 from typing import Optional
 
 from synhydro.core.pipeline import GeneratorDisaggregatorPipeline
@@ -22,12 +25,11 @@ class KirschNowakPipeline(GeneratorDisaggregatorPipeline):
     bootstrap method, then disaggregates them to daily flows using the Nowak
     KNN-based temporal disaggregation method.
 
+    Data is not passed at construction time. Use ``preprocessing(Q_obs)`` or
+    ``fit(Q_obs)`` to supply observed flow data.
+
     Parameters
     ----------
-    Q_obs : pd.DataFrame
-        Daily observed streamflow data with DatetimeIndex.
-        Used to train both the generator (aggregated to monthly) and
-        disaggregator (used as daily).
     generate_using_log_flow : bool, default=True
         Whether to generate in log-space (Kirsch parameter).
     matrix_repair_method : str, default='spectral'
@@ -49,11 +51,11 @@ class KirschNowakPipeline(GeneratorDisaggregatorPipeline):
     >>> # Load daily historic flows
     >>> Q_daily = pd.read_csv('daily_flows.csv', index_col=0, parse_dates=True)
     >>>
-    >>> # Create pipeline
-    >>> pipeline = KirschNowakPipeline(Q_daily)
+    >>> # Create pipeline (no data)
+    >>> pipeline = KirschNowakPipeline()
     >>>
     >>> # Fit and generate
-    >>> pipeline.preprocessing()
+    >>> pipeline.preprocessing(Q_daily)
     >>> pipeline.fit()
     >>> daily_ensemble = pipeline.generate(n_realizations=100, n_years=50)
 
@@ -61,9 +63,10 @@ class KirschNowakPipeline(GeneratorDisaggregatorPipeline):
     -----
     This pipeline is equivalent to creating:
     ```python
-    generator = KirschGenerator(Q_obs, generate_using_log_flow=True)
-    disaggregator = NowakDisaggregator(Q_obs, n_neighbors=5)
+    generator = KirschGenerator(generate_using_log_flow=True)
+    disaggregator = NowakDisaggregator(n_neighbors=5)
     pipeline = GeneratorDisaggregatorPipeline(generator, disaggregator)
+    pipeline.fit(Q_obs)
     ```
 
     References
@@ -72,21 +75,21 @@ class KirschNowakPipeline(GeneratorDisaggregatorPipeline):
     Nowak disaggregator: KNN-based temporal disaggregation (Nowak et al., 2010)
     """
 
-    def __init__(self,
-                 Q_obs: pd.DataFrame,
-                 generate_using_log_flow: bool = True,
-                 matrix_repair_method: str = 'spectral',
-                 n_neighbors: int = 5,
-                 max_month_shift: int = 7,
-                 name: Optional[str] = None,
-                 debug: bool = False):
+    def __init__(
+        self,
+        *,
+        generate_using_log_flow: bool = True,
+        matrix_repair_method: str = "spectral",
+        n_neighbors: int = 5,
+        max_month_shift: int = 7,
+        name: Optional[str] = None,
+        debug: bool = False,
+    ):
         """
         Initialize the Kirsch-Nowak pipeline.
 
         Parameters
         ----------
-        Q_obs : pd.DataFrame
-            Daily observed streamflow data.
         generate_using_log_flow : bool, default=True
             Generate in log-space for Kirsch.
         matrix_repair_method : str, default='spectral'
@@ -102,18 +105,16 @@ class KirschNowakPipeline(GeneratorDisaggregatorPipeline):
         """
         # Create Kirsch generator
         generator = KirschGenerator(
-            Q_obs=Q_obs,
             generate_using_log_flow=generate_using_log_flow,
             matrix_repair_method=matrix_repair_method,
-            debug=debug
+            debug=debug,
         )
 
         # Create Nowak disaggregator
         disaggregator = NowakDisaggregator(
-            Q_obs=Q_obs,
             n_neighbors=n_neighbors,
             max_month_shift=max_month_shift,
-            debug=debug
+            debug=debug,
         )
 
         # Initialize parent pipeline
@@ -121,7 +122,7 @@ class KirschNowakPipeline(GeneratorDisaggregatorPipeline):
             generator=generator,
             disaggregator=disaggregator,
             name=name or "KirschNowakPipeline",
-            debug=debug
+            debug=debug,
         )
 
 
@@ -136,13 +137,11 @@ class ThomasFieringNowakPipeline(GeneratorDisaggregatorPipeline):
     Note: Thomas-Fiering is a univariate method, so only single-site generation
     is supported. For multisite, use KirschNowakPipeline instead.
 
+    Data is not passed at construction time. Use ``preprocessing(Q_obs)`` or
+    ``fit(Q_obs)`` to supply observed flow data.
+
     Parameters
     ----------
-    Q_obs : pd.Series or pd.DataFrame
-        Daily observed streamflow data with DatetimeIndex.
-        If DataFrame, only the first column is used (Thomas-Fiering is univariate).
-        Used to train both the generator (aggregated to monthly) and
-        disaggregator (used as daily).
     n_neighbors : int, default=5
         Number of KNN neighbors for disaggregation (Nowak parameter).
     max_month_shift : int, default=7
@@ -160,11 +159,11 @@ class ThomasFieringNowakPipeline(GeneratorDisaggregatorPipeline):
     >>> # Load daily historic flows (single site)
     >>> Q_daily = pd.read_csv('daily_flows.csv', index_col=0, parse_dates=True)
     >>>
-    >>> # Create pipeline
-    >>> pipeline = ThomasFieringNowakPipeline(Q_daily['site_1'])
+    >>> # Create pipeline (no data)
+    >>> pipeline = ThomasFieringNowakPipeline()
     >>>
     >>> # Fit and generate
-    >>> pipeline.preprocessing()
+    >>> pipeline.preprocessing(Q_daily['site_1'])
     >>> pipeline.fit()
     >>> daily_ensemble = pipeline.generate(n_realizations=100, n_years=50)
 
@@ -172,9 +171,10 @@ class ThomasFieringNowakPipeline(GeneratorDisaggregatorPipeline):
     -----
     This pipeline is equivalent to creating:
     ```python
-    generator = ThomasFieringGenerator(Q_obs)
-    disaggregator = NowakDisaggregator(Q_obs, n_neighbors=5)
+    generator = ThomasFieringGenerator()
+    disaggregator = NowakDisaggregator(n_neighbors=5)
     pipeline = GeneratorDisaggregatorPipeline(generator, disaggregator)
+    pipeline.fit(Q_obs)
     ```
 
     References
@@ -183,20 +183,19 @@ class ThomasFieringNowakPipeline(GeneratorDisaggregatorPipeline):
     Nowak disaggregator: KNN-based temporal disaggregation (Nowak et al., 2010)
     """
 
-    def __init__(self,
-                 Q_obs,
-                 n_neighbors: int = 5,
-                 max_month_shift: int = 7,
-                 name: Optional[str] = None,
-                 debug: bool = False):
+    def __init__(
+        self,
+        *,
+        n_neighbors: int = 5,
+        max_month_shift: int = 7,
+        name: Optional[str] = None,
+        debug: bool = False,
+    ):
         """
         Initialize the Thomas-Fiering-Nowak pipeline.
 
         Parameters
         ----------
-        Q_obs : pd.Series or pd.DataFrame
-            Daily observed streamflow data. If DataFrame with multiple columns,
-            only the first column is used (Thomas-Fiering is univariate).
         n_neighbors : int, default=5
             Number of KNN neighbors for Nowak.
         max_month_shift : int, default=7
@@ -208,16 +207,14 @@ class ThomasFieringNowakPipeline(GeneratorDisaggregatorPipeline):
         """
         # Create Thomas-Fiering generator
         generator = ThomasFieringGenerator(
-            Q_obs=Q_obs,
-            debug=debug
+            debug=debug,
         )
 
         # Create Nowak disaggregator
         disaggregator = NowakDisaggregator(
-            Q_obs=Q_obs,
             n_neighbors=n_neighbors,
             max_month_shift=max_month_shift,
-            debug=debug
+            debug=debug,
         )
 
         # Initialize parent pipeline
@@ -225,5 +222,5 @@ class ThomasFieringNowakPipeline(GeneratorDisaggregatorPipeline):
             generator=generator,
             disaggregator=disaggregator,
             name=name or "ThomasFieringNowakPipeline",
-            debug=debug
+            debug=debug,
         )
