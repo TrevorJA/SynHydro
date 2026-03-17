@@ -585,6 +585,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="05_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ensemble Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1006,39 +1029,39 @@
 
 
 <h1 id="tutorials">Tutorials<a class="headerlink" href="#tutorials" title="Permanent link">&para;</a></h1>
-<p>Concise examples covering the core SynHydro workflows.</p>
+<p>Step-by-step guides, each focused on a single SynHydro workflow.</p>
 <table>
 <thead>
 <tr>
 <th>Tutorial</th>
-<th>Generator</th>
-<th>Description</th>
+<th>What you'll learn</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="01_quickstart/">Quickstart</a></td>
-<td><code>ThomasFieringGenerator</code></td>
-<td>Single-site monthly generation</td>
+<td><a href="01_quickstart/">01 — Quickstart</a></td>
+<td>Three-step generator workflow: preprocessing, fit, generate</td>
 </tr>
 <tr>
-<td><a href="02_multisite/">Multi-Site Monthly</a></td>
-<td><code>KirschGenerator</code></td>
-<td>Multi-site nonparametric bootstrap</td>
+<td><a href="02_multisite/">02 — Multi-Site</a></td>
+<td>Multi-site generation with spatial correlation preservation</td>
 </tr>
 <tr>
-<td><a href="03_pipeline/">Monthly→Daily Pipeline</a></td>
-<td><code>KirschNowakPipeline</code></td>
-<td>Full monthly-to-daily workflow</td>
+<td><a href="03_pipeline/">03 — Pipeline</a></td>
+<td>Monthly-to-daily disaggregation via <code>KirschNowakPipeline</code></td>
 </tr>
 <tr>
-<td><a href="04_drought_analysis/">Drought Analysis</a></td>
-<td><code>SSIDroughtMetrics</code></td>
-<td>SSI calculation and drought metrics</td>
+<td><a href="04_drought_analysis/">04 — Drought Analysis</a></td>
+<td>SSI calculation and drought event extraction</td>
+</tr>
+<tr>
+<td><a href="05_validation/">05 — Ensemble Validation</a></td>
+<td><code>validate_ensemble</code> metrics and <code>plot_validation_panel</code></td>
 </tr>
 </tbody>
 </table>
-<p>All examples use <code>synhydro.load_example_data()</code>, which returns a multi-site daily streamflow <code>DataFrame</code>.</p>
+<p>All examples use <code>synhydro.load_example_data()</code>, which returns a multi-site
+daily streamflow <code>DataFrame</code>.</p>
 
 
 

@@ -570,6 +570,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/05_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ensemble Validation
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -962,39 +985,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ssidroughtmetrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      SSIDroughtMetrics
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#synhydro.droughts.ssi.SSIDroughtMetrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      SSIDroughtMetrics
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="SSIDroughtMetrics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#synhydro.droughts.ssi.SSIDroughtMetrics.calculate_ssi" class="md-nav__link">
-    <span class="md-ellipsis">
-      calculate_ssi
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#ssi" class="md-nav__link">
     <span class="md-ellipsis">
       SSI
@@ -1216,39 +1206,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ssidroughtmetrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      SSIDroughtMetrics
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#synhydro.droughts.ssi.SSIDroughtMetrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      SSIDroughtMetrics
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="SSIDroughtMetrics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#synhydro.droughts.ssi.SSIDroughtMetrics.calculate_ssi" class="md-nav__link">
-    <span class="md-ellipsis">
-      calculate_ssi
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#ssi" class="md-nav__link">
     <span class="md-ellipsis">
       SSI
@@ -1424,251 +1381,6 @@
 
 
 <h1 id="drought-metrics">Drought Metrics<a class="headerlink" href="#drought-metrics" title="Permanent link">&para;</a></h1>
-<h2 id="ssidroughtmetrics">SSIDroughtMetrics<a class="headerlink" href="#ssidroughtmetrics" title="Permanent link">&para;</a></h2>
-
-
-<div class="doc doc-object doc-class">
-
-
-
-<h2 id="synhydro.droughts.ssi.SSIDroughtMetrics" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">SSIDroughtMetrics</span>
-
-
-<a href="#synhydro.droughts.ssi.SSIDroughtMetrics" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">SSIDroughtMetrics</span><span class="p">(</span><span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;M&#39;</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span> <span class="n">dist</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ContinuousDist</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;gamma&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents first">
-
-
-
-        <p>Class to calculate and store drought metrics based on the Standardized Streamflow Index (SSI).</p>
-<p>Attributes:
-    timescale (str): Temporal scale ('D' for daily, 'M' for monthly).
-    window (int): Rolling window size for aggregation.
-    dist (ContinuousDist): Probability distribution for SSI calculation (default: gamma).
-    ssi (pd.Series): Series of SSI values.
-    drought_metrics (pd.DataFrame): DataFrame containing drought metrics.</p>
-
-        <p>Initialize the SSIDroughtMetrics class.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>timescale</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Temporal scale: 'D' for daily, 'M' for monthly.</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;M&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>window</code>
-            </td>
-            <td>
-                  <code><span title="int">int</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Rolling window size for aggregation before SSI calculation.</p>
-              </div>
-            </td>
-            <td>
-                  <code>12</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>dist</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span> or <span title="spei._typing.ContinuousDist">ContinuousDist</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Probability distribution to use for SSI calculation.
-Can be string name from registry or scipy distribution object.
-Common string options: 'gamma', 'lognorm', 'pearson3', 'weibull'
-Or pass scipy object directly: scs.gamma, scs.lognorm, etc.</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;gamma&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>data</code>
-            </td>
-            <td>
-                  <code><span title="pandas.Series">Series</span> or <span title="pandas.DataFrame">DataFrame</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Initial data to set.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Examples:</span></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using string name (recommended)</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">ssi</span> <span class="o">=</span> <span class="n">SSIDroughtMetrics</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="s1">&#39;gamma&#39;</span><span class="p">)</span>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using scipy object directly</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">scs</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">ssi</span> <span class="o">=</span> <span class="n">SSIDroughtMetrics</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="n">scs</span><span class="o">.</span><span class="n">lognorm</span><span class="p">)</span>
-</span></code></pre></div>
-
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-children">
-
-
-
-
-
-
-
-
-
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="synhydro.droughts.ssi.SSIDroughtMetrics.calculate_ssi" class="doc doc-heading">
-            <span class="doc doc-object-name doc-function-name">calculate_ssi</span>
-
-
-<a href="#synhydro.droughts.ssi.SSIDroughtMetrics.calculate_ssi" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">calculate_ssi</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span></code></pre></div>
-
-    <div class="doc doc-contents ">
-
-        <p>Calculate the Standardized Streamflow Index (SSI).</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>data</code>
-            </td>
-            <td>
-                  <code><span title="pandas.Series">Series</span> or <span title="pandas.DataFrame">DataFrame</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Data to calculate SSI for. If None, uses previously set data.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="pandas.Series">Series</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>SSI values.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="ValueError">ValueError</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If no data is provided and no data was previously set.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    </div>
-
-</div>
-
-
-
-  </div>
-
-    </div>
-
-</div><hr />
 <h2 id="ssi">SSI<a class="headerlink" href="#ssi" title="Permanent link">&para;</a></h2>
 
 

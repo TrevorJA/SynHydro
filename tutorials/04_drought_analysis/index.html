@@ -18,7 +18,7 @@
         <link rel="prev" href="../03_pipeline/">
       
       
-        <link rel="next" href="../../algorithms/">
+        <link rel="next" href="../05_validation/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#drought-analysis" class="md-skip">
+        <a href="#drought-analysis-with-ssi" class="md-skip">
           Skip to content
         </a>
       
@@ -609,27 +609,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ssi-calculation" class="md-nav__link">
+  <a href="#calculate-ssi" class="md-nav__link">
     <span class="md-ellipsis">
-      SSI Calculation
+      Calculate SSI
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#drought-metrics" class="md-nav__link">
+  <a href="#visualize" class="md-nav__link">
     <span class="md-ellipsis">
-      Drought Metrics
+      Visualize
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#comparing-observed-vs-synthetic" class="md-nav__link">
+  <a href="#extract-drought-events" class="md-nav__link">
     <span class="md-ellipsis">
-      Comparing Observed vs. Synthetic
+      Extract drought events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next steps
     </span>
   </a>
   
@@ -639,6 +648,29 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_validation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Ensemble Validation
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1054,27 +1086,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#ssi-calculation" class="md-nav__link">
+  <a href="#calculate-ssi" class="md-nav__link">
     <span class="md-ellipsis">
-      SSI Calculation
+      Calculate SSI
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#drought-metrics" class="md-nav__link">
+  <a href="#visualize" class="md-nav__link">
     <span class="md-ellipsis">
-      Drought Metrics
+      Visualize
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#comparing-observed-vs-synthetic" class="md-nav__link">
+  <a href="#extract-drought-events" class="md-nav__link">
     <span class="md-ellipsis">
-      Comparing Observed vs. Synthetic
+      Extract drought events
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next steps
     </span>
   </a>
   
@@ -1099,40 +1140,54 @@
   
 
 
-<h1 id="drought-analysis">Drought Analysis<a class="headerlink" href="#drought-analysis" title="Permanent link">&para;</a></h1>
-<p>SynHydro provides Standardized Streamflow Index (SSI) calculation and drought metric extraction
-via <code>SSIDroughtMetrics</code>.</p>
-<h2 id="ssi-calculation">SSI Calculation<a class="headerlink" href="#ssi-calculation" title="Permanent link">&para;</a></h2>
+<h1 id="drought-analysis-with-ssi">Drought Analysis with SSI<a class="headerlink" href="#drought-analysis-with-ssi" title="Permanent link">&para;</a></h1>
+<p>SynHydro provides the <strong>Standardized Streamflow Index (SSI)</strong> for
+characterizing drought from streamflow data. This tutorial covers the
+SSI calculation and drought event extraction workflow.</p>
+<h2 id="calculate-ssi">Calculate SSI<a class="headerlink" href="#calculate-ssi" title="Permanent link">&para;</a></h2>
+<p>SSI transforms raw flows into standardized anomalies by fitting a probability
+distribution within a rolling window. Values below -1 indicate drought;
+below -2 is extreme.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">synhydro</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">Q_daily</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">load_example_data</span><span class="p">()</span>
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">Q_monthly</span> <span class="o">=</span> <span class="n">Q_daily</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;MS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="n">site</span> <span class="o">=</span> <span class="n">Q_monthly</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="c1"># Calculate 12-month SSI using gamma distribution</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">ssi_calc</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">SSIDroughtMetrics</span><span class="p">(</span><span class="n">timescale</span><span class="o">=</span><span class="s2">&quot;M&quot;</span><span class="p">,</span> <span class="n">window</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">dist</span><span class="o">=</span><span class="s2">&quot;gamma&quot;</span><span class="p">)</span>
-</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">ssi</span> <span class="o">=</span> <span class="n">ssi_calc</span><span class="o">.</span><span class="n">calculate_ssi</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">[</span><span class="n">site</span><span class="p">])</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">ssi_calc</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">SSI</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="s2">&quot;gamma&quot;</span><span class="p">,</span> <span class="n">timescale</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">fit_freq</span><span class="o">=</span><span class="s2">&quot;ME&quot;</span><span class="p">)</span>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">ssi_calc</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">[</span><span class="n">site</span><span class="p">])</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">ssi</span> <span class="o">=</span> <span class="n">ssi_calc</span><span class="o">.</span><span class="n">get_training_ssi</span><span class="p">()</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SSI mean: </span><span class="si">{</span><span class="n">ssi</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>   <span class="c1"># ≈ 0</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;SSI std:  </span><span class="si">{</span><span class="n">ssi</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>     <span class="c1"># ≈ 1</span>
 </span></code></pre></div>
-<p>The SSI series has mean ≈ 0 and std ≈ 1. Values below −1 indicate moderate-to-severe drought.</p>
-<h2 id="drought-metrics">Drought Metrics<a class="headerlink" href="#drought-metrics" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">metrics</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">get_drought_metrics</span><span class="p">(</span><span class="n">ssi</span><span class="p">)</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<h2 id="visualize">Visualize<a class="headerlink" href="#visualize" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">synhydro.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_ssi_timeseries</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_ssi_timeseries</span><span class="p">(</span><span class="n">ssi</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;SSI-12 — </span><span class="si">{</span><span class="n">site</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </span></code></pre></div>
-<p>Returned columns include: <code>duration</code>, <code>magnitude</code>, <code>severity</code> (minimum SSI), and
-<code>avg_severity</code> for each identified drought event.</p>
-<h2 id="comparing-observed-vs-synthetic">Comparing Observed vs. Synthetic<a class="headerlink" href="#comparing-observed-vs-synthetic" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">KirschGenerator</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">)</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="n">gen</span><span class="o">.</span><span class="n">preprocessing</span><span class="p">()</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_realizations</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">n_years</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="c1"># Compute SSI for each realization</span>
-</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="n">syn_ssi_list</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">Q_syn</span> <span class="ow">in</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a>    <span class="n">ssi_syn</span> <span class="o">=</span> <span class="n">ssi_calc</span><span class="o">.</span><span class="n">calculate_ssi</span><span class="p">(</span><span class="n">Q_syn</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
-</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a>    <span class="n">syn_ssi_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ssi_syn</span><span class="p">)</span>
+<p>Shaded zones mark moderate (-1 to -1.5), severe (-1.5 to -2), and
+extreme (&lt; -2) drought conditions.</p>
+<h2 id="extract-drought-events">Extract drought events<a class="headerlink" href="#extract-drought-events" title="Permanent link">&para;</a></h2>
+<p><code>get_drought_metrics</code> identifies contiguous periods where SSI stays below -1:</p>
+<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">metrics</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">get_drought_metrics</span><span class="p">(</span><span class="n">ssi</span><span class="p">)</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">metrics</span><span class="p">[[</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="s2">&quot;severity&quot;</span><span class="p">,</span> <span class="s2">&quot;avg_severity&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </span></code></pre></div>
-<p><strong>Algorithm details:</strong> <a href="../../algorithms/thomas_fiering/">Thomas-Fiering AR(1)</a> · <a href="../../algorithms/kirsch/">Kirsch Bootstrap</a></p>
+<p>Each row is a drought event with its duration, severity (minimum SSI),
+and magnitude (cumulative deficit).</p>
+<div class="admonition tip">
+<p class="admonition-title">Choosing a distribution</p>
+<p>Use <code>compare_distributions</code> to rank candidate distributions by AIC and
+Kolmogorov-Smirnov test:
+<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">results</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">compare_distributions</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+</span></code></pre></div></p>
+</div>
+<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>Ensemble validation</strong> → <a href="../05_validation/">Tutorial 05</a></li>
+<li><strong>Algorithm details</strong> → <a href="../../algorithms/kirsch/">Kirsch Bootstrap</a></li>
+</ul>
 
 
 
