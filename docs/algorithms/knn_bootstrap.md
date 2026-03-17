@@ -56,7 +56,7 @@ For multisite applications, all sites are resampled jointly using the same selec
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.DataFrame` | — | Observed streamflow with DatetimeIndex, sites as columns |
+| `Q_obs` | `pd.DataFrame` | - | Observed streamflow with DatetimeIndex, sites as columns |
 | `n_neighbors` | `Optional[int]` | `None` | K; if None, uses ceil(sqrt(n)) |
 | `feature_cols` | `Optional[List[str]]` | `None` | Columns to use as features for KNN search. If None, uses all site columns |
 | `index_site` | `Optional[str]` | `None` | Reserved for future use (multisite index site selection) |

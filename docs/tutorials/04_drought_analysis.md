@@ -30,7 +30,7 @@ print(f"SSI std:  {ssi.std():.3f}")     # ≈ 1
 ```python
 from synhydro.plotting import plot_ssi_timeseries
 
-fig, ax = plot_ssi_timeseries(ssi, title=f"SSI-12 — {site}")
+fig, ax = plot_ssi_timeseries(ssi, title=f"SSI-12 - {site}")
 ```
 
 Shaded zones mark moderate (-1 to -1.5), severe (-1.5 to -2), and
@@ -58,5 +58,5 @@ and magnitude (cumulative deficit).
 
 ## Next steps
 
-- **Ensemble validation** → [Tutorial 05](05_validation.md)
-- **Algorithm details** → [Kirsch Bootstrap](../algorithms/kirsch.md)
+- **Ensemble validation** - [Tutorial 05](05_validation.md)
+- **Algorithm details** - [Kirsch Bootstrap](../algorithms/kirsch.md)

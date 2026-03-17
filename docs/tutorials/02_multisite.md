@@ -34,6 +34,6 @@ fig, axes = plot_spatial_correlation(
 
 ## Next steps
 
-- **Monthly-to-daily pipeline** → [Tutorial 03](03_pipeline.md)
-- **Quantitative validation** → [Tutorial 05](05_validation.md)
-- **Algorithm details** → [Kirsch Bootstrap](../algorithms/kirsch.md)
+- **Monthly-to-daily pipeline** - [Tutorial 03](03_pipeline.md)
+- **Quantitative validation** - [Tutorial 05](05_validation.md)
+- **Algorithm details** - [Kirsch Bootstrap](../algorithms/kirsch.md)

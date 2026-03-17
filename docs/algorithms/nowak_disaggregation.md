@@ -26,25 +26,25 @@ For each calendar month m, fit a `sklearn.NearestNeighbors` model on the scalar 
 
 For each synthetic monthly flow `Q_syn_m`:
 
-1. **Find neighbors** — query the KNN model for the K nearest historic months by Euclidean distance on total flow.
-2. **Select one neighbor** — draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
+1. **Find neighbors** - query the KNN model for the K nearest historic months by Euclidean distance on total flow.
+2. **Select one neighbor** - draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
    ```
    K(i) = (1/i) / sum_{j=1}^{K} (1/j)
    ```
    This harmonic weighting favors closer analogs while maintaining stochastic diversity.
-3. **Disaggregate** — apply the selected month's daily proportions:
+3. **Disaggregate** - apply the selected month's daily proportions:
    ```
    q_d = Q_syn_m * (q*_d / sum(q*_d'))
    ```
    For multi-site data, each site is disaggregated independently using the same selected analog month.
-4. **Smooth month boundaries** (if `blend_days > 0`) — apply weighted blending across adjacent months to reduce discontinuities at month transitions, then rescale each month to preserve the original monthly total exactly.
+4. **Smooth month boundaries** (if `blend_days > 0`) - apply weighted blending across adjacent months to reduce discontinuities at month transitions, then rescale each month to preserve the original monthly total exactly.
 
 ## Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed daily streamflow with DatetimeIndex |
-| `n_neighbors` | `int` | `5` | K — number of candidate neighbors |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed daily streamflow with DatetimeIndex |
+| `n_neighbors` | `int` | `5` | K - number of candidate neighbors |
 | `max_month_shift` | `int` | `7` | Days of calendar flexibility around each month |
 | `blend_days` | `int` | `2` | Days of overlap smoothing at month boundaries to reduce discontinuities (0 = no blending) |
 | `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |
@@ -53,7 +53,7 @@ For each synthetic monthly flow `Q_syn_m`:
 ## Properties Preserved
 
 - Daily flow patterns within each month (borrowed from historical record)
-- Monthly totals (exact, by construction — preserved even after boundary blending)
+- Monthly totals (exact, by construction - preserved even after boundary blending)
 - Multi-site consistency (same analog month applied to all sites)
 
 **Not preserved:**

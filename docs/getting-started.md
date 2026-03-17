@@ -55,7 +55,7 @@ Q_monthly = Q_daily.resample("MS").mean()           # aggregate to monthly
 | Daily, single-site | `PhaseRandomizationGenerator` |
 | Annual, single-site | `WARMGenerator` |
 | Annual, multi-site, drought-aware | `MultiSiteHMMGenerator` |
-| Monthly→Daily disaggregation | `NowakDisaggregator` (or use a Pipeline) |
+| Monthly-to-Daily disaggregation | `NowakDisaggregator` (or use a Pipeline) |
 
 ## Basic Workflow
 

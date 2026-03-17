@@ -15,31 +15,31 @@ The Kirsch method generates synthetic multi-site monthly streamflow by bootstrap
 
 ### Preprocessing
 
-1. **Aggregate to monthly** — group by (year, month) and sum.
-2. **Optional log transform** — if `generate_using_log_flow=True`, apply `log(Q)` (clipped at 1e-6).
+1. **Aggregate to monthly** - group by (year, month) and sum.
+2. **Optional log transform** - if `generate_using_log_flow=True`, apply `log(Q)` (clipped at 1e-6).
 
 ### Fitting
 
-1. **Monthly statistics** — for each month m and site s, compute mean and standard deviation.
+1. **Monthly statistics** - for each month m and site s, compute mean and standard deviation.
 2. **Standardized residuals**:
    ```
    Z_h[y, m, s] = (Q[y, m, s] - mean[m, s]) / std[m, s]
    ```
-3. **Normal score transform** (if log-flow) — for each month-site pair:
+3. **Normal score transform** (if log-flow) - for each month-site pair:
    - Rank residuals, map to normal quantiles via Hazen plotting positions
    - Store mapping for inverse transform during generation
    - Result: `Y` in standard normal space
-4. **Cross-year shifted matrix** `Y_prime` — preserves inter-year correlations:
+4. **Cross-year shifted matrix** `Y_prime` - preserves inter-year correlations:
    ```
    Y_prime[:, 0:6, :]  = Y[:-1, 6:12, :]   # Jul-Dec of year i
    Y_prime[:, 6:12, :] = Y[1:, 0:6, :]      # Jan-Jun of year i+1
    ```
-5. **Cholesky decomposition** — for each site, compute 12x12 correlation matrix of Y (and Y_prime), repair if not PSD (spectral method), then Cholesky factor.
+5. **Cholesky decomposition** - for each site, compute 12x12 correlation matrix of Y (and Y_prime), repair if not PSD (spectral method), then Cholesky factor.
 
 ### Generation
 
-1. **Bootstrap** — sample random year indices for each (year, month) position.
-2. **Cholesky mixing** — multiply bootstrap samples by Cholesky factor to impose correlation:
+1. **Bootstrap** - sample random year indices for each (year, month) position.
+2. **Cholesky mixing** - multiply bootstrap samples by Cholesky factor to impose correlation:
    ```
    Z[:, :, s] = X[:, :, s] @ U[s]
    ```
@@ -48,7 +48,7 @@ The Kirsch method generates synthetic multi-site monthly streamflow by bootstrap
    ZC[i, 0:6, :]  = Z_prime[i, 6:12, :]    # first half from shifted
    ZC[i, 6:12, :] = Z[i+1, 6:12, :]         # second half from regular
    ```
-4. **Inverse normal score transform** (if log-flow) — map back using stored mappings with linear tail extrapolation.
+4. **Inverse normal score transform** (if log-flow) - map back using stored mappings with linear tail extrapolation.
 5. **Destandardize**: `Q_syn = ZC * std[m] + mean[m]`
 6. **Back-transform** from log space if applicable: `Q_syn = exp(Q_syn)`
 
@@ -56,7 +56,7 @@ The Kirsch method generates synthetic multi-site monthly streamflow by bootstrap
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.DataFrame` | — | Observed multi-site streamflow with DatetimeIndex |
+| `Q_obs` | `pd.DataFrame` | - | Observed multi-site streamflow with DatetimeIndex |
 | `generate_using_log_flow` | `bool` | `True` | Log-transform before processing (recommended for skewed data) |
 | `matrix_repair_method` | `str` | `'spectral'` | Method for repairing non-PSD correlation matrices |
 | `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |

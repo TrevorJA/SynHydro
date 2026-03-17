@@ -27,24 +27,24 @@ The Multi-Site HMM uses a Gaussian Mixture Model HMM to generate synthetic strea
 2. **Fit** via Baum-Welch (EM) algorithm on log-transformed flows:
    - E-step: compute state posteriors via forward-backward
    - M-step: update state means, covariances, and transition probabilities
-3. **Order states** by mean of first site (ascending: driest → wettest).
-4. **Compute stationary distribution** — solve for left eigenvector of transition matrix with eigenvalue 1.
+3. **Order states** by mean of first site (ascending: driest to wettest).
+4. **Compute stationary distribution** - solve for left eigenvector of transition matrix with eigenvalue 1.
 
 ### Generation
 
-1. **State trajectory** — sample initial state from stationary distribution, then at each timestep sample next state from transition matrix row.
-2. **Emission sampling** — for each timestep with state s:
+1. **State trajectory** - sample initial state from stationary distribution, then at each timestep sample next state from transition matrix row.
+2. **Emission sampling** - for each timestep with state s:
    ```
    Q_log[t, :] ~ MultivariateNormal(mu_s, Sigma_s)
    ```
 3. **Back-transform**: `Q_syn = exp(Q_log) - offset`, then clip negatives to 0.
-4. **Build output** — create DataFrame with DatetimeIndex at inferred frequency.
+4. **Build output** - create DataFrame with DatetimeIndex at inferred frequency.
 
 ## Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow with DatetimeIndex |
 | `n_states` | `int` | `2` | Number of hidden states (2 = dry/wet) |
 | `offset` | `float` | `1.0` | Additive offset before log transform |
 | `max_iterations` | `int` | `1000` | Maximum EM iterations |
@@ -67,7 +67,7 @@ The Multi-Site HMM uses a Gaussian Mixture Model HMM to generate synthetic strea
 ## Limitations
 
 - Requires 20+ years for 2 states; 50+ for more states
-- First-order Markov — may miss multi-year drought persistence
+- First-order Markov - may miss multi-year drought persistence
 - Full covariance becomes expensive for n_sites > 20 (consider `'diag'`)
 - EM may converge to local optima; multiple initializations recommended
 - State label switching: ordering by mean ensures consistency but different seeds may find different optima

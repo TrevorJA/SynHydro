@@ -19,19 +19,19 @@ SynHydro implements the following stochastic generation and disaggregation metho
 
 | Algorithm | Class | Type | Frequency |
 |-----------|-------|------|-----------|
-| [Nowak KNN](nowak_disaggregation.md) | `NowakDisaggregator` | Nonparametric | Monthly→Daily |
-| [Valencia-Schaake](valencia_schaake.md) | `ValenciaSchaakeDisaggregator` | Parametric | Annual→Monthly |
-| [Grygier-Stedinger](grygier_stedinger.md) | `GrygierStedingerDisaggregator` | Parametric | Annual→Monthly |
+| [Nowak KNN](nowak_disaggregation.md) | `NowakDisaggregator` | Nonparametric | Monthly-to-Daily |
+| [Valencia-Schaake](valencia_schaake.md) | `ValenciaSchaakeDisaggregator` | Parametric | Annual-to-Monthly |
+| [Grygier-Stedinger](grygier_stedinger.md) | `GrygierStedingerDisaggregator` | Parametric | Annual-to-Monthly |
 
 ## Key Properties Preserved
 
 | Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap |
 |----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Monthly means/stds | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ |
+| Monthly means/stds | ✓ | ✓ | ✓ | - | - | - | ✓ | ✓ |
 | Temporal correlation | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Spatial correlation | — | ✓ | ✓ | — | — | ✓ | — | ✓ |
-| Long-range persistence | — | — | — | — | ✓ | — | ✓ | — |
-| Non-stationarity | — | — | — | — | ✓ | — | — | — |
-| Drought states | — | — | — | — | — | ✓ | — | — |
-| Power spectrum | — | — | — | ✓ | ✓ | — | ✓ | — |
-| Empirical distribution | — | ✓ | — | — | — | — | — | ✓ |
+| Spatial correlation | - | ✓ | ✓ | - | - | ✓ | - | ✓ |
+| Long-range persistence | - | - | - | - | ✓ | - | ✓ | - |
+| Non-stationarity | - | - | - | - | ✓ | - | - | - |
+| Drought states | - | - | - | - | - | ✓ | - | - |
+| Power spectrum | - | - | - | ✓ | ✓ | - | ✓ | - |
+| Empirical distribution | - | ✓ | - | - | - | - | - | ✓ |

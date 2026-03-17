@@ -1,4 +1,4 @@
-# ARFIMA — Autoregressive Fractionally Integrated Moving Average (Hosking 1984)
+# ARFIMA - Autoregressive Fractionally Integrated Moving Average (Hosking 1984)
 
 | | |
 |---|---|
@@ -83,7 +83,7 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow with DatetimeIndex |
 | `p` | `int` | `1` | AR order for the short-memory component |
 | `q` | `int` | `0` | MA order (currently only q=0 is supported) |
 | `d_method` | `str` | `'whittle'` | Estimation method for d: `'whittle'`, `'gph'`, or `'rs'` |

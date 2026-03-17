@@ -27,6 +27,6 @@ This package is a work in progress, and many of the methods are incomplete or un
 
 ## Planned additions
 
-- ARFIMA (Hosking 1984) — long-memory / Hurst persistence
-- Vine Copula (Fernandes et al. 2017) — modern flexible multivariate
-- LSTM stochastic generator (2020+) — deep learning
+- ARFIMA (Hosking 1984) - long-memory / Hurst persistence
+- Vine Copula (Fernandes et al. 2017) - modern flexible multivariate
+- LSTM stochastic generator (2020+) - deep learning

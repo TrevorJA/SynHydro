@@ -29,7 +29,7 @@ The returned `Ensemble` contains 50 synthetic 30-year monthly timeseries.
 
 ```python
 Q_syn_0 = ensemble.data_by_realization[0]
-print(Q_syn_0.shape)  # (360, 1) — 30 years × 12 months
+print(Q_syn_0.shape)  # (360, 1) - 30 years x 12 months
 ```
 
 !!! note "Seed reproducibility"
@@ -54,6 +54,6 @@ fig, ax = plot_flow_duration_curve(
 
 ## Next steps
 
-- **Multi-site generation** → [Tutorial 02](02_multisite.md)
-- **Monthly-to-daily pipeline** → [Tutorial 03](03_pipeline.md)
-- **Algorithm details** → [Thomas-Fiering AR(1)](../algorithms/thomas_fiering.md)
+- **Multi-site generation** - [Tutorial 02](02_multisite.md)
+- **Monthly-to-daily pipeline** - [Tutorial 03](03_pipeline.md)
+- **Algorithm details** - [Thomas-Fiering AR(1)](../algorithms/thomas_fiering.md)

@@ -16,8 +16,8 @@ The Thomas-Fiering method generates synthetic monthly streamflow using a seasona
 ### Preprocessing
 
 1. **Resample to monthly** if input is daily or sub-monthly (sum within each month).
-2. **Univariate enforcement** — use first column if multi-site DataFrame is provided.
-3. **Stedinger-Taylor normalization** — for each month m:
+2. **Univariate enforcement** - use first column if multi-site DataFrame is provided.
+3. **Stedinger-Taylor normalization** - for each month m:
    - Estimate lower bound:
      ```
      tau_m = (Q_max * Q_min - Q_median^2) / (Q_max + Q_min - 2 * Q_median)
@@ -27,12 +27,12 @@ The Thomas-Fiering method generates synthetic monthly streamflow using a seasona
 
 ### Fitting
 
-1. **Monthly statistics** — for each month m, compute from transformed flows X:
+1. **Monthly statistics** - for each month m, compute from transformed flows X:
    - Mean: `mu_m`
    - Standard deviation: `sigma_m`
-2. **Lag-1 serial correlations** — for each transition m to m+1:
+2. **Lag-1 serial correlations** - for each transition m to m+1:
    - `rho_m = corr(X_m, X_{m+1})` (Dec-Jan wraps across year boundary)
-3. **Store parameters** — 48 total (12 months x 4: mu, sigma, rho, tau).
+3. **Store parameters** - 48 total (12 months x 4: mu, sigma, rho, tau).
 
 ### Generation
 
@@ -49,7 +49,7 @@ The Thomas-Fiering method generates synthetic monthly streamflow using a seasona
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow with DatetimeIndex |
 | `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
 | `debug` | `bool` | `False` | Enable debug logging |
 
@@ -66,8 +66,8 @@ The Thomas-Fiering method generates synthetic monthly streamflow using a seasona
 
 ## Limitations
 
-- Univariate only — no spatial correlation modeling
-- First-order memory — misses multi-month drought persistence
+- Univariate only - no spatial correlation modeling
+- First-order memory - misses multi-month drought persistence
 - Requires at least 2 complete years; 10+ recommended
 - Assumes stationarity (no trends or regime shifts)
 

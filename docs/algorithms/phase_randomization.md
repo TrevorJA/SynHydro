@@ -15,17 +15,17 @@ Phase randomization generates synthetic daily streamflow by randomizing the Four
 
 ### Preprocessing
 
-1. **Remove leap days** — ensures consistent 365-day years.
-2. **Create day-of-year index** (1–365).
-3. **Validate** — minimum 730 days (2 complete years), no missing observations.
+1. **Remove leap days** - ensures consistent 365-day years.
+2. **Create day-of-year index** (1-365).
+3. **Validate** - minimum 730 days (2 complete years), no missing observations.
 
 ### Fitting
 
-1. **Marginal distribution fitting** (if `marginal='kappa'`) — for each day d:
+1. **Marginal distribution fitting** (if `marginal='kappa'`) - for each day d:
    - Define moving window of +/- `win_h_length` days (circular, wraps at year boundary)
    - Extract all observations in window across all years
    - Fit four-parameter kappa distribution via L-moment matching
-2. **Normal score transform** — for each day d:
+2. **Normal score transform** - for each day d:
    - Rank all observations across years
    - Generate a standard normal sample of the same size, sort it
    - Map observed ranks to sorted normal values (rank-matching)
@@ -41,17 +41,17 @@ Phase randomization generates synthetic daily streamflow by randomizing the Four
    - For positive frequencies: generate random phases from Uniform(-pi, pi)
    - Construct `FT_new[k] = modulus[k] * exp(i * phase_random[k])`
    - Apply conjugate symmetry for negative frequencies
-2. **Inverse FFT** — produces phase-randomized series in normalized domain.
-3. **Back-transform to original distribution** — for each day d:
+2. **Inverse FFT** - produces phase-randomized series in normalized domain.
+3. **Back-transform to original distribution** - for each day d:
    - If kappa: generate kappa sample, rank-match against normalized values
    - If empirical: rank-match directly against observed (no extrapolation)
-4. **Non-negativity** — replace negative values with `Uniform(0, min_obs_d)`.
+4. **Non-negativity** - replace negative values with `Uniform(0, min_obs_d)`.
 
 ## Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed daily streamflow with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed daily streamflow with DatetimeIndex |
 | `marginal` | `str` | `'kappa'` | Marginal distribution: `'kappa'` (extrapolation) or `'empirical'` |
 | `win_h_length` | `int` | `15` | Half-window for daily distribution fitting (total = 2*h + 1 days) |
 | `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
@@ -70,10 +70,10 @@ Phase randomization generates synthetic daily streamflow by randomizing the Four
 
 ## Limitations
 
-- Univariate only — no spatial correlations between sites
+- Univariate only - no spatial correlations between sites
 - Generated series has same length as observed (no temporal extrapolation)
 - Output excludes February 29 dates
-- Kappa fitting may fail for some days — falls back to adjacent day parameters or empirical distribution
+- Kappa fitting may fail for some days - falls back to adjacent day parameters or empirical distribution
 - Minimum 2 years of data; 10+ recommended for stable kappa fits
 
 ## References

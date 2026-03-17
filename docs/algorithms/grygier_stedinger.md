@@ -78,7 +78,7 @@ For each synthetic aggregate value Y_syn:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow at sub-period resolution with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow at sub-period resolution with DatetimeIndex |
 | `n_subperiods` | `int` | `12` | Number of sub-periods per aggregate period |
 | `transform` | `str` | `'log'` | Transformation: `'log'`, `'wilson_hilferty'`, or `'none'` |
 | `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |

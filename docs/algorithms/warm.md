@@ -1,4 +1,4 @@
-# WARM — Wavelet Auto-Regressive Method (Nowak et al. 2011)
+# WARM - Wavelet Auto-Regressive Method (Nowak et al. 2011)
 
 | | |
 |---|---|
@@ -20,40 +20,40 @@ WARM combines continuous wavelet transforms with autoregressive modeling to gene
 
 ### Fitting
 
-1. **Continuous Wavelet Transform** — decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
+1. **Continuous Wavelet Transform** - decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
    ```
    W(s, t) = CWT(Q_obs, scales, wavelet)
    ```
    Result: coefficient matrix of shape (n_scales, n_years).
 
-2. **Scale Averaged Wavelet Power** — compute time-varying power across all scales:
+2. **Scale Averaged Wavelet Power** - compute time-varying power across all scales:
    ```
    SAWP(t) = (1/S) * sum_s |W(s, t)|^2
    ```
    High SAWP indicates high energy/variability at time t.
 
-3. **Normalize by SAWP** — remove time-varying power to produce stationary components:
+3. **Normalize by SAWP** - remove time-varying power to produce stationary components:
    ```
    W_norm(s, t) = W(s, t) / sqrt(SAWP(t) + epsilon)
    ```
 
-4. **Fit AR models** — for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.
+4. **Fit AR models** - for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.
 
 ### Generation
 
-1. **Generate normalized coefficients** — for each scale, run the fitted AR(p) process forward with Gaussian innovations.
-2. **Resample SAWP** — bootstrap SAWP values from the historical record with replacement.
-3. **Rescale coefficients** — restore time-varying power:
+1. **Generate normalized coefficients** - for each scale, run the fitted AR(p) process forward with Gaussian innovations.
+2. **Resample SAWP** - bootstrap SAWP values from the historical record with replacement.
+3. **Rescale coefficients** - restore time-varying power:
    ```
    W_syn(s, t) = W_norm_syn(s, t) * sqrt(SAWP_syn(t) + epsilon)
    ```
-4. **Inverse wavelet transform** — reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.
+4. **Inverse wavelet transform** - reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.
 
 ## Parameters
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | — | Observed streamflow with DatetimeIndex |
+| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow with DatetimeIndex |
 | `wavelet` | `str` | `'morl'` | Mother wavelet; any pywt continuous wavelet (e.g., `'morl'`, `'morlet'`) |
 | `scales` | `int` | `64` | Number of frequency scales (rule of thumb: T/2 to T) |
 | `ar_order` | `int` | `1` | AR model order (1 or 2 typically sufficient) |
@@ -75,8 +75,8 @@ WARM combines continuous wavelet transforms with autoregressive modeling to gene
 
 ## Limitations
 
-- Annual frequency only — for finer resolution, couple with a disaggregation method
-- Univariate (single site) — no native multi-site support
+- Annual frequency only - for finer resolution, couple with a disaggregation method
+- Univariate (single site) - no native multi-site support
 - Inverse CWT is approximate (PyWavelets); corrected by mean/variance adjustment
 - Edge effects in CWT for short records (< 20 years)
 - Gaussian AR innovations may underrepresent extremes

@@ -93,6 +93,6 @@ fig, axes = plot_validation_panel(
 ## Next steps
 
 - **Diagnostic plots** for specific properties (ACF, FDC, spatial correlation)
-  are available in `synhydro.plotting` — see the [API reference](../api/generators.md)
+  are available in `synhydro.plotting` - see the [API reference](../api/generators.md)
 - **Algorithm details** can help diagnose which statistical properties a
-  generator is designed to preserve → [Algorithms](../algorithms/index.md)
+  generator is designed to preserve - [Algorithms](../algorithms/index.md)
