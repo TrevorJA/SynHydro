@@ -1275,8 +1275,8 @@
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
 <li><strong>Resample to monthly</strong> if input is daily or sub-monthly (sum within each month).</li>
-<li><strong>Univariate enforcement</strong> — use first column if multi-site DataFrame is provided.</li>
-<li><strong>Stedinger-Taylor normalization</strong> — for each month m:</li>
+<li><strong>Univariate enforcement</strong> - use first column if multi-site DataFrame is provided.</li>
+<li><strong>Stedinger-Taylor normalization</strong> - for each month m:</li>
 <li>Estimate lower bound:
      <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>tau_m = (Q_max * Q_min - Q_median^2) / (Q_max + Q_min - 2 * Q_median)
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>tau_m = max(tau_m, 0)
@@ -1285,12 +1285,12 @@
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Monthly statistics</strong> — for each month m, compute from transformed flows X:</li>
+<li><strong>Monthly statistics</strong> - for each month m, compute from transformed flows X:</li>
 <li>Mean: <code>mu_m</code></li>
 <li>Standard deviation: <code>sigma_m</code></li>
-<li><strong>Lag-1 serial correlations</strong> — for each transition m to m+1:</li>
+<li><strong>Lag-1 serial correlations</strong> - for each transition m to m+1:</li>
 <li><code>rho_m = corr(X_m, X_{m+1})</code> (Dec-Jan wraps across year boundary)</li>
-<li><strong>Store parameters</strong> — 48 total (12 months x 4: mu, sigma, rho, tau).</li>
+<li><strong>Store parameters</strong> - 48 total (12 months x 4: mu, sigma, rho, tau).</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
@@ -1316,7 +1316,7 @@
 <tr>
 <td><code>Q_obs</code></td>
 <td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>—</td>
+<td>-</td>
 <td>Observed streamflow with DatetimeIndex</td>
 </tr>
 <tr>
@@ -1345,8 +1345,8 @@
 - Exact marginal distributions (normality imposed via transformation)</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Univariate only — no spatial correlation modeling</li>
-<li>First-order memory — misses multi-month drought persistence</li>
+<li>Univariate only - no spatial correlation modeling</li>
+<li>First-order memory - misses multi-month drought persistence</li>
 <li>Requires at least 2 complete years; 10+ recommended</li>
 <li>Assumes stationarity (no trends or regime shifts)</li>
 </ul>

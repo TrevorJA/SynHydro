@@ -1242,7 +1242,7 @@
   
 
 
-<h1 id="warm-wavelet-auto-regressive-method-nowak-et-al-2011">WARM — Wavelet Auto-Regressive Method (Nowak et al. 2011)<a class="headerlink" href="#warm-wavelet-auto-regressive-method-nowak-et-al-2011" title="Permanent link">&para;</a></h1>
+<h1 id="warm-wavelet-auto-regressive-method-nowak-et-al-2011">WARM - Wavelet Auto-Regressive Method (Nowak et al. 2011)<a class="headerlink" href="#warm-wavelet-auto-regressive-method-nowak-et-al-2011" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1280,34 +1280,34 @@
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p><strong>Continuous Wavelet Transform</strong> — decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
+<p><strong>Continuous Wavelet Transform</strong> - decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>W(s, t) = CWT(Q_obs, scales, wavelet)
 </span></code></pre></div>
    Result: coefficient matrix of shape (n_scales, n_years).</p>
 </li>
 <li>
-<p><strong>Scale Averaged Wavelet Power</strong> — compute time-varying power across all scales:
+<p><strong>Scale Averaged Wavelet Power</strong> - compute time-varying power across all scales:
    <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>SAWP(t) = (1/S) * sum_s |W(s, t)|^2
 </span></code></pre></div>
    High SAWP indicates high energy/variability at time t.</p>
 </li>
 <li>
-<p><strong>Normalize by SAWP</strong> — remove time-varying power to produce stationary components:
+<p><strong>Normalize by SAWP</strong> - remove time-varying power to produce stationary components:
    <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>W_norm(s, t) = W(s, t) / sqrt(SAWP(t) + epsilon)
 </span></code></pre></div></p>
 </li>
 <li>
-<p><strong>Fit AR models</strong> — for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.</p>
+<p><strong>Fit AR models</strong> - for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.</p>
 </li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Generate normalized coefficients</strong> — for each scale, run the fitted AR(p) process forward with Gaussian innovations.</li>
-<li><strong>Resample SAWP</strong> — bootstrap SAWP values from the historical record with replacement.</li>
-<li><strong>Rescale coefficients</strong> — restore time-varying power:
+<li><strong>Generate normalized coefficients</strong> - for each scale, run the fitted AR(p) process forward with Gaussian innovations.</li>
+<li><strong>Resample SAWP</strong> - bootstrap SAWP values from the historical record with replacement.</li>
+<li><strong>Rescale coefficients</strong> - restore time-varying power:
    <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>W_syn(s, t) = W_norm_syn(s, t) * sqrt(SAWP_syn(t) + epsilon)
 </span></code></pre></div></li>
-<li><strong>Inverse wavelet transform</strong> — reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.</li>
+<li><strong>Inverse wavelet transform</strong> - reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.</li>
 </ol>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -1323,7 +1323,7 @@
 <tr>
 <td><code>Q_obs</code></td>
 <td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>—</td>
+<td>-</td>
 <td>Observed streamflow with DatetimeIndex</td>
 </tr>
 <tr>
@@ -1372,8 +1372,8 @@
 - Spatial correlations (univariate method)</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Annual frequency only — for finer resolution, couple with a disaggregation method</li>
-<li>Univariate (single site) — no native multi-site support</li>
+<li>Annual frequency only - for finer resolution, couple with a disaggregation method</li>
+<li>Univariate (single site) - no native multi-site support</li>
 <li>Inverse CWT is approximate (PyWavelets); corrected by mean/variance adjustment</li>
 <li>Edge effects in CWT for short records (&lt; 20 years)</li>
 <li>Gaussian AR innovations may underrepresent extremes</li>

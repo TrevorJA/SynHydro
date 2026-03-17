@@ -1286,17 +1286,17 @@
 <li><strong>Fit</strong> via Baum-Welch (EM) algorithm on log-transformed flows:</li>
 <li>E-step: compute state posteriors via forward-backward</li>
 <li>M-step: update state means, covariances, and transition probabilities</li>
-<li><strong>Order states</strong> by mean of first site (ascending: driest → wettest).</li>
-<li><strong>Compute stationary distribution</strong> — solve for left eigenvector of transition matrix with eigenvalue 1.</li>
+<li><strong>Order states</strong> by mean of first site (ascending: driest to wettest).</li>
+<li><strong>Compute stationary distribution</strong> - solve for left eigenvector of transition matrix with eigenvalue 1.</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>State trajectory</strong> — sample initial state from stationary distribution, then at each timestep sample next state from transition matrix row.</li>
-<li><strong>Emission sampling</strong> — for each timestep with state s:
+<li><strong>State trajectory</strong> - sample initial state from stationary distribution, then at each timestep sample next state from transition matrix row.</li>
+<li><strong>Emission sampling</strong> - for each timestep with state s:
    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Q_log[t, :] ~ MultivariateNormal(mu_s, Sigma_s)
 </span></code></pre></div></li>
 <li><strong>Back-transform</strong>: <code>Q_syn = exp(Q_log) - offset</code>, then clip negatives to 0.</li>
-<li><strong>Build output</strong> — create DataFrame with DatetimeIndex at inferred frequency.</li>
+<li><strong>Build output</strong> - create DataFrame with DatetimeIndex at inferred frequency.</li>
 </ol>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -1312,7 +1312,7 @@
 <tr>
 <td><code>Q_obs</code></td>
 <td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>—</td>
+<td>-</td>
 <td>Observed streamflow with DatetimeIndex</td>
 </tr>
 <tr>
@@ -1367,7 +1367,7 @@
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Requires 20+ years for 2 states; 50+ for more states</li>
-<li>First-order Markov — may miss multi-year drought persistence</li>
+<li>First-order Markov - may miss multi-year drought persistence</li>
 <li>Full covariance becomes expensive for n_sites &gt; 20 (consider <code>'diag'</code>)</li>
 <li>EM may converge to local optima; multiple initializations recommended</li>
 <li>State label switching: ordering by mean ensures consistency but different seeds may find different optima</li>

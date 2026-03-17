@@ -1274,17 +1274,17 @@
 <h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Remove leap days</strong> — ensures consistent 365-day years.</li>
-<li><strong>Create day-of-year index</strong> (1–365).</li>
-<li><strong>Validate</strong> — minimum 730 days (2 complete years), no missing observations.</li>
+<li><strong>Remove leap days</strong> - ensures consistent 365-day years.</li>
+<li><strong>Create day-of-year index</strong> (1-365).</li>
+<li><strong>Validate</strong> - minimum 730 days (2 complete years), no missing observations.</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Marginal distribution fitting</strong> (if <code>marginal='kappa'</code>) — for each day d:</li>
+<li><strong>Marginal distribution fitting</strong> (if <code>marginal='kappa'</code>) - for each day d:</li>
 <li>Define moving window of +/- <code>win_h_length</code> days (circular, wraps at year boundary)</li>
 <li>Extract all observations in window across all years</li>
 <li>Fit four-parameter kappa distribution via L-moment matching</li>
-<li><strong>Normal score transform</strong> — for each day d:</li>
+<li><strong>Normal score transform</strong> - for each day d:</li>
 <li>Rank all observations across years</li>
 <li>Generate a standard normal sample of the same size, sort it</li>
 <li>Map observed ranks to sorted normal values (rank-matching)</li>
@@ -1300,11 +1300,11 @@
 <li>For positive frequencies: generate random phases from Uniform(-pi, pi)</li>
 <li>Construct <code>FT_new[k] = modulus[k] * exp(i * phase_random[k])</code></li>
 <li>Apply conjugate symmetry for negative frequencies</li>
-<li><strong>Inverse FFT</strong> — produces phase-randomized series in normalized domain.</li>
-<li><strong>Back-transform to original distribution</strong> — for each day d:</li>
+<li><strong>Inverse FFT</strong> - produces phase-randomized series in normalized domain.</li>
+<li><strong>Back-transform to original distribution</strong> - for each day d:</li>
 <li>If kappa: generate kappa sample, rank-match against normalized values</li>
 <li>If empirical: rank-match directly against observed (no extrapolation)</li>
-<li><strong>Non-negativity</strong> — replace negative values with <code>Uniform(0, min_obs_d)</code>.</li>
+<li><strong>Non-negativity</strong> - replace negative values with <code>Uniform(0, min_obs_d)</code>.</li>
 </ol>
 <h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
@@ -1320,7 +1320,7 @@
 <tr>
 <td><code>Q_obs</code></td>
 <td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>—</td>
+<td>-</td>
 <td>Observed daily streamflow with DatetimeIndex</td>
 </tr>
 <tr>
@@ -1361,10 +1361,10 @@
 - Exact autocorrelations (preserved only in expectation across ensemble)</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Univariate only — no spatial correlations between sites</li>
+<li>Univariate only - no spatial correlations between sites</li>
 <li>Generated series has same length as observed (no temporal extrapolation)</li>
 <li>Output excludes February 29 dates</li>
-<li>Kappa fitting may fail for some days — falls back to adjacent day parameters or empirical distribution</li>
+<li>Kappa fitting may fail for some days - falls back to adjacent day parameters or empirical distribution</li>
 <li>Minimum 2 years of data; 10+ recommended for stable kappa fits</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>

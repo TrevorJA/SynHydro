@@ -1274,36 +1274,36 @@
 <h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
 <h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Aggregate to monthly</strong> — group by (year, month) and sum.</li>
-<li><strong>Optional log transform</strong> — if <code>generate_using_log_flow=True</code>, apply <code>log(Q)</code> (clipped at 1e-6).</li>
+<li><strong>Aggregate to monthly</strong> - group by (year, month) and sum.</li>
+<li><strong>Optional log transform</strong> - if <code>generate_using_log_flow=True</code>, apply <code>log(Q)</code> (clipped at 1e-6).</li>
 </ol>
 <h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Monthly statistics</strong> — for each month m and site s, compute mean and standard deviation.</li>
+<li><strong>Monthly statistics</strong> - for each month m and site s, compute mean and standard deviation.</li>
 <li><strong>Standardized residuals</strong>:
    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Z_h[y, m, s] = (Q[y, m, s] - mean[m, s]) / std[m, s]
 </span></code></pre></div></li>
-<li><strong>Normal score transform</strong> (if log-flow) — for each month-site pair:</li>
+<li><strong>Normal score transform</strong> (if log-flow) - for each month-site pair:</li>
 <li>Rank residuals, map to normal quantiles via Hazen plotting positions</li>
 <li>Store mapping for inverse transform during generation</li>
 <li>Result: <code>Y</code> in standard normal space</li>
-<li><strong>Cross-year shifted matrix</strong> <code>Y_prime</code> — preserves inter-year correlations:
+<li><strong>Cross-year shifted matrix</strong> <code>Y_prime</code> - preserves inter-year correlations:
    <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>Y_prime[:, 0:6, :]  = Y[:-1, 6:12, :]   # Jul-Dec of year i
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>Y_prime[:, 6:12, :] = Y[1:, 0:6, :]      # Jan-Jun of year i+1
 </span></code></pre></div></li>
-<li><strong>Cholesky decomposition</strong> — for each site, compute 12x12 correlation matrix of Y (and Y_prime), repair if not PSD (spectral method), then Cholesky factor.</li>
+<li><strong>Cholesky decomposition</strong> - for each site, compute 12x12 correlation matrix of Y (and Y_prime), repair if not PSD (spectral method), then Cholesky factor.</li>
 </ol>
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
-<li><strong>Bootstrap</strong> — sample random year indices for each (year, month) position.</li>
-<li><strong>Cholesky mixing</strong> — multiply bootstrap samples by Cholesky factor to impose correlation:
+<li><strong>Bootstrap</strong> - sample random year indices for each (year, month) position.</li>
+<li><strong>Cholesky mixing</strong> - multiply bootstrap samples by Cholesky factor to impose correlation:
    <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Z[:, :, s] = X[:, :, s] @ U[s]
 </span></code></pre></div></li>
 <li><strong>Combine</strong> Z and Z_prime to preserve intra-year correlations:
    <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>ZC[i, 0:6, :]  = Z_prime[i, 6:12, :]    # first half from shifted
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>ZC[i, 6:12, :] = Z[i+1, 6:12, :]         # second half from regular
 </span></code></pre></div></li>
-<li><strong>Inverse normal score transform</strong> (if log-flow) — map back using stored mappings with linear tail extrapolation.</li>
+<li><strong>Inverse normal score transform</strong> (if log-flow) - map back using stored mappings with linear tail extrapolation.</li>
 <li><strong>Destandardize</strong>: <code>Q_syn = ZC * std[m] + mean[m]</code></li>
 <li><strong>Back-transform</strong> from log space if applicable: <code>Q_syn = exp(Q_syn)</code></li>
 </ol>
@@ -1321,7 +1321,7 @@
 <tr>
 <td><code>Q_obs</code></td>
 <td><code>pd.DataFrame</code></td>
-<td>—</td>
+<td>-</td>
 <td>Observed multi-site streamflow with DatetimeIndex</td>
 </tr>
 <tr>
