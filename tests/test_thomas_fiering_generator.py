@@ -67,14 +67,11 @@ class TestThomasFieringPreprocessing:
         assert gen.is_preprocessed is True
         assert gen.Q_obs_monthly.index.freq in ["MS", "<MonthBegin>"]
 
-    def test_preprocessing_dataframe_uses_first_column(self, sample_monthly_dataframe):
-        """Test preprocessing with DataFrame uses first column only."""
+    def test_preprocessing_multisite_raises(self, sample_monthly_dataframe):
+        """Test that multi-site DataFrame raises ValueError."""
         gen = ThomasFieringGenerator()
-        gen.preprocessing(sample_monthly_dataframe)
-
-        assert gen.is_preprocessed is True
-        assert isinstance(gen.Q_obs_monthly, pd.Series)
-        assert len(gen._sites) == 1
+        with pytest.raises(ValueError, match="univariate"):
+            gen.preprocessing(sample_monthly_dataframe)
 
     def test_preprocessing_stedinger_transform(self, sample_monthly_series):
         """Test that Stedinger transform is applied."""

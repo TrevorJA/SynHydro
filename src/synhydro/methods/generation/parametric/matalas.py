@@ -15,31 +15,9 @@ from numpy.typing import NDArray
 
 from synhydro.core.base import Generator, FittedParams
 from synhydro.core.ensemble import Ensemble
+from synhydro.core.statistics import repair_correlation_matrix
 
 logger = logging.getLogger(__name__)
-
-
-def _nearest_psd(A: NDArray) -> NDArray:
-    """
-    Project a symmetric matrix to the nearest positive semi-definite matrix.
-
-    Uses eigendecomposition to clip negative eigenvalues to a small positive
-    value. Applied when residual covariance matrices become slightly non-PSD
-    due to numerical errors.
-
-    Parameters
-    ----------
-    A : NDArray
-        Symmetric matrix of shape (n, n).
-
-    Returns
-    -------
-    NDArray
-        Nearest PSD matrix of same shape.
-    """
-    eigenvalues, eigenvectors = np.linalg.eigh(A)
-    eigenvalues = np.maximum(eigenvalues, 1e-8)
-    return eigenvectors @ np.diag(eigenvalues) @ eigenvectors.T
 
 
 class MATALASGenerator(Generator):
@@ -279,7 +257,7 @@ class MATALASGenerator(Generator):
 
             # Symmetrize and enforce PSD before Cholesky
             M = 0.5 * (M + M.T)
-            M = _nearest_psd(M)
+            M = repair_correlation_matrix(M, method="spectral")
 
             try:
                 B = np.linalg.cholesky(M)
@@ -306,7 +284,7 @@ class MATALASGenerator(Generator):
     # Generation
     # ------------------------------------------------------------------
 
-    def _generate_one(self, n_years: int) -> pd.DataFrame:
+    def _generate_one(self, n_years: int, *, rng: np.random.Generator) -> pd.DataFrame:
         """
         Generate a single realization of monthly flows across all sites.
 
@@ -314,6 +292,8 @@ class MATALASGenerator(Generator):
         ----------
         n_years : int
             Number of years to simulate.
+        rng : np.random.Generator
+            Random number generator instance.
 
         Returns
         -------
@@ -326,14 +306,14 @@ class MATALASGenerator(Generator):
         sigma = self._sigma.values  # (12, n_sites)
 
         # Initialize: draw first month from marginal (standard normal)
-        Z_prev = np.random.randn(n_sites)
+        Z_prev = rng.standard_normal(n_sites)
 
         Z_all = np.zeros((n_steps, n_sites))
         Z_all[0] = Z_prev
 
         for t in range(1, n_steps):
             m_prev = (t - 1) % 12  # 0-indexed month of previous step
-            eps = np.random.randn(n_sites)
+            eps = rng.standard_normal(n_sites)
             Z_curr = self._A[m_prev] @ Z_prev + self._B[m_prev] @ eps
             Z_all[t] = Z_curr
             Z_prev = Z_curr
@@ -386,8 +366,7 @@ class MATALASGenerator(Generator):
         """
         self.validate_fit()
 
-        if seed is not None:
-            np.random.seed(seed)
+        rng = np.random.default_rng(seed)
 
         if n_timesteps is not None:
             n_years = int(np.ceil(n_timesteps / 12))
@@ -399,7 +378,7 @@ class MATALASGenerator(Generator):
 
         realizations = {}
         for i in range(n_realizations):
-            df = self._generate_one(n_years)
+            df = self._generate_one(n_years, rng=rng)
             if n_timesteps is not None:
                 df = df.iloc[:n_timesteps]
             realizations[i] = df

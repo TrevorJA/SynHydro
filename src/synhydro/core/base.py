@@ -678,11 +678,13 @@ class Generator(ABC):
                 raise ValueError(f"Sites not found in data: {missing}")
             Q = Q[sites]
         if not self.supports_multisite and Q.shape[1] > 1:
-            self.logger.warning(
-                "%s is univariate — using first column only.",
-                self.__class__.__name__,
+            raise ValueError(
+                f"{self.__class__.__name__} is univariate and does not support "
+                f"multi-site data ({Q.shape[1]} columns provided). "
+                f"Pass a single-column DataFrame, or use a multi-site generator "
+                f"such as KirschGenerator, MATALASGenerator, or "
+                f"MultiSiteHMMGenerator."
             )
-            Q = Q.iloc[:, 0:1]
         self._sites = Q.columns.tolist()
         return Q
 

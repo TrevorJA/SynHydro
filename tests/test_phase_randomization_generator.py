@@ -134,14 +134,11 @@ class TestPhaseRandomizationGeneratorPreprocessing:
         with pytest.raises(ValueError, match="At least 730 days"):
             gen.preprocessing(sample_daily_series_short)
 
-    def test_preprocessing_multisite_warning(self, sample_daily_dataframe_long):
-        """Test that multi-site data produces warning and uses first column."""
+    def test_preprocessing_multisite_raises(self, sample_daily_dataframe_long):
+        """Test that multi-site data raises ValueError."""
         gen = PhaseRandomizationGenerator()
-        gen.preprocessing(sample_daily_dataframe_long)
-
-        # Should have preprocessed successfully using first column
-        assert gen.is_preprocessed is True
-        assert len(gen._sites) == 1
+        with pytest.raises(ValueError, match="univariate"):
+            gen.preprocessing(sample_daily_dataframe_long)
 
 
 class TestPhaseRandomizationGeneratorFit:

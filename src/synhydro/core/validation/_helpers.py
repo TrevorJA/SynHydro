@@ -4,7 +4,18 @@ Shared helpers for ensemble validation metric computation.
 
 import numpy as np
 
-_VALID_METRICS = frozenset({"marginal", "temporal", "spatial", "drought", "spectral"})
+_VALID_METRICS = frozenset(
+    {
+        "marginal",
+        "temporal",
+        "spatial",
+        "drought",
+        "spectral",
+        "seasonal",
+        "annual",
+        "fdc",
+    }
+)
 
 
 def _skewness(x: np.ndarray) -> float:

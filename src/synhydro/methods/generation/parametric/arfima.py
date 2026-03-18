@@ -659,8 +659,7 @@ class ARFIMAGenerator(Generator):
         """
         self.validate_fit()
 
-        if seed is not None:
-            np.random.seed(seed)
+        rng = np.random.default_rng(seed)
 
         # Determine number of timesteps
         if n_timesteps is not None:
@@ -679,7 +678,7 @@ class ARFIMAGenerator(Generator):
         # Generate realizations
         realizations = {}
         for i in range(n_realizations):
-            Q_syn = self._generate_single(n_timesteps_final)
+            Q_syn = self._generate_single(n_timesteps_final, rng=rng)
             realizations[i] = Q_syn.to_frame(name=self._sites[0])
 
         self.logger.info(
@@ -698,7 +697,9 @@ class ARFIMAGenerator(Generator):
 
         return Ensemble(realizations, metadata=metadata)
 
-    def _generate_single(self, n_timesteps: int) -> pd.Series:
+    def _generate_single(
+        self, n_timesteps: int, *, rng: np.random.Generator
+    ) -> pd.Series:
         """
         Generate a single realization of synthetic flows.
 
@@ -706,6 +707,8 @@ class ARFIMAGenerator(Generator):
         ----------
         n_timesteps : int
             Number of timesteps to generate.
+        rng : np.random.Generator
+            Random number generator instance.
 
         Returns
         -------
@@ -713,7 +716,7 @@ class ARFIMAGenerator(Generator):
             Single realization of synthetic flows.
         """
         # Generate ARMA innovations
-        eps = np.random.normal(0, np.sqrt(self.sigma_eps_sq), n_timesteps)
+        eps = rng.normal(0, np.sqrt(self.sigma_eps_sq), n_timesteps)
 
         # Apply AR(p) recursion to get differenced series
         W = np.zeros(n_timesteps)

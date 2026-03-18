@@ -274,6 +274,7 @@ class NowakDisaggregator(Disaggregator):
         ensemble: Ensemble,
         n_neighbors=None,
         sample_method="distance_weighted",
+        seed=None,
         **kwargs,
     ) -> Ensemble:
         """
@@ -289,6 +290,8 @@ class NowakDisaggregator(Disaggregator):
             If None, uses the value from initialization.
         sample_method : str, default='distance_weighted'
             Method to use for sampling the K nearest neighbors.
+        seed : int, optional
+            Random seed for reproducibility.
         **kwargs
             Additional disaggregation parameters.
 
@@ -306,13 +309,19 @@ class NowakDisaggregator(Disaggregator):
         if n_neighbors is None:
             n_neighbors = self.n_neighbors
 
+        # Create random number generator
+        rng = np.random.default_rng(seed)
+
         # Disaggregate each realization
         daily_realization_dict = {}
 
         for realization_id, monthly_df in ensemble.data_by_realization.items():
             # Disaggregate this realization
             daily_df = self._disaggregate_single_realization(
-                monthly_df, n_neighbors=n_neighbors, sample_method=sample_method
+                monthly_df,
+                n_neighbors=n_neighbors,
+                sample_method=sample_method,
+                rng=rng,
             )
             daily_realization_dict[realization_id] = daily_df
 
@@ -416,7 +425,12 @@ class NowakDisaggregator(Disaggregator):
         return df
 
     def _disaggregate_single_realization(
-        self, Qs_monthly, n_neighbors=None, sample_method="distance_weighted"
+        self,
+        Qs_monthly,
+        n_neighbors=None,
+        sample_method="distance_weighted",
+        *,
+        rng=None,
     ):
         """
         Disaggregate a single realization from monthly to daily (internal method).
@@ -490,7 +504,7 @@ class NowakDisaggregator(Disaggregator):
 
             # Get the K nearest neighbors
             sampled_indices = self.sample_knn_monthly_flows(
-                Qs_monthly_index_array, month, n_neighbors, sample_method
+                Qs_monthly_index_array, month, n_neighbors, sample_method, rng=rng
             )
 
             # For each year, disaggregate the Qs_monthly using the sampled daily flow proportions
@@ -928,6 +942,8 @@ class NowakDisaggregator(Disaggregator):
         month,
         n_neighbors=None,
         sample_method="distance_weighted",
+        *,
+        rng=None,
     ):
         """
         Given cumulative monthly flow values, sample K nearest neighbors
@@ -953,6 +969,9 @@ class NowakDisaggregator(Disaggregator):
         if n_neighbors is None:
             n_neighbors = self.n_neighbors
 
+        if rng is None:
+            rng = np.random.default_rng()
+
         # get the K nearest neighbors
         distances, indices = self.find_knn_indices(Qs_monthly_array, month, n_neighbors)
 
@@ -965,9 +984,7 @@ class NowakDisaggregator(Disaggregator):
                     distances[i, :] + 1e-10
                 )  # Add small epsilon to avoid division by zero
                 weights = weights / weights.sum()
-                sampled_indices.append(
-                    np.random.choice(indices[i, :].flatten(), p=weights)
-                )
+                sampled_indices.append(rng.choice(indices[i, :].flatten(), p=weights))
 
         elif sample_method == "lall_and_sharma_1996":
             weights = []
@@ -979,9 +996,7 @@ class NowakDisaggregator(Disaggregator):
             weights = np.array(weights)
 
             for i in range(indices.shape[0]):
-                sampled_indices.append(
-                    np.random.choice(indices[i, :].flatten(), p=weights)
-                )
+                sampled_indices.append(rng.choice(indices[i, :].flatten(), p=weights))
         else:
             raise ValueError(
                 "Invalid sample method. Must be 'distance_weighted' or 'lall_and_sharma_1996'."
@@ -1095,14 +1110,27 @@ class NowakDisaggregator(Disaggregator):
 
                 # Extract only the actual days needed from the proportions array
                 # (arrays are sized to 31 days max, but we only use the actual days)
+                # After truncation, renormalize so proportions sum to 1.0
+                # (ensures monthly total is preserved even when neighbor had
+                # a different day count, e.g. leap vs non-leap February)
                 if self.is_multisite:
                     daily_flow_proportions_for_month = daily_flow_proportions[
                         y, :expected_days, :
                     ]  # shape: (expected_days, n_sites)
+                    col_sums = daily_flow_proportions_for_month.sum(axis=0)
+                    col_sums = np.where(col_sums > 0, col_sums, 1.0)
+                    daily_flow_proportions_for_month = (
+                        daily_flow_proportions_for_month / col_sums
+                    )
                 else:
                     daily_flow_proportions_for_month = daily_flow_proportions[
                         y, :expected_days
                     ]  # shape: (expected_days,)
+                    prop_sum = daily_flow_proportions_for_month.sum()
+                    if prop_sum > 0:
+                        daily_flow_proportions_for_month = (
+                            daily_flow_proportions_for_month / prop_sum
+                        )
 
                 # Disaggregate the monthly flow using the daily flow proportions
                 if self.is_multisite:

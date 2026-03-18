@@ -578,14 +578,13 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         self.validate_fit()
         self.validate_input_ensemble(ensemble)
 
-        if seed is not None:
-            np.random.seed(seed)
+        rng = np.random.default_rng(seed)
 
         # Disaggregate each realization
         monthly_realization_dict = {}
 
         for realization_id, annual_df in ensemble.data_by_realization.items():
-            monthly_df = self._disaggregate_single_realization(annual_df)
+            monthly_df = self._disaggregate_single_realization(annual_df, rng=rng)
             monthly_realization_dict[realization_id] = monthly_df
 
         # Create metadata for monthly ensemble
@@ -610,7 +609,9 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
 
         return monthly_ensemble
 
-    def _disaggregate_single_realization(self, annual_df: pd.DataFrame) -> pd.DataFrame:
+    def _disaggregate_single_realization(
+        self, annual_df: pd.DataFrame, *, rng: np.random.Generator
+    ) -> pd.DataFrame:
         """
         Disaggregate a single realization from annual to monthly.
 
@@ -642,7 +643,7 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             year = annual_df.index[i].year
 
             # Sample monthly flows for this year
-            X_month = self._sample_conditional_distribution(annual_flow)
+            X_month = self._sample_conditional_distribution(annual_flow, rng=rng)
 
             # Inverse transform
             if self.transform != "none":
@@ -675,7 +676,9 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
 
         return monthly_df
 
-    def _sample_conditional_distribution(self, Y_syn: float) -> np.ndarray:
+    def _sample_conditional_distribution(
+        self, Y_syn: float, *, rng: np.random.Generator
+    ) -> np.ndarray:
         """
         Sample from conditional distribution given aggregate.
 
@@ -696,7 +699,7 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
         mu_X_given_Y = self.mu_X_ + self.A_ * (Y_syn - self.mu_Y_)
 
         # Sample residuals: Z ~ N(0, I_m)
-        Z = np.random.standard_normal(self.n_subperiods)
+        Z = rng.standard_normal(self.n_subperiods)
 
         # X_syn = mu_X|Y + C @ Z
         X_syn = mu_X_given_Y + self.C_ @ Z

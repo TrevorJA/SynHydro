@@ -376,9 +376,8 @@ class MultiSiteHMMGenerator(Generator):
         else:
             raise ValueError("Must provide either n_years or n_timesteps")
 
-        # Set random seed if provided
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         self.logger.debug(
             f"Generating {n_realizations} realizations of {n_steps} timesteps"
@@ -388,12 +387,12 @@ class MultiSiteHMMGenerator(Generator):
 
         for r in range(n_realizations):
             # Generate state trajectory
-            states = self._generate_state_trajectory(n_steps)
+            states = self._generate_state_trajectory(n_steps, rng=rng)
 
             # Generate emissions for each timestep
             Q_log_syn = np.zeros((n_steps, len(self._sites)))
             for t, state in enumerate(states):
-                Q_log_syn[t, :] = np.random.multivariate_normal(
+                Q_log_syn[t, :] = rng.multivariate_normal(
                     self.means_[state], self.covariances_[state]
                 )
 
@@ -415,7 +414,9 @@ class MultiSiteHMMGenerator(Generator):
 
         return Ensemble(realizations)
 
-    def _generate_state_trajectory(self, n_timesteps: int) -> List[int]:
+    def _generate_state_trajectory(
+        self, n_timesteps: int, *, rng: np.random.Generator
+    ) -> List[int]:
         """
         Generate hidden state trajectory.
 
@@ -423,6 +424,8 @@ class MultiSiteHMMGenerator(Generator):
         ----------
         n_timesteps : int
             Number of timesteps in trajectory.
+        rng : np.random.Generator
+            Random number generator instance.
 
         Returns
         -------
@@ -430,13 +433,13 @@ class MultiSiteHMMGenerator(Generator):
             Sequence of hidden states.
         """
         # Sample initial state from stationary distribution
-        state = np.random.choice(self.n_states, p=self.stationary_distribution_)
+        state = rng.choice(self.n_states, p=self.stationary_distribution_)
 
         states = [state]
 
         # Generate remaining states using transition matrix
         for _ in range(1, n_timesteps):
-            state = np.random.choice(self.n_states, p=self.transition_matrix_[state, :])
+            state = rng.choice(self.n_states, p=self.transition_matrix_[state, :])
             states.append(state)
 
         return states

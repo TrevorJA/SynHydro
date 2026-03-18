@@ -466,8 +466,8 @@ class TestMultiSiteHMMStateTrajectory:
         gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
-        np.random.seed(42)
-        states = gen._generate_state_trajectory(50)
+        rng = np.random.default_rng(42)
+        states = gen._generate_state_trajectory(50, rng=rng)
 
         assert len(states) == 50
 
@@ -477,8 +477,8 @@ class TestMultiSiteHMMStateTrajectory:
         gen.preprocessing(sample_annual_dataframe)
         gen.fit(random_state=42)
 
-        np.random.seed(42)
-        states = gen._generate_state_trajectory(100)
+        rng = np.random.default_rng(42)
+        states = gen._generate_state_trajectory(100, rng=rng)
 
         assert all(s in [0, 1, 2] for s in states)
 
@@ -489,14 +489,14 @@ class TestMultiSiteHMMStateTrajectory:
         gen.fit(random_state=42)
 
         # Generate many trajectories
-        np.random.seed(42)
+        rng = np.random.default_rng(42)
         n_trajectories = 1000
         n_steps = 100
 
         transitions = np.zeros((2, 2))
 
         for _ in range(n_trajectories):
-            states = gen._generate_state_trajectory(n_steps)
+            states = gen._generate_state_trajectory(n_steps, rng=rng)
             for i in range(len(states) - 1):
                 transitions[states[i], states[i + 1]] += 1
 

@@ -48,6 +48,12 @@ from synhydro.methods.generation.parametric.warm import WARMGenerator
 
 # Disaggregators
 from synhydro.methods.disaggregation.temporal.nowak import NowakDisaggregator
+from synhydro.methods.disaggregation.temporal.valencia_schaake import (
+    ValenciaSchaakeDisaggregator,
+)
+from synhydro.methods.disaggregation.temporal.grygier_stedinger import (
+    GrygierStedingerDisaggregator,
+)
 
 # Pre-built pipelines (recommended for most users)
 from synhydro.pipelines import (
@@ -72,6 +78,8 @@ __all__ = [
     "WARMGenerator",
     # Individual disaggregators
     "NowakDisaggregator",
+    "ValenciaSchaakeDisaggregator",
+    "GrygierStedingerDisaggregator",
     # Pipeline system
     "GeneratorDisaggregatorPipeline",
     "KirschNowakPipeline",

@@ -128,16 +128,11 @@ class TestWARMPreprocessing:
         assert hasattr(gen, "Q_obs_annual")
         assert isinstance(gen.Q_obs_annual, pd.Series)
 
-    def test_preprocessing_annual_dataframe_uses_first_column(
-        self, sample_annual_dataframe
-    ):
-        """Test preprocessing with DataFrame uses first column only."""
+    def test_preprocessing_multisite_raises(self, sample_annual_dataframe):
+        """Test that multi-site DataFrame raises ValueError."""
         gen = WARMGenerator()
-        gen.preprocessing(sample_annual_dataframe)
-
-        assert gen.is_preprocessed is True
-        assert isinstance(gen.Q_obs_annual, pd.Series)
-        assert len(gen._sites) == 1
+        with pytest.raises(ValueError, match="univariate"):
+            gen.preprocessing(sample_annual_dataframe)
 
     def test_preprocessing_monthly_to_annual(self, sample_monthly_series):
         """Test preprocessing resamples monthly to annual."""

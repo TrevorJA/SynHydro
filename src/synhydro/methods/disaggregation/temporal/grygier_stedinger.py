@@ -532,16 +532,15 @@ class GrygierStedingerDisaggregator(Disaggregator):
         # Validate input ensemble
         self.validate_input_ensemble(ensemble)
 
-        # Set random seed if provided
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         # Disaggregate each realization
         monthly_realization_dict = {}
 
         for realization_id, annual_df in ensemble.data_by_realization.items():
             # Disaggregate this realization
-            monthly_df = self._disaggregate_single_realization(annual_df)
+            monthly_df = self._disaggregate_single_realization(annual_df, rng=rng)
             monthly_realization_dict[realization_id] = monthly_df
 
         # Create metadata for monthly ensemble
@@ -568,7 +567,7 @@ class GrygierStedingerDisaggregator(Disaggregator):
         return monthly_ensemble
 
     def _disaggregate_single_realization(
-        self, Y_syn_annual: pd.DataFrame
+        self, Y_syn_annual: pd.DataFrame, *, rng: np.random.Generator
     ) -> pd.DataFrame:
         """
         Disaggregate a single realization from annual to monthly.
@@ -616,7 +615,7 @@ class GrygierStedingerDisaggregator(Disaggregator):
                 )
 
                 # Generate uncorrected sub-periods
-                Z = np.random.standard_normal(m * self.n_sites)
+                Z = rng.standard_normal(m * self.n_sites)
                 X_raw = mu_X_y.flatten() + self.C_ @ Z
 
                 # Apply conservation correction
@@ -635,7 +634,7 @@ class GrygierStedingerDisaggregator(Disaggregator):
                 mu_X_y = self.mu_X_ + self.A_ * (Y_y - self.mu_Y_)
 
                 # Generate uncorrected sub-periods
-                Z = np.random.standard_normal(m)
+                Z = rng.standard_normal(m)
                 X_raw = mu_X_y + self.C_ @ Z
 
                 # Apply conservation correction

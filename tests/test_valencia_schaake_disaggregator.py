@@ -207,7 +207,8 @@ class TestValenciaSchaakeDisaggregation:
         annual_dates = pd.DatetimeIndex(["2020-01-01"], freq="YS")
         annual_df = pd.DataFrame({"site_1": annual_value}, index=annual_dates)
 
-        monthly_df = disagg._disaggregate_single_realization(annual_df)
+        rng = np.random.default_rng(0)
+        monthly_df = disagg._disaggregate_single_realization(annual_df, rng=rng)
 
         assert isinstance(monthly_df, pd.DataFrame)
         assert len(monthly_df) == 12  # 12 months
@@ -223,7 +224,8 @@ class TestValenciaSchaakeDisaggregation:
         annual_dates = pd.date_range("2020-01-01", periods=3, freq="YS")
         annual_df = pd.DataFrame({"site_1": annual_values}, index=annual_dates)
 
-        monthly_df = disagg._disaggregate_single_realization(annual_df)
+        rng = np.random.default_rng(0)
+        monthly_df = disagg._disaggregate_single_realization(annual_df, rng=rng)
 
         assert isinstance(monthly_df, pd.DataFrame)
         assert len(monthly_df) == 36  # 3 years * 12 months
@@ -276,7 +278,8 @@ class TestValenciaSchaakeDisaggregation:
         annual_dates = pd.DatetimeIndex(["2020-01-01"], freq="YS")
         annual_df = pd.DataFrame({"site_1": [annual_value]}, index=annual_dates)
 
-        monthly_df = disagg._disaggregate_single_realization(annual_df)
+        rng = np.random.default_rng(0)
+        monthly_df = disagg._disaggregate_single_realization(annual_df, rng=rng)
         monthly_sum = monthly_df["site_1"].sum()
 
         # Should preserve the annual total
@@ -292,7 +295,8 @@ class TestValenciaSchaakeDisaggregation:
         annual_dates = pd.DatetimeIndex(["2020-01-01"], freq="YS")
         annual_df = pd.DataFrame({"site_1": [annual_value]}, index=annual_dates)
 
-        monthly_df = disagg._disaggregate_single_realization(annual_df)
+        rng = np.random.default_rng(0)
+        monthly_df = disagg._disaggregate_single_realization(annual_df, rng=rng)
 
         # All values should be non-negative
         assert (monthly_df.values >= 0).all()
@@ -307,11 +311,11 @@ class TestValenciaSchaakeDisaggregation:
         annual_df = pd.DataFrame({"site_1": [1200.0]}, index=annual_dates)
 
         # Run twice with same seed
-        np.random.seed(42)
-        monthly_1 = disagg._disaggregate_single_realization(annual_df.copy())
+        rng1 = np.random.default_rng(42)
+        monthly_1 = disagg._disaggregate_single_realization(annual_df.copy(), rng=rng1)
 
-        np.random.seed(42)
-        monthly_2 = disagg._disaggregate_single_realization(annual_df.copy())
+        rng2 = np.random.default_rng(42)
+        monthly_2 = disagg._disaggregate_single_realization(annual_df.copy(), rng=rng2)
 
         # Results should be identical
         np.testing.assert_array_almost_equal(monthly_1.values, monthly_2.values)

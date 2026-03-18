@@ -20,19 +20,31 @@ ensemble = gen.generate(n_realizations=100, n_years=50, seed=42)
 
 ## Run validation
 
-`validate_ensemble` compares the ensemble to observed data across five
+`validate_ensemble` compares the ensemble to observed data across eight
 metric categories:
 
 | Category | What it checks |
 |----------|----------------|
-| **Marginal** | Mean, std, skewness, CV, percentiles |
-| **Temporal** | Lag-1 & lag-2 autocorrelation, Hurst exponent |
+| **Marginal** | Mean, std, skewness, kurtosis, CV, percentiles, KS test |
+| **Temporal** | Lag-1/2 autocorrelation, Hurst exponent, ACF RMSE |
 | **Spatial** | Cross-site correlation RMSE and bias |
-| **Drought** | Mean duration, severity, and frequency |
+| **Drought** | Mean/max duration, mean/max severity, frequency |
 | **Spectral** | Power spectrum RMSE, correlation, low-frequency ratio |
+| **Seasonal** | Per-month mean/std/skewness bias, Wilcoxon p-values |
+| **Annual** | Annual mean, variance, skewness, lag-1 ACF, variance ratio |
+| **FDC** | Flow duration curve RMSE, bias at Q10/Q50/Q90, envelope coverage |
 
 ```python
 result = validate_ensemble(ensemble, Q_monthly)
+```
+
+You can also request a subset of categories:
+
+```python
+result = validate_ensemble(
+    ensemble, Q_monthly,
+    metrics=["marginal", "seasonal", "fdc"],
+)
 ```
 
 ## Explore results
@@ -93,6 +105,6 @@ fig, axes = plot_validation_panel(
 ## Next steps
 
 - **Diagnostic plots** for specific properties (ACF, FDC, spatial correlation)
-  are available in `synhydro.plotting` - see the [API reference](../api/generators.md)
+  are available in `synhydro.plotting` -- see the [API reference](../api/generators.md)
 - **Algorithm details** can help diagnose which statistical properties a
-  generator is designed to preserve - [Algorithms](../algorithms/index.md)
+  generator is designed to preserve -- [Algorithms](../algorithms/index.md)

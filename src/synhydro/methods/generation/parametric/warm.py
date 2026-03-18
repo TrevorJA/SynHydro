@@ -405,7 +405,9 @@ class WARMGenerator(Generator):
             training_period_=training_period,
         )
 
-    def _generate(self, n_years: int, **kwargs) -> pd.DataFrame:
+    def _generate(
+        self, n_years: int, *, rng: np.random.Generator, **kwargs
+    ) -> pd.DataFrame:
         """
         Generate a single realization of synthetic flows (internal method).
 
@@ -418,6 +420,8 @@ class WARMGenerator(Generator):
         ----------
         n_years : int
             Number of years to generate.
+        rng : np.random.Generator
+            Random number generator instance.
         **kwargs : dict, optional
             Additional parameters (currently unused).
 
@@ -439,7 +443,7 @@ class WARMGenerator(Generator):
 
             # Initialize with zeros (or could use historical values)
             series = np.zeros(n_years)
-            innovations = np.random.normal(0, sigma, n_years)
+            innovations = rng.normal(0, sigma, n_years)
 
             # Generate AR process
             for t in range(n_years):
@@ -455,7 +459,7 @@ class WARMGenerator(Generator):
         # Resample SAWP with replacement to get time-varying power for synthetic sequence
         # This preserves the range and distribution of power variations
         n_obs = len(self.sawp_)
-        resampled_indices = np.random.choice(n_obs, size=n_years, replace=True)
+        resampled_indices = rng.choice(n_obs, size=n_years, replace=True)
         synthetic_sawp = self.sawp_[resampled_indices]
 
         # Rescale coefficients by synthetic SAWP
@@ -566,9 +570,8 @@ class WARMGenerator(Generator):
         # Validate fit
         self.validate_fit()
 
-        # Set random seed if provided
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         # Determine number of years
         if n_timesteps is not None:
@@ -582,7 +585,7 @@ class WARMGenerator(Generator):
         # Generate realizations
         realizations = {}
         for i in range(n_realizations):
-            Q_syn_df = self._generate(n_years)
+            Q_syn_df = self._generate(n_years, rng=rng)
             realizations[i] = Q_syn_df
 
         self.logger.info(

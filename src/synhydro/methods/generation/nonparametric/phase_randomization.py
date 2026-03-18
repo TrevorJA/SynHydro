@@ -626,8 +626,8 @@ class PhaseRandomizationGenerator(Generator):
         """
         self.validate_fit()
 
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         if n_years is not None or n_timesteps is not None:
             self.logger.warning(
@@ -639,10 +639,10 @@ class PhaseRandomizationGenerator(Generator):
 
         for r in range(n_realizations):
             # Phase randomization
-            ts_new = self._phase_randomize()
+            ts_new = self._phase_randomize(rng=rng)
 
             # Back-transformation
-            simulated = self._back_transform(ts_new)
+            simulated = self._back_transform(ts_new, rng=rng)
 
             # Store as DataFrame
             realizations[r] = pd.DataFrame(
@@ -654,19 +654,26 @@ class PhaseRandomizationGenerator(Generator):
         # Create and return Ensemble
         return Ensemble(realizations)
 
-    def _phase_randomize(self) -> np.ndarray:
+    def _phase_randomize(self, rng=None) -> np.ndarray:
         """
         Generate phase-randomized time series.
+
+        Parameters
+        ----------
+        rng : np.random.Generator, optional
+            Random number generator instance. If None, creates a new default generator.
 
         Returns
         -------
         np.ndarray
             Phase-randomized time series in normal domain.
         """
+        if rng is None:
+            rng = np.random.default_rng()
         n = len(self.ft_)
 
         # Generate random phases for first half
-        random_phases = np.random.uniform(-np.pi, np.pi, len(self.first_part_))
+        random_phases = rng.uniform(-np.pi, np.pi, len(self.first_part_))
 
         # Construct new complex spectrum
         ft_new = np.zeros(n, dtype=complex)
@@ -691,7 +698,7 @@ class PhaseRandomizationGenerator(Generator):
 
         return ts_new
 
-    def _back_transform(self, ts_new: np.ndarray) -> np.ndarray:
+    def _back_transform(self, ts_new: np.ndarray, rng=None) -> np.ndarray:
         """
         Back-transform from normal to original distribution.
 
@@ -699,12 +706,16 @@ class PhaseRandomizationGenerator(Generator):
         ----------
         ts_new : np.ndarray
             Phase-randomized series in normal domain.
+        rng : np.random.Generator, optional
+            Random number generator instance. If None, creates a new default generator.
 
         Returns
         -------
         np.ndarray
             Simulated streamflow in original units.
         """
+        if rng is None:
+            rng = np.random.default_rng()
         simulated = np.zeros(len(ts_new))
 
         for d in range(1, 366):
@@ -717,7 +728,7 @@ class PhaseRandomizationGenerator(Generator):
 
             if self.marginal == "kappa" and self.par_day_.get(d) is not None:
                 # Generate kappa sample
-                kappa_sample = self._rand_kappa(n, **self.par_day_[d])
+                kappa_sample = self._rand_kappa(n, rng=rng, **self.par_day_[d])
 
                 # Rank-based mapping
                 new_ranks = np.argsort(np.argsort(day_values_new))
@@ -738,7 +749,7 @@ class PhaseRandomizationGenerator(Generator):
             if len(neg_indices) > 0:
                 min_obs = self.Q_obs_[mask].min()
                 if min_obs > 0:
-                    rep_value = np.random.uniform(0, min_obs, len(neg_indices))
+                    rep_value = rng.uniform(0, min_obs, len(neg_indices))
                 else:
                     rep_value = np.zeros(len(neg_indices))
                 simulated[neg_indices] = rep_value
@@ -746,7 +757,7 @@ class PhaseRandomizationGenerator(Generator):
         return simulated
 
     def _rand_kappa(
-        self, n: int, xi: float, alfa: float, k: float, h: float
+        self, n: int, xi: float, alfa: float, k: float, h: float, rng=None
     ) -> np.ndarray:
         """
         Generate random samples from kappa distribution.
@@ -763,13 +774,17 @@ class PhaseRandomizationGenerator(Generator):
             Shape parameter k.
         h : float
             Shape parameter h.
+        rng : np.random.Generator, optional
+            Random number generator instance. If None, creates a new default generator.
 
         Returns
         -------
         np.ndarray
             Random samples from kappa distribution.
         """
-        F = np.random.uniform(1e-10, 1 - 1e-10, n)
+        if rng is None:
+            rng = np.random.default_rng()
+        F = rng.uniform(1e-10, 1 - 1e-10, n)
         return self._invF_kappa(F, xi, alfa, k, h)
 
     def _invF_kappa(

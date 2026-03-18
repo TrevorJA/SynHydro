@@ -222,16 +222,39 @@ class KNNBootstrapGenerator(Generator):
         (Rajagopalan & Lall 1999). For each month m, the feature vector is the
         flow at month m and the successor is the flow at month m+1.
 
+        When ``index_site`` is set, only that site's column is used as the
+        feature for distance computation while all sites are still carried as
+        successors.  When ``block_size`` > 1, successors are stored as
+        consecutive blocks of length ``block_size`` for block resampling.
+
         For annual or daily data, a single global pool is used.
         """
-        features_all = self._Q_obs[self._feature_cols].values[:-1]
-        successors_all = self._Q_obs.values[1:]
-        months_all = self._Q_obs.index[:-1].month  # month of the feature row
+        # Determine which columns drive the KNN distance
+        if self.index_site is not None:
+            knn_cols = [self.index_site]
+        else:
+            knn_cols = self._feature_cols
+
+        self._knn_cols = knn_cols
+
+        bs = self.block_size
+        n = len(self._Q_obs)
+
+        # Feature at time t, successor block starting at t+1
+        # We need at least bs successor values after each feature
+        max_t = n - bs
+        features_all = self._Q_obs[knn_cols].values[:max_t]
+        months_all = self._Q_obs.index[:max_t].month
+
+        # Build successor blocks: shape (max_t, block_size, n_sites)
+        all_values = self._Q_obs.values  # (n, n_sites)
+        successors_all = np.stack(
+            [all_values[t + 1 : t + 1 + bs] for t in range(max_t)], axis=0
+        )  # (max_t, block_size, n_sites)
 
         self._is_monthly_conditioned = self._frequency in ("MS", "M", "ME")
 
         if self._is_monthly_conditioned:
-            # Build per-month pools
             self._monthly_features = {}
             self._monthly_successors = {}
             for m in range(1, 13):
@@ -239,7 +262,6 @@ class KNNBootstrapGenerator(Generator):
                 self._monthly_features[m] = features_all[mask]
                 self._monthly_successors[m] = successors_all[mask]
                 self.logger.debug("Month %d: %d feature-successor pairs", m, mask.sum())
-            # Also keep global pool as fallback
             self._feature_vectors = features_all
             self._successor_values = successors_all
         else:
@@ -247,10 +269,10 @@ class KNNBootstrapGenerator(Generator):
             self._successor_values = successors_all
 
         self.logger.debug(
-            "Built %d feature-successor pairs (features: %d, successors: %d)",
+            "Built %d feature-successor pairs (knn_features: %d, block_size: %d)",
             len(features_all),
             features_all.shape[1],
-            successors_all.shape[1],
+            bs,
         )
 
     def _make_kernel_weights(self, k: int) -> np.ndarray:
@@ -395,9 +417,8 @@ class KNNBootstrapGenerator(Generator):
         # Validate fit
         self.validate_fit()
 
-        # Set random seed if provided
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         # Determine number of timesteps to generate
         if n_timesteps is not None:
@@ -417,7 +438,7 @@ class KNNBootstrapGenerator(Generator):
         # Generate realizations
         realization_dict = {}
         for i in range(n_realizations):
-            Q_syn = self._generate_single_realization(n_generate)
+            Q_syn = self._generate_single_realization(n_generate, rng=rng)
             realization_dict[i] = Q_syn
 
         # Create metadata
@@ -442,7 +463,7 @@ class KNNBootstrapGenerator(Generator):
 
         return ensemble
 
-    def _generate_single_realization(self, n_timesteps: int) -> pd.DataFrame:
+    def _generate_single_realization(self, n_timesteps: int, rng=None) -> pd.DataFrame:
         """
         Generate a single synthetic realization.
 
@@ -451,16 +472,23 @@ class KNNBootstrapGenerator(Generator):
         The successor of the selected neighbor provides the value for the
         *next* timestep, naturally advancing month-to-month.
 
+        When ``block_size`` > 1, each KNN selection copies a block of
+        consecutive successor values before the next KNN query.
+
         Parameters
         ----------
         n_timesteps : int
             Number of timesteps to generate.
+        rng : np.random.Generator, optional
+            Random number generator instance. If None, creates a new default generator.
 
         Returns
         -------
         pd.DataFrame
             Synthetic flow data with DatetimeIndex and site columns.
         """
+        if rng is None:
+            rng = np.random.default_rng()
         # Build date index first so we know each timestep's month
         if self._frequency == "D":
             freq = "D"
@@ -477,19 +505,22 @@ class KNNBootstrapGenerator(Generator):
         date_index = pd.date_range(start=start_date, periods=n_timesteps, freq=freq)
 
         Q_syn = np.zeros((n_timesteps, len(self._sites)))
-        n_features = len(self._feature_cols)
+        n_knn_features = len(self._knn_cols)
+        bs = self.block_size
 
         if self._is_monthly_conditioned:
             # Month-conditioned generation
-            # Initialize: draw from the first month's pool
             m0 = date_index[0].month
-            init_idx = np.random.randint(0, len(self._monthly_successors[m0]))
-            Q_syn[0, :] = self._monthly_successors[m0][init_idx, :]
+            init_idx = rng.integers(0, len(self._monthly_successors[m0]))
+            block = self._monthly_successors[m0][init_idx]  # (bs, n_sites)
+            copy_len = min(bs, n_timesteps)
+            Q_syn[:copy_len, :] = block[:copy_len]
 
-            for t in range(1, n_timesteps):
-                # Current month determines which KNN model to query
+            t = copy_len
+            while t < n_timesteps:
+                # Use the last generated value's month for KNN lookup
                 m = date_index[t - 1].month
-                current_feature = Q_syn[t - 1, :n_features].reshape(1, -1)
+                current_feature = Q_syn[t - 1, :n_knn_features].reshape(1, -1)
 
                 knn = self._monthly_knn[m]
                 weights = self._monthly_weights[m]
@@ -497,24 +528,31 @@ class KNNBootstrapGenerator(Generator):
                 _, neighbor_indices = knn.kneighbors(current_feature)
                 neighbor_indices = neighbor_indices[0]
 
-                selected_idx = np.random.choice(neighbor_indices, p=weights)
-                Q_syn[t, :] = self._monthly_successors[m][selected_idx, :]
+                selected_idx = rng.choice(neighbor_indices, p=weights)
+                block = self._monthly_successors[m][selected_idx]  # (bs, n_sites)
+                copy_len = min(bs, n_timesteps - t)
+                Q_syn[t : t + copy_len, :] = block[:copy_len]
+                t += copy_len
         else:
-            # Global (non-monthly) generation — original algorithm
-            init_idx = np.random.randint(0, len(self._feature_vectors))
-            Q_syn[0, :] = self._successor_values[init_idx, :]
+            # Global (non-monthly) generation
+            init_idx = rng.integers(0, len(self._feature_vectors))
+            block = self._successor_values[init_idx]  # (bs, n_sites)
+            copy_len = min(bs, n_timesteps)
+            Q_syn[:copy_len, :] = block[:copy_len]
 
-            for t in range(1, n_timesteps):
-                current_feature = Q_syn[t - 1, :n_features].reshape(1, -1)
+            t = copy_len
+            while t < n_timesteps:
+                current_feature = Q_syn[t - 1, :n_knn_features].reshape(1, -1)
 
                 _, neighbor_indices = self._knn_model.kneighbors(
                     current_feature, n_neighbors=self._n_neighbors
                 )
                 neighbor_indices = neighbor_indices[0]
 
-                selected_idx = np.random.choice(
-                    neighbor_indices, p=self._kernel_weights
-                )
-                Q_syn[t, :] = self._successor_values[selected_idx, :]
+                selected_idx = rng.choice(neighbor_indices, p=self._kernel_weights)
+                block = self._successor_values[selected_idx]  # (bs, n_sites)
+                copy_len = min(bs, n_timesteps - t)
+                Q_syn[t : t + copy_len, :] = block[:copy_len]
+                t += copy_len
 
         return pd.DataFrame(Q_syn, index=date_index, columns=self._sites)

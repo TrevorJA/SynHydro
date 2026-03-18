@@ -387,7 +387,7 @@ class KirschGenerator(Generator):
                 ZC_orig[:, m, s] = np.interp(ZC[:, m, s], ns_ext, sv_ext)
         return ZC_orig
 
-    def _get_bootstrap_indices(self, n_years, max_idx=None):
+    def _get_bootstrap_indices(self, n_years, max_idx=None, rng=None):
         """
         Return 'M', a matrix of bootstrap indices for the synthetic time series.
 
@@ -397,14 +397,18 @@ class KirschGenerator(Generator):
             Number of years for which to generate bootstrap indices.
         max_idx : int, optional
             Maximum index for the historic years. If None, uses the number of historic years.
+        rng : np.random.Generator, optional
+            Random number generator instance. If None, creates a new default generator.
 
         Returns
         -------
         np.ndarray
             A matrix of shape (n_years, n_months) containing bootstrap indices.
         """
+        if rng is None:
+            rng = np.random.default_rng()
         max_idx = self.n_historic_years if max_idx is None else max_idx
-        return np.random.choice(max_idx, size=(n_years, self.n_months), replace=True)
+        return rng.choice(max_idx, size=(n_years, self.n_months), replace=True)
 
     def _create_bootstrap_tensor(self, M, use_Y_prime=False):
         """
@@ -483,7 +487,7 @@ class KirschGenerator(Generator):
         return Q_syn.reshape(-1, self.n_sites)
 
     def generate_single_series(
-        self, n_years, M=None, as_array=True, synthetic_index=None
+        self, n_years, M=None, as_array=True, synthetic_index=None, rng=None
     ):
         """
         Generate a single synthetic time series.
@@ -504,10 +508,15 @@ class KirschGenerator(Generator):
         np.ndarray or pd.DataFrame
             Synthetic time series data.
         """
+        if rng is None:
+            rng = np.random.default_rng()
+
         n_years_buffered = n_years + 1
 
         if M is None:
-            M = self._get_bootstrap_indices(n_years_buffered, max_idx=self.Y.shape[0])
+            M = self._get_bootstrap_indices(
+                n_years_buffered, max_idx=self.Y.shape[0], rng=rng
+            )
         else:
             M = np.asarray(M)
             if M.shape != (n_years_buffered, self.n_months):
@@ -519,7 +528,7 @@ class KirschGenerator(Generator):
         # Y_prime has one fewer year than Y due to cross-year correlation structure
         # Using M.copy() would allow indices up to Y.shape[0]-1, but Y_prime only has indices up to Y.shape[0]-2
         M_prime = self._get_bootstrap_indices(
-            n_years_buffered, max_idx=self.Y_prime.shape[0]
+            n_years_buffered, max_idx=self.Y_prime.shape[0], rng=rng
         )
 
         X = self._create_bootstrap_tensor(M, use_Y_prime=False)
@@ -580,9 +589,8 @@ class KirschGenerator(Generator):
         # Validate fit
         self.validate_fit()
 
-        # Set random seed if provided
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         # Determine number of years
         if n_years is None:
@@ -591,7 +599,7 @@ class KirschGenerator(Generator):
         # Generate realizations
         realization_dict = {}
         for i in range(n_realizations):
-            df = self.generate_single_series(n_years, as_array=False)
+            df = self.generate_single_series(n_years, as_array=False, rng=rng)
             realization_dict[i] = df
 
         # Create metadata

@@ -2,13 +2,26 @@
 Ensemble Validation Framework
 
 Unified metrics for comparing synthetic ensemble properties against
-observed streamflow records. Computes marginal, temporal, spatial,
-drought, and spectral statistics to assess generation fidelity.
+observed streamflow records.
+
+Metric categories
+-----------------
+- **marginal**: Mean, std, skewness, kurtosis, CV, percentiles, KS test
+- **temporal**: Lag-1/2 ACF, Hurst exponent, ACF RMSE
+- **spatial**: Cross-site correlation RMSE, max error, bias
+- **drought**: Mean/max drought duration and severity, frequency
+- **spectral**: Power spectrum RMSE, correlation, low-frequency ratio
+- **seasonal**: Per-month mean/std/skewness bias, Wilcoxon p-values
+- **annual**: Annual mean, variance, skewness, lag-1 ACF, variance ratio
+- **fdc**: Flow duration curve RMSE, bias at Q10/Q50/Q90, envelope coverage
 
 References
 ----------
 Stedinger, J.R. and Taylor, M.R. (1982). Synthetic streamflow generation:
 1. Model verification and validation. Water Resources Research, 18(4), 909-918.
+
+Srikanthan, R. and McMahon, T.A. (2001). Stochastic generation of annual,
+monthly and daily climate data. Stochastic Hydrology and Hydraulics, 15, 369-391.
 """
 
 import logging
@@ -25,6 +38,9 @@ from synhydro.core.validation._metrics import (
     _compute_spatial_metrics,
     _compute_drought_metrics,
     _compute_spectral_metrics,
+    _compute_seasonal_metrics,
+    _compute_annual_metrics,
+    _compute_fdc_metrics,
     _compute_summary_scores,
 )
 
@@ -44,9 +60,7 @@ def validate_ensemble(
     Validate a synthetic ensemble against observed streamflow.
 
     Computes a comprehensive suite of metrics comparing ensemble properties
-    to observed statistics. Results include per-site marginal moments,
-    temporal dependence, spatial correlations, drought characteristics, and
-    spectral fidelity.
+    to observed statistics across eight categories.
 
     Parameters
     ----------
@@ -57,7 +71,8 @@ def validate_ensemble(
     metrics : list of str, optional
         Subset of metric categories to compute. Options:
         ``'marginal'``, ``'temporal'``, ``'spatial'``, ``'drought'``,
-        ``'spectral'``. If None, all categories are computed.
+        ``'spectral'``, ``'seasonal'``, ``'annual'``, ``'fdc'``.
+        If None, all categories are computed.
     drought_threshold : float, optional
         Flow threshold for drought identification. If None, defaults to
         the 20th percentile of observed flows at each site.
@@ -117,6 +132,15 @@ def validate_ensemble(
 
     if "spectral" in metrics:
         result.spectral = _compute_spectral_metrics(ensemble, Q_obs, obs_sites)
+
+    if "seasonal" in metrics:
+        result.seasonal = _compute_seasonal_metrics(ensemble, Q_obs, obs_sites)
+
+    if "annual" in metrics:
+        result.annual = _compute_annual_metrics(ensemble, Q_obs, obs_sites)
+
+    if "fdc" in metrics:
+        result.fdc = _compute_fdc_metrics(ensemble, Q_obs, obs_sites)
 
     result.summary = _compute_summary_scores(result)
 

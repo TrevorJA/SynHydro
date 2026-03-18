@@ -260,7 +260,9 @@ class ThomasFieringGenerator(Generator):
             training_period_=training_period,
         )
 
-    def _generate(self, n_years: int, **kwargs) -> pd.DataFrame:
+    def _generate(
+        self, n_years: int, *, rng: np.random.Generator, **kwargs
+    ) -> pd.DataFrame:
         """
         Generate a single realization of synthetic flows (internal method).
 
@@ -268,6 +270,8 @@ class ThomasFieringGenerator(Generator):
         ----------
         n_years : int
             Number of years to generate.
+        rng : np.random.Generator
+            Random number generator instance.
         **kwargs : dict, optional
             Additional parameters (currently unused).
 
@@ -287,12 +291,12 @@ class ThomasFieringGenerator(Generator):
                 if (i == 0) and (m == 0):
                     self.x_syn[0] = (
                         self.mu_monthly[month]
-                        + np.random.normal(0, 1) * self.sigma_monthly[month]
+                        + rng.normal(0, 1) * self.sigma_monthly[month]
                     )
 
                 else:
 
-                    e_rand = np.random.normal(0, 1)
+                    e_rand = rng.normal(0, 1)
 
                     self.x_syn[i * 12 + m] = (
                         self.mu_monthly[month]
@@ -364,9 +368,8 @@ class ThomasFieringGenerator(Generator):
         # Validate fit
         self.validate_fit()
 
-        # Set random seed if provided
-        if seed is not None:
-            np.random.seed(seed)
+        # Create random number generator
+        rng = np.random.default_rng(seed)
 
         # Determine number of years
         if n_timesteps is not None:
@@ -380,7 +383,7 @@ class ThomasFieringGenerator(Generator):
         # Generate realizations
         realizations = {}
         for i in range(n_realizations):
-            Q_syn = self._generate(n_years)
+            Q_syn = self._generate(n_years, rng=rng)
 
             # Extract values as Series
             if isinstance(Q_syn, pd.DataFrame):

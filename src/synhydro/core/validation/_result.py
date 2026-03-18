@@ -14,15 +14,25 @@ class ValidationResult:
     Attributes
     ----------
     marginal : dict[str, dict]
-        Per-site marginal statistics (mean, std, skewness, cv, percentiles).
+        Per-site marginal statistics (mean, std, skewness, kurtosis, cv,
+        percentiles, KS test p-value).
     temporal : dict[str, dict]
-        Per-site temporal statistics (lag-1 ACF, lag-2 ACF, Hurst exponent).
+        Per-site temporal statistics (lag-1/2 ACF, Hurst exponent, ACF RMSE).
     spatial : dict[str, float]
         Cross-site correlation preservation metrics.
     drought : dict[str, dict]
-        Per-site drought duration, severity, and frequency statistics.
+        Per-site drought duration, severity, and frequency (mean and max).
     spectral : dict[str, dict]
         Per-site spectral comparison metrics.
+    seasonal : dict[str, dict]
+        Per-site monthly statistics (mean bias, std bias, skewness bias,
+        Wilcoxon p-values per month).
+    annual : dict[str, dict]
+        Per-site annual aggregate statistics (mean, variance, skewness,
+        lag-1 ACF, cross-scale variance ratio).
+    fdc : dict[str, dict]
+        Per-site flow duration curve metrics (RMSE, bias at key exceedances,
+        ensemble envelope coverage).
     summary : dict[str, float]
         Aggregate summary scores across all metric categories.
     """
@@ -32,14 +42,17 @@ class ValidationResult:
     spatial: dict[str, float] = field(default_factory=dict)
     drought: dict[str, dict] = field(default_factory=dict)
     spectral: dict[str, dict] = field(default_factory=dict)
+    seasonal: dict[str, dict] = field(default_factory=dict)
+    annual: dict[str, dict] = field(default_factory=dict)
+    fdc: dict[str, dict] = field(default_factory=dict)
     summary: dict[str, float] = field(default_factory=dict)
 
     def to_dataframe(self) -> pd.DataFrame:
         """
         Flatten per-site metric results into a tidy DataFrame.
 
-        Includes marginal, temporal, drought, and spectral categories.
-        Spatial metrics (site-pair level) are excluded.
+        Includes all per-site metric categories. Spatial metrics
+        (site-pair level) are excluded.
 
         Returns
         -------
@@ -53,6 +66,9 @@ class ValidationResult:
             ("temporal", self.temporal),
             ("drought", self.drought),
             ("spectral", self.spectral),
+            ("seasonal", self.seasonal),
+            ("annual", self.annual),
+            ("fdc", self.fdc),
         ]:
             for site, metrics in site_metrics.items():
                 for metric_name, values in metrics.items():
