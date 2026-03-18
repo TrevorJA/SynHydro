@@ -3716,7 +3716,7 @@ If omitted, a prior call to <code>preprocessing()</code> is required.</p>
 
 
 <a href="#synhydro.methods.disaggregation.temporal.nowak.NowakDisaggregator.disaggregate" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">disaggregate</span><span class="p">(</span><span class="n">ensemble</span><span class="p">:</span> <span class="n">Ensemble</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_method</span><span class="o">=</span><span class="s1">&#39;distance_weighted&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">disaggregate</span><span class="p">(</span><span class="n">ensemble</span><span class="p">:</span> <span class="n">Ensemble</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_method</span><span class="o">=</span><span class="s1">&#39;distance_weighted&#39;</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
@@ -3783,6 +3783,22 @@ If None, uses the value from initialization.</p>
             </td>
             <td>
                   <code>&#39;distance_weighted&#39;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>seed</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Random seed for reproducibility.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -3956,7 +3972,7 @@ from the historic dataset.</p>
 
 
 <a href="#synhydro.methods.disaggregation.temporal.nowak.NowakDisaggregator.sample_knn_monthly_flows" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">sample_knn_monthly_flows</span><span class="p">(</span><span class="n">Qs_monthly_array</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_method</span><span class="o">=</span><span class="s1">&#39;distance_weighted&#39;</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">sample_knn_monthly_flows</span><span class="p">(</span><span class="n">Qs_monthly_array</span><span class="p">,</span> <span class="n">month</span><span class="p">,</span> <span class="n">n_neighbors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_method</span><span class="o">=</span><span class="s1">&#39;distance_weighted&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents ">
