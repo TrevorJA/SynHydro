@@ -232,6 +232,9 @@ class Generator(ABC):
         """
         Validate and standardize input data format.
 
+        Checks type, DatetimeIndex, NaN content, negative values, data
+        frequency, and minimum record length.
+
         Parameters
         ----------
         data : pd.Series or pd.DataFrame
@@ -259,10 +262,12 @@ class Generator(ABC):
         if isinstance(data, pd.Series):
             data = data.to_frame(name=data.name or "flow")
 
+        # Empty data
+        if len(data) == 0:
+            raise ValueError("Input data is empty.")
+
         # Index validation
         if not isinstance(data.index, pd.DatetimeIndex):
-
-            # try to convert index to DatetimeIndex
             try:
                 data.index = pd.to_datetime(data.index)
             except Exception as e:
@@ -270,9 +275,79 @@ class Generator(ABC):
                     f"Data index must be a DatetimeIndex, got {type(data.index)}: {e}"
                 )
 
+        # NaN check
+        nan_counts = data.isna().sum()
+        total_nans = nan_counts.sum()
+        if total_nans > 0:
+            pct = total_nans / data.size * 100
+            nan_sites = nan_counts[nan_counts > 0]
+            self.logger.warning(
+                "Input data contains %d NaN values (%.1f%%). "
+                "Sites with NaNs: %s. NaN rows will propagate through "
+                "fitting and may cause errors or poor results.",
+                total_nans,
+                pct,
+                dict(nan_sites),
+            )
+
+        # Negative value check
+        numeric_data = data.select_dtypes(include="number")
+        if (numeric_data < 0).any().any():
+            neg_sites = [
+                col for col in numeric_data.columns if (numeric_data[col] < 0).any()
+            ]
+            self.logger.warning(
+                "Input data contains negative values in sites: %s. "
+                "Generators using log transforms will fail on negative values.",
+                neg_sites,
+            )
+
+        # Frequency detection and validation
+        freq = data.index.freq or pd.infer_freq(data.index)
+        if freq is not None:
+            # Normalize common frequency aliases
+            freq_str = str(freq)
+            freq_map = {
+                "D": "D",
+                "MS": "MS",
+                "M": "MS",
+                "ME": "MS",
+                "YS": "YS",
+                "YE": "YS",
+                "AS": "YS",
+                "A": "YS",
+                "AS-JAN": "YS",
+            }
+            normalized = freq_map.get(freq_str, freq_str)
+            if (
+                hasattr(self, "supported_frequencies")
+                and normalized not in self.supported_frequencies
+            ):
+                self.logger.warning(
+                    "Detected frequency '%s' is not in supported frequencies %s "
+                    "for %s. The generator may resample internally or raise an "
+                    "error during preprocessing.",
+                    normalized,
+                    self.supported_frequencies,
+                    self.__class__.__name__,
+                )
+
+        # Minimum record length
+        n = len(data)
+        if n < 24:
+            self.logger.warning(
+                "Input data has only %d timesteps. Most generators need at "
+                "least 2-3 years of data for reliable parameter estimation. "
+                "Results may be unreliable.",
+                n,
+            )
+
         self.logger.info(
-            f"Validated data: {data.shape[0]} timesteps, {data.shape[1]} sites, "
-            f"period {data.index[0]} to {data.index[-1]}"
+            "Validated data: %d timesteps, %d sites, period %s to %s",
+            data.shape[0],
+            data.shape[1],
+            data.index[0],
+            data.index[-1],
         )
 
         return data
@@ -895,6 +970,8 @@ class Disaggregator(ABC):
         """
         Validate and standardize input data format.
 
+        Checks type, DatetimeIndex, NaN content, and negative values.
+
         Parameters
         ----------
         data : pd.Series or pd.DataFrame
@@ -922,9 +999,12 @@ class Disaggregator(ABC):
         if isinstance(data, pd.Series):
             data = data.to_frame(name=data.name or "flow")
 
+        # Empty data
+        if len(data) == 0:
+            raise ValueError("Input data is empty.")
+
         # Index validation
         if not isinstance(data.index, pd.DatetimeIndex):
-            # try to convert index to DatetimeIndex
             try:
                 data.index = pd.to_datetime(data.index)
             except Exception as e:
@@ -932,9 +1012,39 @@ class Disaggregator(ABC):
                     f"Data index must be a DatetimeIndex, got {type(data.index)}: {e}"
                 )
 
+        # NaN check
+        nan_counts = data.isna().sum()
+        total_nans = nan_counts.sum()
+        if total_nans > 0:
+            pct = total_nans / data.size * 100
+            nan_sites = nan_counts[nan_counts > 0]
+            self.logger.warning(
+                "Input data contains %d NaN values (%.1f%%). "
+                "Sites with NaNs: %s. NaN rows will propagate through "
+                "fitting and may cause errors or poor results.",
+                total_nans,
+                pct,
+                dict(nan_sites),
+            )
+
+        # Negative value check
+        numeric_data = data.select_dtypes(include="number")
+        if (numeric_data < 0).any().any():
+            neg_sites = [
+                col for col in numeric_data.columns if (numeric_data[col] < 0).any()
+            ]
+            self.logger.warning(
+                "Input data contains negative values in sites: %s. "
+                "Disaggregators using log transforms will fail on negative values.",
+                neg_sites,
+            )
+
         self.logger.info(
-            f"Validated data: {data.shape[0]} timesteps, {data.shape[1]} sites, "
-            f"period {data.index[0]} to {data.index[-1]}"
+            "Validated data: %d timesteps, %d sites, period %s to %s",
+            data.shape[0],
+            data.shape[1],
+            data.index[0],
+            data.index[-1],
         )
 
         return data

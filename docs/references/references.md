@@ -5,7 +5,7 @@
 Thomas, H.A., and Fiering, M.B. (1962). Mathematical synthesis of streamflow sequences for the analysis of river basins by simulation. In *Design of Water Resource Systems* (eds. Maass et al.), pp. 459-493. Harvard University Press.
 
 **Matalas MAR(1)**
-Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. *Water Resources Research*, 3(4), 937–945. https://doi.org/10.1029/WR003i004p00937
+Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. *Water Resources Research*, 3(4), 937-945. https://doi.org/10.1029/WR003i004p00937
 
 **Multi-Site Hidden Markov Model**
 Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. *Earth's Future*. https://doi.org/10.1029/2024EF004841

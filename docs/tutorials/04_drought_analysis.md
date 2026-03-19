@@ -21,8 +21,8 @@ ssi_calc = synhydro.SSI(dist="gamma", timescale=12, fit_freq="ME")
 ssi_calc.fit(Q_monthly[site])
 ssi = ssi_calc.get_training_ssi()
 
-print(f"SSI mean: {ssi.mean():.3f}")   # ≈ 0
-print(f"SSI std:  {ssi.std():.3f}")     # ≈ 1
+print(f"SSI mean: {ssi.mean():.3f}")   # ~0
+print(f"SSI std:  {ssi.std():.3f}")     # ~1
 ```
 
 ## Visualize

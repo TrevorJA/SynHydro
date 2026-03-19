@@ -8,7 +8,6 @@ a comprehensive suite of metrics comparing the ensemble against observed data.
 
 ```python
 import synhydro
-from synhydro import validate_ensemble
 
 Q_daily = synhydro.load_example_data()
 Q_monthly = Q_daily.resample("MS").mean()
@@ -35,13 +34,13 @@ metric categories:
 | **FDC** | Flow duration curve RMSE, bias at Q10/Q50/Q90, envelope coverage |
 
 ```python
-result = validate_ensemble(ensemble, Q_monthly)
+result = synhydro.validate_ensemble(ensemble, Q_monthly)
 ```
 
 You can also request a subset of categories:
 
 ```python
-result = validate_ensemble(
+result = synhydro.validate_ensemble(
     ensemble, Q_monthly,
     metrics=["marginal", "seasonal", "fdc"],
 )

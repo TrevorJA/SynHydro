@@ -29,7 +29,7 @@ The returned `Ensemble` contains 50 synthetic 30-year monthly timeseries.
 
 ```python
 Q_syn_0 = ensemble.data_by_realization[0]
-print(Q_syn_0.shape)  # (360, 1) - 30 years x 12 months
+print(Q_syn_0.shape)  # (360, 1) -- 30 years x 12 months
 ```
 
 !!! note "Seed reproducibility"

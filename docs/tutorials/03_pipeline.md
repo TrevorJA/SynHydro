@@ -22,7 +22,7 @@ daily_ensemble = pipeline.generate(n_realizations=10, n_years=30, seed=42)
 
 ```python
 Q_syn_daily = daily_ensemble.data_by_realization[0]
-print(Q_syn_daily.shape)  # (~10957 days × n_sites)
+print(Q_syn_daily.shape)  # (~10957 days x n_sites)
 ```
 
 !!! tip "Single-site alternative"
@@ -53,5 +53,5 @@ fig, ax = plot_timeseries(
 
 - **Drought analysis** on synthetic flows - [Tutorial 04](04_drought_analysis.md)
 - **Ensemble validation** - [Tutorial 05](05_validation.md)
-- **Algorithm details** - [Kirsch Bootstrap](../algorithms/kirsch.md) ·
+- **Algorithm details** - [Kirsch Bootstrap](../algorithms/kirsch.md),
   [Nowak Disaggregation](../algorithms/nowak_disaggregation.md)
