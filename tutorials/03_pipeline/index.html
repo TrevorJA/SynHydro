@@ -1139,7 +1139,7 @@ monthly aggregation and disaggregation automatically.</p>
 </span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">daily_ensemble</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_realizations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">n_years</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 </span></code></pre></div>
 <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">Q_syn_daily</span> <span class="o">=</span> <span class="n">daily_ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">Q_syn_daily</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (~10957 days × n_sites)</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">Q_syn_daily</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (~10957 days x n_sites)</span>
 </span></code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Single-site alternative</p>
@@ -1165,7 +1165,7 @@ monthly aggregation and disaggregation automatically.</p>
 <ul>
 <li><strong>Drought analysis</strong> on synthetic flows - <a href="../04_drought_analysis/">Tutorial 04</a></li>
 <li><strong>Ensemble validation</strong> - <a href="../05_validation/">Tutorial 05</a></li>
-<li><strong>Algorithm details</strong> - <a href="../../algorithms/kirsch/">Kirsch Bootstrap</a> ·
+<li><strong>Algorithm details</strong> - <a href="../../algorithms/kirsch/">Kirsch Bootstrap</a>,
   <a href="../../algorithms/nowak_disaggregation/">Nowak Disaggregation</a></li>
 </ul>
 

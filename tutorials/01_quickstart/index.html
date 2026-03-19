@@ -1160,7 +1160,7 @@ fit a generator, generate synthetic realizations, and plot the results.</p>
 </span></code></pre></div>
 <p>The returned <code>Ensemble</code> contains 50 synthetic 30-year monthly timeseries.</p>
 <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">Q_syn_0</span> <span class="o">=</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">data_by_realization</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">Q_syn_0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (360, 1) - 30 years x 12 months</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">print</span><span class="p">(</span><span class="n">Q_syn_0</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>  <span class="c1"># (360, 1) -- 30 years x 12 months</span>
 </span></code></pre></div>
 <div class="admonition note">
 <p class="admonition-title">Seed reproducibility</p>
