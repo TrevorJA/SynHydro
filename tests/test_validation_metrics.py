@@ -1,5 +1,5 @@
 """
-Tests for ensemble validation metrics, including L-moment and extreme value categories.
+Tests for ensemble validation metrics.
 """
 
 import pytest
@@ -11,6 +11,10 @@ from synhydro.core.validation import validate_ensemble, ValidationResult
 from synhydro.core.validation._metrics import (
     _compute_lmoment_metrics,
     _compute_extreme_metrics,
+    _compute_crps_metrics,
+    _compute_ssi_drought_metrics,
+    _crps_single,
+    _extract_ssi_droughts,
     _lkurtosis,
 )
 
@@ -210,3 +214,120 @@ class TestValidateEnsembleNewMetrics:
         assert "mean_absolute_relative_error" in result.summary
         # Summary should aggregate across all categories including new ones
         assert result.summary["mean_absolute_relative_error"] > 0
+
+    def test_crps_in_validate_ensemble(self, monthly_ensemble, monthly_obs):
+        result = validate_ensemble(monthly_ensemble, monthly_obs, metrics=["crps"])
+        assert len(result.crps) > 0
+        assert len(result.marginal) == 0
+
+    def test_ssi_drought_in_validate_ensemble(self, monthly_ensemble, monthly_obs):
+        result = validate_ensemble(
+            monthly_ensemble, monthly_obs, metrics=["ssi_drought"]
+        )
+        # SSI may not return results for short synthetic data, but should not error
+        assert isinstance(result.ssi_drought, dict)
+
+    def test_all_categories_in_dataframe(self, monthly_ensemble, monthly_obs):
+        result = validate_ensemble(monthly_ensemble, monthly_obs)
+        df = result.to_dataframe()
+        categories = set(df["category"].unique())
+        assert "crps" in categories
+        assert "lmoments" in categories
+        assert "extremes" in categories
+
+
+# ---------------------------------------------------------------------------
+# CRPS metrics
+# ---------------------------------------------------------------------------
+
+
+class TestCRPSMetrics:
+    """Tests for Continuous Ranked Probability Score metrics."""
+
+    def test_crps_single_perfect(self):
+        """CRPS = 0 when observation equals all ensemble members."""
+        members = np.array([5.0, 5.0, 5.0, 5.0])
+        assert _crps_single(5.0, members) == pytest.approx(0.0, abs=1e-10)
+
+    def test_crps_single_positive(self):
+        """CRPS is always non-negative."""
+        rng = np.random.default_rng(42)
+        members = rng.lognormal(5, 0.5, 100)
+        for y in [10.0, 100.0, 500.0, 1000.0]:
+            assert _crps_single(y, members) >= 0.0
+
+    def test_crps_single_increases_with_distance(self):
+        """CRPS should increase as observation moves further from ensemble."""
+        members = np.array([100.0, 110.0, 105.0, 95.0, 102.0])
+        crps_close = _crps_single(103.0, members)
+        crps_far = _crps_single(200.0, members)
+        assert crps_far > crps_close
+
+    def test_crps_metrics_returns_sites(self, monthly_ensemble, monthly_obs):
+        result = _compute_crps_metrics(monthly_ensemble, monthly_obs, ["site_A"])
+        assert "site_A" in result
+
+    def test_crps_metrics_keys(self, monthly_ensemble, monthly_obs):
+        result = _compute_crps_metrics(monthly_ensemble, monthly_obs, ["site_A"])
+        assert "crps_mean" in result["site_A"]
+
+    def test_crps_mean_positive(self, monthly_ensemble, monthly_obs):
+        result = _compute_crps_metrics(monthly_ensemble, monthly_obs, ["site_A"])
+        assert result["site_A"]["crps_mean"]["synthetic_median"] > 0
+
+    def test_crpss_bounded(self, monthly_ensemble, monthly_obs):
+        """CRPSS should be less than 1 (perfect) and typically > -1."""
+        result = _compute_crps_metrics(monthly_ensemble, monthly_obs, ["site_A"])
+        if "crpss" in result["site_A"]:
+            crpss = result["site_A"]["crpss"]["synthetic_median"]
+            assert crpss < 1.0
+
+    def test_crps_skips_short_series(self, monthly_ensemble):
+        short_obs = pd.DataFrame(
+            {"site_A": [1.0, 2.0, 3.0]},
+            index=pd.date_range("2000-01-01", periods=3, freq="MS"),
+        )
+        result = _compute_crps_metrics(monthly_ensemble, short_obs, ["site_A"])
+        assert len(result.get("site_A", {})) == 0
+
+
+# ---------------------------------------------------------------------------
+# SSI drought metrics
+# ---------------------------------------------------------------------------
+
+
+class TestSSIDroughtMetrics:
+    """Tests for SSI-based drought validation metrics."""
+
+    def test_extract_ssi_droughts_basic(self):
+        """Simple SSI sequence with one drought event."""
+        ssi = np.array([0.5, -0.5, -1.2, -1.5, -0.8, 0.3, 0.5])
+        result = _extract_ssi_droughts(ssi, threshold=-1.0)
+        # Drought starts at -1.2, ends when returning above 0 at 0.3
+        assert len(result["durations"]) == 1
+        assert result["durations"][0] >= 2  # at least -1.2 and -1.5 below 0
+
+    def test_extract_ssi_droughts_no_drought(self):
+        """No drought when SSI stays above threshold."""
+        ssi = np.array([0.5, 0.2, -0.3, -0.5, 0.1, 0.8])
+        result = _extract_ssi_droughts(ssi, threshold=-1.0)
+        assert len(result["durations"]) == 0
+
+    def test_extract_ssi_droughts_severity_positive(self):
+        """Severity values should be positive (absolute cumulative deficit)."""
+        ssi = np.array([0.5, -1.5, -2.0, -1.0, 0.5])
+        result = _extract_ssi_droughts(ssi, threshold=-1.0)
+        for sev in result["severities"]:
+            assert sev > 0
+
+    def test_ssi_drought_metrics_returns_dict(self, monthly_ensemble, monthly_obs):
+        result = _compute_ssi_drought_metrics(monthly_ensemble, monthly_obs, ["site_A"])
+        assert isinstance(result, dict)
+
+    def test_ssi_drought_metrics_skips_short(self, monthly_ensemble):
+        short_obs = pd.DataFrame(
+            {"site_A": np.random.default_rng(42).lognormal(5, 0.3, 12)},
+            index=pd.date_range("2000-01-01", periods=12, freq="MS"),
+        )
+        result = _compute_ssi_drought_metrics(monthly_ensemble, short_obs, ["site_A"])
+        assert len(result.get("site_A", {})) == 0

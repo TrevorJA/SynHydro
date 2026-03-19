@@ -983,6 +983,309 @@ def _compute_extreme_metrics(
 
 
 # ---------------------------------------------------------------------------
+# CRPS (Hersbach, 2000)
+# ---------------------------------------------------------------------------
+
+
+def _compute_crps_metrics(
+    ensemble: Ensemble,
+    Q_obs: pd.DataFrame,
+    sites: list[str],
+) -> dict[str, dict]:
+    """Compute Continuous Ranked Probability Score (CRPS) per site.
+
+    Since synthetic generators produce statistically equivalent series
+    (not date-aligned forecasts), CRPS is computed by calendar month:
+    for each month m, pool all synthetic values for month m across
+    realizations as the ensemble, then score each observed month-m value
+    against that pool.
+
+    CRPSS (skill score) is reported relative to a climatological reference
+    (unconditional sample distribution of all observed values, ignoring
+    seasonality).
+
+    Metrics: crps_mean, crpss.
+
+    References
+    ----------
+    Hersbach, H. (2000). Decomposition of the Continuous Ranked Probability
+    Score for Ensemble Prediction Systems. Weather and Forecasting, 15(5),
+    559-570.
+    """
+    results = {}
+
+    for site in sites:
+        obs = Q_obs[site].dropna()
+        if len(obs) < 24:
+            continue
+
+        # Pool synthetic values by calendar month
+        syn_by_month: dict[int, np.ndarray] = {m: [] for m in range(1, 13)}
+        for df in ensemble.data_by_realization.values():
+            if site not in df.columns:
+                continue
+            s = df[site].dropna()
+            if not hasattr(s.index, "month"):
+                continue
+            for m in range(1, 13):
+                vals = s[s.index.month == m].values
+                syn_by_month[m].extend(vals.tolist())
+
+        # Convert to arrays
+        for m in syn_by_month:
+            syn_by_month[m] = np.array(syn_by_month[m])
+
+        # Score each observed value against the synthetic pool for its month
+        crps_values = []
+        for m in range(1, 13):
+            obs_m = obs[obs.index.month == m].values
+            members = syn_by_month[m]
+            members = members[np.isfinite(members)]
+            if len(members) < 5 or len(obs_m) == 0:
+                continue
+            for y in obs_m:
+                if not np.isfinite(y):
+                    continue
+                crps_values.append(_crps_single(y, members))
+
+        if len(crps_values) < 12:
+            continue
+
+        crps_arr = np.array(crps_values)
+        mean_crps = float(np.mean(crps_arr))
+
+        # Climatological CRPS: score each obs against all other obs
+        obs_vals = obs.values[np.isfinite(obs.values)]
+        if len(obs_vals) > 10:
+            clim_crps_vals = []
+            for y in obs_vals:
+                clim_crps_vals.append(_crps_single(y, obs_vals))
+            clim_crps = float(np.mean(clim_crps_vals))
+            crpss = 1.0 - mean_crps / clim_crps if abs(clim_crps) > 1e-10 else np.nan
+        else:
+            crpss = np.nan
+
+        site_results = {
+            "crps_mean": {
+                "observed": 0.0,
+                "synthetic_median": mean_crps,
+                "synthetic_p10": float(np.percentile(crps_arr, 10)),
+                "synthetic_p90": float(np.percentile(crps_arr, 90)),
+                "relative_error": mean_crps,
+            },
+        }
+        if np.isfinite(crpss):
+            site_results["crpss"] = {
+                "observed": 1.0,
+                "synthetic_median": float(crpss),
+                "synthetic_p10": float(crpss),
+                "synthetic_p90": float(crpss),
+                "relative_error": float(crpss - 1.0),
+            }
+
+        results[site] = site_results
+
+    return results
+
+
+def _crps_single(y: float, members: np.ndarray) -> float:
+    """Compute CRPS for a single observation against an ensemble.
+
+    Uses the exact formula from Hersbach (2000):
+    CRPS = E|X - y| - 0.5 * E|X - X'|
+    where X, X' are independent draws from the ensemble.
+
+    Parameters
+    ----------
+    y : float
+        Observed value.
+    members : np.ndarray
+        Ensemble member values (already filtered for finiteness).
+
+    Returns
+    -------
+    float
+        CRPS value (non-negative, lower is better).
+    """
+    m = len(members)
+    term1 = np.mean(np.abs(members - y))
+    sorted_m = np.sort(members)
+    ranks = np.arange(1, m + 1)
+    term2 = np.sum((2 * ranks - m - 1) * sorted_m) / (m * m)
+    return float(term1 - term2)
+
+
+# ---------------------------------------------------------------------------
+# SSI-based drought metrics (McKee et al., 1993)
+# ---------------------------------------------------------------------------
+
+
+def _compute_ssi_drought_metrics(
+    ensemble: Ensemble,
+    Q_obs: pd.DataFrame,
+    sites: list[str],
+    ssi_timescale: int = 12,
+    ssi_dist: str = "gamma",
+) -> dict[str, dict]:
+    """Compute SSI-based drought metrics per site.
+
+    Fits SSI (Standardized Streamflow Index) on observed data, then
+    transforms each synthetic realization using the same fitted
+    distributions. Compares drought event characteristics (duration,
+    severity, frequency) derived from SSI < -1 threshold.
+
+    Metrics: ssi_mean_drought_duration, ssi_max_drought_duration,
+    ssi_mean_drought_severity, ssi_max_drought_severity,
+    ssi_drought_frequency.
+
+    References
+    ----------
+    McKee, T.B., Doesken, N.J., and Kleist, J. (1993). The relationship
+    of drought frequency and duration to time scales. Proc. 8th Conf.
+    on Applied Climatology, Anaheim, CA, 179-184.
+    """
+    from synhydro.droughts.ssi import SSI
+
+    results = {}
+
+    for site in sites:
+        obs = Q_obs[site].dropna()
+        if len(obs) < 36:
+            # Need at least 3 years for SSI fitting
+            continue
+
+        # Fit SSI on observed data
+        try:
+            ssi_calc = SSI(dist=ssi_dist, timescale=ssi_timescale)
+            ssi_calc.fit(obs)
+            obs_ssi = ssi_calc.get_training_ssi().dropna()
+        except Exception:
+            logger.debug("SSI fitting failed for site %s, skipping", site)
+            continue
+
+        if len(obs_ssi) < 12:
+            continue
+
+        # Extract observed drought events (SSI < -1)
+        obs_droughts = _extract_ssi_droughts(obs_ssi.values)
+        obs_dur = obs_droughts["durations"]
+        obs_sev = obs_droughts["severities"]
+        n_obs = len(obs_ssi)
+
+        obs_mean_dur = float(np.mean(obs_dur)) if obs_dur else 0.0
+        obs_max_dur = float(np.max(obs_dur)) if obs_dur else 0.0
+        obs_mean_sev = float(np.mean(obs_sev)) if obs_sev else 0.0
+        obs_max_sev = float(np.max(obs_sev)) if obs_sev else 0.0
+        obs_freq = len(obs_dur) / (n_obs / 12.0) if n_obs > 0 else 0.0
+
+        # Compute drought metrics for each synthetic realization
+        syn_mean_dur: list[float] = []
+        syn_max_dur: list[float] = []
+        syn_mean_sev: list[float] = []
+        syn_max_sev: list[float] = []
+        syn_freq: list[float] = []
+
+        for df in ensemble.data_by_realization.values():
+            if site not in df.columns:
+                continue
+            s = df[site].dropna()
+            if len(s) < 36:
+                continue
+            try:
+                syn_ssi = ssi_calc.transform(s).dropna()
+            except Exception:
+                continue
+            if len(syn_ssi) < 12:
+                continue
+
+            droughts = _extract_ssi_droughts(syn_ssi.values)
+            dur = droughts["durations"]
+            sev = droughts["severities"]
+            n_syn = len(syn_ssi)
+
+            syn_mean_dur.append(float(np.mean(dur)) if dur else 0.0)
+            syn_max_dur.append(float(np.max(dur)) if dur else 0.0)
+            syn_mean_sev.append(float(np.mean(sev)) if sev else 0.0)
+            syn_max_sev.append(float(np.max(sev)) if sev else 0.0)
+            syn_freq.append(len(dur) / (n_syn / 12.0) if n_syn > 0 else 0.0)
+
+        if not syn_mean_dur:
+            continue
+
+        site_results = {}
+        for name, obs_val, syn_vals in [
+            ("ssi_mean_drought_duration", obs_mean_dur, syn_mean_dur),
+            ("ssi_max_drought_duration", obs_max_dur, syn_max_dur),
+            ("ssi_mean_drought_severity", obs_mean_sev, syn_mean_sev),
+            ("ssi_max_drought_severity", obs_max_sev, syn_max_sev),
+            ("ssi_drought_frequency", obs_freq, syn_freq),
+        ]:
+            entry = _metric_entry(obs_val, syn_vals)
+            if entry is not None:
+                site_results[name] = entry
+
+        results[site] = site_results
+
+    return results
+
+
+def _extract_ssi_droughts(
+    ssi_values: np.ndarray,
+    threshold: float = -1.0,
+) -> dict[str, list]:
+    """Extract drought events from SSI values.
+
+    A drought event starts when SSI drops below the threshold and ends
+    when it returns above 0.
+
+    Parameters
+    ----------
+    ssi_values : np.ndarray
+        SSI values.
+    threshold : float, default -1.0
+        SSI threshold to initiate a drought event.
+
+    Returns
+    -------
+    dict
+        'durations': list of drought durations in timesteps.
+        'severities': list of cumulative SSI deficits (absolute value).
+    """
+    durations = []
+    severities = []
+    in_drought = False
+    current_dur = 0
+    current_sev = 0.0
+
+    for val in ssi_values:
+        if not np.isfinite(val):
+            continue
+        if in_drought:
+            if val >= 0:
+                # End of drought
+                durations.append(current_dur)
+                severities.append(current_sev)
+                in_drought = False
+                current_dur = 0
+                current_sev = 0.0
+            else:
+                current_dur += 1
+                current_sev += abs(val)
+        else:
+            if val <= threshold:
+                in_drought = True
+                current_dur = 1
+                current_sev = abs(val)
+
+    # Close any ongoing drought
+    if in_drought and current_dur > 0:
+        durations.append(current_dur)
+        severities.append(current_sev)
+
+    return {"durations": durations, "severities": severities}
+
+
+# ---------------------------------------------------------------------------
 # Summary scores
 # ---------------------------------------------------------------------------
 
@@ -1001,6 +1304,8 @@ def _compute_summary_scores(result: ValidationResult) -> dict[str, float]:
         result.fdc,
         result.lmoments,
         result.extremes,
+        result.crps,
+        result.ssi_drought,
     ]:
         for site_metrics in category.values():
             for values in site_metrics.values():

@@ -16,6 +16,8 @@ Metric categories
 - **fdc**: Flow duration curve RMSE, bias at Q10/Q50/Q90, envelope coverage
 - **lmoments**: L-CV, L-skewness, L-kurtosis ratios (Hosking & Wallis 1997)
 - **extremes**: Annual max/min statistics, GEV return-period quantiles, 7Q metrics
+- **crps**: Continuous Ranked Probability Score and skill score (Hersbach 2000)
+- **ssi_drought**: SSI-based drought duration, severity, frequency (McKee et al. 1993)
 
 References
 ----------
@@ -45,6 +47,8 @@ from synhydro.core.validation._metrics import (
     _compute_fdc_metrics,
     _compute_lmoment_metrics,
     _compute_extreme_metrics,
+    _compute_crps_metrics,
+    _compute_ssi_drought_metrics,
     _compute_summary_scores,
 )
 
@@ -76,7 +80,7 @@ def validate_ensemble(
         Subset of metric categories to compute. Options:
         ``'marginal'``, ``'temporal'``, ``'spatial'``, ``'drought'``,
         ``'spectral'``, ``'seasonal'``, ``'annual'``, ``'fdc'``,
-        ``'lmoments'``, ``'extremes'``.
+        ``'lmoments'``, ``'extremes'``, ``'crps'``, ``'ssi_drought'``.
         If None, all categories are computed.
     drought_threshold : float, optional
         Flow threshold for drought identification. If None, defaults to
@@ -152,6 +156,12 @@ def validate_ensemble(
 
     if "extremes" in metrics:
         result.extremes = _compute_extreme_metrics(ensemble, Q_obs, obs_sites)
+
+    if "crps" in metrics:
+        result.crps = _compute_crps_metrics(ensemble, Q_obs, obs_sites)
+
+    if "ssi_drought" in metrics:
+        result.ssi_drought = _compute_ssi_drought_metrics(ensemble, Q_obs, obs_sites)
 
     result.summary = _compute_summary_scores(result)
 

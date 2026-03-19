@@ -16,6 +16,8 @@ _VALID_METRICS = frozenset(
         "fdc",
         "lmoments",
         "extremes",
+        "crps",
+        "ssi_drought",
     }
 )
 

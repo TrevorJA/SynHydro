@@ -38,6 +38,12 @@ class ValidationResult:
     extremes : dict[str, dict]
         Per-site extreme value metrics (annual max statistics, GEV return
         period quantiles, 7-day minimum flow statistics).
+    crps : dict[str, dict]
+        Per-site CRPS (Continuous Ranked Probability Score) and CRPSS
+        (skill score vs climatology).
+    ssi_drought : dict[str, dict]
+        Per-site SSI-based drought metrics (duration, severity, frequency)
+        using SSI < -1 threshold.
     summary : dict[str, float]
         Aggregate summary scores across all metric categories.
     """
@@ -52,6 +58,8 @@ class ValidationResult:
     fdc: dict[str, dict] = field(default_factory=dict)
     lmoments: dict[str, dict] = field(default_factory=dict)
     extremes: dict[str, dict] = field(default_factory=dict)
+    crps: dict[str, dict] = field(default_factory=dict)
+    ssi_drought: dict[str, dict] = field(default_factory=dict)
     summary: dict[str, float] = field(default_factory=dict)
 
     def to_dataframe(self) -> pd.DataFrame:
@@ -78,6 +86,8 @@ class ValidationResult:
             ("fdc", self.fdc),
             ("lmoments", self.lmoments),
             ("extremes", self.extremes),
+            ("crps", self.crps),
+            ("ssi_drought", self.ssi_drought),
         ]:
             for site, metrics in site_metrics.items():
                 for metric_name, values in metrics.items():
