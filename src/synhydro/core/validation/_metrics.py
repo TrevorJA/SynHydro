@@ -14,7 +14,12 @@ import pandas as pd
 from scipy import stats as sp_stats
 
 from synhydro.core.ensemble import Ensemble
-from synhydro.core.statistics import compute_hurst_exponent, compare_spectral_properties
+from synhydro.core.statistics import (
+    compute_hurst_exponent,
+    compare_spectral_properties,
+    _compute_lmoments,
+    fit_gev,
+)
 from synhydro.core.validation._helpers import (
     _skewness,
     _extract_droughts,
@@ -710,6 +715,274 @@ def _compute_fdc_metrics(
 
 
 # ---------------------------------------------------------------------------
+# L-moment metrics (Hosking & Wallis, 1997)
+# ---------------------------------------------------------------------------
+
+
+def _compute_lmoment_metrics(
+    ensemble: Ensemble,
+    Q_obs: pd.DataFrame,
+    sites: list[str],
+) -> dict[str, dict]:
+    """Compute L-moment ratio metrics per site.
+
+    L-moment ratios are more robust than product-moment estimators for
+    non-normal data and small samples. L-CV (tau-2), L-skewness (tau-3),
+    and L-kurtosis (tau-4) are standard in flood frequency analysis.
+
+    Metrics: l_cv, l_skewness, l_kurtosis.
+
+    References
+    ----------
+    Hosking, J.R.M. and Wallis, J.R. (1997). Regional Frequency Analysis:
+    An Approach Based on L-Moments. Cambridge University Press.
+    """
+    results = {}
+
+    for site in sites:
+        obs = Q_obs[site].dropna().values
+        if len(obs) < 10:
+            continue
+
+        l1_obs, l2_obs, t3_obs = _compute_lmoments(obs)
+        # L-CV = l2 / l1
+        obs_lcv = l2_obs / l1_obs if abs(l1_obs) > 1e-10 else np.nan
+        # L-kurtosis: need 4th L-moment
+        obs_lkurt = _lkurtosis(obs)
+
+        syn_lcv: list[float] = []
+        syn_lskew: list[float] = []
+        syn_lkurt: list[float] = []
+
+        for df in ensemble.data_by_realization.values():
+            if site not in df.columns:
+                continue
+            s = df[site].dropna().values
+            if len(s) < 10:
+                continue
+            l1_s, l2_s, t3_s = _compute_lmoments(s)
+            if abs(l1_s) > 1e-10:
+                syn_lcv.append(l2_s / l1_s)
+            syn_lskew.append(t3_s)
+            syn_lkurt.append(_lkurtosis(s))
+
+        site_results = {}
+        for name, obs_val, syn_vals in [
+            ("l_cv", obs_lcv, syn_lcv),
+            ("l_skewness", t3_obs, syn_lskew),
+            ("l_kurtosis", obs_lkurt, syn_lkurt),
+        ]:
+            entry = _metric_entry(obs_val, syn_vals)
+            if entry is not None:
+                site_results[name] = entry
+
+        results[site] = site_results
+
+    return results
+
+
+def _lkurtosis(x: np.ndarray) -> float:
+    """Compute L-kurtosis (tau-4) from sample values.
+
+    Parameters
+    ----------
+    x : np.ndarray
+        Sample values. Needs n >= 5 for reliable estimation.
+
+    Returns
+    -------
+    float
+        L-kurtosis ratio, or nan if sample is too small.
+    """
+    n = len(x)
+    if n < 5:
+        return np.nan
+    xs = np.sort(x)
+
+    # Probability weighted moments b0..b3
+    b0 = np.mean(xs)
+    b1 = np.sum(np.arange(1, n) * xs[1:]) / (n * (n - 1))
+    b2 = np.sum(np.arange(1, n - 1) * np.arange(2, n) * xs[2:]) / (
+        n * (n - 1) * (n - 2)
+    )
+    b3 = np.sum(
+        np.arange(1, n - 2) * np.arange(2, n - 1) * np.arange(3, n) * xs[3:]
+    ) / (n * (n - 1) * (n - 2) * (n - 3))
+
+    l2 = 2 * b1 - b0
+    l4 = 20 * b3 - 30 * b2 + 12 * b1 - b0
+    if abs(l2) < 1e-10:
+        return 0.0
+    return float(l4 / l2)
+
+
+# ---------------------------------------------------------------------------
+# Extreme value metrics (Stedinger et al., 1993)
+# ---------------------------------------------------------------------------
+
+
+def _compute_extreme_metrics(
+    ensemble: Ensemble,
+    Q_obs: pd.DataFrame,
+    sites: list[str],
+) -> dict[str, dict]:
+    """Compute extreme flow metrics per site.
+
+    Compares annual maximum and minimum flow statistics between observed
+    and synthetic data. Annual maxima are fit with GEV distributions to
+    derive return-period quantiles. Low-flow metrics use the 7-day minimum
+    annual flow (7Q).
+
+    Metrics: annual_max_mean, annual_max_cv, gev_q10, gev_q50, gev_q100,
+    annual_7q_min_mean, annual_7q_min_std.
+
+    References
+    ----------
+    Stedinger, J.R., Vogel, R.M., and Foufoula-Georgiou, E. (1993).
+    Frequency analysis of extreme events. In Handbook of Hydrology,
+    edited by D.R. Maidment, McGraw-Hill, Chapter 18.
+    """
+    results = {}
+
+    for site in sites:
+        obs = Q_obs[site].dropna()
+        if len(obs) < 60:
+            # Need several years of data for meaningful extremes
+            continue
+
+        # Annual maxima
+        obs_annual_max = obs.resample("YS").max().dropna()
+        if len(obs_annual_max) < 5:
+            continue
+
+        obs_max_mean = float(obs_annual_max.mean())
+        obs_max_cv = (
+            float(obs_annual_max.std(ddof=1) / obs_max_mean)
+            if abs(obs_max_mean) > 1e-10
+            else np.nan
+        )
+
+        # GEV quantiles from observed
+        try:
+            obs_gev = fit_gev(obs_annual_max.values, method="lmom")
+            from scipy.stats import genextreme
+
+            obs_q10 = float(
+                genextreme.isf(
+                    0.1, -obs_gev["shape"], loc=obs_gev["loc"], scale=obs_gev["scale"]
+                )
+            )
+            obs_q50 = float(
+                genextreme.isf(
+                    0.02, -obs_gev["shape"], loc=obs_gev["loc"], scale=obs_gev["scale"]
+                )
+            )
+            obs_q100 = float(
+                genextreme.isf(
+                    0.01, -obs_gev["shape"], loc=obs_gev["loc"], scale=obs_gev["scale"]
+                )
+            )
+        except Exception:
+            obs_q10, obs_q50, obs_q100 = np.nan, np.nan, np.nan
+
+        # 7-day minimum (low-flow metric)
+        obs_7q = obs.rolling(window=7, min_periods=7).mean()
+        obs_annual_7q_min = obs_7q.resample("YS").min().dropna()
+        obs_7q_mean = (
+            float(obs_annual_7q_min.mean()) if len(obs_annual_7q_min) > 0 else np.nan
+        )
+        obs_7q_std = (
+            float(obs_annual_7q_min.std(ddof=1))
+            if len(obs_annual_7q_min) > 1
+            else np.nan
+        )
+
+        # Synthetic statistics
+        syn_max_mean: list[float] = []
+        syn_max_cv: list[float] = []
+        syn_q10: list[float] = []
+        syn_q50: list[float] = []
+        syn_q100: list[float] = []
+        syn_7q_mean: list[float] = []
+        syn_7q_std: list[float] = []
+
+        for df in ensemble.data_by_realization.values():
+            if site not in df.columns:
+                continue
+            s = df[site].dropna()
+            if len(s) < 60:
+                continue
+
+            s_annual_max = s.resample("YS").max().dropna()
+            if len(s_annual_max) < 5:
+                continue
+
+            s_max_mean = float(s_annual_max.mean())
+            syn_max_mean.append(s_max_mean)
+            if abs(s_max_mean) > 1e-10:
+                syn_max_cv.append(float(s_annual_max.std(ddof=1) / s_max_mean))
+
+            # GEV quantiles from synthetic
+            try:
+                s_gev = fit_gev(s_annual_max.values, method="lmom")
+                syn_q10.append(
+                    float(
+                        genextreme.isf(
+                            0.1, -s_gev["shape"], loc=s_gev["loc"], scale=s_gev["scale"]
+                        )
+                    )
+                )
+                syn_q50.append(
+                    float(
+                        genextreme.isf(
+                            0.02,
+                            -s_gev["shape"],
+                            loc=s_gev["loc"],
+                            scale=s_gev["scale"],
+                        )
+                    )
+                )
+                syn_q100.append(
+                    float(
+                        genextreme.isf(
+                            0.01,
+                            -s_gev["shape"],
+                            loc=s_gev["loc"],
+                            scale=s_gev["scale"],
+                        )
+                    )
+                )
+            except Exception:
+                pass
+
+            # 7-day minimum
+            s_7q = s.rolling(window=7, min_periods=7).mean()
+            s_annual_7q_min = s_7q.resample("YS").min().dropna()
+            if len(s_annual_7q_min) > 0:
+                syn_7q_mean.append(float(s_annual_7q_min.mean()))
+            if len(s_annual_7q_min) > 1:
+                syn_7q_std.append(float(s_annual_7q_min.std(ddof=1)))
+
+        site_results = {}
+        for name, obs_val, syn_vals in [
+            ("annual_max_mean", obs_max_mean, syn_max_mean),
+            ("annual_max_cv", obs_max_cv, syn_max_cv),
+            ("gev_q10", obs_q10, syn_q10),
+            ("gev_q50", obs_q50, syn_q50),
+            ("gev_q100", obs_q100, syn_q100),
+            ("annual_7q_min_mean", obs_7q_mean, syn_7q_mean),
+            ("annual_7q_min_std", obs_7q_std, syn_7q_std),
+        ]:
+            entry = _metric_entry(obs_val, syn_vals)
+            if entry is not None:
+                site_results[name] = entry
+
+        results[site] = site_results
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # Summary scores
 # ---------------------------------------------------------------------------
 
@@ -726,6 +999,8 @@ def _compute_summary_scores(result: ValidationResult) -> dict[str, float]:
         result.seasonal,
         result.annual,
         result.fdc,
+        result.lmoments,
+        result.extremes,
     ]:
         for site_metrics in category.values():
             for values in site_metrics.values():

@@ -14,6 +14,8 @@ Metric categories
 - **seasonal**: Per-month mean/std/skewness bias, Wilcoxon p-values
 - **annual**: Annual mean, variance, skewness, lag-1 ACF, variance ratio
 - **fdc**: Flow duration curve RMSE, bias at Q10/Q50/Q90, envelope coverage
+- **lmoments**: L-CV, L-skewness, L-kurtosis ratios (Hosking & Wallis 1997)
+- **extremes**: Annual max/min statistics, GEV return-period quantiles, 7Q metrics
 
 References
 ----------
@@ -41,6 +43,8 @@ from synhydro.core.validation._metrics import (
     _compute_seasonal_metrics,
     _compute_annual_metrics,
     _compute_fdc_metrics,
+    _compute_lmoment_metrics,
+    _compute_extreme_metrics,
     _compute_summary_scores,
 )
 
@@ -71,7 +75,8 @@ def validate_ensemble(
     metrics : list of str, optional
         Subset of metric categories to compute. Options:
         ``'marginal'``, ``'temporal'``, ``'spatial'``, ``'drought'``,
-        ``'spectral'``, ``'seasonal'``, ``'annual'``, ``'fdc'``.
+        ``'spectral'``, ``'seasonal'``, ``'annual'``, ``'fdc'``,
+        ``'lmoments'``, ``'extremes'``.
         If None, all categories are computed.
     drought_threshold : float, optional
         Flow threshold for drought identification. If None, defaults to
@@ -141,6 +146,12 @@ def validate_ensemble(
 
     if "fdc" in metrics:
         result.fdc = _compute_fdc_metrics(ensemble, Q_obs, obs_sites)
+
+    if "lmoments" in metrics:
+        result.lmoments = _compute_lmoment_metrics(ensemble, Q_obs, obs_sites)
+
+    if "extremes" in metrics:
+        result.extremes = _compute_extreme_metrics(ensemble, Q_obs, obs_sites)
 
     result.summary = _compute_summary_scores(result)
 

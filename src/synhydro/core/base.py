@@ -317,6 +317,11 @@ class Generator(ABC):
                 "AS": "YS",
                 "A": "YS",
                 "AS-JAN": "YS",
+                "<MonthBegin>": "MS",
+                "<MonthEnd>": "MS",
+                "<YearBegin: month=1>": "YS",
+                "<YearEnd: month=12>": "YS",
+                "<Day>": "D",
             }
             normalized = freq_map.get(freq_str, freq_str)
             if (

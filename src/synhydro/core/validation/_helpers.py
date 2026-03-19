@@ -14,6 +14,8 @@ _VALID_METRICS = frozenset(
         "seasonal",
         "annual",
         "fdc",
+        "lmoments",
+        "extremes",
     }
 )
 

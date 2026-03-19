@@ -33,6 +33,11 @@ class ValidationResult:
     fdc : dict[str, dict]
         Per-site flow duration curve metrics (RMSE, bias at key exceedances,
         ensemble envelope coverage).
+    lmoments : dict[str, dict]
+        Per-site L-moment ratio metrics (L-CV, L-skewness, L-kurtosis).
+    extremes : dict[str, dict]
+        Per-site extreme value metrics (annual max statistics, GEV return
+        period quantiles, 7-day minimum flow statistics).
     summary : dict[str, float]
         Aggregate summary scores across all metric categories.
     """
@@ -45,6 +50,8 @@ class ValidationResult:
     seasonal: dict[str, dict] = field(default_factory=dict)
     annual: dict[str, dict] = field(default_factory=dict)
     fdc: dict[str, dict] = field(default_factory=dict)
+    lmoments: dict[str, dict] = field(default_factory=dict)
+    extremes: dict[str, dict] = field(default_factory=dict)
     summary: dict[str, float] = field(default_factory=dict)
 
     def to_dataframe(self) -> pd.DataFrame:
@@ -69,6 +76,8 @@ class ValidationResult:
             ("seasonal", self.seasonal),
             ("annual", self.annual),
             ("fdc", self.fdc),
+            ("lmoments", self.lmoments),
+            ("extremes", self.extremes),
         ]:
             for site, metrics in site_metrics.items():
                 for metric_name, values in metrics.items():
