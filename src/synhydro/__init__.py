@@ -30,7 +30,13 @@ from synhydro.droughts.diagnostics import (
 )
 
 # Validation
-from synhydro.core.validation import validate_ensemble, ValidationResult
+from synhydro.core.validation import (
+    validate_ensemble,
+    ValidationResult,
+    compute_realization_metrics,
+    bootstrap_metric_ci,
+    compare_methods,
+)
 
 # Generators
 from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
@@ -92,6 +98,9 @@ __all__ = [
     # Validation
     "validate_ensemble",
     "ValidationResult",
+    "compute_realization_metrics",
+    "bootstrap_metric_ci",
+    "compare_methods",
     # Drought analysis - SSI calculation
     "SSI",
     "get_drought_metrics",

@@ -54,7 +54,19 @@ from synhydro.core.validation._metrics import (
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["validate_ensemble", "ValidationResult"]
+from synhydro.core.validation._testing import (
+    compute_realization_metrics,
+    bootstrap_metric_ci,
+    compare_methods,
+)
+
+__all__ = [
+    "validate_ensemble",
+    "ValidationResult",
+    "compute_realization_metrics",
+    "bootstrap_metric_ci",
+    "compare_methods",
+]
 
 
 def validate_ensemble(
