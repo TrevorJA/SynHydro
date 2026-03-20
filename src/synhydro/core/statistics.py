@@ -18,10 +18,10 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 ### Function to compute autocorrelation ###
 def compute_autocorrelation(
-    data: pd.DataFrame,
-    max_lag: Optional[int] = None
+    data: pd.DataFrame, max_lag: Optional[int] = None
 ) -> pd.DataFrame:
     """
     Compute autocorrelation for each column in DataFrame.
@@ -52,17 +52,21 @@ def compute_autocorrelation(
             if lag >= len(series):
                 acf_values.append(np.nan)
                 continue
-            cov = ((series[:-lag] - mean) * (series[lag:] - mean)).sum() if lag > 0 else ((series - mean) ** 2).sum()
+            cov = (
+                ((series[:-lag] - mean) * (series[lag:] - mean)).sum()
+                if lag > 0
+                else ((series - mean) ** 2).sum()
+            )
             acf_values.append(cov / (len(series) - lag) / var)
         acf_dict[col] = acf_values
 
     acf_df = pd.DataFrame(acf_dict, index=np.arange(max_lag + 1))
-    acf_df.index.name = 'lag'
+    acf_df.index.name = "lag"
     return acf_df
 
+
 def compute_spatial_correlation(
-    data: pd.DataFrame,
-    method: Literal['pearson', 'spearman', 'kendall'] = 'pearson'
+    data: pd.DataFrame, method: Literal["pearson", "spearman", "kendall"] = "pearson"
 ) -> pd.DataFrame:
     """
     Compute spatial correlation matrix between columns in DataFrame.
@@ -78,13 +82,11 @@ def compute_spatial_correlation(
         Correlation matrix with sites as both index and columns.
     """
     corr_matrix = data.corr(method=method)
-    
+
     return corr_matrix
 
 
-def compute_monthly_statistics(
-    data: pd.DataFrame
-) -> Dict[str, pd.DataFrame]:
+def compute_monthly_statistics(data: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     """
     Compute statistics by month.
 
@@ -102,18 +104,18 @@ def compute_monthly_statistics(
     monthly = data.groupby(data.index.month)
 
     return {
-        'mean': monthly.mean(),
-        'std': monthly.std(),
-        'min': monthly.min(),
-        'max': monthly.max(),
-        'skew': monthly.skew(),
-        'cv': monthly.std() / monthly.mean()  # Coefficient of variation
+        "mean": monthly.mean(),
+        "std": monthly.std(),
+        "min": monthly.min(),
+        "max": monthly.max(),
+        "skew": monthly.skew(),
+        "cv": monthly.std() / monthly.mean(),  # Coefficient of variation
     }
 
 
 def repair_correlation_matrix(
     corr: NDArray[np.float64],
-    method: Literal['spectral', 'hypersphere', 'nearest'] = 'spectral'
+    method: Literal["spectral", "hypersphere", "nearest"] = "spectral",
 ) -> NDArray[np.float64]:
     """
     Repair non-positive definite correlation matrix.
@@ -136,7 +138,7 @@ def repair_correlation_matrix(
     - 'hypersphere': Project onto space of valid correlation matrices
     - 'nearest': Find nearest positive definite matrix (Higham algorithm)
     """
-    if method == 'spectral':
+    if method == "spectral":
         # Eigenvalue decomposition
         eigenvalues, eigenvectors = np.linalg.eigh(corr)
 
@@ -152,7 +154,7 @@ def repair_correlation_matrix(
 
         return repaired
 
-    elif method == 'hypersphere':
+    elif method == "hypersphere":
         # Project correlations onto valid range [-1, 1]
         repaired = corr.copy()
         np.fill_diagonal(repaired, 1.0)
@@ -167,9 +169,9 @@ def repair_correlation_matrix(
             return repaired
         except np.linalg.LinAlgError:
             logger.warning("Hypersphere method failed, falling back to spectral")
-            return repair_correlation_matrix(corr, method='spectral')
+            return repair_correlation_matrix(corr, method="spectral")
 
-    elif method == 'nearest':
+    elif method == "nearest":
         # Higham's algorithm for nearest correlation matrix
         return _nearest_correlation_matrix(corr)
 
@@ -178,9 +180,7 @@ def repair_correlation_matrix(
 
 
 def _nearest_correlation_matrix(
-    A: NDArray[np.float64],
-    max_iter: int = 100,
-    tol: float = 1e-7
+    A: NDArray[np.float64], max_iter: int = 100, tol: float = 1e-7
 ) -> NDArray[np.float64]:
     """
     Find nearest correlation matrix using Higham's algorithm.
@@ -216,12 +216,14 @@ def _nearest_correlation_matrix(
         np.fill_diagonal(X, 1.0)
 
         # Check convergence
-        if np.linalg.norm(Y - X, ord='fro') < tol:
+        if np.linalg.norm(Y - X, ord="fro") < tol:
             return X
 
         Y = X
 
-    logger.warning(f"Nearest correlation matrix did not converge in {max_iter} iterations")
+    logger.warning(
+        f"Nearest correlation matrix did not converge in {max_iter} iterations"
+    )
     return Y
 
 
@@ -229,9 +231,10 @@ def _nearest_correlation_matrix(
 # Long-Range Dependence Estimation
 # =============================================================================
 
+
 def compute_hurst_exponent(
     data: Union[pd.Series, np.ndarray],
-    method: Literal['rs', 'dfa'] = 'rs',
+    method: Literal["rs", "dfa"] = "rs",
     min_window: int = 10,
     max_window: Optional[int] = None,
 ) -> Dict[str, float]:
@@ -291,9 +294,9 @@ def compute_hurst_exponent(
     if max_window is None:
         max_window = n // 4
 
-    if method == 'rs':
+    if method == "rs":
         return _hurst_rs(x, min_window, max_window)
-    elif method == 'dfa':
+    elif method == "dfa":
         return _hurst_dfa(x, min_window, max_window)
     else:
         raise ValueError(f"Unknown method: {method}. Use 'rs' or 'dfa'.")
@@ -349,7 +352,7 @@ def _hurst_rs(
 
     if len(log_n) < 3:
         logger.warning("Too few window sizes for reliable Hurst estimation.")
-        return {'H': np.nan, 'c': np.nan, 'r_squared': np.nan}
+        return {"H": np.nan, "c": np.nan, "r_squared": np.nan}
 
     # Linear regression in log-log space
     slope, intercept = np.polyfit(log_n, log_rs, 1)
@@ -359,7 +362,7 @@ def _hurst_rs(
     ss_tot = np.sum((log_rs - log_rs.mean()) ** 2)
     r_squared = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
 
-    return {'H': float(slope), 'c': float(intercept), 'r_squared': float(r_squared)}
+    return {"H": float(slope), "c": float(intercept), "r_squared": float(r_squared)}
 
 
 def _hurst_dfa(
@@ -411,25 +414,26 @@ def _hurst_dfa(
 
     if len(log_n) < 3:
         logger.warning("Too few window sizes for reliable DFA estimation.")
-        return {'H': np.nan, 'c': np.nan, 'r_squared': np.nan}
+        return {"H": np.nan, "c": np.nan, "r_squared": np.nan}
 
     slope, intercept = np.polyfit(log_n, log_f, 1)
     ss_res = np.sum((log_f - (slope * log_n + intercept)) ** 2)
     ss_tot = np.sum((log_f - log_f.mean()) ** 2)
     r_squared = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
 
-    return {'H': float(slope), 'c': float(intercept), 'r_squared': float(r_squared)}
+    return {"H": float(slope), "c": float(intercept), "r_squared": float(r_squared)}
 
 
 # =============================================================================
 # Spectral Analysis
 # =============================================================================
 
+
 def compute_power_spectral_density(
     data: Union[pd.Series, pd.DataFrame],
-    method: Literal['welch', 'periodogram'] = 'welch',
+    method: Literal["welch", "periodogram"] = "welch",
     nperseg: Optional[int] = None,
-    detrend: str = 'linear',
+    detrend: str = "linear",
 ) -> Tuple[np.ndarray, Union[np.ndarray, pd.DataFrame]]:
     """
     Compute the power spectral density (PSD) of flow timeseries.
@@ -463,12 +467,14 @@ def compute_power_spectral_density(
     elif isinstance(data, pd.DataFrame):
         is_series = False
     else:
-        raise TypeError(f"Expected pd.Series, pd.DataFrame, or np.ndarray, got {type(data)}")
+        raise TypeError(
+            f"Expected pd.Series, pd.DataFrame, or np.ndarray, got {type(data)}"
+        )
 
     if is_series:
         if nperseg is None:
             nperseg = min(256, len(x))
-        if method == 'welch':
+        if method == "welch":
             freqs, psd = signal.welch(x, fs=1.0, nperseg=nperseg, detrend=detrend)
         else:
             freqs, psd = signal.periodogram(x, fs=1.0, detrend=detrend)
@@ -479,7 +485,7 @@ def compute_power_spectral_density(
         for col in data.columns:
             x = data[col].dropna().values
             seg = nperseg if nperseg is not None else min(256, len(x))
-            if method == 'welch':
+            if method == "welch":
                 f, p = signal.welch(x, fs=1.0, nperseg=seg, detrend=detrend)
             else:
                 f, p = signal.periodogram(x, fs=1.0, detrend=detrend)
@@ -492,7 +498,7 @@ def compute_power_spectral_density(
 def compare_spectral_properties(
     observed: Union[pd.Series, pd.DataFrame],
     synthetic: Union[pd.Series, pd.DataFrame],
-    method: Literal['welch', 'periodogram'] = 'welch',
+    method: Literal["welch", "periodogram"] = "welch",
     nperseg: Optional[int] = None,
 ) -> Dict[str, float]:
     """
@@ -536,7 +542,7 @@ def compare_spectral_properties(
         common_freqs = np.linspace(
             max(freq_obs[1], freq_syn[1]),
             min(freq_obs[-1], freq_syn[-1]),
-            num=min(len(freq_obs), len(freq_syn))
+            num=min(len(freq_obs), len(freq_syn)),
         )
         psd_obs = np.interp(common_freqs, freq_obs, psd_obs)
         psd_syn = np.interp(common_freqs, freq_syn, psd_syn)
@@ -567,10 +573,10 @@ def compare_spectral_properties(
     high_freq_ratio = float(high_syn / high_obs) if high_obs > 0 else np.nan
 
     return {
-        'spectral_rmse': spectral_rmse,
-        'spectral_correlation': spectral_corr,
-        'low_freq_ratio': low_freq_ratio,
-        'high_freq_ratio': high_freq_ratio,
+        "spectral_rmse": spectral_rmse,
+        "spectral_correlation": spectral_corr,
+        "low_freq_ratio": low_freq_ratio,
+        "high_freq_ratio": high_freq_ratio,
     }
 
 
@@ -578,9 +584,10 @@ def compare_spectral_properties(
 # Extreme Value Analysis
 # ============================================================================
 
+
 def fit_gev(
     annual_maxima: Union[pd.Series, np.ndarray],
-    method: Literal['mle', 'lmom'] = 'lmom',
+    method: Literal["mle", "lmom"] = "lmom",
 ) -> Dict[str, float]:
     """
     Fit a Generalized Extreme Value (GEV) distribution to annual maxima.
@@ -617,23 +624,23 @@ def fit_gev(
     if len(x) < 5:
         raise ValueError("Need at least 5 annual maxima for GEV fitting.")
 
-    if method == 'mle':
+    if method == "mle":
         shape, loc, scale = genextreme.fit(x)
         n = len(x)
         log_lik = np.sum(genextreme.logpdf(x, shape, loc=loc, scale=scale))
         aic = 2 * 3 - 2 * log_lik
         return {
-            'shape': float(-shape),  # scipy uses negated shape convention
-            'loc': float(loc),
-            'scale': float(scale),
-            'aic': float(aic),
+            "shape": float(-shape),  # scipy uses negated shape convention
+            "loc": float(loc),
+            "scale": float(scale),
+            "aic": float(aic),
         }
-    elif method == 'lmom':
+    elif method == "lmom":
         l1, l2, t3 = _compute_lmoments(x)
         # Hosking (1997) rational approximation for GEV shape from L-skewness
         # k is the GEV shape parameter (xi in some notations)
         c = 2.0 / (3.0 + t3) - np.log(2) / np.log(3)
-        k = 7.8590 * c + 2.9554 * c ** 2
+        k = 7.8590 * c + 2.9554 * c**2
         if abs(k) > 1e-6:
             gamma_val = _gamma_func(1 + k)
             scale = float(l2 * k / (gamma_val * (1 - 2 ** (-k))))
@@ -643,9 +650,9 @@ def fit_gev(
             scale = float(l2 / np.log(2))
             loc = float(l1 - scale * 0.5772)
         return {
-            'shape': float(k),
-            'loc': loc,
-            'scale': scale,
+            "shape": float(k),
+            "loc": loc,
+            "scale": scale,
         }
     else:
         raise ValueError(f"Unknown method: {method}")
@@ -653,7 +660,7 @@ def fit_gev(
 
 def fit_lp3(
     annual_maxima: Union[pd.Series, np.ndarray],
-    method: Literal['mle', 'mom'] = 'mom',
+    method: Literal["mle", "mom"] = "mom",
 ) -> Dict[str, float]:
     """
     Fit a Log-Pearson Type III (LP3) distribution to annual maxima.
@@ -695,13 +702,14 @@ def fit_lp3(
 
     mean_log = float(np.mean(log_x))
     std_log = float(np.std(log_x, ddof=1))
-    skew_log = float(
-        n * np.sum((log_x - mean_log) ** 3)
-        / ((n - 1) * (n - 2) * std_log ** 3)
-    ) if std_log > 1e-10 else 0.0
+    skew_log = (
+        float(n * np.sum((log_x - mean_log) ** 3) / ((n - 1) * (n - 2) * std_log**3))
+        if std_log > 1e-10
+        else 0.0
+    )
 
     if abs(skew_log) > 1e-6:
-        alpha = 4.0 / (skew_log ** 2)
+        alpha = 4.0 / (skew_log**2)
         beta = std_log * abs(skew_log) / 2.0
         if skew_log < 0:
             beta = -beta
@@ -712,19 +720,19 @@ def fit_lp3(
         gamma = mean_log
 
     return {
-        'mean_log': mean_log,
-        'std_log': std_log,
-        'skew_log': skew_log,
-        'alpha': float(alpha),
-        'beta': float(beta),
-        'gamma': float(gamma),
+        "mean_log": mean_log,
+        "std_log": std_log,
+        "skew_log": skew_log,
+        "alpha": float(alpha),
+        "beta": float(beta),
+        "gamma": float(gamma),
     }
 
 
 def flood_frequency_quantiles(
     annual_maxima: Union[pd.Series, np.ndarray],
     return_periods: Optional[List] = None,
-    distribution: Literal['gev', 'lp3'] = 'gev',
+    distribution: Literal["gev", "lp3"] = "gev",
     **fit_kwargs,
 ) -> pd.DataFrame:
     """
@@ -759,42 +767,54 @@ def flood_frequency_quantiles(
 
     exceedance_probs = [1.0 / T for T in return_periods]
 
-    if distribution == 'gev':
+    if distribution == "gev":
         params = fit_gev(x, **fit_kwargs)
         # scipy uses negated shape
         quantiles = [
-            float(genextreme.isf(p, -params['shape'],
-                                  loc=params['loc'], scale=params['scale']))
+            float(
+                genextreme.isf(
+                    p, -params["shape"], loc=params["loc"], scale=params["scale"]
+                )
+            )
             for p in exceedance_probs
         ]
-    elif distribution == 'lp3':
+    elif distribution == "lp3":
         params = fit_lp3(x, **fit_kwargs)
         # Use Pearson III on log scale, then back-transform
-        if abs(params['skew_log']) > 1e-6:
-            a = params['alpha']
-            b = params['beta']
-            g = params['gamma']
+        if abs(params["skew_log"]) > 1e-6:
+            a = params["alpha"]
+            b = params["beta"]
+            g = params["gamma"]
             quantiles = []
             for p in exceedance_probs:
-                log_q = float(pearson3.isf(p, params['skew_log'],
-                                            loc=params['mean_log'],
-                                            scale=params['std_log']))
-                quantiles.append(10 ** log_q)
+                log_q = float(
+                    pearson3.isf(
+                        p,
+                        params["skew_log"],
+                        loc=params["mean_log"],
+                        scale=params["std_log"],
+                    )
+                )
+                quantiles.append(10**log_q)
         else:
             from scipy.stats import norm
+
             quantiles = [
-                float(10 ** norm.isf(p, loc=params['mean_log'],
-                                      scale=params['std_log']))
+                float(
+                    10 ** norm.isf(p, loc=params["mean_log"], scale=params["std_log"])
+                )
                 for p in exceedance_probs
             ]
     else:
         raise ValueError(f"Unknown distribution: {distribution}")
 
-    return pd.DataFrame({
-        'return_period': return_periods,
-        'exceedance_prob': exceedance_probs,
-        'quantile': quantiles,
-    })
+    return pd.DataFrame(
+        {
+            "return_period": return_periods,
+            "exceedance_prob": exceedance_probs,
+            "quantile": quantiles,
+        }
+    )
 
 
 def _compute_lmoments(x: np.ndarray) -> Tuple[float, float, float]:
@@ -818,9 +838,9 @@ def _compute_lmoments(x: np.ndarray) -> Tuple[float, float, float]:
     # Probability weighted moments
     b0 = np.mean(xs)
     b1 = np.sum(np.arange(1, n) * xs[1:]) / (n * (n - 1))
-    b2 = np.sum(
-        np.arange(1, n - 1) * np.arange(2, n) * xs[2:]
-    ) / (n * (n - 1) * (n - 2))
+    b2 = np.sum(np.arange(1, n - 1) * np.arange(2, n) * xs[2:]) / (
+        n * (n - 1) * (n - 2)
+    )
 
     l1 = b0
     l2 = 2 * b1 - b0
@@ -834,4 +854,152 @@ def _compute_lmoments(x: np.ndarray) -> Tuple[float, float, float]:
 def _gamma_func(x: float) -> float:
     """Wrapper for scipy gamma function."""
     from scipy.special import gamma
+
     return float(gamma(x))
+
+
+class NormalScoreTransform:
+    """Empirical normal score transform with Hazen plotting position.
+
+    Maps observed values to standard normal scores via the empirical CDF,
+    using the Hazen plotting position F(x) = (rank - 0.5) / n.  Supports
+    grouped transforms (e.g. one mapping per calendar month per site).
+
+    Parameters
+    ----------
+    None
+
+    References
+    ----------
+    Nelsen, R.B. (2006). An Introduction to Copulas. 2nd ed. Springer.
+    Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). JWRPM, 139(4).
+
+    Examples
+    --------
+    >>> nst = NormalScoreTransform()
+    >>> nst.fit({(1, 0): np.array([10, 20, 30, 40, 50])})
+    >>> z = nst.transform(np.array([25]), group_key=(1, 0))
+    """
+
+    def __init__(self) -> None:
+        self._sorted_values: Dict[tuple, np.ndarray] = {}
+        self._normal_scores: Dict[tuple, np.ndarray] = {}
+        self._is_fitted: bool = False
+
+    def fit(self, values_by_group: Dict[tuple, np.ndarray]) -> "NormalScoreTransform":
+        """Fit the transform by computing Hazen normal scores per group.
+
+        Parameters
+        ----------
+        values_by_group : Dict[tuple, np.ndarray]
+            Mapping from group key (e.g. (month, site_index)) to a 1-D
+            array of observed values for that group.
+
+        Returns
+        -------
+        NormalScoreTransform
+            The fitted instance (for method chaining).
+
+        Raises
+        ------
+        ValueError
+            If any group has fewer than 2 observations.
+        """
+        from scipy.stats import norm as _norm
+
+        self._sorted_values = {}
+        self._normal_scores = {}
+
+        for key, values in values_by_group.items():
+            vals = np.asarray(values, dtype=float)
+            if len(vals) < 2:
+                raise ValueError(
+                    f"Group {key} has fewer than 2 observations; "
+                    "cannot compute normal scores."
+                )
+            n = len(vals)
+            pp = (np.arange(1, n + 1) - 0.5) / n
+            nscores = _norm.ppf(pp)
+
+            sorted_vals = np.sort(vals)
+            self._sorted_values[key] = sorted_vals
+            self._normal_scores[key] = nscores
+
+        self._is_fitted = True
+        return self
+
+    def transform(self, values: np.ndarray, group_key: tuple) -> np.ndarray:
+        """Forward transform: observed values to normal scores.
+
+        Parameters
+        ----------
+        values : np.ndarray
+            Values to transform (1-D).
+        group_key : tuple
+            Key identifying which fitted group mapping to use.
+
+        Returns
+        -------
+        np.ndarray
+            Normal scores with the same shape as *values*.
+
+        Raises
+        ------
+        RuntimeError
+            If the transform has not been fitted.
+        KeyError
+            If *group_key* was not present during fitting.
+        """
+        self._check_fitted()
+        sv = self._sorted_values[group_key]
+        ns = self._normal_scores[group_key]
+        return np.interp(np.asarray(values, dtype=float), sv, ns)
+
+    def inverse_transform(self, scores: np.ndarray, group_key: tuple) -> np.ndarray:
+        """Inverse transform: normal scores to original value space.
+
+        Uses linear extrapolation at the tails so that synthetic values
+        beyond the observed range are not clamped.
+
+        Parameters
+        ----------
+        scores : np.ndarray
+            Normal scores to invert (1-D).
+        group_key : tuple
+            Key identifying which fitted group mapping to use.
+
+        Returns
+        -------
+        np.ndarray
+            Values in the original space with the same shape as *scores*.
+
+        Raises
+        ------
+        RuntimeError
+            If the transform has not been fitted.
+        KeyError
+            If *group_key* was not present during fitting.
+        """
+        self._check_fitted()
+        ns = self._normal_scores[group_key]
+        sv = self._sorted_values[group_key]
+
+        # Linear tail extrapolation (prevents clamping at observed extremes)
+        slope_lo = (sv[1] - sv[0]) / (ns[1] - ns[0]) if ns[1] != ns[0] else 1.0
+        slope_hi = (sv[-1] - sv[-2]) / (ns[-1] - ns[-2]) if ns[-1] != ns[-2] else 1.0
+        ns_ext = np.concatenate([[-10.0], ns, [10.0]])
+        sv_ext = np.concatenate(
+            [
+                [sv[0] + slope_lo * (-10.0 - ns[0])],
+                sv,
+                [sv[-1] + slope_hi * (10.0 - ns[-1])],
+            ]
+        )
+        return np.interp(np.asarray(scores, dtype=float), ns_ext, sv_ext)
+
+    def _check_fitted(self) -> None:
+        """Raise if the transform has not been fitted."""
+        if not self._is_fitted:
+            raise RuntimeError(
+                "NormalScoreTransform has not been fitted. Call fit() first."
+            )

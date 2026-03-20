@@ -50,18 +50,29 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
    ```
    Truncate the infinite sum at lag K (default: 100).
 
-3. **Fit AR(p) to the differenced series** via Yule-Walker equations:
-   - p is user-specified (default: 1). The MA component (q > 0) is not yet implemented.
-   - Store AR coefficients phi and innovation variance sigma_eps^2.
+3. **Fit ARMA(p,q) to the differenced series:**
+   - If q = 0: Yule-Walker equations for AR(p) (classical approach).
+   - If q > 0: Conditional Sum of Squares (CSS) estimation, which jointly
+     estimates AR and MA coefficients by minimizing the sum of squared
+     one-step-ahead prediction errors (Chung and Baillie, 1993).  Initial
+     AR guess from Yule-Walker; optimized via L-BFGS-B with bounds
+     (-0.99, 0.99) for stationarity/invertibility.
+   - If `auto_order=True`: grid search over p in {0, 1, 2} and q in
+     {0, 1, 2}, selecting by BIC (proven consistent for ARFIMA; Huang
+     et al. 2022).
+   - Store AR coefficients phi, MA coefficients theta, and innovation
+     variance sigma_eps^2.
 
 4. **Store all fitted parameters**: d, phi, theta, sigma_eps^2, seasonal means/stds (if monthly), truncation lag K.
 
 ### Generation
 
-1. **Generate AR innovations** for the differenced series:
+1. **Generate ARMA innovations** for the differenced series:
    ```
    eps_t ~ N(0, sigma_eps^2)
-   W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t
+   W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p}
+       + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
+       + eps_t
    ```
 
 2. **Invert fractional differencing** via MA convolution (FIR filter) to recover the long-memory process:
@@ -85,7 +96,8 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 |-----------|------|---------|-------------|
 | `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow with DatetimeIndex |
 | `p` | `int` | `1` | AR order for the short-memory component |
-| `q` | `int` | `0` | MA order (currently only q=0 is supported) |
+| `q` | `int` | `0` | MA order for the short-memory component |
+| `auto_order` | `bool` | `False` | Select (p, q) via BIC grid search (Huang et al. 2022) |
 | `d_method` | `str` | `'whittle'` | Estimation method for d: `'whittle'`, `'gph'`, or `'rs'` |
 | `truncation_lag` | `int` | `100` | Truncation lag K for fractional differencing coefficients |
 | `deseasonalize` | `bool` | `True` | Remove monthly seasonality before fitting (set False for annual data) |
@@ -96,6 +108,7 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 
 - Long-range dependence / Hurst exponent (directly parameterized via d)
 - Lag-1 through lag-p short-memory autocorrelation (via AR component)
+- Short-memory MA structure when q > 0 (via CSS-estimated MA component)
 - Monthly means and standard deviations (via deseasonalization)
 - Power spectrum at low frequencies (hyperbolic decay)
 
@@ -110,7 +123,7 @@ The Hurst exponent H is related to the fractional differencing parameter by H = 
 - Requires long records (50+ years) for reliable estimation of d
 - Gaussian innovation assumption may underrepresent extreme events
 - Truncation of infinite fractional differencing series introduces approximation error
-- MA component (q > 0) not yet implemented; only AR short-memory component is available
+- CSS estimation for MA component has known small-sample bias (Chung and Baillie, 1993)
 
 ## References
 
@@ -123,6 +136,8 @@ Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using f
 - Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates for strongly dependent stationary Gaussian time series. *The Annals of Statistics*, 14(2), 517-532.
 - Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. *Water Resources Research*, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
 - Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. *Hydrological Sciences Journal*, 47(4), 573-595.
+- Chung, C.-F., and Baillie, R.T. (1993). Small sample bias in conditional sum-of-squares estimators of fractionally integrated ARMA models. *Empirical Economics*, 18, 791-806.
+- Huang, J., Chan, N.H., Chen, S., and Ing, C.-K. (2022). Consistent order selection for ARFIMA processes. *Annals of Statistics*, 50(3).
 
 ---
 

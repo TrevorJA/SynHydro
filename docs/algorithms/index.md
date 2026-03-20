@@ -14,6 +14,7 @@ SynHydro implements the following stochastic generation and disaggregation metho
 | [Multi-Site HMM](multisite_hmm.md) | `MultiSiteHMMGenerator` | Parametric | Annual | Multi |
 | [ARFIMA](arfima.md) | `ARFIMAGenerator` | Parametric | Monthly/Annual | Single |
 | [KNN Bootstrap](knn_bootstrap.md) | `KNNBootstrapGenerator` | Nonparametric | Monthly/Annual | Single/Multi |
+| [Gaussian/t-Copula](gaussian_copula.md) | `GaussianCopulaGenerator` | Parametric | Monthly | Multi |
 
 ## Disaggregation Methods
 
@@ -25,13 +26,14 @@ SynHydro implements the following stochastic generation and disaggregation metho
 
 ## Key Properties Preserved
 
-| Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap |
-|----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Monthly means/stds | ✓ | ✓ | ✓ | - | - | - | ✓ | ✓ |
-| Temporal correlation | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| Spatial correlation | - | ✓ | ✓ | - | - | ✓ | - | ✓ |
-| Long-range persistence | - | - | - | - | ✓ | - | ✓ | - |
-| Non-stationarity | - | - | - | - | ✓ | - | - | - |
-| Drought states | - | - | - | - | - | ✓ | - | - |
-| Power spectrum | - | - | - | ✓ | ✓ | - | ✓ | - |
-| Empirical distribution | - | ✓ | - | - | - | - | - | ✓ |
+| Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap | Copula |
+|----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Monthly means/stds | x | x | x | - | - | - | x | x | x |
+| Temporal correlation | x | x | x | x | x | x | x | x | x |
+| Spatial correlation | - | x | x | - | - | x | - | x | x |
+| Long-range persistence | - | - | - | - | x | - | x | - | - |
+| Non-stationarity | - | - | - | - | x | - | - | - | - |
+| Drought states | - | - | - | - | - | x | - | - | - |
+| Power spectrum | - | - | - | x | x | - | x | - | - |
+| Empirical distribution | - | x | - | - | - | - | - | x | x |
+| Tail dependence | - | - | - | - | - | - | - | - | x (t-copula) |

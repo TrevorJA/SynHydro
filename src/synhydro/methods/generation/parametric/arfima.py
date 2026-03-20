@@ -62,6 +62,7 @@ class ARFIMAGenerator(Generator):
         d_method: str = "whittle",
         truncation_lag: int = 100,
         deseasonalize: bool = True,
+        auto_order: bool = False,
         name: Optional[str] = None,
         debug: bool = False,
         **kwargs,
@@ -83,6 +84,11 @@ class ARFIMAGenerator(Generator):
         deseasonalize : bool, default=True
             Remove seasonal component (monthly means/stds) before fitting.
             Set False for annual data.
+        auto_order : bool, default=False
+            If True, select (p, q) via BIC grid search over
+            p in {0, 1, 2} and q in {0, 1, 2}.  Overrides user-supplied
+            p and q values.  Uses BIC which is proven consistent for
+            ARFIMA (Huang et al. 2022, Annals of Statistics).
         name : str, optional
             Name identifier for this generator instance.
         debug : bool, default=False
@@ -97,6 +103,7 @@ class ARFIMAGenerator(Generator):
         self.d_method = d_method
         self.truncation_lag = truncation_lag
         self.deseasonalize = deseasonalize
+        self.auto_order = auto_order
 
         # Store initialization parameters
         self.init_params.algorithm_params = {
@@ -105,6 +112,7 @@ class ARFIMAGenerator(Generator):
             "d_method": d_method,
             "truncation_lag": truncation_lag,
             "deseasonalize": deseasonalize,
+            "auto_order": auto_order,
         }
 
     @property
@@ -149,10 +157,13 @@ class ARFIMAGenerator(Generator):
             elif 350 <= median_days <= 380:
                 freq = "AS"
 
-        if freq is not None and str(freq) in ("MS", "M", "ME"):
+        freq_str = getattr(freq, "freqstr", str(freq)) if freq is not None else None
+        if freq_str is not None and freq_str in ("MS", "M", "ME"):
             self._output_freq = "MS"
             self._is_monthly = True
-        elif freq is not None and str(freq) in ("AS", "YS", "Y", "A", "AS-JAN"):
+        elif freq_str is not None and any(
+            freq_str.startswith(p) for p in ("AS", "YS", "Y", "A")
+        ):
             self._output_freq = "YS"
             self._is_monthly = False
         else:
@@ -237,32 +248,38 @@ class ARFIMAGenerator(Generator):
         # Apply fractional differencing
         self.W = self._apply_fractional_differencing()
 
+        # BIC-based automatic order selection (Huang et al. 2022)
+        if self.auto_order:
+            self.p, self.q = self._select_order_bic(self.W)
+            self.logger.info(
+                "BIC selected ARMA(%d,%d) for short-memory component",
+                self.p,
+                self.q,
+            )
+
         # Fit ARMA(p,q) to differenced series
-        if self.p > 0:
+        if self.q > 0:
+            self.phi, self.theta = self._fit_arma_css(self.W, self.p, self.q)
+            self.logger.info(
+                "Fitted ARMA(%d,%d) via CSS: phi=%s, theta=%s",
+                self.p,
+                self.q,
+                self.phi,
+                self.theta,
+            )
+        elif self.p > 0:
             self.phi = self._fit_ar(self.W, self.p)
+            self.theta = np.array([])
             self.logger.info(f"Fitted AR({self.p}) coefficients: {self.phi}")
         else:
             self.phi = np.array([])
-
-        # MA component not implemented in this version (q=0)
-        if self.q > 0:
-            self.logger.warning("MA component (q>0) not yet implemented; setting q=0")
-            self.theta = np.array([])
-        else:
             self.theta = np.array([])
 
-        # Innovation variance: compute one-step-ahead prediction errors
+        # Innovation variance from one-step-ahead prediction errors
         W_vals = self.W.values
-        if self.p > 0:
-            residuals = np.zeros(len(W_vals))
-            for i in range(len(W_vals)):
-                prediction = sum(
-                    self.phi[k] * W_vals[i - 1 - k] for k in range(min(self.p, i))
-                )
-                residuals[i] = W_vals[i] - prediction
-            self.sigma_eps_sq = np.var(residuals[self.p :])  # skip burn-in
-        else:
-            self.sigma_eps_sq = np.var(W_vals)
+        residuals = self._compute_css_residuals(W_vals, self.phi, self.theta)
+        burn_in = max(self.p, self.q, 1)
+        self.sigma_eps_sq = float(np.var(residuals[burn_in:]))
 
         self.update_state(fitted=True)
         self.fitted_params_ = self._compute_fitted_params()
@@ -525,6 +542,172 @@ class ARFIMAGenerator(Generator):
         W_series = pd.Series(W, index=self.Q_norm.index)
         return W_series
 
+    @staticmethod
+    def _compute_css_residuals(
+        W: np.ndarray, phi: np.ndarray, theta: np.ndarray
+    ) -> np.ndarray:
+        """Compute one-step-ahead prediction residuals for ARMA(p,q).
+
+        Parameters
+        ----------
+        W : np.ndarray
+            Fractionally differenced series.
+        phi : np.ndarray
+            AR coefficients (may be empty).
+        theta : np.ndarray
+            MA coefficients (may be empty).
+
+        Returns
+        -------
+        np.ndarray
+            Residuals (innovations) of the same length as *W*.
+        """
+        n = len(W)
+        p = len(phi)
+        q = len(theta)
+        eps = np.zeros(n)
+        for t in range(n):
+            ar_part = 0.0
+            for k in range(min(p, t)):
+                ar_part += phi[k] * W[t - 1 - k]
+            ma_part = 0.0
+            for j in range(min(q, t)):
+                ma_part += theta[j] * eps[t - 1 - j]
+            eps[t] = W[t] - ar_part - ma_part
+        return eps
+
+    def _fit_arma_css(
+        self, data: pd.Series, p: int, q: int
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Fit ARMA(p,q) via Conditional Sum of Squares (CSS).
+
+        CSS minimizes the sum of squared one-step-ahead prediction errors.
+        Asymptotically equivalent to MLE (Chung & Baillie 1993).
+
+        Parameters
+        ----------
+        data : pd.Series
+            Fractionally differenced series (centred).
+        p : int
+            AR order.
+        q : int
+            MA order.
+
+        Returns
+        -------
+        phi : np.ndarray
+            AR coefficients [phi_1, ..., phi_p].
+        theta : np.ndarray
+            MA coefficients [theta_1, ..., theta_q].
+        """
+        W = data.values.copy()
+        W = W - np.mean(W)
+        n = len(W)
+
+        # Initial guess: Yule-Walker for AR, zeros for MA
+        if p > 0:
+            phi0 = self._fit_ar(data, p)
+        else:
+            phi0 = np.array([])
+        theta0 = np.zeros(q)
+        x0 = np.concatenate([phi0, theta0])
+
+        def css_objective(params: np.ndarray) -> float:
+            phi_c = params[:p]
+            theta_c = params[p:]
+            eps = self._compute_css_residuals(W, phi_c, theta_c)
+            burn = max(p, q, 1)
+            return float(np.sum(eps[burn:] ** 2))
+
+        bounds = [(-0.99, 0.99)] * (p + q)
+        result = minimize(
+            css_objective,
+            x0,
+            method="L-BFGS-B",
+            bounds=bounds,
+            options={"maxiter": 500},
+        )
+
+        if not result.success:
+            self.logger.warning(
+                "CSS optimisation did not converge (%s). "
+                "Falling back to AR-only (Yule-Walker).",
+                result.message,
+            )
+            return phi0 if p > 0 else np.array([]), np.zeros(q)
+
+        phi_fit = result.x[:p]
+        theta_fit = result.x[p:]
+        return phi_fit, theta_fit
+
+    def _select_order_bic(self, data: pd.Series) -> Tuple[int, int]:
+        """Select ARMA(p,q) order by BIC grid search.
+
+        Searches p in {0, 1, 2} and q in {0, 1, 2}.  BIC is proven
+        consistent for ARFIMA order selection (Huang et al. 2022,
+        Annals of Statistics 50(3)).
+
+        Parameters
+        ----------
+        data : pd.Series
+            Fractionally differenced series.
+
+        Returns
+        -------
+        best_p : int
+            Selected AR order.
+        best_q : int
+            Selected MA order.
+        """
+        W = data.values.copy()
+        W = W - np.mean(W)
+        n = len(W)
+
+        best_bic = np.inf
+        best_p, best_q = self.p, self.q
+
+        for p_cand in range(3):
+            for q_cand in range(3):
+                try:
+                    if q_cand > 0:
+                        phi_c, theta_c = self._fit_arma_css(data, p_cand, q_cand)
+                    elif p_cand > 0:
+                        phi_c = self._fit_ar(data, p_cand)
+                        theta_c = np.array([])
+                    else:
+                        phi_c = np.array([])
+                        theta_c = np.array([])
+
+                    eps = self._compute_css_residuals(W, phi_c, theta_c)
+                    burn = max(p_cand, q_cand, 1)
+                    n_eff = n - burn
+                    sigma2 = float(np.var(eps[burn:]))
+                    if sigma2 <= 0:
+                        continue
+                    k = p_cand + q_cand
+                    bic_val = n_eff * np.log(sigma2) + k * np.log(n_eff)
+
+                    self.logger.debug(
+                        "BIC(%d,%d) = %.2f  (sigma2=%.4f)",
+                        p_cand,
+                        q_cand,
+                        bic_val,
+                        sigma2,
+                    )
+
+                    if bic_val < best_bic:
+                        best_bic = bic_val
+                        best_p, best_q = p_cand, q_cand
+                except Exception as exc:
+                    self.logger.debug(
+                        "BIC search: ARMA(%d,%d) failed: %s",
+                        p_cand,
+                        q_cand,
+                        exc,
+                    )
+
+        return best_p, best_q
+
     def _fit_ar(self, data: pd.Series, p: int) -> np.ndarray:
         """
         Fit AR(p) model using Yule-Walker equations.
@@ -718,12 +901,14 @@ class ARFIMAGenerator(Generator):
         # Generate ARMA innovations
         eps = rng.normal(0, np.sqrt(self.sigma_eps_sq), n_timesteps)
 
-        # Apply AR(p) recursion to get differenced series
+        # Apply ARMA(p,q) recursion to get differenced series
         W = np.zeros(n_timesteps)
         for t in range(n_timesteps):
             W[t] = eps[t]
             for k in range(min(t, self.p)):
                 W[t] += self.phi[k] * W[t - 1 - k]
+            for j in range(min(t, self.q)):
+                W[t] += self.theta[j] * eps[t - 1 - j]
 
         # Invert fractional differencing via MA convolution (Hosking 1984):
         # X_t = sum_{k=0}^{K} psi_k * W_{t-k}

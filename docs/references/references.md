@@ -13,6 +13,15 @@ Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compound
 **ARFIMA (Autoregressive Fractionally Integrated Moving Average)**
 Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using fractional differencing. *Water Resources Research*, 20(12), 1898-1908. https://doi.org/10.1029/WR020i012p01898
 
+**Copula-Based Multivariate Streamflow Generation**
+Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know about copula modeling but were afraid to ask. *Journal of Hydrologic Engineering*, 12(4), 347-368. https://doi.org/10.1061/(ASCE)1084-0699(2007)12:4(347)
+
+Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based method for multisite monthly and daily streamflow simulation. *Journal of Hydrology*, 526, 360-381. https://doi.org/10.1016/j.jhydrol.2015.01.025
+
+Tootoonchi, F., Haerter, J.O., Todsen, A., Whan, K., Laux, P., and Sadegh, M. (2022). Copulas for hydroclimatic analysis: A practice-oriented overview. *WIREs Water*, 9(2), e1579. https://doi.org/10.1002/wat2.1579
+
+Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic spatial vine copula model for multi-site streamflow simulation. *Electric Power Systems Research*, 152, 9-17. https://doi.org/10.1016/j.epsr.2017.06.017
+
 **Stedinger-Taylor Normalization** (used in Thomas-Fiering)
 Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. *Water Resources Research*, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909
 

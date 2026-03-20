@@ -1,6 +1,7 @@
 """
 Generation methods for SynHydro.
 """
+
 from synhydro.methods.generation.nonparametric import (
     KirschGenerator,
     KNNBootstrapGenerator,
@@ -8,6 +9,7 @@ from synhydro.methods.generation.nonparametric import (
 )
 from synhydro.methods.generation.parametric import (
     ARFIMAGenerator,
+    GaussianCopulaGenerator,
     MATALASGenerator,
     MultiSiteHMMGenerator,
     ThomasFieringGenerator,
@@ -15,12 +17,13 @@ from synhydro.methods.generation.parametric import (
 )
 
 __all__ = [
-    'ARFIMAGenerator',
-    'KirschGenerator',
-    'KNNBootstrapGenerator',
-    'MATALASGenerator',
-    'MultiSiteHMMGenerator',
-    'PhaseRandomizationGenerator',
-    'ThomasFieringGenerator',
-    'WARMGenerator',
+    "ARFIMAGenerator",
+    "GaussianCopulaGenerator",
+    "KirschGenerator",
+    "KNNBootstrapGenerator",
+    "MATALASGenerator",
+    "MultiSiteHMMGenerator",
+    "PhaseRandomizationGenerator",
+    "ThomasFieringGenerator",
+    "WARMGenerator",
 ]
