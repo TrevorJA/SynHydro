@@ -1166,11 +1166,20 @@
    Truncate the infinite sum at lag K (default: 100).</p>
 </li>
 <li>
-<p><strong>Fit AR(p) to the differenced series</strong> via Yule-Walker equations:</p>
+<p><strong>Fit ARMA(p,q) to the differenced series:</strong></p>
 </li>
-<li>p is user-specified (default: 1). The MA component (q &gt; 0) is not yet implemented.</li>
+<li>If q = 0: Yule-Walker equations for AR(p) (classical approach).</li>
+<li>If q &gt; 0: Conditional Sum of Squares (CSS) estimation, which jointly
+     estimates AR and MA coefficients by minimizing the sum of squared
+     one-step-ahead prediction errors (Chung and Baillie, 1993).  Initial
+     AR guess from Yule-Walker; optimized via L-BFGS-B with bounds
+     (-0.99, 0.99) for stationarity/invertibility.</li>
+<li>If <code>auto_order=True</code>: grid search over p in {0, 1, 2} and q in
+     {0, 1, 2}, selecting by BIC (proven consistent for ARFIMA; Huang
+     et al. 2022).</li>
 <li>
-<p>Store AR coefficients phi and innovation variance sigma_eps^2.</p>
+<p>Store AR coefficients phi, MA coefficients theta, and innovation
+     variance sigma_eps^2.</p>
 </li>
 <li>
 <p><strong>Store all fitted parameters</strong>: d, phi, theta, sigma_eps^2, seasonal means/stds (if monthly), truncation lag K.</p>
@@ -1179,9 +1188,11 @@
 <h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
-<p><strong>Generate AR innovations</strong> for the differenced series:
+<p><strong>Generate ARMA innovations</strong> for the differenced series:
    <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>eps_t ~ N(0, sigma_eps^2)
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p} + eps_t
+</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>W_t = phi_1 * W_{t-1} + ... + phi_p * W_{t-p}
+</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    + theta_1 * eps_{t-1} + ... + theta_q * eps_{t-q}
+</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>    + eps_t
 </span></code></pre></div></p>
 </li>
 <li>
@@ -1228,7 +1239,13 @@
 <td><code>q</code></td>
 <td><code>int</code></td>
 <td><code>0</code></td>
-<td>MA order (currently only q=0 is supported)</td>
+<td>MA order for the short-memory component</td>
+</tr>
+<tr>
+<td><code>auto_order</code></td>
+<td><code>bool</code></td>
+<td><code>False</code></td>
+<td>Select (p, q) via BIC grid search (Huang et al. 2022)</td>
 </tr>
 <tr>
 <td><code>d_method</code></td>
@@ -1266,6 +1283,7 @@
 <ul>
 <li>Long-range dependence / Hurst exponent (directly parameterized via d)</li>
 <li>Lag-1 through lag-p short-memory autocorrelation (via AR component)</li>
+<li>Short-memory MA structure when q &gt; 0 (via CSS-estimated MA component)</li>
 <li>Monthly means and standard deviations (via deseasonalization)</li>
 <li>Power spectrum at low frequencies (hyperbolic decay)</li>
 </ul>
@@ -1279,7 +1297,7 @@
 <li>Requires long records (50+ years) for reliable estimation of d</li>
 <li>Gaussian innovation assumption may underrepresent extreme events</li>
 <li>Truncation of infinite fractional differencing series introduces approximation error</li>
-<li>MA component (q &gt; 0) not yet implemented; only AR short-memory component is available</li>
+<li>CSS estimation for MA component has known small-sample bias (Chung and Baillie, 1993)</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1289,7 +1307,9 @@ Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using f
 - Geweke, J., and Porter-Hudak, S. (1983). The estimation and application of long memory time series models. <em>Journal of Time Series Analysis</em>, 4(4), 221-238. https://doi.org/10.1111/j.1467-9892.1983.tb00371.x
 - Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates for strongly dependent stationary Gaussian time series. <em>The Annals of Statistics</em>, 14(2), 517-532.
 - Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. <em>Water Resources Research</em>, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
-- Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. <em>Hydrological Sciences Journal</em>, 47(4), 573-595.</p>
+- Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. <em>Hydrological Sciences Journal</em>, 47(4), 573-595.
+- Chung, C.-F., and Baillie, R.T. (1993). Small sample bias in conditional sum-of-squares estimators of fractionally integrated ARMA models. <em>Empirical Economics</em>, 18, 791-806.
+- Huang, J., Chan, N.H., Chen, S., and Ing, C.-K. (2022). Consistent order selection for ARFIMA processes. <em>Annals of Statistics</em>, 50(3).</p>
 <hr />
 <p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/arfima.py</code>
 <strong>Tests:</strong> <code>tests/test_arfima_generator.py</code></p>

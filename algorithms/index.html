@@ -1192,6 +1192,13 @@
 <td>Monthly/Annual</td>
 <td>Single/Multi</td>
 </tr>
+<tr>
+<td><a href="gaussian_copula/">Gaussian/t-Copula</a></td>
+<td><code>GaussianCopulaGenerator</code></td>
+<td>Parametric</td>
+<td>Monthly</td>
+<td>Multi</td>
+</tr>
 </tbody>
 </table>
 <h2 id="disaggregation-methods">Disaggregation Methods<a class="headerlink" href="#disaggregation-methods" title="Permanent link">&para;</a></h2>
@@ -1238,41 +1245,45 @@
 <th style="text-align: center;">HMM</th>
 <th style="text-align: center;">ARFIMA</th>
 <th style="text-align: center;">KNN Bootstrap</th>
+<th style="text-align: center;">Copula</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>Monthly means/stds</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
 </tr>
 <tr>
 <td>Temporal correlation</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
 </tr>
 <tr>
 <td>Spatial correlation</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
 </tr>
 <tr>
 <td>Long-range persistence</td>
@@ -1280,9 +1291,10 @@
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 </tr>
 <tr>
@@ -1291,7 +1303,8 @@
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
@@ -1303,7 +1316,8 @@
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 </tr>
@@ -1312,22 +1326,36 @@
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 </tr>
 <tr>
 <td>Empirical distribution</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
 <td style="text-align: center;">-</td>
-<td style="text-align: center;">✓</td>
+<td style="text-align: center;">x</td>
+<td style="text-align: center;">x</td>
+</tr>
+<tr>
+<td>Tail dependence</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">-</td>
+<td style="text-align: center;">x (t-copula)</td>
 </tr>
 </tbody>
 </table>
