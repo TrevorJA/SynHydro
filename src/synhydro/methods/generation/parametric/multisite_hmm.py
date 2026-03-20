@@ -198,7 +198,8 @@ class MultiSiteHMMGenerator(Generator):
 
         # Apply offset and log transformation
         Q_adj = Q + self.offset
-        self.Q_log_ = np.log(Q_adj).values
+        with np.errstate(invalid="ignore"):
+            self.Q_log_ = np.log(Q_adj).values
 
         # Check for invalid values
         if not np.all(np.isfinite(self.Q_log_)):

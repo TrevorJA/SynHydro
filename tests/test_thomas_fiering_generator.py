@@ -330,8 +330,7 @@ class TestThomasFieringStatisticalProperties:
         gen_mean = all_data.mean()
         obs_mean = gen.Q_obs_monthly.mean()
 
-        # Generated mean should be in reasonable range
-        # Allow wider range due to transformation effects
+        # Stedinger log-transform and small ensemble (50x20yr) introduce bias
         ratio = gen_mean / obs_mean
         assert 0.05 < ratio < 5.0
 
@@ -351,8 +350,7 @@ class TestThomasFieringStatisticalProperties:
         gen_std = all_data.std()
         obs_std = gen.Q_obs_monthly.std()
 
-        # Generated std should be in reasonable range
-        # Allow wider range due to transformation and sample variability
+        # Stedinger log-transform and small ensemble (50x20yr) introduce variance bias
         ratio = gen_std / obs_std
         assert 0.1 < ratio < 5.0
 

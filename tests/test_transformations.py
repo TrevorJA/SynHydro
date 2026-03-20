@@ -29,7 +29,7 @@ class TestSteddingerTransform:
         assert isinstance(transformed, pd.DataFrame)
         assert len(transformed) == len(sample_monthly_series)
         assert transform.is_fitted is True
-        assert hasattr(transform, 'params_')
+        assert hasattr(transform, "params_")
 
     def test_inverse_transform_series(self, sample_monthly_series):
         """Test inverse transform on Series (converted to DataFrame)."""
@@ -51,7 +51,7 @@ class TestSteddingerTransform:
 
         assert isinstance(transformed, pd.DataFrame)
         assert transform.is_fitted is True
-        assert 'tau' in transform.params_
+        assert "tau" in transform.params_
 
     def test_inverse_transform_by_month(self, sample_monthly_series):
         """Test inverse transform with by_month=True (converted to DataFrame)."""
@@ -62,10 +62,13 @@ class TestSteddingerTransform:
         recovered = transform.inverse_transform(transformed)
 
         # Only check rows where both transformed and recovered are finite
-        valid_mask = (np.isfinite(transformed.values).all(axis=1) &
-                      np.isfinite(recovered.values).all(axis=1))
+        valid_mask = np.isfinite(transformed.values).all(axis=1) & np.isfinite(
+            recovered.values
+        ).all(axis=1)
         if valid_mask.sum() > 0:
-            assert np.allclose(recovered.values[valid_mask], df.values[valid_mask], rtol=1e-5)
+            assert np.allclose(
+                recovered.values[valid_mask], df.values[valid_mask], rtol=1e-5
+            )
 
     def test_fit_transform_dataframe(self, sample_monthly_dataframe):
         """Test fit and transform on DataFrame."""
@@ -112,7 +115,8 @@ class TestLogTransform:
 
     def test_log_transform_dataframe(self, sample_monthly_dataframe):
         """Test log transform on DataFrame."""
-        transform = LogTransform(offset=0.0)
+        # Fixture data can include zeros; use small offset so log is defined
+        transform = LogTransform(offset=1.0)
         transformed = transform.fit_transform(sample_monthly_dataframe)
 
         assert isinstance(transformed, pd.DataFrame)
@@ -197,7 +201,7 @@ class TestBoxCoxTransform:
         assert isinstance(transformed, pd.DataFrame)
         assert len(transformed) == len(sample_monthly_series)
         assert transform.is_fitted is True
-        assert 'lambda' in transform.params_ or 'lambda_values' in transform.params_
+        assert "lambda" in transform.params_ or "lambda_values" in transform.params_
 
     def test_inverse_transform_series(self, sample_monthly_series):
         """Test inverse transform on Series (converted to DataFrame)."""
@@ -231,20 +235,18 @@ class TestTransformPipeline:
 
     def test_pipeline_creation(self):
         """Test creating a pipeline."""
-        pipeline = TransformPipeline([
-            LogTransform(offset=0.0),
-            StandardScaler(by_month=False)
-        ])
+        pipeline = TransformPipeline(
+            [LogTransform(offset=0.0), StandardScaler(by_month=False)]
+        )
         assert len(pipeline.transforms) == 2
         assert isinstance(pipeline.transforms[0], LogTransform)
         assert isinstance(pipeline.transforms[1], StandardScaler)
 
     def test_pipeline_fit_transform(self, sample_monthly_series):
         """Test pipeline fit and transform."""
-        pipeline = TransformPipeline([
-            LogTransform(offset=0.0),
-            StandardScaler(by_month=False)
-        ])
+        pipeline = TransformPipeline(
+            [LogTransform(offset=0.0), StandardScaler(by_month=False)]
+        )
         transformed = pipeline.fit_transform(sample_monthly_series)
 
         assert isinstance(transformed, pd.Series)
@@ -252,10 +254,9 @@ class TestTransformPipeline:
 
     def test_pipeline_inverse_transform(self, sample_monthly_series):
         """Test pipeline inverse transform."""
-        pipeline = TransformPipeline([
-            LogTransform(offset=0.0),
-            StandardScaler(by_month=False)
-        ])
+        pipeline = TransformPipeline(
+            [LogTransform(offset=0.0), StandardScaler(by_month=False)]
+        )
         transformed = pipeline.fit_transform(sample_monthly_series)
         recovered = pipeline.inverse_transform(transformed)
 
@@ -263,10 +264,9 @@ class TestTransformPipeline:
 
     def test_pipeline_fit_and_transform_separately(self, sample_monthly_series):
         """Test fitting and transforming separately."""
-        pipeline = TransformPipeline([
-            LogTransform(offset=0.0),
-            StandardScaler(by_month=False)
-        ])
+        pipeline = TransformPipeline(
+            [LogTransform(offset=0.0), StandardScaler(by_month=False)]
+        )
         pipeline.fit(sample_monthly_series)
         transformed = pipeline.transform(sample_monthly_series)
 
@@ -277,24 +277,24 @@ class TestTransformPipeline:
         """Test pipeline with three transforms (converted to DataFrame)."""
         # Convert Series to DataFrame - SteddingerTransform and BoxCoxTransform require DataFrame
         df = sample_monthly_series.to_frame()
-        pipeline = TransformPipeline([
-            SteddingerTransform(by_month=False),
-            StandardScaler(by_month=False),
-            BoxCoxTransform(by_site=False)
-        ])
+        pipeline = TransformPipeline(
+            [
+                SteddingerTransform(by_month=False),
+                StandardScaler(by_month=False),
+                BoxCoxTransform(by_site=False),
+            ]
+        )
         transformed = pipeline.fit_transform(df)
         recovered = pipeline.inverse_transform(transformed)
 
         assert np.allclose(recovered.values, df.values, rtol=1e-5)
 
     def test_pipeline_with_dataframe(self, sample_monthly_dataframe):
-        """Test pipeline with DataFrame (offset large enough to handle seasonal negatives)."""
-        # sample_monthly_dataframe can have negative values due to seasonal component;
-        # use a large offset to ensure log transform receives positive inputs.
-        pipeline = TransformPipeline([
-            LogTransform(offset=200.0),
-            StandardScaler(by_month=False)
-        ])
+        """Test pipeline with DataFrame."""
+        # Use small offset to handle zero-flow values in fixture data
+        pipeline = TransformPipeline(
+            [LogTransform(offset=1.0), StandardScaler(by_month=False)]
+        )
         transformed = pipeline.fit_transform(sample_monthly_dataframe)
         recovered = pipeline.inverse_transform(transformed)
 
@@ -310,10 +310,9 @@ class TestTransformPipeline:
 
     def test_pipeline_transform_before_fit_raises(self, sample_monthly_series):
         """Test that transform before fit raises error."""
-        pipeline = TransformPipeline([
-            LogTransform(offset=0.0),
-            StandardScaler(by_month=False)
-        ])
+        pipeline = TransformPipeline(
+            [LogTransform(offset=0.0), StandardScaler(by_month=False)]
+        )
         with pytest.raises(ValueError):
             pipeline.transform(sample_monthly_series)
 

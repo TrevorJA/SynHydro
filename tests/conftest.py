@@ -11,25 +11,25 @@ from datetime import datetime
 @pytest.fixture
 def sample_daily_series():
     """Generate a sample daily time series for testing."""
-    dates = pd.date_range(start='2010-01-01', end='2015-12-31', freq='D')
+    dates = pd.date_range(start="2010-01-01", end="2015-12-31", freq="D")
     np.random.seed(42)
     values = np.random.gamma(shape=2.0, scale=50.0, size=len(dates))
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 @pytest.fixture
 def sample_monthly_series():
     """Generate a sample monthly time series for testing."""
-    dates = pd.date_range(start='2010-01-01', end='2020-12-31', freq='MS')
+    dates = pd.date_range(start="2010-01-01", end="2020-12-31", freq="MS")
     np.random.seed(42)
     values = np.random.gamma(shape=2.0, scale=100.0, size=len(dates))
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 @pytest.fixture
 def sample_daily_dataframe():
     """Generate a sample daily multi-site DataFrame for testing."""
-    dates = pd.date_range(start='2010-01-01', end='2015-12-31', freq='D')
+    dates = pd.date_range(start="2010-01-01", end="2015-12-31", freq="D")
     np.random.seed(42)
     n_sites = 3
     data = {}
@@ -37,14 +37,14 @@ def sample_daily_dataframe():
         # Generate correlated data
         base = np.random.gamma(shape=2.0, scale=50.0, size=len(dates))
         noise = np.random.normal(0, 10, size=len(dates))
-        data[f'site_{i+1}'] = base + noise
+        data[f"site_{i+1}"] = np.clip(base + noise, 0.01, None)
     return pd.DataFrame(data, index=dates)
 
 
 @pytest.fixture
 def sample_monthly_dataframe():
     """Generate a sample monthly multi-site DataFrame for testing."""
-    dates = pd.date_range(start='2010-01-01', end='2020-12-31', freq='MS')
+    dates = pd.date_range(start="2010-01-01", end="2020-12-31", freq="MS")
     np.random.seed(42)
     n_sites = 3
     data = {}
@@ -53,7 +53,7 @@ def sample_monthly_dataframe():
         base = np.random.gamma(shape=2.0, scale=100.0, size=len(dates))
         seasonal = 50 * np.sin(2 * np.pi * np.arange(len(dates)) / 12)
         noise = np.random.normal(0, 20, size=len(dates))
-        data[f'site_{i+1}'] = base + seasonal + noise
+        data[f"site_{i+1}"] = np.clip(base + seasonal + noise, 0.01, None)
     return pd.DataFrame(data, index=dates)
 
 
@@ -75,11 +75,7 @@ def sample_correlation_matrix():
 def sample_non_psd_matrix():
     """Generate a non-positive semi-definite matrix for testing repair algorithms."""
     # Create a matrix with negative eigenvalues
-    matrix = np.array([
-        [1.0, 0.9, 0.8],
-        [0.9, 1.0, 0.95],
-        [0.8, 0.95, 1.0]
-    ])
+    matrix = np.array([[1.0, 0.9, 0.8], [0.9, 1.0, 0.95], [0.8, 0.95, 1.0]])
     # Force it to be non-PSD by making eigenvalues negative
     matrix[0, 1] = 1.1  # This makes it invalid
     return matrix
@@ -94,14 +90,14 @@ def temp_hdf5_file(tmp_path):
 @pytest.fixture
 def sample_ensemble_data():
     """Generate sample ensemble data for testing."""
-    dates = pd.date_range(start='2010-01-01', end='2012-12-31', freq='D')
+    dates = pd.date_range(start="2010-01-01", end="2012-12-31", freq="D")
     np.random.seed(42)
 
     # Create ensemble with 3 realizations and 2 sites
     ensemble = {}
     for realization in range(3):
         data = {}
-        for site in ['site_1', 'site_2']:
+        for site in ["site_1", "site_2"]:
             np.random.seed(42 + realization)
             data[site] = np.random.gamma(shape=2.0, scale=50.0, size=len(dates))
         ensemble[realization] = pd.DataFrame(data, index=dates)
@@ -112,30 +108,30 @@ def sample_ensemble_data():
 @pytest.fixture
 def sample_annual_series():
     """Generate a sample annual time series for testing."""
-    dates = pd.date_range(start='2000-01-01', end='2020-12-31', freq='AS')
+    dates = pd.date_range(start="2000-01-01", end="2020-12-31", freq="AS")
     np.random.seed(42)
     values = np.random.gamma(shape=2.0, scale=1000.0, size=len(dates))
-    return pd.Series(values, index=dates, name='site_1')
+    return pd.Series(values, index=dates, name="site_1")
 
 
 @pytest.fixture
 def sample_annual_dataframe():
     """Generate a sample annual multi-site DataFrame for testing."""
-    dates = pd.date_range(start='2000-01-01', end='2020-12-31', freq='AS')
+    dates = pd.date_range(start="2000-01-01", end="2020-12-31", freq="AS")
     np.random.seed(42)
     n_sites = 3
     data = {}
     for i in range(n_sites):
         base = np.random.gamma(shape=2.0, scale=1000.0, size=len(dates))
         noise = np.random.normal(0, 100, size=len(dates))
-        data[f'site_{i+1}'] = base + noise
+        data[f"site_{i+1}"] = np.clip(base + noise, 0.01, None)
     return pd.DataFrame(data, index=dates)
 
 
 @pytest.fixture
 def sample_ssi_data():
     """Generate sample data for SSI drought metrics testing."""
-    dates = pd.date_range(start='2000-01-01', end='2020-12-31', freq='D')
+    dates = pd.date_range(start="2000-01-01", end="2020-12-31", freq="D")
     np.random.seed(42)
 
     # Create data with some drought periods (low flows)
@@ -150,4 +146,4 @@ def sample_ssi_data():
     for idx in drought_indices:
         values[idx] = values[idx] * 0.3  # Reduce flows significantly
 
-    return pd.Series(values, index=dates, name='flow')
+    return pd.Series(values, index=dates, name="flow")

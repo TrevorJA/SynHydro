@@ -547,7 +547,9 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             Correlation matrix.
         """
         stds = np.sqrt(np.diag(self.S_XX_))
-        corr = self.S_XX_ / np.outer(stds, stds)
+        denom = np.outer(stds, stds)
+        denom[denom == 0] = 1.0
+        corr = self.S_XX_ / denom
         return corr
 
     def disaggregate(

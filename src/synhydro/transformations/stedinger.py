@@ -3,6 +3,7 @@ Stedinger-Taylor normalization transformation.
 
 Implements the Stedinger and Taylor (1982) transformation with lower bound estimation.
 """
+
 import numpy as np
 import pandas as pd
 
@@ -39,7 +40,7 @@ class SteddingerTransform(Transform):
         super().__init__()
         self.by_month = by_month
 
-    def fit(self, data: pd.DataFrame) -> 'SteddingerTransform':
+    def fit(self, data: pd.DataFrame) -> "SteddingerTransform":
         """
         Fit lower bound parameters.
 
@@ -63,10 +64,10 @@ class SteddingerTransform(Transform):
             for month in range(1, 13):
                 month_data = data[data.index.month == month]
                 tau.loc[month] = self._compute_lower_bound(month_data)
-            self.params_['tau'] = tau
+            self.params_["tau"] = tau
         else:
             # Single tau for entire series
-            self.params_['tau'] = self._compute_lower_bound(data)
+            self.params_["tau"] = self._compute_lower_bound(data)
 
         self.is_fitted = True
         return self
@@ -94,7 +95,7 @@ class SteddingerTransform(Transform):
             data = data.to_frame()
 
         transformed = data.copy()
-        tau = self.params_['tau']
+        tau = self.params_["tau"]
 
         if self.by_month:
             for month in range(1, 13):
@@ -105,16 +106,22 @@ class SteddingerTransform(Transform):
                     if isinstance(tau_month, pd.Series) and len(tau_month) > 1:
                         # Multiple columns: tau_month is a Series with column names as index
                         for col in data.columns:
-                            transformed.loc[mask, col] = np.log(data.loc[mask, col] - tau_month.loc[col])
+                            transformed.loc[mask, col] = np.log(
+                                data.loc[mask, col] - tau_month.loc[col]
+                            )
                     elif isinstance(tau_month, pd.Series) and len(tau_month) == 1:
                         # Single column: tau_month is a Series with one element
                         tau_value = tau_month.iloc[0]
                         for col in data.columns:
-                            transformed.loc[mask, col] = np.log(data.loc[mask, col] - tau_value)
+                            transformed.loc[mask, col] = np.log(
+                                data.loc[mask, col] - tau_value
+                            )
                     else:
                         # Scalar case
                         for col in data.columns:
-                            transformed.loc[mask, col] = np.log(data.loc[mask, col] - tau_month)
+                            transformed.loc[mask, col] = np.log(
+                                data.loc[mask, col] - tau_month
+                            )
         else:
             transformed = np.log(data - tau)
 
@@ -147,7 +154,7 @@ class SteddingerTransform(Transform):
             data = data.to_frame()
 
         result = data.copy()
-        tau = self.params_['tau']
+        tau = self.params_["tau"]
 
         if self.by_month:
             for month in range(1, 13):
@@ -158,16 +165,22 @@ class SteddingerTransform(Transform):
                     if isinstance(tau_month, pd.Series) and len(tau_month) > 1:
                         # Multiple columns: tau_month is a Series with column names as index
                         for col in data.columns:
-                            result.loc[mask, col] = np.exp(data.loc[mask, col]) + tau_month.loc[col]
+                            result.loc[mask, col] = (
+                                np.exp(data.loc[mask, col]) + tau_month.loc[col]
+                            )
                     elif isinstance(tau_month, pd.Series) and len(tau_month) == 1:
                         # Single column: tau_month is a Series with one element
                         tau_value = tau_month.iloc[0]
                         for col in data.columns:
-                            result.loc[mask, col] = np.exp(data.loc[mask, col]) + tau_value
+                            result.loc[mask, col] = (
+                                np.exp(data.loc[mask, col]) + tau_value
+                            )
                     else:
                         # Scalar case
                         for col in data.columns:
-                            result.loc[mask, col] = np.exp(data.loc[mask, col]) + tau_month
+                            result.loc[mask, col] = (
+                                np.exp(data.loc[mask, col]) + tau_month
+                            )
         else:
             result = np.exp(data) + tau
 
@@ -198,7 +211,15 @@ class SteddingerTransform(Transform):
         qmin = data.min()
         qmedian = data.median()
 
-        tau = (qmax * qmin - qmedian ** 2) / (qmax + qmin - 2 * qmedian)
-        tau = tau.clip(lower=0)  # Ensure non-negative
+        tau = (qmax * qmin - qmedian**2) / (qmax + qmin - 2 * qmedian)
+
+        # tau must be non-negative and strictly below qmin for log(data - tau) > 0.
+        # When the formula produces tau >= qmin or tau < 0, the distributional
+        # assumption doesn't hold; fall back to tau = 0 (plain log).
+        invalid = (tau < 0) | (tau >= qmin) | ~np.isfinite(tau)
+        if isinstance(tau, pd.Series):
+            tau[invalid] = 0.0
+        else:
+            tau = np.where(invalid, 0.0, tau)
 
         return tau

@@ -83,12 +83,8 @@ class TestSSI:
         distributions = ["gamma", "lognorm", "pearson3"]
         for dist_name in distributions:
             ssi = SSI(dist=dist_name, timescale=1, fit_freq="ME")
-            try:
-                ssi_values = ssi.fit_transform(sample_monthly_series)
-                assert isinstance(ssi_values, pd.Series)
-            except Exception as e:
-                # Some distributions might not fit well with all data
-                pytest.skip(f"Distribution '{dist_name}' failed: {e}")
+            ssi_values = ssi.fit_transform(sample_monthly_series)
+            assert isinstance(ssi_values, pd.Series)
 
     def test_prob_zero_parameter(self, sample_daily_series):
         """Test SSI with prob_zero parameter."""
