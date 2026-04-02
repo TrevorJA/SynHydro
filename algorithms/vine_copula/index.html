@@ -12,28 +12,28 @@
         <meta name="author" content="Trevor Amestoy">
       
       
-        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/">
+        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/vine_copula/">
       
       
-        <link rel="prev" href="../tutorials/05_validation/">
+        <link rel="prev" href="../multisite_hmm/">
       
       
-        <link rel="next" href="thomas_fiering/">
+        <link rel="next" href="../nowak_disaggregation/">
       
       
-      <link rel="icon" href="../assets/images/favicon.png">
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.23">
     
     
       
-        <title>Overview - SynHydro</title>
+        <title>Vine Copula - SynHydro</title>
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.84d31ad4.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.84d31ad4.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.06af60db.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
       
       
 
@@ -52,11 +52,11 @@
       
     
     
-      <link rel="stylesheet" href="../assets/_mkdocstrings.css">
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#algorithms" class="md-skip">
+        <a href="#vine-copula-generator-yu-et-al-2025-wang-shen-2023-pereira-et-al-2017" class="md-skip">
           Skip to content
         </a>
       
@@ -98,7 +98,7 @@
 
 <header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href=".." title="SynHydro" class="md-header__button md-logo" aria-label="SynHydro" data-md-component="logo">
+    <a href="../.." title="SynHydro" class="md-header__button md-logo" aria-label="SynHydro" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2m0 17c-2.76 0-5-2.24-5-5 0-3.33 5-8.96 5-8.96s5 5.63 5 8.96c0 2.76-2.24 5-5 5"/></svg>
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Vine Copula
             
           </span>
         </div>
@@ -223,7 +223,7 @@
   
   
     <li class="md-tabs__item">
-      <a href=".." class="md-tabs__link">
+      <a href="../.." class="md-tabs__link">
         
   
   
@@ -242,7 +242,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../getting-started/" class="md-tabs__link">
+      <a href="../../getting-started/" class="md-tabs__link">
         
   
   
@@ -263,7 +263,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../tutorials/" class="md-tabs__link">
+        <a href="../../tutorials/" class="md-tabs__link">
           
   
   
@@ -285,7 +285,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -305,7 +305,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/generators/" class="md-tabs__link">
+        <a href="../../api/generators/" class="md-tabs__link">
           
   
   
@@ -345,7 +345,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href=".." title="SynHydro" class="md-nav__button md-logo" aria-label="SynHydro" data-md-component="logo">
+    <a href="../.." title="SynHydro" class="md-nav__button md-logo" aria-label="SynHydro" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2m0 17c-2.76 0-5-2.24-5-5 0-3.33 5-8.96 5-8.96s5 5.63 5 8.96c0 2.76-2.24 5-5 5"/></svg>
@@ -375,7 +375,7 @@
   
   
     <li class="md-nav__item">
-      <a href=".." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         
   
   
@@ -397,7 +397,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
+      <a href="../../getting-started/" class="md-nav__link">
         
   
   
@@ -462,7 +462,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/" class="md-nav__link">
+      <a href="../../tutorials/" class="md-nav__link">
         
   
   
@@ -485,7 +485,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/01_quickstart/" class="md-nav__link">
+      <a href="../../tutorials/01_quickstart/" class="md-nav__link">
         
   
   
@@ -508,7 +508,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/02_multisite/" class="md-nav__link">
+      <a href="../../tutorials/02_multisite/" class="md-nav__link">
         
   
   
@@ -531,7 +531,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/03_pipeline/" class="md-nav__link">
+      <a href="../../tutorials/03_pipeline/" class="md-nav__link">
         
   
   
@@ -554,7 +554,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/04_drought_analysis/" class="md-nav__link">
+      <a href="../../tutorials/04_drought_analysis/" class="md-nav__link">
         
   
   
@@ -577,7 +577,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../tutorials/05_validation/" class="md-nav__link">
+      <a href="../../tutorials/05_validation/" class="md-nav__link">
         
   
   
@@ -652,32 +652,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Overview
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -688,53 +666,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#generation-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Generation Methods
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#disaggregation-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      Disaggregation Methods
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#key-properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Key Properties Preserved
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -747,7 +678,7 @@
   
   
     <li class="md-nav__item">
-      <a href="thomas_fiering/" class="md-nav__link">
+      <a href="../thomas_fiering/" class="md-nav__link">
         
   
   
@@ -770,7 +701,7 @@
   
   
     <li class="md-nav__item">
-      <a href="kirsch/" class="md-nav__link">
+      <a href="../kirsch/" class="md-nav__link">
         
   
   
@@ -793,7 +724,7 @@
   
   
     <li class="md-nav__item">
-      <a href="matalas/" class="md-nav__link">
+      <a href="../matalas/" class="md-nav__link">
         
   
   
@@ -816,7 +747,7 @@
   
   
     <li class="md-nav__item">
-      <a href="phase_randomization/" class="md-nav__link">
+      <a href="../phase_randomization/" class="md-nav__link">
         
   
   
@@ -839,7 +770,7 @@
   
   
     <li class="md-nav__item">
-      <a href="warm/" class="md-nav__link">
+      <a href="../warm/" class="md-nav__link">
         
   
   
@@ -862,7 +793,7 @@
   
   
     <li class="md-nav__item">
-      <a href="multisite_hmm/" class="md-nav__link">
+      <a href="../multisite_hmm/" class="md-nav__link">
         
   
   
@@ -882,10 +813,32 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="vine_copula/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Vine Copula
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -896,6 +849,113 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#algorithm" class="md-nav__link">
+    <span class="md-ellipsis">
+      Algorithm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Algorithm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fitting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#properties-preserved" class="md-nav__link">
+    <span class="md-ellipsis">
+      Properties Preserved
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -908,7 +968,7 @@
   
   
     <li class="md-nav__item">
-      <a href="nowak_disaggregation/" class="md-nav__link">
+      <a href="../nowak_disaggregation/" class="md-nav__link">
         
   
   
@@ -981,7 +1041,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/generators/" class="md-nav__link">
+      <a href="../../api/generators/" class="md-nav__link">
         
   
   
@@ -1004,7 +1064,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/disaggregators/" class="md-nav__link">
+      <a href="../../api/disaggregators/" class="md-nav__link">
         
   
   
@@ -1027,7 +1087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/drought/" class="md-nav__link">
+      <a href="../../api/drought/" class="md-nav__link">
         
   
   
@@ -1050,7 +1110,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/core/" class="md-nav__link">
+      <a href="../../api/core/" class="md-nav__link">
         
   
   
@@ -1100,27 +1160,87 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#generation-methods" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation Methods
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#disaggregation-methods" class="md-nav__link">
+  <a href="#algorithm" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation Methods
+      Algorithm
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Algorithm">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#preprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Preprocessing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Fitting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Generation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parameters" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameters
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-properties-preserved" class="md-nav__link">
+  <a href="#properties-preserved" class="md-nav__link">
     <span class="md-ellipsis">
-      Key Properties Preserved
+      Properties Preserved
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#limitations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Limitations
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
     </span>
   </a>
   
@@ -1145,260 +1265,209 @@
   
 
 
-<h1 id="algorithms">Algorithms<a class="headerlink" href="#algorithms" title="Permanent link">&para;</a></h1>
-<p>SynHydro implements the following stochastic generation and disaggregation methods.</p>
-<h2 id="generation-methods">Generation Methods<a class="headerlink" href="#generation-methods" title="Permanent link">&para;</a></h2>
+<h1 id="vine-copula-generator-yu-et-al-2025-wang-shen-2023-pereira-et-al-2017">Vine Copula Generator (Yu et al. 2025; Wang &amp; Shen 2023; Pereira et al. 2017)<a class="headerlink" href="#vine-copula-generator-yu-et-al-2025-wang-shen-2023-pereira-et-al-2017" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
-<th>Algorithm</th>
-<th>Class</th>
-<th>Type</th>
-<th>Frequency</th>
-<th>Sites</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="thomas_fiering/">Thomas-Fiering AR(1)</a></td>
-<td><code>ThomasFieringGenerator</code></td>
+<td><strong>Type</strong></td>
 <td>Parametric</td>
+</tr>
+<tr>
+<td><strong>Resolution</strong></td>
 <td>Monthly</td>
-<td>Single</td>
 </tr>
 <tr>
-<td><a href="kirsch/">Kirsch Bootstrap</a></td>
-<td><code>KirschGenerator</code></td>
-<td>Nonparametric</td>
-<td>Monthly</td>
-<td>Multi</td>
+<td><strong>Sites</strong></td>
+<td>Multisite</td>
 </tr>
 <tr>
-<td><a href="matalas/">Matalas MAR(1)</a></td>
-<td><code>MATALASGenerator</code></td>
-<td>Parametric</td>
-<td>Monthly</td>
-<td>Multi</td>
-</tr>
-<tr>
-<td><a href="phase_randomization/">Phase Randomization</a></td>
-<td><code>PhaseRandomizationGenerator</code></td>
-<td>Nonparametric</td>
-<td>Daily</td>
-<td>Single</td>
-</tr>
-<tr>
-<td><a href="warm/">WARM</a></td>
-<td><code>WARMGenerator</code></td>
-<td>Parametric</td>
-<td>Annual</td>
-<td>Single</td>
-</tr>
-<tr>
-<td><a href="multisite_hmm/">Multi-Site HMM</a></td>
-<td><code>MultiSiteHMMGenerator</code></td>
-<td>Parametric</td>
-<td>Annual</td>
-<td>Multi</td>
-</tr>
-<tr>
-<td><a href="arfima/">ARFIMA</a></td>
-<td><code>ARFIMAGenerator</code></td>
-<td>Parametric</td>
-<td>Monthly/Annual</td>
-<td>Single</td>
-</tr>
-<tr>
-<td><a href="knn_bootstrap/">KNN Bootstrap</a></td>
-<td><code>KNNBootstrapGenerator</code></td>
-<td>Nonparametric</td>
-<td>Monthly/Annual</td>
-<td>Single/Multi</td>
-</tr>
-<tr>
-<td><a href="gaussian_copula/">Gaussian/t-Copula</a></td>
-<td><code>GaussianCopulaGenerator</code></td>
-<td>Parametric</td>
-<td>Monthly</td>
-<td>Multi</td>
-</tr>
-<tr>
-<td><a href="vine_copula/">Vine Copula</a></td>
+<td><strong>Class</strong></td>
 <td><code>VineCopulaGenerator</code></td>
-<td>Parametric</td>
-<td>Monthly</td>
-<td>Multi</td>
 </tr>
 </tbody>
 </table>
-<h2 id="disaggregation-methods">Disaggregation Methods<a class="headerlink" href="#disaggregation-methods" title="Permanent link">&para;</a></h2>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Extends the PAR(1)-plus-copula framework of <code>GaussianCopulaGenerator</code> by
+replacing the single elliptical copula with a vine copula.  Vine copulas
+decompose a multivariate copula into a hierarchy of bivariate copulas
+arranged in tree structures (R-vine, C-vine, or D-vine), allowing
+heterogeneous pairwise dependence and asymmetric tail dependence.</p>
+<p>Marginals and temporal dependence are identical to <code>GaussianCopulaGenerator</code>:
+per-(month, site) parametric or empirical marginals with a Periodic AR(1)
+temporal model.  Spatial dependence among the PAR(1) residuals is captured
+by a monthly-periodic vine copula fitted via the Dissmann algorithm
+(pyvinecopulib).</p>
+<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
+<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Validate input data; resample daily/weekly to monthly if needed.</li>
+<li>Optionally apply <code>log(Q + offset)</code> transform.</li>
+</ol>
+<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
+<p>Steps 1-3 are identical to <code>GaussianCopulaGenerator</code>.</p>
+<ol>
+<li><strong>Marginal fitting</strong> (per calendar month, per site):</li>
+<li>Parametric: fit gamma and log-normal via MLE; select by BIC.</li>
+<li>
+<p>Empirical: fit <code>NormalScoreTransform</code> (Hazen plotting position).</p>
+</li>
+<li>
+<p><strong>Probability Integral Transform (PIT):</strong>
+   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>u[t,s] = F_{m,s}(Q[t,s])
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>z[t,s] = Phi^{-1}(u[t,s])
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>PAR(1) temporal model</strong> (Pereira et al. 2017):
+   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>rho_{m,s} = corr(z[month=m, s], z[month=m-1, s])
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>e[t,s] = (z[t,s] - rho_{m,s} * z[t-1,s]) / sqrt(1 - rho_{m,s}^2)
+</span></code></pre></div></p>
+</li>
+<li>
+<p><strong>Vine copula per month</strong> (new step):</p>
+</li>
+<li>Transform PAR residuals to uniform: <code>u = Phi(e)</code></li>
+<li>For each calendar month m = 1..12, fit a vine copula on the
+     uniform PAR residuals using pyvinecopulib:<ul>
+<li>Structure: R-vine (automatic Dissmann), C-vine, or D-vine</li>
+<li>Bivariate families: selected per edge by AIC/BIC from the
+   configured family set (Gaussian, Student-t, Clayton, Gumbel, etc.)</li>
+</ul>
+</li>
+</ol>
+<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
+<p>For each timestep t (calendar month m):</p>
+<ol>
+<li>
+<p>Draw from the vine copula for month m:
+   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>u_new = vine_m.simulate(1)    # uniform [0,1]^n_sites
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>e = Phi^{-1}(u_new)           # PAR residuals in normal space
+</span></code></pre></div></p>
+</li>
+<li>
+<p>PAR(1) temporal recursion:
+   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>z[t,s] = rho_{m,s} * z[t-1,s] + sqrt(1 - rho_{m,s}^2) * e[s]
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Map to uniform and invert marginal CDF:
+   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>u[t,s] = Phi(z[t,s])
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>Q[t,s] = F_{m,s}^{-1}(u[t,s])
+</span></code></pre></div></p>
+</li>
+<li>
+<p>Enforce non-negativity.</p>
+</li>
+</ol>
+<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Algorithm</th>
-<th>Class</th>
+<th>Parameter</th>
 <th>Type</th>
-<th>Frequency</th>
+<th>Default</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><a href="nowak_disaggregation/">Nowak KNN</a></td>
-<td><code>NowakDisaggregator</code></td>
-<td>Nonparametric</td>
-<td>Monthly-to-Daily</td>
+<td><code>vine_type</code></td>
+<td>str</td>
+<td><code>"rvine"</code></td>
+<td><code>"rvine"</code>, <code>"cvine"</code>, or <code>"dvine"</code>. Controls the vine tree structure.</td>
 </tr>
 <tr>
-<td><a href="valencia_schaake/">Valencia-Schaake</a></td>
-<td><code>ValenciaSchaakeDisaggregator</code></td>
-<td>Parametric</td>
-<td>Annual-to-Monthly</td>
+<td><code>family_set</code></td>
+<td>str or list</td>
+<td><code>"all"</code></td>
+<td>Bivariate copula families to consider per edge.</td>
 </tr>
 <tr>
-<td><a href="grygier_stedinger/">Grygier-Stedinger</a></td>
-<td><code>GrygierStedingerDisaggregator</code></td>
-<td>Parametric</td>
-<td>Annual-to-Monthly</td>
+<td><code>selection_criterion</code></td>
+<td>str</td>
+<td><code>"aic"</code></td>
+<td><code>"aic"</code> or <code>"bic"</code> for bivariate family selection.</td>
+</tr>
+<tr>
+<td><code>marginal_method</code></td>
+<td>str</td>
+<td><code>"parametric"</code></td>
+<td><code>"parametric"</code> (BIC-selected gamma/log-normal) or <code>"empirical"</code> (Hazen CDF).</td>
+</tr>
+<tr>
+<td><code>log_transform</code></td>
+<td>bool</td>
+<td><code>False</code></td>
+<td>Apply log(Q + offset) before fitting.</td>
+</tr>
+<tr>
+<td><code>offset</code></td>
+<td>float</td>
+<td><code>1.0</code></td>
+<td>Additive offset for log transform.</td>
+</tr>
+<tr>
+<td><code>trunc_level</code></td>
+<td>int or None</td>
+<td><code>None</code></td>
+<td>Vine tree truncation level. <code>None</code> fits all trees.</td>
 </tr>
 </tbody>
 </table>
-<h2 id="key-properties-preserved">Key Properties Preserved<a class="headerlink" href="#key-properties-preserved" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th style="text-align: center;">Thomas-Fiering</th>
-<th style="text-align: center;">Kirsch</th>
-<th style="text-align: center;">Matalas</th>
-<th style="text-align: center;">Phase Random</th>
-<th style="text-align: center;">WARM</th>
-<th style="text-align: center;">HMM</th>
-<th style="text-align: center;">ARFIMA</th>
-<th style="text-align: center;">KNN Bootstrap</th>
-<th style="text-align: center;">Copula</th>
-<th style="text-align: center;">Vine Copula</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Monthly means/stds</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-</tr>
-<tr>
-<td>Temporal correlation</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-</tr>
-<tr>
-<td>Spatial correlation</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-</tr>
-<tr>
-<td>Long-range persistence</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-</tr>
-<tr>
-<td>Non-stationarity</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-</tr>
-<tr>
-<td>Drought states</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-</tr>
-<tr>
-<td>Power spectrum</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-</tr>
-<tr>
-<td>Empirical distribution</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-<td style="text-align: center;">x</td>
-</tr>
-<tr>
-<td>Tail dependence</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">-</td>
-<td style="text-align: center;">x (t-copula)</td>
-<td style="text-align: center;">x (asymmetric)</td>
-</tr>
-</tbody>
-</table>
+<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Marginal distributions per (month, site)</li>
+<li>Spatial cross-site correlation via vine copula</li>
+<li>Asymmetric tail dependence (when using Clayton, Gumbel, Joe, etc.)</li>
+<li>Heterogeneous pairwise dependence (different copula families per pair)</li>
+<li>Lag-1 temporal autocorrelation via PAR(1)</li>
+<li>Seasonal cycle (implicit in per-month marginals and PAR parameters)</li>
+</ul>
+<p><strong>Not preserved:</strong></p>
+<ul>
+<li>Higher-order temporal dependence (only lag-1 via PAR(1))</li>
+<li>Long-range dependence / Hurst exponent</li>
+<li>Non-stationarity</li>
+</ul>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Requires the optional dependency <code>pyvinecopulib</code> (<code>pip install synhydro[vine]</code>).</li>
+<li>With short records (&lt; 20 years), each month has fewer than 20 observations
+  for vine fitting.  Vine structure selection may overfit.  Use <code>trunc_level</code>
+  and a restricted <code>family_set</code> to mitigate.</li>
+<li>Vine complexity grows quadratically with the number of sites.  Practical
+  limit is approximately 15-20 sites.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p><strong>Primary:</strong>
+Yu, X., Xu, Y.-P., Guo, Y., Chen, S., and Gu, H. (2025). Synchronization
+frequency analysis and stochastic simulation of multi-site flood flows based
+on the complicated vine copula structure. Hydrology and Earth System Sciences,
+29, 179-214. https://doi.org/10.5194/hess-29-179-2025</p>
+<p>Wang, X., and Shen, Y.-M. (2023). R-statistic based predictor variables
+selection and vine structure determination approach for stochastic streamflow
+generation. Journal of Hydrology, 617, 129093.
+https://doi.org/10.1016/j.jhydrol.2023.129093</p>
+<p>Wang, W., Dong, Z., Zhang, T., Ren, L., Xue, L., Wu, T. (2024). Mixed
+D-vine copula-based conditional quantile model for stochastic monthly
+streamflow simulation. Water Science and Engineering, 17(1), 13-20.
+https://doi.org/10.1016/j.wse.2023.05.004</p>
+<p><strong>See also:</strong>
+- Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic
+  spatial vine copula model for multi-site streamflow simulation. Electric
+  Power Systems Research, 152, 9-17.
+  https://doi.org/10.1016/j.epsr.2017.06.017
+- Czado, C., and Nagler, T. (2022). Vine copula based modeling. Annual Review
+  of Statistics and Its Application, 9, 453-477.</p>
+<hr />
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/vine_copula.py</code>
+<strong>Tests:</strong> <code>tests/test_vine_copula_generator.py</code></p>
 
 
 
@@ -1469,12 +1538,12 @@
     
     
       
-      <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "content.code.annotate", "search.highlight"], "search": "../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.top", "toc.follow", "content.code.copy", "content.code.annotate", "search.highlight"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.f55a23d4.min.js"></script>
+      <script src="../../assets/javascripts/bundle.f55a23d4.min.js"></script>
       
-        <script src="../javascripts/mathjax.js"></script>
+        <script src="../../javascripts/mathjax.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

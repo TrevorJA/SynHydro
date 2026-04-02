@@ -811,6 +811,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../algorithms/vine_copula/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Vine Copula
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../algorithms/nowak_disaggregation/" class="md-nav__link">
         
   
@@ -1421,6 +1444,57 @@
         
           <li class="md-nav__item">
   <a href="#synhydro.methods.generation.parametric.multisite_hmm.MultiSiteHMMGenerator.generate" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vinecopulagenerator" class="md-nav__link">
+    <span class="md-ellipsis">
+      VineCopulaGenerator
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator" class="md-nav__link">
+    <span class="md-ellipsis">
+      VineCopulaGenerator
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="VineCopulaGenerator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.preprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      preprocessing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.generate" class="md-nav__link">
     <span class="md-ellipsis">
       generate
     </span>
@@ -2087,6 +2161,57 @@
         
           <li class="md-nav__item">
   <a href="#synhydro.methods.generation.parametric.multisite_hmm.MultiSiteHMMGenerator.generate" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#vinecopulagenerator" class="md-nav__link">
+    <span class="md-ellipsis">
+      VineCopulaGenerator
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator" class="md-nav__link">
+    <span class="md-ellipsis">
+      VineCopulaGenerator
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="VineCopulaGenerator">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.preprocessing" class="md-nav__link">
+    <span class="md-ellipsis">
+      preprocessing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.fit" class="md-nav__link">
+    <span class="md-ellipsis">
+      fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.generate" class="md-nav__link">
     <span class="md-ellipsis">
       generate
     </span>
@@ -6339,6 +6464,490 @@ over n_years if both provided.</p>
             <td>
               <div class="doc-md-description">
                 <p>If neither n_years nor n_timesteps is provided.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><hr />
+<h2 id="vinecopulagenerator">VineCopulaGenerator<a class="headerlink" href="#vinecopulagenerator" title="Permanent link">&para;</a></h2>
+
+
+<div class="doc doc-object doc-class">
+
+
+
+<h2 id="synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">VineCopulaGenerator</span>
+
+
+<a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">VineCopulaGenerator</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">vine_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;rvine&#39;</span><span class="p">,</span> <span class="n">family_set</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">selection_criterion</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="n">marginal_method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;parametric&#39;</span><span class="p">,</span> <span class="n">log_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">trunc_level</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><a class="autorefs autorefs-internal" title="Generator (synhydro.core.base.Generator)" href="#synhydro.core.base.Generator">Generator</a></code></p>
+
+
+
+        <p>Multi-site monthly generator based on vine copulas.</p>
+<p>Fits per-(month, site) marginal distributions and a vine copula per
+calendar month on the PAR(1) residuals.  Supports R-vine, C-vine, and
+D-vine structures with automatic family and structure selection via
+pyvinecopulib.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>vine_type</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>"rvine"</code>, <code>"cvine"</code>, or <code>"dvine"</code>.  Controls the vine tree
+structure constraint.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;rvine&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>family_set</code>
+            </td>
+            <td>
+                  <code>str or list of str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Bivariate copula families to consider.  <code>"all"</code> uses all available
+parametric families.  A list of family names can also be provided
+(e.g., <code>["gaussian", "clayton", "gumbel", "frank"]</code>).</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;all&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>selection_criterion</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>"aic"</code> or <code>"bic"</code> for bivariate copula family selection at
+each edge.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;aic&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>marginal_method</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>"parametric"</code> fits gamma and log-normal per (month, site) and
+selects the winner by BIC.  <code>"empirical"</code> uses the Hazen
+plotting-position CDF via :class:<code>NormalScoreTransform</code>.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#34;parametric&#34;</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>log_transform</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Apply <code>log(Q + offset)</code> before fitting.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>offset</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Additive offset for the log transform.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1.0</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>trunc_level</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span> or None</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Truncation level for the vine tree.  <code>None</code> means no truncation
+(all trees are fitted).  Setting <code>trunc_level=1</code> truncates after
+the first tree, replacing higher trees with independence copulas.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>name</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Instance name.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>debug</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Enable debug logging.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="references" open>
+  <summary>References</summary>
+  <p>Yu et al. (2025), Wang &amp; Shen (2023), Wang et al. (2024),
+Pereira et al. (2017).</p>
+</details>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.preprocessing" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">preprocessing</span>
+
+
+<a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.preprocessing" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">preprocessing</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sites</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Validate input and prepare monthly flow data.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_obs</code>
+            </td>
+            <td>
+                  <code><span title="pandas.DataFrame">DataFrame</span> or <span title="pandas.Series">Series</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Monthly streamflow with DatetimeIndex.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sites</code>
+            </td>
+            <td>
+                  <code>list of str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Subset of sites to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.fit" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
+
+<a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">fit</span><span class="p">(</span><span class="n">Q_obs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Fit marginal distributions and vine copula dependence structure.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>Q_obs</code>
+            </td>
+            <td>
+                  <code><span title="pandas.DataFrame">DataFrame</span> or <span title="pandas.Series">Series</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If provided, calls preprocessing automatically.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>sites</code>
+            </td>
+            <td>
+                  <code>list of str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sites to use.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.generate" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">generate</span>
+
+
+<a href="#synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator.generate" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate</span><span class="p">(</span><span class="n">n_realizations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_years</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate synthetic monthly streamflow realizations.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_realizations</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of independent realizations.</p>
+              </div>
+            </td>
+            <td>
+                  <code>1</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_years</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Years per realization.  Defaults to length of the historic record.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_timesteps</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Total monthly timesteps; overrides <em>n_years</em> if provided.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>seed</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Random seed for reproducibility.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="Ensemble (synhydro.core.ensemble.Ensemble)" href="../core/#synhydro.core.ensemble.Ensemble">Ensemble</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Synthetic flow realizations.</p>
               </div>
             </td>
           </tr>
