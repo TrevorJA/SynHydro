@@ -13,6 +13,7 @@ from synhydro.methods.generation.parametric import (
     MATALASGenerator,
     MultiSiteHMMGenerator,
     ThomasFieringGenerator,
+    VineCopulaGenerator,
     WARMGenerator,
 )
 
@@ -25,5 +26,6 @@ __all__ = [
     "MultiSiteHMMGenerator",
     "PhaseRandomizationGenerator",
     "ThomasFieringGenerator",
+    "VineCopulaGenerator",
     "WARMGenerator",
 ]

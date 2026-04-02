@@ -2,6 +2,9 @@
 Parametric generation methods for SynHydro.
 """
 
+from synhydro.methods.generation.parametric.vine_copula import (
+    VineCopulaGenerator,
+)
 from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
 from synhydro.methods.generation.parametric.gaussian_copula import (
     GaussianCopulaGenerator,
@@ -17,5 +20,6 @@ __all__ = [
     "MATALASGenerator",
     "MultiSiteHMMGenerator",
     "ThomasFieringGenerator",
+    "VineCopulaGenerator",
     "WARMGenerator",
 ]

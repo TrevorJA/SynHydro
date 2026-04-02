@@ -102,6 +102,7 @@ nav:
     - Phase Randomization: algorithms/phase_randomization.md
     - WARM: algorithms/warm.md
     - Multi-Site HMM: algorithms/multisite_hmm.md
+    - Vine Copula: algorithms/vine_copula.md
     - Nowak Disaggregation: algorithms/nowak_disaggregation.md
   - API Reference:
     - Generators: api/generators.md

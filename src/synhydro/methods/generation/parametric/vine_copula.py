@@ -1,49 +1,57 @@
 """
-Gaussian / Student-t Copula Generator for multi-site monthly streamflow.
+Vine Copula Generator for multi-site monthly streamflow.
 
-Separates marginal distributions from the dependence structure via Sklar's
-theorem.  Marginals are fitted per (calendar-month, site) -- either
-parametrically (gamma / log-normal, selected by BIC) or empirically (Hazen
-plotting position).  Spatial dependence is captured by the copula correlation
-matrix estimated from PAR(1) residuals in normal-score space.  Temporal
-dependence is preserved via a Periodic AR(1) model per site per month,
-following the two-stage approach of Pereira et al. (2017).
+Extends the PAR(1)-plus-copula framework by replacing the single elliptical
+copula with a vine copula for richer dependence modelling.  Vine copulas allow
+heterogeneous pairwise dependence (different copula families per site pair) and
+asymmetric tail dependence (e.g., Clayton for lower tail, Gumbel for upper).
 
-The t-copula generalises the Gaussian copula with symmetric tail dependence
-controlled by a degrees-of-freedom parameter.
+Marginals and temporal dependence are identical to GaussianCopulaGenerator:
+per-(month, site) parametric or empirical marginals, with a Periodic AR(1)
+model in normal-score space (Pereira et al. 2017).  Spatial dependence among
+the PAR(1) residuals is modelled by a monthly-periodic vine copula fitted
+via the Dissmann algorithm (pyvinecopulib).
 
 References
 ----------
-Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know
-    about copula modeling but were afraid to ask. Journal of Hydrologic
-    Engineering, 12(4), 347-368.
-Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based
-    method for multisite monthly and daily streamflow simulation. Journal of
-    Hydrology, 526, 360-381.
+Yu, X., Xu, Y.-P., Guo, Y., Chen, S., and Gu, H. (2025). Synchronization
+    frequency analysis and stochastic simulation of multi-site flood flows
+    based on the complicated vine copula structure. Hydrology and Earth System
+    Sciences, 29, 179-214. https://doi.org/10.5194/hess-29-179-2025
+Wang, X., and Shen, Y.-M. (2023). R-statistic based predictor variables
+    selection and vine structure determination approach for stochastic
+    streamflow generation. Journal of Hydrology, 617, 129093.
+    https://doi.org/10.1016/j.jhydrol.2023.129093
+Wang, W., Dong, Z., Zhang, T., Ren, L., Xue, L., Wu, T. (2024). Mixed
+    D-vine copula-based conditional quantile model for stochastic monthly
+    streamflow simulation. Water Science and Engineering, 17(1), 13-20.
+    https://doi.org/10.1016/j.wse.2023.05.004
 Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic
     spatial vine copula model for multi-site streamflow simulation. Electric
     Power Systems Research, 152, 9-17.
-Tootoonchi, F. et al. (2022). Copulas for hydroclimatic analysis: A
-    practice-oriented overview. WIREs Water, 9(2), e1579.
+    https://doi.org/10.1016/j.epsr.2017.06.017
 """
 
 import logging
-from typing import Optional, Dict, List, Tuple, Any
+from typing import Optional, Dict, List, Tuple, Union, Any
+
+# pyvinecopulib must be imported before pandas/pyarrow on Windows to avoid
+# a C++ runtime DLL conflict between pyarrow and pyvinecopulib's C++ layer.
+try:
+    import pyvinecopulib as _pyvinecopulib_preload  # noqa: F401
+except ImportError:
+    pass
 
 import numpy as np
 import pandas as pd
-from scipy.stats import norm, gamma as gamma_dist, lognorm, t as t_dist
+from scipy.stats import norm, gamma as gamma_dist, lognorm
 
 from synhydro.core.base import Generator, FittedParams
 from synhydro.core.ensemble import Ensemble, EnsembleMetadata
-from synhydro.core.statistics import (
-    repair_correlation_matrix,
-    NormalScoreTransform,
-)
+from synhydro.core.statistics import NormalScoreTransform
 
 logger = logging.getLogger(__name__)
 
-# BIC helper
 _LOG2PI = np.log(2.0 * np.pi)
 
 
@@ -52,29 +60,50 @@ def _bic(n: int, neg_loglik: float, k: int) -> float:
     return 2.0 * neg_loglik + k * np.log(n)
 
 
-class GaussianCopulaGenerator(Generator):
-    """Multi-site monthly generator based on elliptical copulas.
+def _require_pyvinecopulib():
+    """Import pyvinecopulib; raise ImportError with install hint if missing."""
+    try:
+        import pyvinecopulib as pv
+    except ImportError:
+        raise ImportError(
+            "pyvinecopulib is required for VineCopulaGenerator. "
+            "Install it with:  pip install synhydro[vine]"
+        ) from None
+    return pv
 
-    Fits per-(month, site) marginal distributions and an n_sites x n_sites
-    copula correlation matrix per calendar month.  Supports Gaussian copula
-    (zero tail dependence) and Student-t copula (symmetric tail dependence).
+
+class VineCopulaGenerator(Generator):
+    """Multi-site monthly generator based on vine copulas.
+
+    Fits per-(month, site) marginal distributions and a vine copula per
+    calendar month on the PAR(1) residuals.  Supports R-vine, C-vine, and
+    D-vine structures with automatic family and structure selection via
+    pyvinecopulib.
 
     Parameters
     ----------
-    copula_type : str, default="gaussian"
-        ``"gaussian"`` or ``"t"``.  The t-copula adds a degrees-of-freedom
-        parameter that controls symmetric tail dependence.
+    vine_type : str, default="rvine"
+        ``"rvine"``, ``"cvine"``, or ``"dvine"``.  Controls the vine tree
+        structure constraint.
+    family_set : str or list of str, default="all"
+        Bivariate copula families to consider.  ``"all"`` uses all available
+        parametric families.  A list of family names can also be provided
+        (e.g., ``["gaussian", "clayton", "gumbel", "frank"]``).
+    selection_criterion : str, default="aic"
+        ``"aic"`` or ``"bic"`` for bivariate copula family selection at
+        each edge.
     marginal_method : str, default="parametric"
         ``"parametric"`` fits gamma and log-normal per (month, site) and
-        selects the winner by BIC.  ``"empirical"`` uses the Hazen plotting-
-        position CDF via :class:`NormalScoreTransform`.
+        selects the winner by BIC.  ``"empirical"`` uses the Hazen
+        plotting-position CDF via :class:`NormalScoreTransform`.
     log_transform : bool, default=False
-        Apply ``log(Q + offset)`` before fitting.  Usually unnecessary
-        with parametric marginals but may help empirical marginals.
+        Apply ``log(Q + offset)`` before fitting.
     offset : float, default=1.0
         Additive offset for the log transform.
-    matrix_repair_method : str, default="spectral"
-        Method passed to :func:`repair_correlation_matrix`.
+    trunc_level : int or None, default=None
+        Truncation level for the vine tree.  ``None`` means no truncation
+        (all trees are fitted).  Setting ``trunc_level=1`` truncates after
+        the first tree, replacing higher trees with independence copulas.
     name : str, optional
         Instance name.
     debug : bool, default=False
@@ -82,61 +111,75 @@ class GaussianCopulaGenerator(Generator):
 
     References
     ----------
-    Genest & Favre (2007), Chen et al. (2015), Tootoonchi et al. (2022).
+    Yu et al. (2025), Wang & Shen (2023), Wang et al. (2024),
+    Pereira et al. (2017).
     """
 
     supports_multisite = True
     supported_frequencies = ("MS",)
 
-    _VALID_COPULAS = ("gaussian", "t")
+    _VALID_VINE_TYPES = ("rvine", "cvine", "dvine")
     _VALID_MARGINALS = ("parametric", "empirical")
+    _VALID_CRITERIA = ("aic", "bic")
 
     def __init__(
         self,
         *,
-        copula_type: str = "gaussian",
+        vine_type: str = "rvine",
+        family_set: Union[str, List[str]] = "all",
+        selection_criterion: str = "aic",
         marginal_method: str = "parametric",
         log_transform: bool = False,
         offset: float = 1.0,
-        matrix_repair_method: str = "spectral",
+        trunc_level: Optional[int] = None,
         name: Optional[str] = None,
         debug: bool = False,
     ) -> None:
         super().__init__(name=name, debug=debug)
 
-        if copula_type not in self._VALID_COPULAS:
+        if vine_type not in self._VALID_VINE_TYPES:
             raise ValueError(
-                f"copula_type must be one of {self._VALID_COPULAS}, "
-                f"got '{copula_type}'"
+                f"vine_type must be one of {self._VALID_VINE_TYPES}, "
+                f"got '{vine_type}'"
             )
         if marginal_method not in self._VALID_MARGINALS:
             raise ValueError(
                 f"marginal_method must be one of {self._VALID_MARGINALS}, "
                 f"got '{marginal_method}'"
             )
+        if selection_criterion not in self._VALID_CRITERIA:
+            raise ValueError(
+                f"selection_criterion must be one of {self._VALID_CRITERIA}, "
+                f"got '{selection_criterion}'"
+            )
 
-        self.copula_type = copula_type
+        self.vine_type = vine_type
+        self.family_set = family_set
+        self.selection_criterion = selection_criterion
         self.marginal_method = marginal_method
         self.log_transform = log_transform
         self.offset = offset
-        self.matrix_repair_method = matrix_repair_method
+        self.trunc_level = trunc_level
 
         self.init_params.algorithm_params = {
-            "method": f"Copula ({copula_type})",
-            "copula_type": copula_type,
+            "method": f"Vine Copula ({vine_type})",
+            "vine_type": vine_type,
+            "family_set": (
+                family_set if isinstance(family_set, str) else list(family_set)
+            ),
+            "selection_criterion": selection_criterion,
             "marginal_method": marginal_method,
             "log_transform": log_transform,
             "offset": offset,
-            "matrix_repair_method": matrix_repair_method,
+            "trunc_level": trunc_level,
         }
 
         # Fitted attributes (populated by fit)
         self._marginal_params: Dict[Tuple[int, int], Dict[str, Any]] = {}
         self._nst: Optional[NormalScoreTransform] = None
-        self._monthly_correlations: Dict[int, np.ndarray] = {}
-        self._monthly_cholesky: Dict[int, np.ndarray] = {}
-        self._df: Optional[float] = None  # t-copula degrees of freedom
+        self._monthly_vines: Dict[int, Any] = {}  # month -> pv.Vinecop or None
         self._Q_monthly: Optional[pd.DataFrame] = None
+        self._par_rho: Dict[Tuple[int, int], float] = {}
 
     # ------------------------------------------------------------------
     # Properties
@@ -147,7 +190,7 @@ class GaussianCopulaGenerator(Generator):
         return "MS"
 
     # ------------------------------------------------------------------
-    # Preprocessing
+    # Preprocessing (shared with GaussianCopulaGenerator)
     # ------------------------------------------------------------------
 
     def preprocessing(
@@ -179,8 +222,8 @@ class GaussianCopulaGenerator(Generator):
 
         if self._n_sites == 1:
             self.logger.warning(
-                "Only 1 site provided. The copula correlation matrix is "
-                "trivially [1]. Consider a univariate generator instead."
+                "Only 1 site provided. Vine copula dependence structure is "
+                "trivial. Consider a univariate generator instead."
             )
 
         # Optional log transform
@@ -196,7 +239,7 @@ class GaussianCopulaGenerator(Generator):
         )
 
     # ------------------------------------------------------------------
-    # Marginal fitting helpers
+    # Marginal fitting helpers (shared with GaussianCopulaGenerator)
     # ------------------------------------------------------------------
 
     def _fit_parametric_marginals(self) -> None:
@@ -207,12 +250,10 @@ class GaussianCopulaGenerator(Generator):
         for m in range(1, 13):
             mask = Q.index.month == m
             month_data = Q.loc[mask]
-            n = len(month_data)
 
             for s_idx, site in enumerate(self._sites):
                 vals = month_data[site].values
                 vals = vals[np.isfinite(vals)]
-                # Ensure strictly positive for gamma/lognorm fitting
                 vals_pos = np.maximum(vals, 1e-6)
 
                 best_bic = np.inf
@@ -297,7 +338,6 @@ class GaussianCopulaGenerator(Generator):
         for m in range(1, 13):
             mask = Q.index.month == m
             month_data = Q.loc[mask].values  # (n_years, n_sites)
-            n_years = month_data.shape[0]
             z = np.zeros_like(month_data)
 
             for s_idx in range(self._n_sites):
@@ -341,7 +381,7 @@ class GaussianCopulaGenerator(Generator):
         return scores_by_month
 
     # ------------------------------------------------------------------
-    # PAR(1) temporal model (Pereira et al. 2017)
+    # PAR(1) temporal model (shared with GaussianCopulaGenerator)
     # ------------------------------------------------------------------
 
     def _fit_par_residuals(
@@ -363,26 +403,23 @@ class GaussianCopulaGenerator(Generator):
         -------
         Dict[int, np.ndarray]
             PAR residuals per month, shape (n_years, n_sites).
-            One fewer year than input for months that reference the
-            previous month's data.
         """
-        self._par_rho = {}  # (month, site_idx) -> float
+        self._par_rho = {}
 
         # Compute lag-1 autocorrelation for each month transition
         for m in range(1, 13):
             m_prev = 12 if m == 1 else m - 1
-            z_curr = scores_by_month[m]  # (n_years, n_sites)
-            z_prev = scores_by_month[m_prev]  # (n_years, n_sites)
+            z_curr = scores_by_month[m]
+            z_prev = scores_by_month[m_prev]
 
             # Align: for Jan(m=1), pair with Dec of previous year
             if m == 1:
-                z_prev = z_prev[:-1]  # Dec years 0..T-2
-                z_curr = z_curr[1:]  # Jan years 1..T-1
+                z_prev = z_prev[:-1]
+                z_curr = z_curr[1:]
                 n_min = min(len(z_prev), len(z_curr))
                 z_prev = z_prev[:n_min]
                 z_curr = z_curr[:n_min]
             else:
-                # Same year alignment
                 n_min = min(len(z_curr), len(z_prev))
                 z_curr = z_curr[:n_min]
                 z_prev = z_prev[:n_min]
@@ -400,7 +437,7 @@ class GaussianCopulaGenerator(Generator):
                     rho = 0.0
                 self._par_rho[(m, s)] = rho
 
-        # Compute PAR residuals: e[t] = (z[t] - rho * z[t-1]) / sqrt(1 - rho^2)
+        # Compute PAR residuals
         residuals_by_month: Dict[int, np.ndarray] = {}
         for m in range(1, 13):
             m_prev = 12 if m == 1 else m - 1
@@ -429,80 +466,98 @@ class GaussianCopulaGenerator(Generator):
         return residuals_by_month
 
     # ------------------------------------------------------------------
-    # t-copula df estimation
+    # Vine copula helpers
     # ------------------------------------------------------------------
 
-    def _estimate_t_df(self, scores_by_month: Dict[int, np.ndarray]) -> float:
-        """Estimate t-copula degrees of freedom via profile likelihood.
-
-        Grid search over df in [2, 50].  For each df, compute the
-        multivariate-t log-likelihood across all months and pick the
-        maximum.
-
-        Parameters
-        ----------
-        scores_by_month : Dict[int, np.ndarray]
-            Normal scores per month, shape (n_years, n_sites).
+    def _resolve_family_set(self) -> list:
+        """Resolve family_set parameter to pyvinecopulib BicopFamily enums.
 
         Returns
         -------
-        float
-            Estimated degrees of freedom.
+        list
+            List of pyvinecopulib.BicopFamily members.
         """
-        from scipy.special import gammaln
+        pv = _require_pyvinecopulib()
 
-        df_grid = np.concatenate(
-            [
-                np.arange(2, 10, 1),
-                np.arange(10, 52, 2),
-            ]
-        )
-        best_ll = -np.inf
-        best_df = 5.0
-        p = self._n_sites
+        FAMILY_MAP = {
+            "gaussian": pv.BicopFamily.gaussian,
+            "student_t": pv.BicopFamily.student,
+            "student": pv.BicopFamily.student,
+            "t": pv.BicopFamily.student,
+            "clayton": pv.BicopFamily.clayton,
+            "gumbel": pv.BicopFamily.gumbel,
+            "frank": pv.BicopFamily.frank,
+            "joe": pv.BicopFamily.joe,
+            "bb1": pv.BicopFamily.bb1,
+            "bb6": pv.BicopFamily.bb6,
+            "bb7": pv.BicopFamily.bb7,
+            "bb8": pv.BicopFamily.bb8,
+            "independence": pv.BicopFamily.indep,
+            "tll": pv.BicopFamily.tll,
+        }
 
-        for df in df_grid:
-            total_ll = 0.0
-            for m in range(1, 13):
-                z = scores_by_month[m]  # (n_years, p)
-                R = self._monthly_correlations[m]
-                try:
-                    L = np.linalg.cholesky(R)
-                except np.linalg.LinAlgError:
-                    continue
+        ALL_PARAMETRIC = [
+            pv.BicopFamily.gaussian,
+            pv.BicopFamily.student,
+            pv.BicopFamily.clayton,
+            pv.BicopFamily.gumbel,
+            pv.BicopFamily.frank,
+            pv.BicopFamily.joe,
+            pv.BicopFamily.bb1,
+            pv.BicopFamily.bb6,
+            pv.BicopFamily.bb7,
+            pv.BicopFamily.bb8,
+            pv.BicopFamily.indep,
+        ]
 
-                log_det_R = 2.0 * np.sum(np.log(np.diag(L)))
-                n_years = z.shape[0]
-
-                for i in range(n_years):
-                    x = z[i]
-                    # Mahalanobis distance
-                    v = np.linalg.solve(L, x)
-                    quad = float(np.dot(v, v))
-
-                    # Multivariate t log-density (unnormalized by constant)
-                    ll_i = (
-                        gammaln((df + p) / 2.0)
-                        - gammaln(df / 2.0)
-                        - 0.5 * p * np.log(df * np.pi)
-                        - 0.5 * log_det_R
-                        - ((df + p) / 2.0) * np.log(1.0 + quad / df)
+        if self.family_set == "all":
+            return ALL_PARAMETRIC
+        elif isinstance(self.family_set, list):
+            families = []
+            for name in self.family_set:
+                key = name.lower()
+                if key not in FAMILY_MAP:
+                    raise ValueError(
+                        f"Unknown copula family '{name}'. "
+                        f"Available: {list(FAMILY_MAP.keys())}"
                     )
-                    total_ll += ll_i
+                families.append(FAMILY_MAP[key])
+            return families
+        else:
+            raise ValueError(
+                f"family_set must be 'all' or a list of family names, "
+                f"got '{self.family_set}'"
+            )
 
-            if total_ll > best_ll:
-                best_ll = total_ll
-                best_df = float(df)
+    def _build_structure(self, n_sites: int):
+        """Build a vine structure constraint for the given vine_type.
 
-        self.logger.info("Estimated t-copula df = %.1f", best_df)
-        return best_df
+        Parameters
+        ----------
+        n_sites : int
+            Number of variables.
+
+        Returns
+        -------
+        pyvinecopulib structure or None
+            Structure constraint, or None for R-vine (auto-selected).
+        """
+        pv = _require_pyvinecopulib()
+        order = list(range(1, n_sites + 1))
+
+        if self.vine_type == "dvine":
+            return pv.DVineStructure(order=order)
+        elif self.vine_type == "cvine":
+            return pv.CVineStructure(order=order)
+        else:
+            return None  # R-vine: auto structure selection
 
     # ------------------------------------------------------------------
     # Fit
     # ------------------------------------------------------------------
 
     def fit(self, Q_obs=None, *, sites=None, **kwargs) -> None:
-        """Fit marginal distributions and copula correlation structure.
+        """Fit marginal distributions and vine copula dependence structure.
 
         Parameters
         ----------
@@ -511,11 +566,13 @@ class GaussianCopulaGenerator(Generator):
         sites : list of str, optional
             Sites to use.
         """
+        pv = _require_pyvinecopulib()
+
         if Q_obs is not None:
             self.preprocessing(Q_obs, sites=sites)
         self.validate_preprocessing()
 
-        # Step 1: Fit marginals
+        # Step 1: Fit marginals (identical to GaussianCopulaGenerator)
         if self.marginal_method == "parametric":
             self._fit_parametric_marginals()
         else:
@@ -524,44 +581,62 @@ class GaussianCopulaGenerator(Generator):
         # Step 2: PIT + normal score transform
         scores_by_month = self._pit_to_normal()
 
-        # Step 3: Fit PAR(1) temporal model (Pereira et al. 2017)
-        # Removes temporal dependence; residuals capture spatial structure only
+        # Step 3: PAR(1) temporal model (Pereira et al. 2017)
         residuals_by_month = self._fit_par_residuals(scores_by_month)
 
-        # Step 4: Correlation matrices on PAR residuals per month
-        self._monthly_correlations = {}
-        self._monthly_cholesky = {}
+        # Step 4: Vine copula on PAR residuals per month
+        family_set = self._resolve_family_set()
+        structure = self._build_structure(self._n_sites)
 
+        controls_kwargs: Dict[str, Any] = {
+            "family_set": family_set,
+            "selection_criterion": self.selection_criterion,
+        }
+        if self.trunc_level is not None:
+            controls_kwargs["trunc_lvl"] = self.trunc_level
+
+        controls = pv.FitControlsVinecop(**controls_kwargs)
+
+        self._monthly_vines = {}
         for m in range(1, 13):
-            e = residuals_by_month[m]  # (n_years-1, n_sites)
+            e = residuals_by_month[m]  # (n_years, n_sites)
 
             if self._n_sites == 1:
-                corr = np.array([[1.0]])
-            else:
-                corr = np.corrcoef(e, rowvar=False)
-                corr = repair_correlation_matrix(corr, method=self.matrix_repair_method)
+                self._monthly_vines[m] = None
+                self.logger.debug("Month %d: single site, skipping vine", m)
+                continue
 
-            self._monthly_correlations[m] = corr
+            # Transform PAR residuals to uniform [0,1] via standard normal CDF
+            u = norm.cdf(e)
+            u = np.clip(u, 1e-6, 1.0 - 1e-6)
 
             try:
-                L = np.linalg.cholesky(corr)
-            except np.linalg.LinAlgError:
-                corr = repair_correlation_matrix(corr, method="spectral")
-                L = np.linalg.cholesky(corr)
-                self._monthly_correlations[m] = corr
-
-            self._monthly_cholesky[m] = L
-
-        # Step 5: t-copula df estimation (on residuals)
-        if self.copula_type == "t":
-            self._df = self._estimate_t_df(residuals_by_month)
+                vine = pv.Vinecop.from_data(u, controls=controls, structure=structure)
+                self._monthly_vines[m] = vine
+                self.logger.info(
+                    "Month %d: fitted %s vine with %d parameters "
+                    "on %d obs x %d sites",
+                    m,
+                    self.vine_type,
+                    int(vine.npars),
+                    u.shape[0],
+                    u.shape[1],
+                )
+            except Exception as exc:
+                self.logger.warning(
+                    "Vine fitting failed for month %d: %s. "
+                    "Falling back to independence copula.",
+                    m,
+                    exc,
+                )
+                self._monthly_vines[m] = None
 
         self.update_state(fitted=True)
         self.fitted_params_ = self._compute_fitted_params()
 
         self.logger.info(
-            "Fit complete: copula=%s, marginals=%s, %d sites",
-            self.copula_type,
+            "Fit complete: vine=%s, marginals=%s, %d sites",
+            self.vine_type,
             self.marginal_method,
             self._n_sites,
         )
@@ -623,7 +698,8 @@ class GaussianCopulaGenerator(Generator):
             n_realizations=n_realizations,
             n_sites=self._n_sites,
             description=(
-                f"Copula ({self.copula_type}) with " f"{self.marginal_method} marginals"
+                f"Vine Copula ({self.vine_type}) with "
+                f"{self.marginal_method} marginals"
             ),
         )
 
@@ -653,37 +729,34 @@ class GaussianCopulaGenerator(Generator):
         n_months = n_years * 12
         Q = np.zeros((n_months, n_sites))
 
-        # Track normal scores for PAR(1) temporal recursion
-        z_prev = np.zeros(n_sites)  # z[t-1] in normal-score space
+        z_prev = np.zeros(n_sites)
 
         for t in range(n_months):
             m = (t % 12) + 1  # calendar month 1-12
-            L = self._monthly_cholesky[m]
 
-            # Draw independent samples (copula innovations)
-            if self.copula_type == "t":
-                eps = t_dist.rvs(df=self._df, size=n_sites, random_state=rng)
+            vine = self._monthly_vines.get(m)
+
+            if vine is not None and n_sites > 1:
+                # Draw from vine copula in uniform space
+                vine_seed = int(rng.integers(0, 2**31))
+                u_new = vine.simulate(1, seeds=[vine_seed])  # (1, n_sites)
+                # Transform uniform to normal: these are the PAR residuals
+                e = norm.ppf(np.clip(u_new[0], 1e-8, 1.0 - 1e-8))
             else:
-                eps = rng.standard_normal(n_sites)
+                # Independence fallback (single site or failed fit)
+                e = rng.standard_normal(n_sites)
 
-            # Impose spatial correlation on residuals via Cholesky
-            e_spatial = L @ eps
-
-            # PAR(1) temporal recursion (Pereira et al. 2017):
-            # z[t] = rho_m * z[t-1] + sqrt(1 - rho_m^2) * e[t]
+            # PAR(1) temporal recursion
             z = np.zeros(n_sites)
             for s_idx in range(n_sites):
                 rho = self._par_rho.get((m, s_idx), 0.0)
                 scale = np.sqrt(max(1.0 - rho**2, 1e-6))
-                z[s_idx] = rho * z_prev[s_idx] + scale * e_spatial[s_idx]
+                z[s_idx] = rho * z_prev[s_idx] + scale * e[s_idx]
 
             z_prev = z.copy()
 
-            # Map from normal-score space to original marginal space
-            if self.copula_type == "t":
-                u = t_dist.cdf(z, df=self._df)
-            else:
-                u = norm.cdf(z)
+            # Map from normal-score space to uniform
+            u = norm.cdf(z)
 
             # Inverse marginal CDF
             for s_idx in range(n_sites):
@@ -729,29 +802,55 @@ class GaussianCopulaGenerator(Generator):
 
     def _compute_fitted_params(self) -> FittedParams:
         n = self._n_sites
-        # Parameters per month: n marginal (2 each) + n(n-1)/2 corr + n PAR rho
-        n_marginal = 12 * n * 2
-        n_corr = 12 * n * (n - 1) // 2
+        n_marginal = 12 * n * 2  # shape + scale per (month, site)
         n_par = 12 * n  # PAR(1) rho per month per site
-        n_df = 1 if self.copula_type == "t" else 0
-        n_params = n_marginal + n_corr + n_par + n_df
+
+        # Vine copula parameters: count across all months
+        n_vine_params = 0
+        for m in range(1, 13):
+            vine = self._monthly_vines.get(m)
+            if vine is not None:
+                n_vine_params += int(vine.npars)
+
+        n_params = n_marginal + n_par + n_vine_params
 
         training_period = (
             str(self._Q_monthly.index[0].date()),
             str(self._Q_monthly.index[-1].date()),
         )
 
+        # Build vine summary for diagnostics
+        vine_summaries = {}
+        for m in range(1, 13):
+            vine = self._monthly_vines.get(m)
+            if vine is not None:
+                vine_summaries[f"month_{m}"] = {
+                    "n_params": int(vine.npars),
+                    "trunc_level": vine.trunc_lvl,
+                }
+            else:
+                vine_summaries[f"month_{m}"] = {
+                    "n_params": 0,
+                    "trunc_level": 0,
+                }
+
         return FittedParams(
             means_=None,
             stds_=None,
-            correlations_={m: self._monthly_correlations[m] for m in range(1, 13)},
+            correlations_=None,
             distributions_={
-                "copula_type": self.copula_type,
+                "vine_type": self.vine_type,
+                "family_set": (
+                    self.family_set
+                    if isinstance(self.family_set, str)
+                    else list(self.family_set)
+                ),
+                "selection_criterion": self.selection_criterion,
                 "marginal_method": self.marginal_method,
                 "marginal_params": {
                     str(k): v for k, v in self._marginal_params.items()
                 },
-                "df": self._df,
+                "vine_summaries": vine_summaries,
             },
             transformations_={
                 "log_transform": self.log_transform,

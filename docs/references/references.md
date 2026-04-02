@@ -22,6 +22,15 @@ Tootoonchi, F., Haerter, J.O., Todsen, A., Whan, K., Laux, P., and Sadegh, M. (2
 
 Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic spatial vine copula model for multi-site streamflow simulation. *Electric Power Systems Research*, 152, 9-17. https://doi.org/10.1016/j.epsr.2017.06.017
 
+**Vine Copula-Based Multivariate Streamflow Generation**
+Yu, X., Xu, Y.-P., Guo, Y., Chen, S., and Gu, H. (2025). Synchronization frequency analysis and stochastic simulation of multi-site flood flows based on the complicated vine copula structure. *Hydrology and Earth System Sciences*, 29, 179-214. https://doi.org/10.5194/hess-29-179-2025
+
+Wang, X., and Shen, Y.-M. (2023). R-statistic based predictor variables selection and vine structure determination approach for stochastic streamflow generation. *Journal of Hydrology*, 617, 129093. https://doi.org/10.1016/j.jhydrol.2023.129093
+
+Wang, W., Dong, Z., Zhang, T., Ren, L., Xue, L., Wu, T. (2024). Mixed D-vine copula-based conditional quantile model for stochastic monthly streamflow simulation. *Water Science and Engineering*, 17(1), 13-20. https://doi.org/10.1016/j.wse.2023.05.004
+
+Czado, C., and Nagler, T. (2022). Vine copula based modeling. *Annual Review of Statistics and Its Application*, 9, 453-477.
+
 **Stedinger-Taylor Normalization** (used in Thomas-Fiering)
 Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. *Water Resources Research*, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909
 

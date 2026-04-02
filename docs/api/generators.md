@@ -36,6 +36,12 @@
 
 ---
 
+## VineCopulaGenerator
+
+::: synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator
+
+---
+
 ## WARMGenerator
 
 ::: synhydro.methods.generation.parametric.warm.WARMGenerator

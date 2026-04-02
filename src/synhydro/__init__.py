@@ -7,6 +7,13 @@ statistical preservation and hydrologic applications.
 
 __version__ = "0.0.2"
 
+# pyvinecopulib must be imported before pandas/pyarrow on Windows to avoid
+# a C++ runtime DLL conflict.  Load it eagerly here, before any pandas import.
+try:
+    import pyvinecopulib as _pyvinecopulib_preload  # noqa: F401
+except ImportError:
+    pass
+
 # Core utilities
 from synhydro.core import (
     Generator,
@@ -53,6 +60,9 @@ from synhydro.methods.generation.parametric.gaussian_copula import (
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.matalas import MATALASGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
+from synhydro.methods.generation.parametric.vine_copula import (
+    VineCopulaGenerator,
+)
 from synhydro.methods.generation.parametric.warm import WARMGenerator
 
 # Disaggregators
@@ -85,6 +95,7 @@ __all__ = [
     "ThomasFieringGenerator",
     "MATALASGenerator",
     "MultiSiteHMMGenerator",
+    "VineCopulaGenerator",
     "WARMGenerator",
     # Individual disaggregators
     "NowakDisaggregator",

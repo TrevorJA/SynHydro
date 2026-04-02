@@ -15,6 +15,7 @@ SynHydro implements the following stochastic generation and disaggregation metho
 | [ARFIMA](arfima.md) | `ARFIMAGenerator` | Parametric | Monthly/Annual | Single |
 | [KNN Bootstrap](knn_bootstrap.md) | `KNNBootstrapGenerator` | Nonparametric | Monthly/Annual | Single/Multi |
 | [Gaussian/t-Copula](gaussian_copula.md) | `GaussianCopulaGenerator` | Parametric | Monthly | Multi |
+| [Vine Copula](vine_copula.md) | `VineCopulaGenerator` | Parametric | Monthly | Multi |
 
 ## Disaggregation Methods
 
@@ -26,14 +27,14 @@ SynHydro implements the following stochastic generation and disaggregation metho
 
 ## Key Properties Preserved
 
-| Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap | Copula |
-|----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Monthly means/stds | x | x | x | - | - | - | x | x | x |
-| Temporal correlation | x | x | x | x | x | x | x | x | x |
-| Spatial correlation | - | x | x | - | - | x | - | x | x |
-| Long-range persistence | - | - | - | - | x | - | x | - | - |
-| Non-stationarity | - | - | - | - | x | - | - | - | - |
-| Drought states | - | - | - | - | - | x | - | - | - |
-| Power spectrum | - | - | - | x | x | - | x | - | - |
-| Empirical distribution | - | x | - | - | - | - | - | x | x |
-| Tail dependence | - | - | - | - | - | - | - | - | x (t-copula) |
+| Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap | Copula | Vine Copula |
+|----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Monthly means/stds | x | x | x | - | - | - | x | x | x | x |
+| Temporal correlation | x | x | x | x | x | x | x | x | x | x |
+| Spatial correlation | - | x | x | - | - | x | - | x | x | x |
+| Long-range persistence | - | - | - | - | x | - | x | - | - | - |
+| Non-stationarity | - | - | - | - | x | - | - | - | - | - |
+| Drought states | - | - | - | - | - | x | - | - | - | - |
+| Power spectrum | - | - | - | x | x | - | x | - | - | - |
+| Empirical distribution | - | x | - | - | - | - | - | x | x | x |
+| Tail dependence | - | - | - | - | - | - | - | - | x (t-copula) | x (asymmetric) |
