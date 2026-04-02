@@ -12,6 +12,12 @@
 
 ---
 
+## KNNBootstrapGenerator
+
+::: synhydro.methods.generation.nonparametric.knn_bootstrap.KNNBootstrapGenerator
+
+---
+
 ## PhaseRandomizationGenerator
 
 ::: synhydro.methods.generation.nonparametric.phase_randomization.PhaseRandomizationGenerator
@@ -36,12 +42,24 @@
 
 ---
 
-## VineCopulaGenerator
-
-::: synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator
-
----
-
 ## WARMGenerator
 
 ::: synhydro.methods.generation.parametric.warm.WARMGenerator
+
+---
+
+## ARFIMAGenerator
+
+::: synhydro.methods.generation.parametric.arfima.ARFIMAGenerator
+
+---
+
+## GaussianCopulaGenerator
+
+::: synhydro.methods.generation.parametric.gaussian_copula.GaussianCopulaGenerator
+
+---
+
+## VineCopulaGenerator
+
+::: synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator

@@ -98,12 +98,17 @@ nav:
     - Overview: algorithms/index.md
     - Thomas-Fiering AR(1): algorithms/thomas_fiering.md
     - Kirsch Bootstrap: algorithms/kirsch.md
+    - KNN Bootstrap: algorithms/knn_bootstrap.md
     - Matalas MAR(1): algorithms/matalas.md
     - Phase Randomization: algorithms/phase_randomization.md
     - WARM: algorithms/warm.md
     - Multi-Site HMM: algorithms/multisite_hmm.md
+    - ARFIMA: algorithms/arfima.md
+    - Gaussian/t-Copula: algorithms/gaussian_copula.md
     - Vine Copula: algorithms/vine_copula.md
     - Nowak Disaggregation: algorithms/nowak_disaggregation.md
+    - Valencia-Schaake: algorithms/valencia_schaake.md
+    - Grygier-Stedinger: algorithms/grygier_stedinger.md
   - API Reference:
     - Generators: api/generators.md
     - Disaggregators & Pipelines: api/disaggregators.md
