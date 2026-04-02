@@ -548,12 +548,14 @@ class Ensemble:
                 for site, site_df in self.data_by_site.items():
                     grp = f.create_group(str(site))
 
-                    # Store metadata
-                    grp.attrs["column_labels"] = list(site_df.columns)
+                    # Store column_labels as strings so downstream readers
+                    # (e.g. pywrdrb) can compare with str realization IDs
+                    grp.attrs["column_labels"] = [str(c) for c in site_df.columns]
 
-                    # Store dates as int64 nanosecond timestamps (fast I/O)
-                    dates_ns = site_df.index.astype(np.int64)
-                    grp.create_dataset("date", data=dates_ns, compression=compression)
+                    # Store dates as ISO-format strings so pd.to_datetime(str) works.
+                    # Pass a Python list so h5py stores as variable-length UTF-8 (not bytes).
+                    dates_list = site_df.index.strftime('%Y-%m-%d').tolist()
+                    grp.create_dataset("date", data=dates_list, compression=compression)
 
                     # Store each realization's data for this site
                     for col in site_df.columns:
@@ -565,12 +567,13 @@ class Ensemble:
                 for real_id, real_df in self.data_by_realization.items():
                     grp = f.create_group(str(real_id))
 
-                    # Store metadata
-                    grp.attrs["column_labels"] = list(real_df.columns)
+                    # Store column_labels as strings
+                    grp.attrs["column_labels"] = [str(c) for c in real_df.columns]
 
-                    # Store dates as int64 nanosecond timestamps (fast I/O)
-                    dates_ns = real_df.index.astype(np.int64)
-                    grp.create_dataset("date", data=dates_ns, compression=compression)
+                    # Store dates as ISO-format strings
+                    dates_str = real_df.index.strftime('%Y-%m-%d').values
+                    grp.create_dataset("date", data=dates_str.astype(h5py.string_dtype()),
+                                       compression=compression)
 
                     # Store each site's data for this realization
                     for col in real_df.columns:
