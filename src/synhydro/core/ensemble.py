@@ -438,7 +438,10 @@ class Ensemble:
 
                 # Determine which realizations to load
                 if realization_subset is not None:
-                    missing = [r for r in realization_subset if r not in column_labels]
+                    str_labels = [str(c) for c in column_labels]
+                    missing = [
+                        r for r in realization_subset if str(r) not in str_labels
+                    ]
                     if missing:
                         raise ValueError(
                             f"Realizations {missing} not found in HDF5 file"
@@ -554,7 +557,7 @@ class Ensemble:
 
                     # Store dates as ISO-format strings so pd.to_datetime(str) works.
                     # Pass a Python list so h5py stores as variable-length UTF-8 (not bytes).
-                    dates_list = site_df.index.strftime('%Y-%m-%d').tolist()
+                    dates_list = site_df.index.strftime("%Y-%m-%d").tolist()
                     grp.create_dataset("date", data=dates_list, compression=compression)
 
                     # Store each realization's data for this site
@@ -571,9 +574,12 @@ class Ensemble:
                     grp.attrs["column_labels"] = [str(c) for c in real_df.columns]
 
                     # Store dates as ISO-format strings
-                    dates_str = real_df.index.strftime('%Y-%m-%d').values
-                    grp.create_dataset("date", data=dates_str.astype(h5py.string_dtype()),
-                                       compression=compression)
+                    dates_str = real_df.index.strftime("%Y-%m-%d").values
+                    grp.create_dataset(
+                        "date",
+                        data=dates_str.astype(h5py.string_dtype()),
+                        compression=compression,
+                    )
 
                     # Store each site's data for this realization
                     for col in real_df.columns:

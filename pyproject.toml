@@ -31,23 +31,19 @@ dependencies = [
     "seaborn>=0.13",
     "spei",
     "h5py>=3.16",
+    "pyvinecopulib>=0.7.5",
 ]
 
 [project.optional-dependencies]
-vine = [
-    "pyvinecopulib>=0.7.5",
-]
 dev = [
     "ipython",
     "pygeohydro",
     "pytest",
     "pytest-cov",
-    "pyvinecopulib>=0.7.5",
 ]
 test = [
     "pytest",
     "pytest-cov",
-    "pyvinecopulib>=0.7.5",
 ]
 lint = [
     "pre-commit>=2.20.0",
