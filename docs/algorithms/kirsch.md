@@ -1,83 +1,100 @@
-# Kirsch (2013) Monthly Bootstrap Generator
+# Kirsch Monthly Bootstrap (Kirsch et al., 2013)
 
 | | |
 |---|---|
 | **Type** | Nonparametric |
 | **Resolution** | Monthly |
 | **Sites** | Multisite |
-| **Class** | `KirschGenerator` |
 
 ## Overview
 
-The Kirsch method generates synthetic multi-site monthly streamflow by bootstrapping standardized residuals and imposing fitted correlation structure via Cholesky decomposition. A cross-year shifted matrix preserves December-to-January correlations. An optional normal score transform prevents bias when working in log-space.
+The Kirsch method generates synthetic multi-site monthly streamflow by bootstrapping standardized residuals and imposing fitted temporal and spatial correlation structure through Cholesky decomposition. A cross-year shifted matrix construction preserves December-to-January continuity. An optional normal score transform reduces bias when operating in log-transformed space. The method is nonparametric in that the generated values are drawn from the historical record rather than from a parametric distribution.
 
-## Algorithm
+## Notation
 
-### Preprocessing
+| Symbol | Description |
+|--------|-------------|
+| $Q_{y,m,s}$ | Observed monthly flow for year $y$, month $m$, site $s$ |
+| $\hat{Q}_{y,m,s}$ | Synthetic monthly flow |
+| $\mu_{m,s}$ | Sample mean of flows at site $s$ in month $m$ |
+| $\sigma_{m,s}$ | Sample standard deviation of flows at site $s$ in month $m$ |
+| $Z_{y,m,s}$ | Standardized residual |
+| $Y_{y,m,s}$ | Normal score-transformed residual |
+| $\mathbf{Y}^{(s)} \in \mathbb{R}^{N \times 12}$ | Matrix of normal scores for site $s$ (years by months) |
+| $\mathbf{Y}'^{(s)}$ | Cross-year shifted matrix for site $s$ |
+| $\mathbf{R}^{(s)}, \mathbf{R}'^{(s)}$ | $12 \times 12$ correlation matrices of $\mathbf{Y}^{(s)}$ and $\mathbf{Y}'^{(s)}$ |
+| $\mathbf{U}^{(s)}$ | Upper Cholesky factor, $\mathbf{R}^{(s)} = (\mathbf{U}^{(s)})^\top \mathbf{U}^{(s)}$ |
+| $N$ | Number of complete years in the record |
+| $S$ | Number of sites |
 
-1. **Aggregate to monthly** - group by (year, month) and sum.
-2. **Optional log transform** - if `generate_using_log_flow=True`, apply `log(Q)` (clipped at 1e-6).
+## Formulation
 
-### Fitting
+### Standardization and Normal Score Transform
 
-1. **Monthly statistics** - for each month m and site s, compute mean and standard deviation.
-2. **Standardized residuals**:
-   ```
-   Z_h[y, m, s] = (Q[y, m, s] - mean[m, s]) / std[m, s]
-   ```
-3. **Normal score transform** (if log-flow) - for each month-site pair:
-   - Rank residuals, map to normal quantiles via Hazen plotting positions
-   - Store mapping for inverse transform during generation
-   - Result: `Y` in standard normal space
-4. **Cross-year shifted matrix** `Y_prime` - preserves inter-year correlations:
-   ```
-   Y_prime[:, 0:6, :]  = Y[:-1, 6:12, :]   # Jul-Dec of year i
-   Y_prime[:, 6:12, :] = Y[1:, 0:6, :]      # Jan-Jun of year i+1
-   ```
-5. **Cholesky decomposition** - for each site, compute 12x12 correlation matrix of Y (and Y_prime), repair if not PSD (spectral method), then Cholesky factor.
+Monthly flows are first (optionally) log-transformed: $Q' = \ln(\max(Q, 10^{-6}))$. Standardized residuals are computed for each year $y$, month $m$, and site $s$:
 
-### Generation
+$$
+Z_{y,m,s} = \frac{Q'_{y,m,s} - \mu_{m,s}}{\sigma_{m,s}}
+$$
 
-1. **Bootstrap** - sample random year indices for each (year, month) position.
-2. **Cholesky mixing** - multiply bootstrap samples by Cholesky factor to impose correlation:
-   ```
-   Z[:, :, s] = X[:, :, s] @ U[s]
-   ```
-3. **Combine** Z and Z_prime to preserve intra-year correlations:
-   ```
-   ZC[i, 0:6, :]  = Z_prime[i, 6:12, :]    # first half from shifted
-   ZC[i, 6:12, :] = Z[i+1, 6:12, :]         # second half from regular
-   ```
-4. **Inverse normal score transform** (if log-flow) - map back using stored mappings with linear tail extrapolation.
-5. **Destandardize**: `Q_syn = ZC * std[m] + mean[m]`
-6. **Back-transform** from log space if applicable: `Q_syn = exp(Q_syn)`
+When operating in log space, a normal score transform (NST) is applied to each $(m, s)$ pair. The residuals are ranked, mapped to Hazen plotting positions $p_i = (i - 0.5)/n$, and converted to standard normal quantiles:
 
-## Parameters
+$$
+Y_{y,m,s} = \Phi^{-1}\!\left(\frac{r(Z_{y,m,s}) - 0.5}{N}\right)
+$$
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `Q_obs` | `pd.DataFrame` | - | Observed multi-site streamflow with DatetimeIndex |
-| `generate_using_log_flow` | `bool` | `True` | Log-transform before processing (recommended for skewed data) |
-| `matrix_repair_method` | `str` | `'spectral'` | Method for repairing non-PSD correlation matrices |
-| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
-| `debug` | `bool` | `False` | Enable debug logging |
+where $r(\cdot)$ denotes the rank among the $N$ values and $\Phi^{-1}$ is the standard normal inverse CDF.
 
-## Properties Preserved
+### Cross-Year Shifted Matrix
 
-- Monthly means and standard deviations (per site)
-- Spatial cross-site correlations (via Cholesky decomposition)
-- Intra-annual temporal correlation (within and across year boundaries)
-- Empirical marginal distributions (nonparametric)
+To preserve inter-annual correlation (particularly the December-January transition), a shifted matrix $\mathbf{Y}'^{(s)}$ is constructed for each site $s$:
 
-**Not preserved:**
-- Values outside observed range (bootstrap limitation, except via NST tail extrapolation)
+$$
+\mathbf{Y}'^{(s)}_{y,\,1:6} = \mathbf{Y}^{(s)}_{y,\,7:12}, \qquad \mathbf{Y}'^{(s)}_{y,\,7:12} = \mathbf{Y}^{(s)}_{y+1,\,1:6}
+$$
+
+This re-indexes the data so that July-December of year $y$ is paired with January-June of year $y+1$, enabling the Cholesky factor to capture cross-year correlations.
+
+### Cholesky Decomposition
+
+For each site $s$, the $12 \times 12$ sample correlation matrices $\mathbf{R}^{(s)}$ and $\mathbf{R}'^{(s)}$ are computed from $\mathbf{Y}^{(s)}$ and $\mathbf{Y}'^{(s)}$ respectively. If either matrix is not positive definite, it is repaired via spectral projection (negative eigenvalues are set to zero and the matrix is rescaled to unit diagonal). The upper Cholesky factors $\mathbf{U}^{(s)}$ and $\mathbf{U}'^{(s)}$ are then computed.
+
+### Synthesis Procedure
+
+1. **Bootstrap**: For each synthetic year, sample $N$ year indices with replacement from the historical record. Construct a bootstrap matrix $\mathbf{X}^{(s)}$ (and corresponding $\mathbf{X}'^{(s)}$) by extracting the normal scores at the sampled indices.
+
+2. **Impose correlation**: Multiply each bootstrap matrix by its Cholesky factor:
+
+$$
+\tilde{\mathbf{Z}}^{(s)} = \mathbf{X}^{(s)} \mathbf{U}^{(s)}, \qquad \tilde{\mathbf{Z}}'^{(s)} = \mathbf{X}'^{(s)} \mathbf{U}'^{(s)}
+$$
+
+3. **Combine shifted and unshifted results**: The final correlated matrix $\mathbf{Z}_C$ takes the first half of each year from the shifted result and the second half from the unshifted result:
+
+$$
+\mathbf{Z}_{C,y,1:6,s} = \tilde{\mathbf{Z}}'_{y,7:12,s}, \qquad \mathbf{Z}_{C,y,7:12,s} = \tilde{\mathbf{Z}}_{y+1,7:12,s}
+$$
+
+4. **Inverse normal score transform**: Map back from normal space to the original residual space using the stored rank mappings, with linear extrapolation in the tails for values outside the historical range.
+
+5. **Destandardize and back-transform**:
+
+$$
+\hat{Q}'_{y,m,s} = Z_{C,y,m,s} \cdot \sigma_{m,s} + \mu_{m,s}, \qquad \hat{Q}_{y,m,s} = \exp(\hat{Q}'_{y,m,s})
+$$
+
+## Statistical Properties
+
+The method preserves monthly means and standard deviations at each site (by construction through standardization and destandardization), spatial cross-site correlations (all sites share the same bootstrap indices for each year), and intra-annual temporal correlation (through the Cholesky decomposition of the 12-month correlation matrix). The cross-year shifted matrix construction maintains continuity across the December-January boundary.
+
+Because the method resamples from the historical record, the empirical marginal distribution is approximately preserved. The normal score transform and its inverse allow modest extrapolation beyond the observed range in the tails. However, the generated values remain close to the historical envelope, and genuinely novel extremes cannot be produced.
 
 ## Limitations
 
-- Requires complete years (all 12 months present per year)
-- Y_prime construction loses one year of data
-- Sample correlation matrices may require PSD repair, which can inflate correlations
-- Bootstrap resampling bounded by historical range
+- Generated values are bounded near the historical range (bootstrap limitation).
+- Requires complete years; the cross-year shifted matrix loses one year of data.
+- Sample correlation matrices may need positive-definiteness repair, which can inflate apparent correlations.
+- The method does not model long-range persistence or nonstationarity.
 
 ## References
 
@@ -87,4 +104,3 @@ Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of 
 ---
 
 **Implementation:** `src/synhydro/methods/generation/nonparametric/kirsch.py`
-**Tests:** `tests/test_kirsch_generator.py`

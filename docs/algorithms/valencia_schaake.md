@@ -1,106 +1,113 @@
-# Valencia-Schaake Temporal Disaggregation (Valencia and Schaake 1973)
+# Valencia-Schaake Temporal Disaggregation (Valencia and Schaake, 1973)
 
 | | |
 |---|---|
 | **Type** | Parametric |
 | **Resolution** | Annual to Monthly |
 | **Sites** | Univariate / Multisite |
-| **Class** | `ValenciaSchaakeDisaggregator` |
 
 ## Overview
 
-The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) using a linear regression model that preserves the conditional mean and covariance structure of the sub-periods given the aggregate. The method models sub-period flows as a multivariate normal distribution conditioned on the known aggregate, then samples from this conditional distribution.
+The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) by modeling the sub-periods as a multivariate normal distribution conditioned on the known aggregate. A linear regression relates the sub-period vector to the aggregate, and the conditional covariance captures the remaining uncertainty. This is the classical baseline against which subsequent disaggregation methods, including the [Grygier-Stedinger](grygier_stedinger.md) extension, are compared.
 
-This is the classical baseline against which all subsequent disaggregation methods are compared.
+## Notation
 
-## Algorithm
+| Symbol | Description |
+|--------|-------------|
+| $\mathbf{X}_y \in \mathbb{R}^{m}$ | Vector of sub-period flows for year $y$, $X_{y,j}$ is the flow in sub-period $j$ |
+| $Y_y$ | Aggregate (annual) flow for year $y$, $Y_y = \mathbf{1}^\top \mathbf{X}_y$ |
+| $\boldsymbol{\mu}_X \in \mathbb{R}^{m}$ | Mean vector of sub-period flows |
+| $\mu_Y$ | Mean of the aggregate flow |
+| $\sigma_Y^2$ | Variance of the aggregate flow |
+| $\mathbf{S}_{XX} \in \mathbb{R}^{m \times m}$ | Covariance matrix of sub-period flows |
+| $\mathbf{S}_{XY} \in \mathbb{R}^{m}$ | Cross-covariance between sub-periods and aggregate |
+| $\mathbf{A} \in \mathbb{R}^{m}$ | Regression coefficient vector |
+| $\mathbf{S}_e \in \mathbb{R}^{m \times m}$ | Conditional covariance of sub-periods given the aggregate |
+| $\mathbf{C}$ | Lower Cholesky factor, $\mathbf{S}_e = \mathbf{C}\mathbf{C}^\top$ |
+| $m$ | Number of sub-periods (e.g., 12 months) |
+| $N$ | Number of complete years in the historical record |
+| $\mathbf{1}$ | $m$-vector of ones |
 
-### Preprocessing
+## Formulation
 
-1. **Validate input**: observed flows at the finer resolution (e.g., daily or monthly) with DatetimeIndex.
-2. **Aggregate observed flows** to the coarser resolution (e.g., monthly to annual by summation).
-3. **Organize into matrices**: for each year y, form the vector of sub-period flows:
-   ```
-   X_y = [Q_{y,1}, Q_{y,2}, ..., Q_{y,m}]^T
-   ```
-   where m is the number of sub-periods (e.g., 12 months).
-4. **Optional transformation**: apply log or Box-Cox transform to improve normality.
+### Model Structure
 
-### Fitting
+The sub-period vector $\mathbf{X}$ and the aggregate $Y = \mathbf{1}^\top \mathbf{X}$ are assumed to follow a joint multivariate normal distribution. The conditional distribution of $\mathbf{X}$ given $Y$ is:
 
-1. **Compute sub-period statistics**:
-   - Mean vector: `mu_X = E[X]` (m x 1)
-   - Covariance matrix: `S_XX = Cov(X, X)` (m x m)
-2. **Compute aggregate statistics**:
-   - Mean: `mu_Y = E[Y]` where Y = sum(X)
-   - Variance: `sigma_Y^2 = Var(Y)`
-3. **Compute cross-covariance** between sub-periods and aggregate:
-   ```
-   S_XY = Cov(X, Y) = S_XX * 1_m
-   ```
-   where 1_m is an m-vector of ones.
-4. **Compute regression parameters**:
-   - Regression coefficients: `A = S_XY / sigma_Y^2` (m x 1)
-   - Conditional covariance: `S_e = S_XX - A * sigma_Y^2 * A^T` (m x m)
-5. **Cholesky decomposition** of S_e:
-   ```
-   S_e = C * C^T
-   ```
-   If S_e is not positive semi-definite, apply spectral repair (set negative eigenvalues to small positive value).
-6. **Store** mu_X, mu_Y, sigma_Y^2, A, C, and transformation parameters.
+$$
+\mathbf{X} \mid Y \;\sim\; \mathcal{N}\!\left(\boldsymbol{\mu}_{X|Y},\; \mathbf{S}_e\right)
+$$
 
-### Disaggregation
+where the conditional mean is:
 
-For each synthetic aggregate value Y_syn:
+$$
+\boldsymbol{\mu}_{X|Y} = \boldsymbol{\mu}_X + \mathbf{A}(Y - \mu_Y)
+$$
 
-1. **Compute conditional mean**:
-   ```
-   mu_X|Y = mu_X + A * (Y_syn - mu_Y)
-   ```
-2. **Sample residuals**:
-   ```
-   Z ~ N(0, I_m)
-   X_syn = mu_X|Y + C * Z
-   ```
-3. **Proportional adjustment** to enforce consistency (sub-periods sum to aggregate):
-   ```
-   X_adj = X_syn * (Y_syn / sum(X_syn))
-   ```
-   Note: This multiplicative adjustment is simple but can distort the conditional covariance. See Grygier-Stedinger (1988) for a more rigorous conservation correction.
-4. **Inverse transform** if log/Box-Cox was applied.
-5. **Enforce non-negativity**: clip to zero.
+### Parameter Estimation
 
-## Parameters
+The sub-period covariance and aggregate statistics are estimated from the historical record. The cross-covariance between sub-periods and the aggregate is:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow at sub-period resolution with DatetimeIndex |
-| `n_subperiods` | `int` | `12` | Number of sub-periods per aggregate period |
-| `transform` | `str` | `'log'` | Transformation before fitting: `'log'`, `'boxcox'`, or `'none'` |
-| `conservation_method` | `str` | `'proportional'` | Method to enforce sum consistency: `'proportional'` or `'none'` |
-| `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |
-| `debug` | `bool` | `False` | Enable debug logging |
+$$
+\mathbf{S}_{XY} = \text{Cov}(\mathbf{X}, Y) = \mathbf{S}_{XX}\,\mathbf{1}
+$$
 
-## Properties Preserved
+The regression coefficient vector is:
 
-- Conditional mean of sub-periods given aggregate (by construction)
-- Conditional covariance structure (via S_e)
-- Monthly means and standard deviations (approximately)
-- Cross-correlations between sub-periods (via full covariance S_XX)
-- Aggregate total (exactly, via proportional adjustment)
+$$
+\mathbf{A} = \frac{\mathbf{S}_{XY}}{\sigma_Y^2}
+$$
 
-**Not preserved:**
-- Exact conditional covariance after proportional adjustment
-- Non-Gaussian features of sub-period distributions
-- Inter-annual temporal correlations between sub-periods
+The conditional covariance matrix is:
+
+$$
+\mathbf{S}_e = \mathbf{S}_{XX} - \frac{\mathbf{S}_{XY}\,\mathbf{S}_{XY}^\top}{\sigma_Y^2}
+$$
+
+If $\mathbf{S}_e$ is not positive semi-definite, it is repaired via spectral projection. The Cholesky factorization $\mathbf{S}_e = \mathbf{C}\mathbf{C}^\top$ is then computed.
+
+An optional transformation (log or Box-Cox) may be applied to the sub-period flows before fitting to improve the normality assumption.
+
+### Synthesis Procedure
+
+For each synthetic aggregate value $Y^{\text{syn}}$:
+
+1. Compute the conditional mean:
+
+$$
+\boldsymbol{\mu}_{X|Y} = \boldsymbol{\mu}_X + \mathbf{A}(Y^{\text{syn}} - \mu_Y)
+$$
+
+2. Sample from the conditional distribution:
+
+$$
+\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_m), \qquad \mathbf{X}^{\text{syn}} = \boldsymbol{\mu}_{X|Y} + \mathbf{C}\,\mathbf{Z}
+$$
+
+3. Apply a proportional adjustment to enforce volume conservation:
+
+$$
+X_j^{\text{adj}} = X_j^{\text{syn}} \cdot \frac{Y^{\text{syn}}}{\displaystyle\sum_{k=1}^{m} X_k^{\text{syn}}}
+$$
+
+4. Invert the transformation if one was applied.
+5. Enforce non-negativity.
+
+Note: The proportional adjustment ensures exact volume conservation but distorts the conditional covariance structure. The [Grygier-Stedinger](grygier_stedinger.md) method provides a correction that preserves this structure.
+
+## Statistical Properties
+
+The method preserves the conditional mean and covariance of sub-period flows given the aggregate, the cross-correlations among sub-periods, and the aggregate total (exactly, after proportional adjustment). Monthly means and standard deviations are approximately preserved.
+
+However, the proportional adjustment introduces distortion into the conditional covariance. The multivariate normal assumption may be violated for strongly skewed flow distributions, particularly at the monthly or daily scale. Inter-annual serial correlations between sub-periods of consecutive years are not modeled.
 
 ## Limitations
 
-- Assumes multivariate normality of sub-period flows (often violated for daily/monthly data)
-- Proportional adjustment distorts the conditional covariance
-- Does not model serial correlation between consecutive years' sub-periods
-- For high m (many sub-periods), covariance estimation requires long records
-- Better suited for annual-to-monthly than monthly-to-daily (daily data requires many more sub-periods)
+- Multivariate normality assumption may be violated for skewed sub-period distributions.
+- Proportional adjustment distorts the conditional covariance (see Grygier-Stedinger for improvement).
+- Does not model serial correlations between sub-periods of consecutive years.
+- Full covariance estimation requires long records relative to $m$.
+- Better suited for annual-to-monthly than monthly-to-daily disaggregation.
 
 ## References
 
@@ -114,4 +121,3 @@ Valencia, R.D., and Schaake, J.C. (1973). Disaggregation processes in stochastic
 ---
 
 **Implementation:** `src/synhydro/methods/disaggregation/temporal/valencia_schaake.py`
-**Tests:** `tests/test_valencia_schaake_disaggregator.py`

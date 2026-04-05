@@ -1,154 +1,143 @@
-# Gaussian / Student-t Copula Generator (Chen et al. 2015; Pereira et al. 2017)
+# Gaussian / Student-t Copula Generator (Chen et al., 2015; Pereira et al., 2017)
 
 | | |
 |---|---|
 | **Type** | Parametric |
 | **Resolution** | Monthly |
 | **Sites** | Multisite |
-| **Class** | `GaussianCopulaGenerator` |
 
 ## Overview
 
-Separates the marginal distributions from the dependence structure using
-Sklar's theorem.  Per-(month, site) marginals are fitted parametrically
-(gamma or log-normal, selected by BIC) or empirically (Hazen plotting
-position).  Temporal dependence is captured by a Periodic AR(1) model in
-normal-score space (Pereira et al. 2017), and spatial dependence among
-the PAR residuals is modelled by a Gaussian or Student-t copula.
+This method separates marginal distributions from the dependence structure via Sklar's theorem. Per-(month, site) marginals are fitted parametrically (gamma or log-normal, selected by BIC) or empirically. Temporal dependence is captured by a Periodic AR(1) model in normal-score space (Pereira et al., 2017), and spatial dependence among the PAR residuals is modeled by a Gaussian or Student-t copula. The Student-t copula adds symmetric tail dependence through a degrees-of-freedom parameter, addressing the Gaussian copula's known limitation of zero tail dependence.
 
-The t-copula adds symmetric tail dependence via a degrees-of-freedom
-parameter, addressing the Gaussian copula's known zero tail dependence
-limitation (Tootoonchi et al. 2022).
+## Notation
 
-## Algorithm
+| Symbol | Description |
+|--------|-------------|
+| $Q_{t,s}$ | Observed monthly flow at time $t$, site $s$ |
+| $\hat{Q}_{t,s}$ | Synthetic monthly flow |
+| $m(t)$ | Calendar month at time $t$, $m \in \{1, \ldots, 12\}$ |
+| $F_{m,s}$ | Marginal CDF for month $m$, site $s$ |
+| $u_{t,s}$ | Uniform score, $u = F_{m,s}(Q_{t,s})$ |
+| $z_{t,s}$ | Normal score, $z = \Phi^{-1}(u)$ |
+| $\rho_{m,s}$ | PAR(1) lag-1 autocorrelation for month $m$, site $s$ |
+| $e_{t,s}$ | PAR(1) residual |
+| $\mathbf{R}_m \in \mathbb{R}^{S \times S}$ | Copula correlation matrix for month $m$ |
+| $\mathbf{L}_m$ | Lower Cholesky factor, $\mathbf{R}_m = \mathbf{L}_m \mathbf{L}_m^\top$ |
+| $\nu$ | Degrees of freedom for the Student-t copula |
+| $\Phi, \Phi^{-1}$ | Standard normal CDF and its inverse |
+| $T_\nu, T_\nu^{-1}$ | Student-t CDF and its inverse with $\nu$ degrees of freedom |
+| $S$ | Number of sites |
+| $N$ | Number of complete years |
 
-### Preprocessing
+## Formulation
 
-1. Validate input data via `_store_obs_data()`; resample daily/weekly to monthly if needed.
-2. Optionally apply `log(Q + offset)` transform.
+### Marginal Fitting
 
-### Fitting
+For each month $m$ and site $s$, the marginal distribution $F_{m,s}$ is selected from the gamma and log-normal families. Both are fitted by maximum likelihood, and the model with the lower BIC is retained:
 
-1. **Marginal fitting** (per calendar month, per site):
-   - Parametric: fit gamma and log-normal via MLE; select winner by BIC
-     (Tootoonchi et al. 2022).  Store shape/scale parameters.
-   - Empirical: fit `NormalScoreTransform` (Hazen plotting position).
+$$
+\text{BIC} = 2\,\text{NLL} + k \ln n
+$$
 
-2. **Probability Integral Transform (PIT):**
-   ```
-   u[t,s] = F_{m,s}(Q[t,s])      # CDF of fitted marginal
-   z[t,s] = Phi^{-1}(u[t,s])     # normal scores
-   ```
+where NLL is the negative log-likelihood, $k$ is the number of parameters (2 for both gamma and log-normal), and $n$ is the number of observations. Alternatively, an empirical CDF based on Hazen plotting positions may be used.
 
-3. **PAR(1) temporal model** (Pereira et al. 2017, Section 3.1):
-   - For each monthly transition m-1 -> m and each site s, estimate
-     lag-1 autocorrelation:
-     ```
-     rho_{m,s} = corr(z[month=m, s], z[month=m-1, s])
-     ```
-   - Compute PAR residuals (approximately i.i.d.):
-     ```
-     e[t,s] = (z[t,s] - rho_{m,s} * z[t-1,s]) / sqrt(1 - rho_{m,s}^2)
-     ```
+### Probability Integral Transform and Normal Scores
 
-4. **Copula correlation matrices** (per month):
-   - Compute n_sites x n_sites Pearson correlation of PAR residuals e.
-   - Repair via spectral method to ensure positive definiteness.
-   - Cholesky decompose: R_m = L_m L_m^T.
+Observed flows are mapped to uniform variates via the fitted marginal CDF, then transformed to standard normal space:
 
-5. **t-copula df estimation** (if `copula_type="t"`):
-   - Grid search over df in [2, 50] maximising the multivariate-t
-     log-likelihood on PAR residuals.
+$$
+u_{t,s} = F_{m(t),s}(Q_{t,s}), \qquad z_{t,s} = \Phi^{-1}(u_{t,s})
+$$
 
-### Generation
+### Periodic AR(1) Temporal Model
 
-For each timestep t (calendar month m):
+For each monthly transition $m-1 \to m$ and each site $s$, the lag-1 autocorrelation is estimated:
+
+$$
+\rho_{m,s} = \text{Corr}(z_{m-1,s},\; z_{m,s})
+$$
+
+The PAR(1) residuals, which are approximately temporally independent, are computed as:
+
+$$
+e_{t,s} = \frac{z_{t,s} - \rho_{m(t),s}\, z_{t-1,s}}{\sqrt{1 - \rho_{m(t),s}^2}}
+$$
+
+### Copula Estimation
+
+For each month $m$, the $S \times S$ Pearson correlation matrix of the PAR residuals is computed:
+
+$$
+\mathbf{R}_m = \text{Corr}(\mathbf{e}_m)
+$$
+
+If $\mathbf{R}_m$ is not positive definite, it is repaired via spectral projection (negative eigenvalues are set to a small positive value and the matrix is rescaled to unit diagonal). The Cholesky factorization is then computed: $\mathbf{R}_m = \mathbf{L}_m \mathbf{L}_m^\top$.
+
+For the Student-t copula, the degrees of freedom $\nu$ are estimated by maximizing the profile log-likelihood of the multivariate $t$-distribution over a grid $\nu \in \{2, 3, \ldots, 50\}$:
+
+$$
+\ell(\nu) = \sum_{t} \left[\ln \Gamma\!\left(\frac{\nu + S}{2}\right) - \ln \Gamma\!\left(\frac{\nu}{2}\right) - \frac{S}{2}\ln(\nu\pi) - \frac{1}{2}\ln|\mathbf{R}_m| - \frac{\nu + S}{2}\ln\!\left(1 + \frac{\mathbf{z}_t^\top \mathbf{R}_m^{-1}\mathbf{z}_t}{\nu}\right)\right]
+$$
+
+### Synthesis Procedure
+
+For each time step $t$ with calendar month $m$:
 
 1. Draw independent innovations:
-   - Gaussian: `eps ~ N(0, I_{n_sites})`
-   - t-copula: `eps ~ t(df, I_{n_sites})`
+   - Gaussian copula: $\boldsymbol{\varepsilon}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})$
+   - Student-t copula: $\boldsymbol{\varepsilon}_t \sim t_\nu(\mathbf{0}, \mathbf{I})$
 
-2. Impose spatial correlation:
-   ```
-   e[t] = L_m @ eps
-   ```
+2. Impose spatial correlation via the Cholesky factor:
 
-3. PAR(1) temporal recursion:
-   ```
-   z[t,s] = rho_{m,s} * z[t-1,s] + sqrt(1 - rho_{m,s}^2) * e[t,s]
-   ```
+$$
+\mathbf{e}_t = \mathbf{L}_m\,\boldsymbol{\varepsilon}_t
+$$
 
-4. Map to uniform:
-   - Gaussian: `u[t,s] = Phi(z[t,s])`
-   - t-copula: `u[t,s] = T_df(z[t,s])`
+3. Apply the PAR(1) temporal recursion for each site $s$:
 
-5. Inverse marginal CDF:
-   ```
-   Q[t,s] = F_{m,s}^{-1}(u[t,s])
-   ```
+$$
+z_{t,s} = \rho_{m,s}\,z_{t-1,s} + \sqrt{1 - \rho_{m,s}^2}\;\,e_{t,s}
+$$
+
+4. Map from normal scores to uniform variates:
+   - Gaussian: $u_{t,s} = \Phi(z_{t,s})$
+   - Student-t: $u_{t,s} = T_\nu(z_{t,s})$
+
+5. Apply the inverse marginal CDF:
+
+$$
+\hat{Q}_{t,s} = F_{m,s}^{-1}(u_{t,s})
+$$
 
 6. Enforce non-negativity.
 
-## Parameters
+## Statistical Properties
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `copula_type` | str | `"gaussian"` | `"gaussian"` or `"t"`. t-copula adds tail dependence. |
-| `marginal_method` | str | `"parametric"` | `"parametric"` (BIC-selected gamma/log-normal) or `"empirical"` (Hazen CDF). |
-| `log_transform` | bool | `False` | Apply log(Q + offset) before fitting. |
-| `offset` | float | `1.0` | Additive offset for log transform. |
-| `matrix_repair_method` | str | `"spectral"` | Method for repairing non-PSD correlation matrices. |
+The method preserves marginal distributions at each (month, site) pair through parametric or empirical CDF fitting. Spatial cross-site correlation is captured by the copula correlation matrix applied to PAR residuals. The PAR(1) model preserves lag-1 temporal autocorrelation in normal-score space, and the seasonal cycle is implicit in the month-specific marginals and correlation parameters.
 
-## Properties Preserved
-
-- Marginal distributions per (month, site) via parametric or empirical CDF
-- Spatial cross-site correlation via copula correlation matrix
-- Lag-1 temporal autocorrelation via PAR(1) in normal-score space
-- Seasonal cycle (implicit in per-month marginals and PAR parameters)
-
-**Not preserved:**
-
-- Higher-order temporal dependence (only lag-1 via PAR(1))
-- Asymmetric tail dependence (Gaussian copula only; t-copula provides symmetric tail dependence)
-- Long-range dependence / Hurst exponent (no fractional differencing)
+The Gaussian copula has zero tail dependence, meaning it underestimates the probability of joint extreme events. The Student-t copula provides symmetric tail dependence controlled by $\nu$, with stronger tail dependence as $\nu$ decreases. Neither copula captures asymmetric tail dependence (e.g., stronger co-occurrence of droughts than of floods). Higher-order temporal structure and long-range persistence are not modeled.
 
 ## Limitations
 
-- The Gaussian copula has zero upper and lower tail dependence (Renard and
-  Lang, 2007).  Use `copula_type="t"` to model symmetric tail dependence.
-- PAR(1) captures only lag-1 persistence.  Higher-order temporal structure
-  (e.g., multi-month drought persistence) is not explicitly modelled.
-- Vine copulas (Czado and Nagler, 2022) offer more flexible dependence
-  structures but are beyond the scope of this implementation.
-- With short records (< 20 years per month), parametric marginal fitting
-  and copula parameter estimation may be unreliable.
+- The Gaussian copula has zero upper and lower tail dependence.
+- PAR(1) captures only lag-1 temporal persistence; multi-month drought dynamics are not explicitly modeled.
+- Parametric marginal fitting and copula estimation may be unreliable with fewer than 20 years of data.
+- The Student-t copula provides only symmetric tail dependence; for asymmetric tail dependence, consider the [vine copula](vine_copula.md) extension.
 
 ## References
 
 **Primary:**
-Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know
-about copula modeling but were afraid to ask. Journal of Hydrologic
-Engineering, 12(4), 347-368.
-https://doi.org/10.1061/(ASCE)1084-0699(2007)12:4(347)
+Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know about copula modeling but were afraid to ask. *Journal of Hydrologic Engineering*, 12(4), 347-368. https://doi.org/10.1061/(ASCE)1084-0699(2007)12:4(347)
 
-Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based
-method for multisite monthly and daily streamflow simulation. Journal of
-Hydrology, 526, 360-381.
-https://doi.org/10.1016/j.jhydrol.2015.05.018
+Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based method for multisite monthly and daily streamflow simulation. *Journal of Hydrology*, 526, 360-381. https://doi.org/10.1016/j.jhydrol.2015.05.018
 
-Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic
-spatial vine copula model for multi-site streamflow simulation. Electric
-Power Systems Research, 152, 9-17.
-https://doi.org/10.1016/j.epsr.2017.06.017
+Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic spatial vine copula model for multi-site streamflow simulation. *Electric Power Systems Research*, 152, 9-17. https://doi.org/10.1016/j.epsr.2017.06.017
 
 **See also:**
-- Tootoonchi, F. et al. (2022). Copulas for hydroclimatic analysis: A
-  practice-oriented overview. WIREs Water, 9(2), e1579.
-- Nelsen, R.B. (2006). An Introduction to Copulas. 2nd ed. Springer.
-- Sklar, A. (1959). Fonctions de repartition a n dimensions et leurs
-  marges. Publ. Inst. Statist. Univ. Paris, 8, 229-231.
+- Tootoonchi, F. et al. (2022). Copulas for hydroclimatic analysis: A practice-oriented overview. *WIREs Water*, 9(2), e1579.
+- Sklar, A. (1959). Fonctions de repartition a n dimensions et leurs marges. *Publ. Inst. Statist. Univ. Paris*, 8, 229-231.
 
 ---
 
 **Implementation:** `src/synhydro/methods/generation/parametric/gaussian_copula.py`
-**Tests:** `tests/test_gaussian_copula_generator.py`

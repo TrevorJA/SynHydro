@@ -1,88 +1,86 @@
-# KNN Bootstrap Generator (Lall and Sharma 1996)
+# K-Nearest Neighbor Bootstrap (Lall and Sharma, 1996)
 
 | | |
 |---|---|
 | **Type** | Nonparametric |
 | **Resolution** | Monthly / Annual |
 | **Sites** | Univariate / Multisite |
-| **Class** | `KNNBootstrapGenerator` |
 
 ## Overview
 
-The K-Nearest Neighbor (KNN) bootstrap generates synthetic streamflow by conditionally resampling from the historical record. At each timestep, the current flow value determines a neighborhood of K similar historical states, and the next value is drawn from the successors of those neighbors using kernel-weighted probabilities. This nonparametric approach preserves the empirical marginal distribution exactly and captures nonlinear dependence structures that parametric models may miss.
+The K-Nearest Neighbor (KNN) bootstrap generates synthetic streamflow by conditionally resampling from the historical record. At each time step, the most recent generated value defines a query point in feature space; the $K$ closest historical states are identified, and one is selected with probability inversely proportional to its rank (Lall-Sharma kernel). The generated value is the historical successor of the selected neighbor. This nonparametric approach preserves the empirical marginal distribution exactly and can capture nonlinear dependence structures that parametric models may miss.
 
-For multisite applications, all sites are resampled jointly using the same selected neighbor index, preserving spatial correlation by construction.
+## Notation
 
-## Algorithm
+| Symbol | Description |
+|--------|-------------|
+| $Q_t \in \mathbb{R}^S$ | Observed flow vector at time $t$ across $S$ sites |
+| $\hat{Q}_t$ | Synthetic flow vector at time $t$ |
+| $K$ | Number of nearest neighbors |
+| $N$ | Number of historical time steps |
+| $w_i$ | Lall-Sharma kernel weight for the $i$-th closest neighbor |
+| $\mathbf{x}_t$ | Feature vector at time $t$ (flow values at selected sites) |
+| $d(\cdot, \cdot)$ | Euclidean distance in feature space |
 
-### Preprocessing
+## Formulation
 
-1. **Validate input** as univariate or multisite DataFrame with DatetimeIndex.
-2. **Construct state vectors**: for each timestep t, define the feature vector used for neighbor search. Default: the flow value(s) at time t.
-3. **Build successor pairs**: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values. For monthly data, successors are partitioned by calendar month to preserve seasonality.
+### Neighbor Selection and Kernel Weights
 
-### Fitting
+The number of neighbors defaults to $K = \lceil \sqrt{N} \rceil$, where $N$ is the length of the historical record. The Lall-Sharma kernel assigns probability to the $i$-th closest neighbor ($i = 1, 2, \ldots, K$) as:
 
-1. **Determine K** (number of neighbors). Default heuristic:
-   ```
-   K = ceil(sqrt(n))
-   ```
-   where n is the number of historical timesteps. Can also be set manually.
+$$
+w_i = \frac{1/i}{\displaystyle\sum_{j=1}^{K} 1/j}
+$$
 
-2. **Fit KNN model** using `sklearn.NearestNeighbors` on the historical feature vectors.
+This harmonic weighting gives the closest neighbor approximately twice the selection probability of the second-closest, encouraging fidelity to the local neighborhood while maintaining stochastic diversity.
 
-3. **Compute Lall-Sharma kernel weights** for neighbor selection:
-   ```
-   K(i) = (1/i) / sum_{j=1}^{K} (1/j)
-   ```
-   where i is the rank of the neighbor (i=1 is closest). This harmonic kernel gives the closest neighbor approximately twice the weight of the second-closest.
+### Feature-Successor Structure
 
-4. **Store** the fitted KNN model, the historical feature-successor pairs, and the kernel weights.
+For each historical time step $t$, a feature-successor pair is stored:
 
-### Generation
+$$
+(\mathbf{x}_t,\; Q_{t+1})
+$$
 
-1. **Initialize** by randomly selecting a historical timestep as the starting state.
-2. **For each subsequent timestep**:
-   a. Query the KNN model for the K nearest neighbors of the current state.
-   b. Select one neighbor with probability K(i) (Lall-Sharma kernel).
-   c. The generated value is the **successor** of the selected neighbor in the historical record:
-      ```
-      Q_syn(t+1) = Q_obs(neighbor_t + 1)
-      ```
-   d. Update the current state to Q_syn(t+1) for the next iteration.
-3. **Multisite**: use the index site (or multivariate distance) for neighbor search, then take the successor vector across all sites jointly.
+where $\mathbf{x}_t$ is the feature vector (flow values at time $t$ for the selected sites) and $Q_{t+1}$ is the observed flow at the next time step. For monthly data, the pairs are partitioned by calendar month to respect seasonality: at generation time, only neighbors from the same calendar month are considered.
 
-## Parameters
+### Multisite Extension
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `Q_obs` | `pd.DataFrame` | - | Observed streamflow with DatetimeIndex, sites as columns |
-| `n_neighbors` | `Optional[int]` | `None` | K; if None, uses ceil(sqrt(n)) |
-| `feature_cols` | `Optional[List[str]]` | `None` | Columns to use as features for KNN search. If None, uses all site columns |
-| `index_site` | `Optional[str]` | `None` | Reserved for future use (multisite index site selection) |
-| `block_size` | `int` | `1` | Reserved for future use (block resampling) |
-| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
-| `debug` | `bool` | `False` | Enable debug logging |
+In multisite mode, the neighbor search is performed on a single index site or on the full multivariate feature vector using Euclidean distance:
 
-## Properties Preserved
+$$
+d(\mathbf{x}, \mathbf{x}') = \left\|\mathbf{x} - \mathbf{x}'\right\|_2
+$$
 
-- Empirical marginal distribution (resampled values are historical observations)
-- Nonlinear dependence structure (via conditional resampling)
-- Lag-1 autocorrelation (approximately, via nearest-neighbor conditioning)
-- Spatial cross-correlations (via joint resampling in multisite mode)
+Once a neighbor is selected, the successor vector across all $S$ sites is taken jointly, preserving spatial correlation by construction.
 
-**Not preserved:**
-- Values outside the historical range (bootstrap limitation)
-- Long-range persistence beyond the conditioning lag
-- Trends or non-stationarity
+### Synthesis Procedure
+
+1. Select a random historical time step as the initial state and set $\hat{Q}_1$ equal to the successor of that state.
+2. For each subsequent time step $t = 2, 3, \ldots, T$:
+   - Form the query feature vector $\hat{\mathbf{x}}_{t-1}$ from the most recently generated flow values.
+   - Find the $K$ nearest neighbors of $\hat{\mathbf{x}}_{t-1}$ among the historical feature vectors (within the same calendar month if monthly).
+   - Select one neighbor $j^*$ with probability $w_i$ based on its rank $i$.
+   - Set the generated value to the historical successor:
+
+$$
+\hat{Q}_t = Q_{j^* + 1}
+$$
+
+3. For multisite data, the entire successor vector is assigned jointly.
+
+## Statistical Properties
+
+The empirical marginal distribution is preserved exactly, since every generated value is drawn directly from the historical record. Nonlinear dependence is captured implicitly through the conditional neighborhood structure. Lag-1 autocorrelation is approximately preserved because the successor of a similar state will tend to exhibit similar temporal dynamics. Spatial cross-correlations are maintained through joint resampling.
+
+However, generated values cannot exceed the historical range (a fundamental bootstrap limitation). Long-range persistence beyond the conditioning lag is not explicitly modeled, and the method does not capture trends or nonstationarity. The curse of dimensionality can degrade neighbor selection quality when many sites are used simultaneously as features.
 
 ## Limitations
 
-- Cannot generate values outside the range of the historical record
-- Sensitive to the choice of K: too small causes repetitive sequences, too large destroys temporal structure
-- Curse of dimensionality for high-dimensional feature spaces (many sites)
-- Successor-based resampling can create discontinuities at December-January boundaries if not handled explicitly
-- Requires at least 20 years for monthly data to avoid excessive repetition of analogs
+- Cannot generate values outside the range of the historical record.
+- Sensitive to $K$: too small leads to repetitive cycling through a few neighbors; too large destroys local temporal structure.
+- Curse of dimensionality for high-dimensional feature spaces (many sites).
+- Requires sufficient record length (roughly 20+ years for monthly data) to avoid excessive repetition of analogs.
 
 ## References
 
@@ -96,4 +94,3 @@ Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hyd
 ---
 
 **Implementation:** `src/synhydro/methods/generation/nonparametric/knn_bootstrap.py`
-**Tests:** `tests/test_knn_bootstrap_generator.py`

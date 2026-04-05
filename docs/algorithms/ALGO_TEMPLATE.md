@@ -1,51 +1,62 @@
-# [Method Name] ([Author et al. Year])
+# [Method Name] ([Author et al., Year])
 
 | | |
 |---|---|
-| **Type** | [Parametric / Nonparametric / ML] |
+| **Type** | [Parametric / Nonparametric] |
 | **Resolution** | [Monthly / Daily / Annual] |
 | **Sites** | [Univariate / Multisite] |
-| **Class** | `[ClassName]` |
 
 ## Overview
 
-[2-4 sentence description: what the method does, its core mechanism, and what it's best suited for.]
+[2-4 sentences describing the method's core mechanism, its statistical basis, and what it is best suited for. Write for a reader with hydrology background who may be new to stochastic generation. Avoid implementation details.]
 
-## Algorithm
+## Notation
 
-### Preprocessing
+[Table of mathematical symbols used in this document. Standardize where possible across all algorithm docs.]
 
-1. [Step]
-2. [Step]
+| Symbol | Description |
+|--------|-------------|
+| $Q_t$ | Observed streamflow at time $t$ |
+| $\hat{Q}_t$ | Synthetic (generated) streamflow at time $t$ |
+| $N$ | Length of the historical record |
+| $S$ | Number of sites |
+| ... | ... |
 
-### Fitting
+## Formulation
 
-1. [Step with key equations in code blocks]
-2. [Step]
+### Model Structure
 
-### Generation
+[Define the core mathematical model. State the key equation(s) that characterize the method. Use display math for primary equations:]
 
-1. [Step with key equations in code blocks]
-2. [Step]
+$$
+\hat{Q}_t = f(\cdot)
+$$
 
-## Parameters
+### Parameter Estimation
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `param` | type | value | What it controls |
+[Describe how model parameters are estimated from the observed data. Provide estimator equations. If multiple estimation approaches exist, present each with its assumptions.]
 
-## Properties Preserved
+### Synthesis Procedure
 
-- [Property 1]
-- [Property 2]
+[Step-by-step procedure for generating synthetic sequences from the fitted model. Mix numbered prose steps with display equations. This should read like a formal algorithm description, not pseudocode.]
 
-**Not preserved:**
-- [Limitation as property]
+1. [Initialize ...]
+2. For each time step $t = 1, \ldots, T$:
+
+$$
+\hat{Q}_t = \ldots
+$$
+
+3. [Post-processing ...]
+
+## Statistical Properties
+
+[Discuss what statistical properties the model preserves and which it does not. Frame in terms of moments, correlation structure, spectral properties, or distributional characteristics. Use prose rather than checklists.]
 
 ## Limitations
 
-- [Key limitation 1]
-- [Key limitation 2]
+- [Precise statement of known shortcoming or assumption]
+- [...]
 
 ## References
 
@@ -57,5 +68,4 @@
 
 ---
 
-**Implementation:** `src/synhydro/methods/generation/[category]/[file].py`
-**Tests:** `tests/test_[name].py`
+**Implementation:** `src/synhydro/methods/[category]/[subcategory]/[file].py`

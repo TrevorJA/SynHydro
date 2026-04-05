@@ -1,70 +1,83 @@
-# Nowak (2010) KNN Temporal Disaggregation
+# Nowak KNN Temporal Disaggregation (Nowak et al., 2010)
 
 | | |
 |---|---|
 | **Type** | Nonparametric |
 | **Resolution** | Monthly to Daily |
 | **Sites** | Univariate / Multisite |
-| **Class** | `NowakDisaggregator` |
 
 ## Overview
 
-The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, it identifies the K nearest historic months by total flow, randomly selects one using Lall-Sharma kernel weights, and applies its daily proportions to the synthetic total.
+The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the $K$ nearest historical months (by total flow magnitude) are identified, one is selected stochastically using Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.
 
-## Algorithm
+## Notation
 
-### Preprocessing
+| Symbol | Description |
+|--------|-------------|
+| $Q_m^{\text{syn}}$ | Synthetic total flow for month $m$ |
+| $q_d^{\text{syn}}$ | Synthetic daily flow on day $d$ |
+| $q_d^*$ | Observed daily flow on day $d$ of the selected analog month |
+| $K$ | Number of nearest neighbors |
+| $w_i$ | Lall-Sharma kernel weight for the $i$-th closest neighbor |
+| $b$ | Number of blending days at month boundaries |
+| $N_m$ | Number of historical months in the candidate pool for month $m$ |
 
-1. Validate and store daily observed flows.
-2. Build historic monthly totals at the index gauge (sum across all sites for multi-site disaggregation).
+## Formulation
 
-### Fitting
+### Analog Pool Construction
 
-For each calendar month m, fit a `sklearn.NearestNeighbors` model on the scalar historic monthly totals. Only historic months within +/- `max_month_shift` calendar days of month m's center are included in the pool.
+For each calendar month $m$, a pool of candidate historical months is assembled. A tolerance of $\pm b_{\text{shift}}$ calendar days around the center of month $m$ is allowed, which provides flexibility in matching months near the calendar boundary. The candidate pool stores the total monthly flow and the corresponding daily flow time series for each historical month.
 
-### Disaggregation
+### Neighbor Selection
 
-For each synthetic monthly flow `Q_syn_m`:
+For each synthetic monthly flow $Q_m^{\text{syn}}$, the $K$ nearest historical months are found by Euclidean distance on total monthly flow. The Lall-Sharma kernel assigns selection probability to the $i$-th closest neighbor:
 
-1. **Find neighbors** - query the KNN model for the K nearest historic months by Euclidean distance on total flow.
-2. **Select one neighbor** - draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
-   ```
-   K(i) = (1/i) / sum_{j=1}^{K} (1/j)
-   ```
-   This harmonic weighting favors closer analogs while maintaining stochastic diversity.
-3. **Disaggregate** - apply the selected month's daily proportions:
-   ```
-   q_d = Q_syn_m * (q*_d / sum(q*_d'))
-   ```
-   For multi-site data, each site is disaggregated independently using the same selected analog month.
-4. **Smooth month boundaries** (if `blend_days > 0`) - apply weighted blending across adjacent months to reduce discontinuities at month transitions, then rescale each month to preserve the original monthly total exactly.
+$$
+w_i = \frac{1/i}{\displaystyle\sum_{j=1}^{K} 1/j}, \qquad i = 1, \ldots, K
+$$
 
-## Parameters
+One neighbor is drawn from the $K$ candidates with these probabilities.
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed daily streamflow with DatetimeIndex |
-| `n_neighbors` | `int` | `5` | K - number of candidate neighbors |
-| `max_month_shift` | `int` | `7` | Days of calendar flexibility around each month |
-| `blend_days` | `int` | `2` | Days of overlap smoothing at month boundaries to reduce discontinuities (0 = no blending) |
-| `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |
-| `debug` | `bool` | `False` | Enable debug logging |
+### Proportional Disaggregation
 
-## Properties Preserved
+The daily flows of the selected analog month are used as a template. Let $\{q_d^*\}_{d=1}^{D}$ denote the observed daily flows in the selected analog month (with $D$ days). The synthetic daily flows are computed by proportional scaling:
 
-- Daily flow patterns within each month (borrowed from historical record)
-- Monthly totals (exact, by construction - preserved even after boundary blending)
-- Multi-site consistency (same analog month applied to all sites)
+$$
+q_d^{\text{syn}} = Q_m^{\text{syn}} \cdot \frac{q_d^*}{\displaystyle\sum_{d'=1}^{D} q_{d'}^*}
+$$
 
-**Not preserved:**
-- Month-to-month daily transitions (partially addressed by `blend_days` boundary smoothing)
-- Daily patterns outside historical range
+This ensures that the synthetic daily flows sum exactly to the synthetic monthly total. For multisite data, each site is disaggregated independently using the same selected analog month, preserving inter-site consistency within each month.
+
+### Month Boundary Smoothing
+
+To reduce discontinuities at month transitions, an optional blending step applies a weighted average across $b$ days on each side of the boundary. After smoothing, each month is rescaled to restore the original monthly total:
+
+$$
+q_d^{\text{smoothed}} \leftarrow q_d^{\text{smoothed}} \cdot \frac{Q_m^{\text{syn}}}{\displaystyle\sum_{d'} q_{d'}^{\text{smoothed}}}
+$$
+
+### Synthesis Procedure
+
+1. Fit a KNN model on the historical monthly flow totals for each calendar month.
+2. For each synthetic monthly flow $Q_m^{\text{syn}}$:
+   - Query the $K$ nearest neighbors by total flow.
+   - Select one analog month using the Lall-Sharma kernel weights.
+   - Disaggregate by applying the analog's daily proportions to $Q_m^{\text{syn}}$.
+3. Optionally smooth month boundaries and rescale to preserve monthly totals.
+4. Enforce non-negativity.
+
+## Statistical Properties
+
+Monthly totals are preserved exactly by construction. Daily flow patterns within each month are drawn from the historical record, maintaining realistic intra-monthly dynamics including storm hydrographs and recession curves. Multisite consistency within each month is preserved through joint analog selection.
+
+Month-to-month daily transitions are not explicitly modeled, though the optional boundary blending partially addresses this. The method cannot produce daily patterns not observed in the historical record, limiting its ability to represent unprecedented extremes. Daily autocorrelation across month boundaries depends on the quality of analog matching.
 
 ## Limitations
 
-- Cannot produce daily patterns not seen in the historical record
-- Leap year handling requires proportional adjustment when analog and target months differ
-- Quality depends on having a sufficiently long historical record to find good analogs
+- Cannot produce daily flow patterns outside the historical range.
+- Leap year handling requires proportional adjustment when the analog and target months differ in length.
+- Quality depends on having a sufficiently long historical record to find good analogs across the range of synthetic monthly totals.
+- Month-to-month daily transitions may exhibit discontinuities despite blending.
 
 ## References
 
@@ -77,4 +90,3 @@ Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric st
 ---
 
 **Implementation:** `src/synhydro/methods/disaggregation/temporal/nowak.py`
-**Tests:** `tests/test_nowak_disaggregator.py`

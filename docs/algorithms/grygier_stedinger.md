@@ -1,115 +1,108 @@
-# Grygier-Stedinger Condensed Disaggregation (Grygier and Stedinger 1988)
+# Grygier-Stedinger Condensed Disaggregation (Grygier and Stedinger, 1988)
 
 | | |
 |---|---|
 | **Type** | Parametric |
 | **Resolution** | Annual to Monthly |
 | **Sites** | Univariate / Multisite |
-| **Class** | `GrygierStedingerDisaggregator` |
 
 ## Overview
 
-The Grygier-Stedinger method extends the Valencia-Schaake disaggregation framework with two key improvements: (1) a condensed parameter set that reduces the number of parameters to be estimated, improving reliability with short records, and (2) a rigorous conservation correction that ensures sub-period values sum exactly to the aggregate without distorting the conditional covariance structure. This method forms the basis of the widely-used SPIGOT software (Stedinger et al., U.S. Army Corps of Engineers).
+The Grygier-Stedinger method extends the [Valencia-Schaake](valencia_schaake.md) disaggregation framework with two key improvements: a condensed parameter set that reduces the number of estimated parameters from $O(m^2)$ to $O(m)$, improving reliability with short records; and a rigorous conservation correction matrix that ensures sub-period values sum exactly to the aggregate without distorting the conditional covariance structure. This method forms the basis of the widely used SPIGOT software (U.S. Army Corps of Engineers).
 
-The conservation correction replaces the simple proportional adjustment of Valencia-Schaake with an adjustment that accounts for the covariance between the sum of generated sub-periods and each individual sub-period, producing statistically consistent disaggregated flows.
+## Notation
 
-## Algorithm
+| Symbol | Description |
+|--------|-------------|
+| $\mathbf{X}_y \in \mathbb{R}^{m}$ | Vector of sub-period flows for year $y$ |
+| $Y_y$ | Aggregate flow, $Y_y = \mathbf{1}^\top \mathbf{X}_y$ |
+| $\boldsymbol{\mu}_X$ | Mean vector of sub-period flows |
+| $\mu_Y, \sigma_Y^2$ | Mean and variance of the aggregate flow |
+| $\mathbf{S}_{XX}$ | Covariance matrix of sub-period flows |
+| $\mathbf{S}_{XY}$ | Cross-covariance between sub-periods and aggregate |
+| $\mathbf{A}$ | Regression coefficient vector |
+| $\mathbf{S}_e$ | Conditional covariance matrix |
+| $\mathbf{C}$ | Lower Cholesky factor, $\mathbf{S}_e = \mathbf{C}\mathbf{C}^\top$ |
+| $\mathbf{D} \in \mathbb{R}^{m}$ | Conservation correction vector |
+| $m$ | Number of sub-periods |
+| $\mathbf{1}$ | $m$-vector of ones |
 
-### Preprocessing
+## Formulation
 
-1. **Validate input**: observed flows at the finer resolution (e.g., monthly) with DatetimeIndex.
-2. **Aggregate to annual** by summation across sub-periods.
-3. **Organize sub-period vectors** X_y for each year y.
-4. **Apply transformation** (log or Wilson-Hilferty) to improve normality.
+### Model Structure
 
-### Fitting
+As in Valencia-Schaake, the sub-period flows are modeled as multivariate normal conditioned on the aggregate:
 
-1. **Compute sub-period statistics** (same as Valencia-Schaake):
-   - Mean vector mu_X, covariance matrix S_XX.
-   - Aggregate mean mu_Y, variance sigma_Y^2.
-   - Cross-covariance S_XY = S_XX * 1_m.
+$$
+\mathbf{X} \mid Y \;\sim\; \mathcal{N}\!\left(\boldsymbol{\mu}_X + \mathbf{A}(Y - \mu_Y),\; \mathbf{S}_e\right)
+$$
 
-2. **Condensed parameterization**: rather than estimating the full m x m covariance S_XX, use a reduced parameter set:
-   - Lag-0 cross-correlations between sub-periods and the aggregate
-   - Lag-1 serial correlations between consecutive sub-periods
-   - Sub-period means and standard deviations
+with regression coefficients $\mathbf{A} = \mathbf{S}_{XY} / \sigma_Y^2$ and conditional covariance $\mathbf{S}_e = \mathbf{S}_{XX} - \mathbf{S}_{XY}\mathbf{S}_{XY}^\top / \sigma_Y^2$.
 
-   This reduces the parameter count from O(m^2) to O(m), making estimation feasible with shorter records.
+### Condensed Parameterization
 
-3. **Compute regression coefficients** A and conditional covariance S_e as in Valencia-Schaake, but using the condensed parameter estimates.
+Rather than estimating the full $m \times m$ covariance matrix $\mathbf{S}_{XX}$, the condensed approach uses a reduced set of statistics:
 
-4. **Compute conservation correction matrix** D:
-   ```
-   D = S_e * 1_m * (1_m^T * S_e * 1_m)^{-1}
-   ```
-   This is the key innovation. D is an m x 1 vector of correction weights that distributes the conservation error across sub-periods proportionally to their conditional variances.
+- Sub-period means $\mu_{X,j}$ and standard deviations $\sigma_{X,j}$ ($j = 1, \ldots, m$)
+- Lag-0 correlations between each sub-period and the aggregate
+- Lag-1 serial correlations between consecutive sub-periods
 
-5. **Cholesky decomposition** of S_e: `S_e = C * C^T`.
+This reduces the parameter count from $m(m+1)/2$ to $O(m)$, making estimation feasible with shorter historical records while retaining the essential first- and second-order structure.
 
-6. **Store** mu_X, mu_Y, A, C, D, and transformation parameters.
+### Conservation Correction
 
-### Disaggregation
+The key innovation is the conservation correction vector $\mathbf{D}$, which distributes the volume discrepancy across sub-periods in a manner that preserves the conditional covariance:
 
-For each synthetic aggregate value Y_syn:
+$$
+\mathbf{D} = \frac{\mathbf{S}_e\,\mathbf{1}}{\mathbf{1}^\top \mathbf{S}_e\,\mathbf{1}}
+$$
 
-1. **Compute conditional mean**:
-   ```
-   mu_X|Y = mu_X + A * (Y_syn - mu_Y)
-   ```
+The weights in $\mathbf{D}$ are proportional to the conditional covariance of each sub-period with the total, ensuring that sub-periods with greater conditional variance absorb a larger share of the correction. This avoids the covariance distortion introduced by the proportional adjustment used in Valencia-Schaake.
 
-2. **Generate uncorrected sub-periods**:
-   ```
-   Z ~ N(0, I_m)
-   X_raw = mu_X|Y + C * Z
-   ```
+### Synthesis Procedure
 
-3. **Apply conservation correction**:
-   ```
-   delta = Y_syn - sum(X_raw)
-   X_syn = X_raw + D * delta
-   ```
-   The correction distributes the discrepancy delta across sub-periods using the weights D, which are derived from the conditional covariance structure. This preserves the statistical properties of the disaggregation while ensuring exact summation.
+For each synthetic aggregate value $Y^{\text{syn}}$:
 
-4. **Inverse transform** if log or Wilson-Hilferty was applied.
+1. Compute the conditional mean:
 
-5. **Enforce non-negativity**: if any X_syn < 0, set to zero and redistribute the deficit across remaining sub-periods proportionally.
+$$
+\boldsymbol{\mu}_{X|Y} = \boldsymbol{\mu}_X + \mathbf{A}(Y^{\text{syn}} - \mu_Y)
+$$
 
-## Parameters
+2. Generate uncorrected sub-period values:
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow at sub-period resolution with DatetimeIndex |
-| `n_subperiods` | `int` | `12` | Number of sub-periods per aggregate period |
-| `transform` | `str` | `'log'` | Transformation: `'log'`, `'wilson_hilferty'`, or `'none'` |
-| `name` | `Optional[str]` | `None` | Optional name identifier for this disaggregator instance |
-| `debug` | `bool` | `False` | Enable debug logging |
+$$
+\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_m), \qquad \mathbf{X}^{\text{raw}} = \boldsymbol{\mu}_{X|Y} + \mathbf{C}\,\mathbf{Z}
+$$
 
-## Properties Preserved
+3. Compute the volume discrepancy and apply the conservation correction:
 
-- Conditional mean of sub-periods given aggregate (by construction)
-- Conditional covariance structure (not distorted by conservation correction)
-- Aggregate total (exactly, by construction via correction matrix D)
-- Monthly means and standard deviations
-- Lag-1 serial correlation between consecutive sub-periods (approximately)
+$$
+\delta = Y^{\text{syn}} - \mathbf{1}^\top \mathbf{X}^{\text{raw}}
+$$
 
-**Not preserved:**
-- Non-Gaussian marginal features
-- Higher-order temporal correlations
-- Non-stationarity
+$$
+\mathbf{X}^{\text{syn}} = \mathbf{X}^{\text{raw}} + \mathbf{D}\,\delta
+$$
 
-## Advantages over Valencia-Schaake
+Since $\mathbf{1}^\top \mathbf{D} = 1$ by construction, this guarantees $\mathbf{1}^\top \mathbf{X}^{\text{syn}} = Y^{\text{syn}}$.
 
-- Conservation correction preserves conditional covariance (proportional adjustment does not)
-- Condensed parameterization requires fewer estimated parameters, improving reliability
-- Explicitly handles the statistical consequences of forcing sub-periods to sum to the aggregate
-- Better performance with short historical records
+4. Invert the transformation if one was applied (log or Wilson-Hilferty).
+5. Enforce non-negativity: if any $X_j^{\text{syn}} < 0$, set to zero and redistribute the deficit proportionally across positive sub-periods.
+
+## Statistical Properties
+
+The method preserves the conditional mean and covariance of sub-period flows given the aggregate. Unlike the Valencia-Schaake proportional adjustment, the conservation correction does not distort the conditional covariance structure, producing statistically consistent disaggregated flows. The aggregate total is preserved exactly by construction.
+
+Monthly means, standard deviations, and lag-1 serial correlations between consecutive sub-periods are approximately preserved through the condensed parameterization. The condensed approach sacrifices complex cross-correlations between non-adjacent sub-periods in exchange for more reliable estimation from short records.
 
 ## Limitations
 
-- Still assumes multivariate normality of transformed sub-period flows
-- Condensed parameterization may miss complex cross-correlations between non-adjacent sub-periods
-- Conservation correction assumes linear relationships; strong nonlinearity in the data may not be captured
-- Transformation choice (log vs. Wilson-Hilferty) can affect results significantly
+- Multivariate normality assumption remains; strongly skewed distributions require transformation.
+- Condensed parameterization may miss complex cross-correlations between non-adjacent sub-periods.
+- Conservation correction assumes linear relationships; strong nonlinearity may not be captured.
+- Transformation choice (log vs. Wilson-Hilferty) can affect results significantly.
+- Does not model inter-annual serial correlations between sub-periods of consecutive years.
 
 ## References
 
@@ -119,9 +112,7 @@ Grygier, J.C., and Stedinger, J.R. (1988). Condensed disaggregation procedures a
 **See also:**
 - Valencia, R.D., and Schaake, J.C. (1973). Disaggregation processes in stochastic hydrology. *Water Resources Research*, 9(3), 580-585. https://doi.org/10.1029/WR009i003p00580
 - Stedinger, J.R., and Vogel, R.M. (1984). Disaggregation procedures for generating serially correlated flow vectors. *Water Resources Research*, 20(1), 47-56. https://doi.org/10.1029/WR020i001p00047
-- Lane, W.L. (1979). Applied stochastic techniques (LAST computer package). User Manual, Division of Planning Technical Services, Bureau of Reclamation, Denver, CO.
 
 ---
 
 **Implementation:** `src/synhydro/methods/disaggregation/temporal/grygier_stedinger.py`
-**Tests:** `tests/test_grygier_stedinger_disaggregator.py`

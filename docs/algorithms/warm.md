@@ -1,85 +1,117 @@
-# WARM - Wavelet Auto-Regressive Method (Nowak et al. 2011)
+# WARM -- Wavelet Auto-Regressive Method (Nowak et al., 2011)
 
 | | |
 |---|---|
 | **Type** | Parametric |
 | **Resolution** | Annual |
 | **Sites** | Univariate |
-| **Class** | `WARMGenerator` |
 
 ## Overview
 
-WARM combines continuous wavelet transforms with autoregressive modeling to generate synthetic annual streamflow. Its key innovation is the Scale Averaged Wavelet Power (SAWP), which captures time-varying spectral characteristics. This makes WARM particularly suited for non-stationary flows with regime shifts or low-frequency variability (e.g., climate oscillations, multi-decadal droughts).
+WARM combines continuous wavelet transforms with autoregressive modeling to generate synthetic annual streamflow that preserves non-stationary low-frequency variability. The observed series is decomposed into time-frequency components via the continuous wavelet transform (CWT), and the time-varying energy is captured by the Scale Averaged Wavelet Power (SAWP). After normalizing by SAWP to produce stationary components, independent AR models are fitted at each wavelet scale. Synthetic generation reverses the process: AR-generated coefficients are rescaled by bootstrapped SAWP values and reconstructed via the inverse CWT.
 
-## Algorithm
+## Notation
 
-### Preprocessing
+| Symbol | Description |
+|--------|-------------|
+| $Q_t$ | Observed annual streamflow at year $t$ |
+| $\hat{Q}_t$ | Synthetic annual streamflow at year $t$ |
+| $W(s, t)$ | CWT coefficient at scale $s$ and time $t$ |
+| $s_j$ | Wavelet scale, $j = 1, \ldots, J$ |
+| $J$ | Total number of scales |
+| $P(t)$ | Scale Averaged Wavelet Power at time $t$ |
+| $\tilde{W}(s, t)$ | SAWP-normalized wavelet coefficient |
+| $\phi_k^{(s)}$ | AR coefficient at lag $k$ for scale $s$ |
+| $p$ | AR model order |
+| $\sigma_s$ | Innovation standard deviation for scale $s$ |
+| $\varepsilon_t$ | Independent standard normal innovation |
+| $N$ | Number of years in the historical record |
 
-1. Validate input (univariate time series, minimum ~20 years recommended).
-2. Resample to annual frequency if needed (sum monthly or daily).
+## Formulation
 
-### Fitting
+### Continuous Wavelet Transform
 
-1. **Continuous Wavelet Transform** - decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
-   ```
-   W(s, t) = CWT(Q_obs, scales, wavelet)
-   ```
-   Result: coefficient matrix of shape (n_scales, n_years).
+The observed annual flow series $\{Q_t\}$ is decomposed using a mother wavelet $\psi$ (default: Morlet) at $J$ discrete scales:
 
-2. **Scale Averaged Wavelet Power** - compute time-varying power across all scales:
-   ```
-   SAWP(t) = (1/S) * sum_s |W(s, t)|^2
-   ```
-   High SAWP indicates high energy/variability at time t.
+$$
+W(s_j, t) = \text{CWT}(Q, s_j), \qquad j = 1, \ldots, J
+$$
 
-3. **Normalize by SAWP** - remove time-varying power to produce stationary components:
-   ```
-   W_norm(s, t) = W(s, t) / sqrt(SAWP(t) + epsilon)
-   ```
+yielding a coefficient matrix of dimension $J \times N$.
 
-4. **Fit AR models** - for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.
+### Scale Averaged Wavelet Power
 
-### Generation
+The SAWP captures the time-varying energy across all frequency scales:
 
-1. **Generate normalized coefficients** - for each scale, run the fitted AR(p) process forward with Gaussian innovations.
-2. **Resample SAWP** - bootstrap SAWP values from the historical record with replacement.
-3. **Rescale coefficients** - restore time-varying power:
-   ```
-   W_syn(s, t) = W_norm_syn(s, t) * sqrt(SAWP_syn(t) + epsilon)
-   ```
-4. **Inverse wavelet transform** - reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.
+$$
+P(t) = \frac{1}{J} \sum_{j=1}^{J} |W(s_j, t)|^2
+$$
 
-## Parameters
+High values of $P(t)$ indicate periods of elevated variability (e.g., regime shifts, climate oscillations).
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `Q_obs` | `pd.Series` or `pd.DataFrame` | - | Observed streamflow with DatetimeIndex |
-| `wavelet` | `str` | `'morl'` | Mother wavelet; any pywt continuous wavelet (e.g., `'morl'`, `'morlet'`) |
-| `scales` | `int` | `64` | Number of frequency scales (rule of thumb: T/2 to T) |
-| `ar_order` | `int` | `1` | AR model order (1 or 2 typically sufficient) |
-| `name` | `Optional[str]` | `None` | Optional name identifier for this generator instance |
-| `debug` | `bool` | `False` | Enable debug logging |
+### Normalization
 
-## Properties Preserved
+The wavelet coefficients are normalized by the SAWP to remove time-varying power and produce approximately stationary components:
 
-- Mean and variance (exactly, via post-reconstruction adjustment)
-- Lag-1 autocorrelation (approximately, via AR models)
-- Multi-year persistence and low-frequency variability (via wavelet decomposition)
-- Non-stationary variance structure (via SAWP)
-- Power spectrum (via wavelet amplitude preservation)
+$$
+\tilde{W}(s_j, t) = \frac{W(s_j, t)}{\sqrt{P(t) + \epsilon}}
+$$
 
-**Not preserved:**
-- Exact marginal distribution shape (Gaussian innovations)
-- Skewness and higher moments (not explicitly modeled)
-- Spatial correlations (univariate method)
+where $\epsilon$ is a small constant to prevent division by zero.
+
+### Autoregressive Fitting
+
+For each scale $s_j$, the normalized coefficient series $\{\tilde{W}(s_j, t)\}_{t=1}^{N}$ is modeled as an AR($p$) process. Let $\mu_s = \mathbb{E}[\tilde{W}(s_j, \cdot)]$ denote the mean and $\gamma_k^{(s)}$ the autocovariance at lag $k$. The AR coefficients are estimated via the Yule-Walker equations:
+
+$$
+\begin{pmatrix} \gamma_0^{(s)} & \gamma_1^{(s)} & \cdots & \gamma_{p-1}^{(s)} \\ \gamma_1^{(s)} & \gamma_0^{(s)} & \cdots & \gamma_{p-2}^{(s)} \\ \vdots & & \ddots & \vdots \\ \gamma_{p-1}^{(s)} & \gamma_{p-2}^{(s)} & \cdots & \gamma_0^{(s)} \end{pmatrix} \begin{pmatrix} \phi_1^{(s)} \\ \phi_2^{(s)} \\ \vdots \\ \phi_p^{(s)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(s)} \\ \gamma_2^{(s)} \\ \vdots \\ \gamma_p^{(s)} \end{pmatrix}
+$$
+
+The innovation variance is:
+
+$$
+\sigma_s^2 = \gamma_0^{(s)} \left(1 - \sum_{k=1}^{p} \phi_k^{(s)} \cdot \frac{\gamma_k^{(s)}}{\gamma_0^{(s)}}\right)
+$$
+
+### Synthesis Procedure
+
+1. For each scale $s_j$, generate a synthetic normalized coefficient series via the AR($p$) recursion:
+
+$$
+\hat{\tilde{W}}(s_j, t) = \mu_{s_j} + \sum_{k=1}^{p} \phi_k^{(s_j)} \left[\hat{\tilde{W}}(s_j, t-k) - \mu_{s_j}\right] + \sigma_{s_j}\,\varepsilon_t
+$$
+
+2. Bootstrap SAWP values from the historical record with replacement to obtain $\{\hat{P}(t)\}_{t=1}^{T}$.
+
+3. Rescale the synthetic coefficients by the bootstrapped SAWP:
+
+$$
+\hat{W}(s_j, t) = \hat{\tilde{W}}(s_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
+$$
+
+4. Reconstruct the synthetic flow via inverse CWT:
+
+$$
+\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{s_j}} \,\text{Re}\!\left[\hat{W}(s_j, t)\right]
+$$
+
+where $c$ is a normalization constant. The reconstructed series is then rescaled to match the observed mean and standard deviation.
+
+5. Enforce non-negativity: $\hat{Q}_t \leftarrow \max(\hat{Q}_t, 0)$.
+
+## Statistical Properties
+
+The method preserves the mean and variance of the annual flow series (exactly, through post-reconstruction adjustment) and the lag-1 autocorrelation (approximately, through the AR models at each scale). The wavelet decomposition and SAWP bootstrapping capture multi-year persistence and non-stationary variance structure, making WARM well suited for flows influenced by climate oscillations or multi-decadal drought regimes.
+
+The power spectrum is approximately preserved through the amplitude structure of the wavelet coefficients. However, the inverse CWT is approximate and requires a mean/variance correction step. Gaussian AR innovations may underrepresent extreme annual flows, and higher moments (skewness, kurtosis) are not explicitly modeled. The method is univariate and does not model spatial dependence.
 
 ## Limitations
 
-- Annual frequency only - for finer resolution, couple with a disaggregation method
-- Univariate (single site) - no native multi-site support
-- Inverse CWT is approximate (PyWavelets); corrected by mean/variance adjustment
-- Edge effects in CWT for short records (< 20 years)
-- Gaussian AR innovations may underrepresent extremes
+- Annual frequency only; for finer resolution, must be coupled with a disaggregation method.
+- Univariate; no native multi-site support.
+- Inverse CWT is approximate; corrected by matching the first two moments.
+- Edge effects in the CWT can degrade quality for short records (fewer than 20 years).
+- Gaussian AR innovations may not adequately represent tail behavior.
 
 ## References
 
@@ -94,4 +126,3 @@ Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Met
 ---
 
 **Implementation:** `src/synhydro/methods/generation/parametric/warm.py`
-**Tests:** `tests/test_warm_generator.py`

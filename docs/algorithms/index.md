@@ -4,26 +4,26 @@ SynHydro implements the following stochastic generation and disaggregation metho
 
 ## Generation Methods
 
-| Algorithm | Class | Type | Frequency | Sites |
-|-----------|-------|------|-----------|-------|
-| [Thomas-Fiering AR(1)](thomas_fiering.md) | `ThomasFieringGenerator` | Parametric | Monthly | Single |
-| [Kirsch Bootstrap](kirsch.md) | `KirschGenerator` | Nonparametric | Monthly | Multi |
-| [Matalas MAR(1)](matalas.md) | `MATALASGenerator` | Parametric | Monthly | Multi |
-| [Phase Randomization](phase_randomization.md) | `PhaseRandomizationGenerator` | Nonparametric | Daily | Single |
-| [WARM](warm.md) | `WARMGenerator` | Parametric | Annual | Single |
-| [Multi-Site HMM](multisite_hmm.md) | `MultiSiteHMMGenerator` | Parametric | Annual | Multi |
-| [ARFIMA](arfima.md) | `ARFIMAGenerator` | Parametric | Monthly/Annual | Single |
-| [KNN Bootstrap](knn_bootstrap.md) | `KNNBootstrapGenerator` | Nonparametric | Monthly/Annual | Single/Multi |
-| [Gaussian/t-Copula](gaussian_copula.md) | `GaussianCopulaGenerator` | Parametric | Monthly | Multi |
-| [Vine Copula](vine_copula.md) | `VineCopulaGenerator` | Parametric | Monthly | Multi |
+| Algorithm | Type | Resolution | Sites |
+|-----------|------|------------|-------|
+| [Thomas-Fiering AR(1)](thomas_fiering.md) | Parametric | Monthly | Univariate |
+| [Kirsch Bootstrap](kirsch.md) | Nonparametric | Monthly | Multisite |
+| [Matalas MAR(1)](matalas.md) | Parametric | Monthly | Multisite |
+| [Phase Randomization](phase_randomization.md) | Nonparametric | Daily | Univariate |
+| [WARM](warm.md) | Parametric | Annual | Univariate |
+| [Multi-Site HMM](multisite_hmm.md) | Parametric | Annual | Multisite |
+| [ARFIMA](arfima.md) | Parametric | Monthly/Annual | Univariate |
+| [KNN Bootstrap](knn_bootstrap.md) | Nonparametric | Monthly/Annual | Univariate/Multisite |
+| [Gaussian/t-Copula](gaussian_copula.md) | Parametric | Monthly | Multisite |
+| [Vine Copula](vine_copula.md) | Parametric | Monthly | Multisite |
 
 ## Disaggregation Methods
 
-| Algorithm | Class | Type | Frequency |
-|-----------|-------|------|-----------|
-| [Nowak KNN](nowak_disaggregation.md) | `NowakDisaggregator` | Nonparametric | Monthly-to-Daily |
-| [Valencia-Schaake](valencia_schaake.md) | `ValenciaSchaakeDisaggregator` | Parametric | Annual-to-Monthly |
-| [Grygier-Stedinger](grygier_stedinger.md) | `GrygierStedingerDisaggregator` | Parametric | Annual-to-Monthly |
+| Algorithm | Type | Resolution |
+|-----------|------|------------|
+| [Nowak KNN](nowak_disaggregation.md) | Nonparametric | Monthly to Daily |
+| [Valencia-Schaake](valencia_schaake.md) | Parametric | Annual to Monthly |
+| [Grygier-Stedinger](grygier_stedinger.md) | Parametric | Annual to Monthly |
 
 ## Key Properties Preserved
 
