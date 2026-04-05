@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#thomas-fiering-1962-with-stedinger-taylor-normalization" class="md-skip">
+        <a href="#thomas-fiering-seasonal-ar1-thomas-and-fiering-1962" class="md-skip">
           Skip to content
         </a>
       
@@ -737,37 +737,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#stedinger-taylor-normalization" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Stedinger-Taylor Normalization
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Parameter Estimation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -779,18 +797,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1293,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#stedinger-taylor-normalization" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Stedinger-Taylor Normalization
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Parameter Estimation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1353,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1398,7 @@
   
 
 
-<h1 id="thomas-fiering-1962-with-stedinger-taylor-normalization">Thomas-Fiering (1962) with Stedinger-Taylor Normalization<a class="headerlink" href="#thomas-fiering-1962-with-stedinger-taylor-normalization" title="Permanent link">&para;</a></h1>
+<h1 id="thomas-fiering-seasonal-ar1-thomas-and-fiering-1962">Thomas-Fiering Seasonal AR(1) (Thomas and Fiering, 1962)<a class="headerlink" href="#thomas-fiering-seasonal-ar1-thomas-and-fiering-1962" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,92 +1419,106 @@
 <td><strong>Sites</strong></td>
 <td>Univariate</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>ThomasFieringGenerator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Thomas-Fiering method generates synthetic monthly streamflow using a seasonal AR(1) model with month-specific parameters. The Stedinger-Taylor (1982) normalization applies a lower-bound adjustment before log transformation, reducing skewness and improving the normality assumption. The method preserves monthly means, standard deviations, and lag-1 serial correlations.</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Resample to monthly</strong> if input is daily or sub-monthly (sum within each month).</li>
-<li><strong>Univariate enforcement</strong> - use first column if multi-site DataFrame is provided.</li>
-<li><strong>Stedinger-Taylor normalization</strong> - for each month m:</li>
-<li>Estimate lower bound:
-     <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>tau_m = (Q_max * Q_min - Q_median^2) / (Q_max + Q_min - 2 * Q_median)
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>tau_m = max(tau_m, 0)
-</span></code></pre></div></li>
-<li>Transform: <code>X_m = log(Q_m - tau_m)</code></li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Monthly statistics</strong> - for each month m, compute from transformed flows X:</li>
-<li>Mean: <code>mu_m</code></li>
-<li>Standard deviation: <code>sigma_m</code></li>
-<li><strong>Lag-1 serial correlations</strong> - for each transition m to m+1:</li>
-<li><code>rho_m = corr(X_m, X_{m+1})</code> (Dec-Jan wraps across year boundary)</li>
-<li><strong>Store parameters</strong> - 48 total (12 months x 4: mu, sigma, rho, tau).</li>
-</ol>
-<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Initialize</strong> first month: <code>X_1 = mu_1 + epsilon * sigma_1</code> where <code>epsilon ~ N(0,1)</code>.</li>
-<li><strong>AR(1) recursion</strong> for each subsequent month:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>X_m = mu_m + rho_m * (sigma_m / sigma_{m-1}) * (X_{m-1} - mu_{m-1})
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>      + sqrt(1 - rho_m^2) * sigma_m * epsilon
-</span></code></pre></div></li>
-<li><strong>Inverse transform</strong>: <code>Q_m = exp(X_m) + tau_m</code></li>
-<li><strong>Non-negativity</strong>: clip to observed monthly minimum.</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>The Thomas-Fiering method generates synthetic monthly streamflow by fitting a first-order autoregressive model with month-specific parameters. A Stedinger-Taylor (1982) lower-bound normalization is applied prior to fitting to improve the Gaussianity of the transformed flows. The model preserves seasonal means, standard deviations, and lag-1 serial correlations while maintaining computational simplicity, making it one of the foundational methods in stochastic hydrology.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>-</td>
-<td>Observed streamflow with DatetimeIndex</td>
+<td><span class="arithmatex">\(Q_{t}\)</span></td>
+<td>Observed monthly streamflow at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this generator instance</td>
+<td><span class="arithmatex">\(\hat{Q}_{t}\)</span></td>
+<td>Synthetic monthly streamflow at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(X_{t}\)</span></td>
+<td>Transformed (normalized) streamflow at time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(m\)</span></td>
+<td>Calendar month index, <span class="arithmatex">\(m \in \{1, 2, \ldots, 12\}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(m(t)\)</span></td>
+<td>Calendar month corresponding to time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mu_m\)</span></td>
+<td>Mean of transformed flows in month <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\sigma_m\)</span></td>
+<td>Standard deviation of transformed flows in month <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\rho_m\)</span></td>
+<td>Lag-1 serial correlation between months <span class="arithmatex">\(m-1\)</span> and <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tau_m\)</span></td>
+<td>Stedinger-Taylor lower bound for month <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\varepsilon_t\)</span></td>
+<td>Independent standard normal variate, <span class="arithmatex">\(\varepsilon_t \sim \mathcal{N}(0, 1)\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Number of complete years in the historical record</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Monthly means and standard deviations (in transformed space)</li>
-<li>Lag-1 serial correlation (month-to-month)</li>
-<li>Seasonal flow patterns (via month-specific parameters)</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Higher-order autocorrelation (lag &gt; 1)
-- Spatial correlations (univariate method)
-- Exact marginal distributions (normality imposed via transformation)</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="stedinger-taylor-normalization">Stedinger-Taylor Normalization<a class="headerlink" href="#stedinger-taylor-normalization" title="Permanent link">&para;</a></h3>
+<p>The observed monthly flows are transformed to approximate normality via a shifted logarithmic transformation. For each month <span class="arithmatex">\(m\)</span>, a lower bound <span class="arithmatex">\(\tau_m\)</span> is estimated from the sample maximum <span class="arithmatex">\(Q_m^{\max}\)</span>, minimum <span class="arithmatex">\(Q_m^{\min}\)</span>, and median <span class="arithmatex">\(\tilde{Q}_m\)</span>:</p>
+<div class="arithmatex">\[
+\tau_m = \frac{Q_m^{\max} \cdot Q_m^{\min} - \tilde{Q}_m^2}{Q_m^{\max} + Q_m^{\min} - 2\,\tilde{Q}_m}
+\]</div>
+<p>If <span class="arithmatex">\(\tau_m &lt; 0\)</span> or <span class="arithmatex">\(\tau_m \geq Q_m^{\min}\)</span>, the estimate is set to zero (reducing to a plain log transform). The forward and inverse transformations are:</p>
+<div class="arithmatex">\[
+X_t = \ln(Q_t - \tau_{m(t)}), \qquad \hat{Q}_t = \exp(\hat{X}_t) + \tau_{m(t)}
+\]</div>
+<h3 id="model-structure">Model Structure<a class="headerlink" href="#model-structure" title="Permanent link">&para;</a></h3>
+<p>In transformed space, the model follows a seasonal AR(1) process. The synthetic value <span class="arithmatex">\(\hat{X}_t\)</span> in month <span class="arithmatex">\(m\)</span> depends on the previous month's value <span class="arithmatex">\(\hat{X}_{t-1}\)</span> in month <span class="arithmatex">\(m-1\)</span>:</p>
+<div class="arithmatex">\[
+\hat{X}_t = \mu_m + \rho_m \frac{\sigma_m}{\sigma_{m-1}} \left( \hat{X}_{t-1} - \mu_{m-1} \right) + \sigma_m \sqrt{1 - \rho_m^2}\;\varepsilon_t
+\]</div>
+<p>where <span class="arithmatex">\(\varepsilon_t \sim \mathcal{N}(0,1)\)</span> are independent innovations. The month indices wrap cyclically (<span class="arithmatex">\(m = 0\)</span> corresponds to <span class="arithmatex">\(m = 12\)</span>).</p>
+<h3 id="parameter-estimation">Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permanent link">&para;</a></h3>
+<p>The model requires 36 parameters: 12 monthly means, 12 monthly standard deviations, and 12 lag-1 correlations (plus 12 transformation bounds <span class="arithmatex">\(\tau_m\)</span>).</p>
+<p>For each month <span class="arithmatex">\(m\)</span>, let <span class="arithmatex">\(\{X_m^{(1)}, \ldots, X_m^{(N)}\}\)</span> be the <span class="arithmatex">\(N\)</span> transformed observations falling in that month. The parameters are estimated as:</p>
+<div class="arithmatex">\[
+\hat{\mu}_m = \frac{1}{N} \sum_{k=1}^{N} X_m^{(k)}, \qquad \hat{\sigma}_m = \sqrt{\frac{1}{N-1} \sum_{k=1}^{N} \left(X_m^{(k)} - \hat{\mu}_m\right)^2}
+\]</div>
+<p>The lag-1 correlation <span class="arithmatex">\(\hat{\rho}_m\)</span> is computed as the Pearson correlation between the set of transformed values in month <span class="arithmatex">\(m-1\)</span> and their paired successors in month <span class="arithmatex">\(m\)</span>, with the December-January transition wrapping across the year boundary.</p>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Estimate <span class="arithmatex">\(\tau_m\)</span> and transform the historical record to obtain <span class="arithmatex">\(\{X_t\}\)</span>.</li>
+<li>Compute <span class="arithmatex">\(\hat{\mu}_m\)</span>, <span class="arithmatex">\(\hat{\sigma}_m\)</span>, and <span class="arithmatex">\(\hat{\rho}_m\)</span> for all <span class="arithmatex">\(m\)</span>.</li>
+<li>Initialize: draw <span class="arithmatex">\(\hat{X}_1 = \hat{\mu}_{m(1)} + \hat{\sigma}_{m(1)} \varepsilon_1\)</span>.</li>
+<li>For each subsequent time step <span class="arithmatex">\(t = 2, 3, \ldots, T\)</span>, generate <span class="arithmatex">\(\hat{X}_t\)</span> using the AR(1) recursion.</li>
+<li>Back-transform: <span class="arithmatex">\(\hat{Q}_t = \exp(\hat{X}_t) + \tau_{m(t)}\)</span>.</li>
+<li>Enforce non-negativity: replace any <span class="arithmatex">\(\hat{Q}_t &lt; 0\)</span> with the historical monthly minimum.</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The model preserves the first two moments (mean and variance) and lag-1 autocorrelation of the transformed flows at the monthly scale. Because the parameters are month-specific, the seasonal cycle of flow statistics is reproduced.</p>
+<p>Higher-order autocorrelations (lag <span class="arithmatex">\(&gt; 1\)</span>) are not explicitly modeled; they arise only indirectly through the chain of lag-1 transitions. The log transformation with lower-bound adjustment reduces positive skewness but does not guarantee that the marginal distributions match the historical ones exactly. The method does not model spatial dependence and is restricted to univariate applications.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Univariate only - no spatial correlation modeling</li>
-<li>First-order memory - misses multi-month drought persistence</li>
-<li>Requires at least 2 complete years; 10+ recommended</li>
-<li>Assumes stationarity (no trends or regime shifts)</li>
+<li>Univariate only; cannot represent inter-site dependence.</li>
+<li>First-order memory limits the representation of multi-month drought persistence.</li>
+<li>Assumes stationarity of the underlying process; trends or regime shifts are not captured.</li>
+<li>Requires a minimum of roughly 10 complete years for stable monthly parameter estimates.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1494,8 +1526,7 @@ Thomas, H.A., and Fiering, M.B. (1962). Mathematical synthesis of streamflow seq
 <p><strong>See also:</strong>
 - Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. <em>Water Resources Research</em>, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/thomas_fiering.py</code>
-<strong>Tests:</strong> <code>tests/test_thomas_fiering_generator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/thomas_fiering.py</code></p>
 
 
 

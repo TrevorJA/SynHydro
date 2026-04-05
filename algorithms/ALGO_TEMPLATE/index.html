@@ -22,7 +22,7 @@
     
     
       
-        <title>[Method Name] ([Author et al. Year]) - SynHydro</title>
+        <title>[Method Name] ([Author et al., Year]) - SynHydro</title>
       
     
     
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              [Method Name] ([Author et al. Year])
+              [Method Name] ([Author et al., Year])
             
           </span>
         </div>
@@ -1144,37 +1144,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Parameter Estimation
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#synthesis-procedure" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1186,18 +1195,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1240,7 +1240,7 @@
   
 
 
-<h1 id="method-name-author-et-al-year">[Method Name] ([Author et al. Year])<a class="headerlink" href="#method-name-author-et-al-year" title="Permanent link">&para;</a></h1>
+<h1 id="method-name-author-et-al-year">[Method Name] ([Author et al., Year])<a class="headerlink" href="#method-name-author-et-al-year" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1251,7 +1251,7 @@
 <tbody>
 <tr>
 <td><strong>Type</strong></td>
-<td>[Parametric / Nonparametric / ML]</td>
+<td>[Parametric / Nonparametric]</td>
 </tr>
 <tr>
 <td><strong>Resolution</strong></td>
@@ -1261,60 +1261,68 @@
 <td><strong>Sites</strong></td>
 <td>[Univariate / Multisite]</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>[ClassName]</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>[2-4 sentence description: what the method does, its core mechanism, and what it's best suited for.]</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li>[Step]</li>
-<li>[Step]</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li>[Step with key equations in code blocks]</li>
-<li>[Step]</li>
-</ol>
-<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<ol>
-<li>[Step with key equations in code blocks]</li>
-<li>[Step]</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>[2-4 sentences describing the method's core mechanism, its statistical basis, and what it is best suited for. Write for a reader with hydrology background who may be new to stochastic generation. Avoid implementation details.]</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
+<p>[Table of mathematical symbols used in this document. Standardize where possible across all algorithm docs.]</p>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>param</code></td>
-<td>type</td>
-<td>value</td>
-<td>What it controls</td>
+<td><span class="arithmatex">\(Q_t\)</span></td>
+<td>Observed streamflow at time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat{Q}_t\)</span></td>
+<td>Synthetic (generated) streamflow at time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Length of the historical record</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S\)</span></td>
+<td>Number of sites</td>
+</tr>
+<tr>
+<td>...</td>
+<td>...</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>[Property 1]</li>
-<li>[Property 2]</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- [Limitation as property]</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="model-structure">Model Structure<a class="headerlink" href="#model-structure" title="Permanent link">&para;</a></h3>
+<p>[Define the core mathematical model. State the key equation(s) that characterize the method. Use display math for primary equations:]</p>
+<div class="arithmatex">\[
+\hat{Q}_t = f(\cdot)
+\]</div>
+<h3 id="parameter-estimation">Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permanent link">&para;</a></h3>
+<p>[Describe how model parameters are estimated from the observed data. Provide estimator equations. If multiple estimation approaches exist, present each with its assumptions.]</p>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<p>[Step-by-step procedure for generating synthetic sequences from the fitted model. Mix numbered prose steps with display equations. This should read like a formal algorithm description, not pseudocode.]</p>
+<ol>
+<li>[Initialize ...]</li>
+<li>For each time step <span class="arithmatex">\(t = 1, \ldots, T\)</span>:</li>
+</ol>
+<div class="arithmatex">\[
+\hat{Q}_t = \ldots
+\]</div>
+<ol>
+<li>[Post-processing ...]</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>[Discuss what statistical properties the model preserves and which it does not. Frame in terms of moments, correlation structure, spectral properties, or distributional characteristics. Use prose rather than checklists.]</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>[Key limitation 1]</li>
-<li>[Key limitation 2]</li>
+<li>[Precise statement of known shortcoming or assumption]</li>
+<li>[...]</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1322,8 +1330,7 @@
 <p><strong>See also:</strong>
 - [Supporting citation]</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/[category]/[file].py</code>
-<strong>Tests:</strong> <code>tests/test_[name].py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/[category]/[subcategory]/[file].py</code></p>
 
 
 

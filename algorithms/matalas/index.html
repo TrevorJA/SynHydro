@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#matalas-1967-multi-site-mar1" class="md-skip">
+        <a href="#matalas-multi-site-mar1-matalas-1967" class="md-skip">
           Skip to content
         </a>
       
@@ -806,37 +806,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#standardization" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Standardization
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Parameter Estimation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -848,18 +866,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1293,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#standardization" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Standardization
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Parameter Estimation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1353,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1398,7 @@
   
 
 
-<h1 id="matalas-1967-multi-site-mar1">Matalas (1967) Multi-Site MAR(1)<a class="headerlink" href="#matalas-1967-multi-site-mar1" title="Permanent link">&para;</a></h1>
+<h1 id="matalas-multi-site-mar1-matalas-1967">Matalas Multi-Site MAR(1) (Matalas, 1967)<a class="headerlink" href="#matalas-multi-site-mar1-matalas-1967" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,101 +1419,125 @@
 <td><strong>Sites</strong></td>
 <td>Multisite</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>MATALASGenerator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Matalas MAR(1) model is the classical parametric baseline for multi-site stochastic streamflow generation. It extends the univariate Thomas-Fiering model to n sites by fitting a matrix autoregressive model to standardized monthly flows. A separate pair of coefficient matrices is estimated for each of the 12 calendar-month transitions.</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Validate input; resample to monthly if daily data are provided.</li>
-<li>Clip values to 1e-6 to avoid log of zero.</li>
-<li>Optionally apply <code>log(Q + 1)</code> transformation to reduce skewness.</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Standardize</strong> observed flows by monthly means and standard deviations:
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>Z(t) = (Q(t) - mu_m) / sigma_m,    m = month(t)
-</span></code></pre></div></li>
-<li><strong>Estimate cross-correlation matrices</strong> for each transition m to m+1:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>S0(m) = (1/(n-1)) * Z(m)^T * Z(m)         # lag-0 covariance
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>S1(m) = (1/(n-1)) * Z(m+1)^T * Z(m)        # lag-1 cross-covariance
-</span></code></pre></div></li>
-<li><strong>Solve for coefficient matrices:</strong>
-   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>A(m) = S1(m) * S0(m)^{-1}                   # AR coefficient matrix
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>M(m) = S0(m+1) - A(m) * S0(m) * A(m)^T      # innovation covariance
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>B(m) = cholesky(M(m))                         # lower Cholesky factor
-</span></code></pre></div>
-   If M(m) is not positive semi-definite, project to nearest PSD matrix via eigenvalue clipping before Cholesky decomposition.</li>
-</ol>
-<p>The December to January transition wraps across the year boundary.</p>
-<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Initialize</strong>: <code>Z_0 ~ N(0, I)</code></li>
-<li><strong>Recurse</strong> for each subsequent month:
-   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Z(t+1) = A(m) * Z(t) + B(m) * epsilon(t+1),    epsilon ~ N(0, I)
-</span></code></pre></div></li>
-<li><strong>Back-transform</strong> to flow space:
-   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Q(t) = sigma_m * Z(t) + mu_m
-</span></code></pre></div></li>
-<li>If log transform was applied: <code>Q = exp(Q) - 1</code></li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>The Matalas model extends the univariate Thomas-Fiering seasonal AR(1) to multiple sites by fitting a matrix autoregressive process to standardized monthly flows. A separate pair of transition matrices (autoregressive coefficients and innovation structure) is estimated for each of the 12 calendar-month transitions, capturing both temporal persistence and contemporaneous spatial dependence across a network of gauges.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.DataFrame</code> or <code>pd.Series</code></td>
-<td>-</td>
-<td>Observed streamflow with DatetimeIndex</td>
+<td><span class="arithmatex">\(\mathbf{Q}_t \in \mathbb{R}^S\)</span></td>
+<td>Observed monthly flow vector at time <span class="arithmatex">\(t\)</span> across <span class="arithmatex">\(S\)</span> sites</td>
 </tr>
 <tr>
-<td><code>log_transform</code></td>
-<td><code>bool</code></td>
-<td><code>True</code></td>
-<td>Apply log(Q+1) before standardization</td>
+<td><span class="arithmatex">\(\hat{\mathbf{Q}}_t\)</span></td>
+<td>Synthetic monthly flow vector at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this generator instance</td>
+<td><span class="arithmatex">\(\mathbf{Z}_t \in \mathbb{R}^S\)</span></td>
+<td>Standardized flow vector at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(m(t)\)</span></td>
+<td>Calendar month corresponding to time <span class="arithmatex">\(t\)</span>, <span class="arithmatex">\(m \in \{1, \ldots, 12\}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\boldsymbol{\mu}_m \in \mathbb{R}^S\)</span></td>
+<td>Vector of site means for month <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\boldsymbol{\sigma}_m \in \mathbb{R}^S\)</span></td>
+<td>Vector of site standard deviations for month <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{S}_0^{(m)} \in \mathbb{R}^{S \times S}\)</span></td>
+<td>Lag-0 cross-correlation matrix for month <span class="arithmatex">\(m\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{S}_1^{(m)} \in \mathbb{R}^{S \times S}\)</span></td>
+<td>Lag-1 cross-correlation matrix (month <span class="arithmatex">\(m+1\)</span> on month <span class="arithmatex">\(m\)</span>)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{A}^{(m)} \in \mathbb{R}^{S \times S}\)</span></td>
+<td>Autoregressive coefficient matrix for the transition from month <span class="arithmatex">\(m\)</span> to <span class="arithmatex">\(m+1\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{B}^{(m)} \in \mathbb{R}^{S \times S}\)</span></td>
+<td>Lower Cholesky factor of the innovation covariance</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\boldsymbol{\varepsilon}_t \in \mathbb{R}^S\)</span></td>
+<td>Independent standard normal innovation vector</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Number of complete years in the historical record</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Monthly means and standard deviations at each site</li>
-<li>Lag-1 serial correlation at each site</li>
-<li>Contemporaneous cross-site correlations</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Higher-order autocorrelation (lag &gt; 1)
-- Non-Gaussian marginal distributions</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="standardization">Standardization<a class="headerlink" href="#standardization" title="Permanent link">&para;</a></h3>
+<p>An optional log transformation <span class="arithmatex">\(Q \mapsto \ln(Q + 1)\)</span> may be applied first to reduce skewness. Flows are then standardized by monthly statistics:</p>
+<div class="arithmatex">\[
+Z_{t,s} = \frac{Q_{t,s} - \mu_{m(t),s}}{\sigma_{m(t),s}}, \qquad s = 1, \ldots, S
+\]</div>
+<p>where <span class="arithmatex">\(\mu_{m,s}\)</span> and <span class="arithmatex">\(\sigma_{m,s}\)</span> are the sample mean and standard deviation of site <span class="arithmatex">\(s\)</span> in month <span class="arithmatex">\(m\)</span>.</p>
+<h3 id="model-structure">Model Structure<a class="headerlink" href="#model-structure" title="Permanent link">&para;</a></h3>
+<p>The standardized flow vectors follow a periodic MAR(1) process:</p>
+<div class="arithmatex">\[
+\mathbf{Z}_{t+1} = \mathbf{A}^{(m)} \mathbf{Z}_t + \mathbf{B}^{(m)} \boldsymbol{\varepsilon}_{t+1}, \qquad \boldsymbol{\varepsilon}_{t+1} \sim \mathcal{N}(\mathbf{0}, \mathbf{I})
+\]</div>
+<p>where <span class="arithmatex">\(m = m(t)\)</span> is the calendar month of time <span class="arithmatex">\(t\)</span> and the month indices wrap cyclically (<span class="arithmatex">\(m = 12\)</span> transitions to <span class="arithmatex">\(m = 1\)</span>).</p>
+<h3 id="parameter-estimation">Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permanent link">&para;</a></h3>
+<p>For each month <span class="arithmatex">\(m\)</span>, let <span class="arithmatex">\(\mathbf{Z}^{(m)}\)</span> denote the <span class="arithmatex">\(N \times S\)</span> matrix of standardized observations falling in month <span class="arithmatex">\(m\)</span>. The lag-0 and lag-1 cross-correlation matrices are:</p>
+<div class="arithmatex">\[
+\mathbf{S}_0^{(m)} = \frac{1}{N - 1} \left(\mathbf{Z}^{(m)}\right)^\top \mathbf{Z}^{(m)}, \qquad \mathbf{S}_1^{(m)} = \frac{1}{N - 1} \left(\mathbf{Z}^{(m+1)}\right)^\top \mathbf{Z}^{(m)}
+\]</div>
+<p>The autoregressive coefficient matrix is obtained by:</p>
+<div class="arithmatex">\[
+\mathbf{A}^{(m)} = \mathbf{S}_1^{(m)} \left(\mathbf{S}_0^{(m)}\right)^{-1}
+\]</div>
+<p>The innovation covariance is the residual after accounting for the autoregressive component:</p>
+<div class="arithmatex">\[
+\mathbf{M}^{(m)} = \mathbf{S}_0^{(m+1)} - \mathbf{A}^{(m)} \mathbf{S}_0^{(m)} \left(\mathbf{A}^{(m)}\right)^\top
+\]</div>
+<p><span class="arithmatex">\(\mathbf{M}^{(m)}\)</span> is symmetrized and, if necessary, repaired to positive semi-definiteness via spectral projection (setting negative eigenvalues to zero). The Cholesky factorization then yields:</p>
+<div class="arithmatex">\[
+\mathbf{B}^{(m)} = \text{chol}(\mathbf{M}^{(m)}), \qquad \mathbf{M}^{(m)} = \mathbf{B}^{(m)} \left(\mathbf{B}^{(m)}\right)^\top
+\]</div>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Initialize <span class="arithmatex">\(\mathbf{Z}_0 \sim \mathcal{N}(\mathbf{0}, \mathbf{I})\)</span>.</li>
+<li>For each time step <span class="arithmatex">\(t = 0, 1, \ldots, T-1\)</span>, with <span class="arithmatex">\(m = m(t)\)</span>:</li>
+</ol>
+<div class="arithmatex">\[
+\mathbf{Z}_{t+1} = \mathbf{A}^{(m)} \mathbf{Z}_t + \mathbf{B}^{(m)} \boldsymbol{\varepsilon}_{t+1}
+\]</div>
+<ol>
+<li>Back-transform to flow space:</li>
+</ol>
+<div class="arithmatex">\[
+\hat{Q}_{t,s} = \sigma_{m(t),s} \cdot Z_{t,s} + \mu_{m(t),s}
+\]</div>
+<ol>
+<li>If a log transformation was applied, invert: <span class="arithmatex">\(\hat{Q}_{t,s} \leftarrow \exp(\hat{Q}_{t,s}) - 1\)</span>, then enforce non-negativity.</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The MAR(1) model preserves the first two moments (mean and variance) and the lag-1 autocorrelation at each site, as well as the contemporaneous cross-site correlation structure, all at the monthly scale. The seasonal cycle of these statistics is captured through the 12 sets of month-specific matrices.</p>
+<p>Higher-order temporal autocorrelations (lag <span class="arithmatex">\(&gt; 1\)</span>) emerge only indirectly through the chain of first-order transitions and are generally underestimated. The model assumes that the standardized residuals are multivariate Gaussian, which may inadequately represent heavy-tailed or skewed marginal distributions. Long-range persistence (Hurst phenomenon) is not captured.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>First-order memory only (lag-1)</li>
-<li>Normality assumption after transformation</li>
-<li>Requires sufficient record length for stable covariance estimation</li>
-<li>Covariance matrices may require PSD repair with limited data</li>
+<li>First-order memory only; multi-month drought persistence is underrepresented.</li>
+<li>Multivariate Gaussian assumption may not hold for strongly skewed flows.</li>
+<li>Covariance matrices may require positive-definiteness repair when the record is short relative to the number of sites.</li>
+<li>Stationarity is assumed; the model does not accommodate trends or regime shifts.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1503,8 +1545,7 @@ Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. <em>Water 
 <p><strong>See also:</strong>
 - Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). <em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/matalas.py</code>
-<strong>Tests:</strong> <code>tests/test_matalas_generator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/matalas.py</code></p>
 
 
 

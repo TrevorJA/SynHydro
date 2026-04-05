@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#nowak-2010-knn-temporal-disaggregation" class="md-skip">
+        <a href="#nowak-knn-temporal-disaggregation-nowak-et-al-2010" class="md-skip">
           Skip to content
         </a>
       
@@ -967,37 +967,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#analog-pool-construction" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Analog Pool Construction
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#neighbor-selection" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Neighbor Selection
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#proportional-disaggregation" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Proportional Disaggregation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#month-boundary-smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Month Boundary Smoothing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1009,18 +1036,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1302,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#analog-pool-construction" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Analog Pool Construction
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#neighbor-selection" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Neighbor Selection
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#proportional-disaggregation" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Proportional Disaggregation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#month-boundary-smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Month Boundary Smoothing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1371,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1416,7 @@
   
 
 
-<h1 id="nowak-2010-knn-temporal-disaggregation">Nowak (2010) KNN Temporal Disaggregation<a class="headerlink" href="#nowak-2010-knn-temporal-disaggregation" title="Permanent link">&para;</a></h1>
+<h1 id="nowak-knn-temporal-disaggregation-nowak-et-al-2010">Nowak KNN Temporal Disaggregation (Nowak et al., 2010)<a class="headerlink" href="#nowak-knn-temporal-disaggregation-nowak-et-al-2010" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,99 +1437,88 @@
 <td><strong>Sites</strong></td>
 <td>Univariate / Multisite</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>NowakDisaggregator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, it identifies the K nearest historic months by total flow, randomly selects one using Lall-Sharma kernel weights, and applies its daily proportions to the synthetic total.</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Validate and store daily observed flows.</li>
-<li>Build historic monthly totals at the index gauge (sum across all sites for multi-site disaggregation).</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<p>For each calendar month m, fit a <code>sklearn.NearestNeighbors</code> model on the scalar historic monthly totals. Only historic months within +/- <code>max_month_shift</code> calendar days of month m's center are included in the pool.</p>
-<h3 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h3>
-<p>For each synthetic monthly flow <code>Q_syn_m</code>:</p>
-<ol>
-<li><strong>Find neighbors</strong> - query the KNN model for the K nearest historic months by Euclidean distance on total flow.</li>
-<li><strong>Select one neighbor</strong> - draw with probability proportional to Lall-Sharma kernel weights (Lall and Sharma 1996). Neighbors are ranked by distance (rank i = 1 is closest), then selected with probability:
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>K(i) = (1/i) / sum_{j=1}^{K} (1/j)
-</span></code></pre></div>
-   This harmonic weighting favors closer analogs while maintaining stochastic diversity.</li>
-<li><strong>Disaggregate</strong> - apply the selected month's daily proportions:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>q_d = Q_syn_m * (q*_d / sum(q*_d&#39;))
-</span></code></pre></div>
-   For multi-site data, each site is disaggregated independently using the same selected analog month.</li>
-<li><strong>Smooth month boundaries</strong> (if <code>blend_days &gt; 0</code>) - apply weighted blending across adjacent months to reduce discontinuities at month transitions, then rescale each month to preserve the original monthly total exactly.</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the <span class="arithmatex">\(K\)</span> nearest historical months (by total flow magnitude) are identified, one is selected stochastically using Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>-</td>
-<td>Observed daily streamflow with DatetimeIndex</td>
+<td><span class="arithmatex">\(Q_m^{\text{syn}}\)</span></td>
+<td>Synthetic total flow for month <span class="arithmatex">\(m\)</span></td>
 </tr>
 <tr>
-<td><code>n_neighbors</code></td>
-<td><code>int</code></td>
-<td><code>5</code></td>
-<td>K - number of candidate neighbors</td>
+<td><span class="arithmatex">\(q_d^{\text{syn}}\)</span></td>
+<td>Synthetic daily flow on day <span class="arithmatex">\(d\)</span></td>
 </tr>
 <tr>
-<td><code>max_month_shift</code></td>
-<td><code>int</code></td>
-<td><code>7</code></td>
-<td>Days of calendar flexibility around each month</td>
+<td><span class="arithmatex">\(q_d^*\)</span></td>
+<td>Observed daily flow on day <span class="arithmatex">\(d\)</span> of the selected analog month</td>
 </tr>
 <tr>
-<td><code>blend_days</code></td>
-<td><code>int</code></td>
-<td><code>2</code></td>
-<td>Days of overlap smoothing at month boundaries to reduce discontinuities (0 = no blending)</td>
+<td><span class="arithmatex">\(K\)</span></td>
+<td>Number of nearest neighbors</td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this disaggregator instance</td>
+<td><span class="arithmatex">\(w_i\)</span></td>
+<td>Lall-Sharma kernel weight for the <span class="arithmatex">\(i\)</span>-th closest neighbor</td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(b\)</span></td>
+<td>Number of blending days at month boundaries</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N_m\)</span></td>
+<td>Number of historical months in the candidate pool for month <span class="arithmatex">\(m\)</span></td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Daily flow patterns within each month (borrowed from historical record)</li>
-<li>Monthly totals (exact, by construction - preserved even after boundary blending)</li>
-<li>Multi-site consistency (same analog month applied to all sites)</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Month-to-month daily transitions (partially addressed by <code>blend_days</code> boundary smoothing)
-- Daily patterns outside historical range</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="analog-pool-construction">Analog Pool Construction<a class="headerlink" href="#analog-pool-construction" title="Permanent link">&para;</a></h3>
+<p>For each calendar month <span class="arithmatex">\(m\)</span>, a pool of candidate historical months is assembled. A tolerance of <span class="arithmatex">\(\pm b_{\text{shift}}\)</span> calendar days around the center of month <span class="arithmatex">\(m\)</span> is allowed, which provides flexibility in matching months near the calendar boundary. The candidate pool stores the total monthly flow and the corresponding daily flow time series for each historical month.</p>
+<h3 id="neighbor-selection">Neighbor Selection<a class="headerlink" href="#neighbor-selection" title="Permanent link">&para;</a></h3>
+<p>For each synthetic monthly flow <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>, the <span class="arithmatex">\(K\)</span> nearest historical months are found by Euclidean distance on total monthly flow. The Lall-Sharma kernel assigns selection probability to the <span class="arithmatex">\(i\)</span>-th closest neighbor:</p>
+<div class="arithmatex">\[
+w_i = \frac{1/i}{\displaystyle\sum_{j=1}^{K} 1/j}, \qquad i = 1, \ldots, K
+\]</div>
+<p>One neighbor is drawn from the <span class="arithmatex">\(K\)</span> candidates with these probabilities.</p>
+<h3 id="proportional-disaggregation">Proportional Disaggregation<a class="headerlink" href="#proportional-disaggregation" title="Permanent link">&para;</a></h3>
+<p>The daily flows of the selected analog month are used as a template. Let <span class="arithmatex">\(\{q_d^*\}_{d=1}^{D}\)</span> denote the observed daily flows in the selected analog month (with <span class="arithmatex">\(D\)</span> days). The synthetic daily flows are computed by proportional scaling:</p>
+<div class="arithmatex">\[
+q_d^{\text{syn}} = Q_m^{\text{syn}} \cdot \frac{q_d^*}{\displaystyle\sum_{d'=1}^{D} q_{d'}^*}
+\]</div>
+<p>This ensures that the synthetic daily flows sum exactly to the synthetic monthly total. For multisite data, each site is disaggregated independently using the same selected analog month, preserving inter-site consistency within each month.</p>
+<h3 id="month-boundary-smoothing">Month Boundary Smoothing<a class="headerlink" href="#month-boundary-smoothing" title="Permanent link">&para;</a></h3>
+<p>To reduce discontinuities at month transitions, an optional blending step applies a weighted average across <span class="arithmatex">\(b\)</span> days on each side of the boundary. After smoothing, each month is rescaled to restore the original monthly total:</p>
+<div class="arithmatex">\[
+q_d^{\text{smoothed}} \leftarrow q_d^{\text{smoothed}} \cdot \frac{Q_m^{\text{syn}}}{\displaystyle\sum_{d'} q_{d'}^{\text{smoothed}}}
+\]</div>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Fit a KNN model on the historical monthly flow totals for each calendar month.</li>
+<li>For each synthetic monthly flow <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>:</li>
+<li>Query the <span class="arithmatex">\(K\)</span> nearest neighbors by total flow.</li>
+<li>Select one analog month using the Lall-Sharma kernel weights.</li>
+<li>Disaggregate by applying the analog's daily proportions to <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>.</li>
+<li>Optionally smooth month boundaries and rescale to preserve monthly totals.</li>
+<li>Enforce non-negativity.</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>Monthly totals are preserved exactly by construction. Daily flow patterns within each month are drawn from the historical record, maintaining realistic intra-monthly dynamics including storm hydrographs and recession curves. Multisite consistency within each month is preserved through joint analog selection.</p>
+<p>Month-to-month daily transitions are not explicitly modeled, though the optional boundary blending partially addresses this. The method cannot produce daily patterns not observed in the historical record, limiting its ability to represent unprecedented extremes. Daily autocorrelation across month boundaries depends on the quality of analog matching.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Cannot produce daily patterns not seen in the historical record</li>
-<li>Leap year handling requires proportional adjustment when analog and target months differ</li>
-<li>Quality depends on having a sufficiently long historical record to find good analogs</li>
+<li>Cannot produce daily flow patterns outside the historical range.</li>
+<li>Leap year handling requires proportional adjustment when the analog and target months differ in length.</li>
+<li>Quality depends on having a sufficiently long historical record to find good analogs across the range of synthetic monthly totals.</li>
+<li>Month-to-month daily transitions may exhibit discontinuities despite blending.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1501,8 +1526,7 @@ Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric st
 <p><strong>See also:</strong>
 - Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/nowak.py</code>
-<strong>Tests:</strong> <code>tests/test_nowak_disaggregator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/nowak.py</code></p>
 
 
 

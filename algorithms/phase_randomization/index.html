@@ -829,37 +829,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#normal-score-transform" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Normal Score Transform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#fourier-decomposition" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Fourier Decomposition
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#phase-randomization" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Phase Randomization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kappa-distribution-and-back-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kappa Distribution and Back-Transformation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -871,18 +898,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1302,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#normal-score-transform" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Normal Score Transform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#fourier-decomposition" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Fourier Decomposition
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#phase-randomization" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Phase Randomization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kappa-distribution-and-back-transformation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kappa Distribution and Back-Transformation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1371,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1416,7 @@
   
 
 
-<h1 id="phase-randomization-brunner-et-al-2019">Phase Randomization (Brunner et al. 2019)<a class="headerlink" href="#phase-randomization-brunner-et-al-2019" title="Permanent link">&para;</a></h1>
+<h1 id="phase-randomization-brunner-et-al-2019">Phase Randomization (Brunner et al., 2019)<a class="headerlink" href="#phase-randomization-brunner-et-al-2019" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,120 +1437,142 @@
 <td><strong>Sites</strong></td>
 <td>Univariate</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>PhaseRandomizationGenerator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>Phase randomization generates synthetic daily streamflow by randomizing the Fourier phase spectrum while preserving the amplitude (power) spectrum. This maintains both short-range (daily autocorrelation) and long-range (Hurst phenomenon) temporal dependence. A four-parameter kappa distribution fitted per day-of-year allows extrapolation beyond the observed range.</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Remove leap days</strong> - ensures consistent 365-day years.</li>
-<li><strong>Create day-of-year index</strong> (1-365).</li>
-<li><strong>Validate</strong> - minimum 730 days (2 complete years), no missing observations.</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Marginal distribution fitting</strong> (if <code>marginal='kappa'</code>) - for each day d:</li>
-<li>Define moving window of +/- <code>win_h_length</code> days (circular, wraps at year boundary)</li>
-<li>Extract all observations in window across all years</li>
-<li>Fit four-parameter kappa distribution via L-moment matching</li>
-<li><strong>Normal score transform</strong> - for each day d:</li>
-<li>Rank all observations across years</li>
-<li>Generate a standard normal sample of the same size, sort it</li>
-<li>Map observed ranks to sorted normal values (rank-matching)</li>
-<li>Result: normalized series with approximately N(0,1) marginals per day</li>
-<li><strong>Fourier transform</strong> of normalized series:</li>
-<li>Compute FFT; extract modulus (amplitude) and phases</li>
-<li>Store first-half indices and mirror indices for conjugate symmetry</li>
-</ol>
-<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Phase randomization</strong>:</li>
-<li>Keep DC component (index 0) unchanged</li>
-<li>For positive frequencies: generate random phases from Uniform(-pi, pi)</li>
-<li>Construct <code>FT_new[k] = modulus[k] * exp(i * phase_random[k])</code></li>
-<li>Apply conjugate symmetry for negative frequencies</li>
-<li><strong>Inverse FFT</strong> - produces phase-randomized series in normalized domain.</li>
-<li><strong>Back-transform to original distribution</strong> - for each day d:</li>
-<li>If kappa: generate kappa sample, rank-match against normalized values</li>
-<li>If empirical: rank-match directly against observed (no extrapolation)</li>
-<li><strong>Non-negativity</strong> - replace negative values with <code>Uniform(0, min_obs_d)</code>.</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>Phase randomization generates synthetic daily streamflow by replacing the Fourier phase spectrum with uniform random phases while preserving the amplitude (power) spectrum. Because the power spectrum encodes all second-order temporal structure, this approach maintains both short-range autocorrelation and long-range dependence (the Hurst phenomenon). A four-parameter kappa distribution, fitted per day of year via L-moments, enables the back-transformation to reproduce or extrapolate beyond the observed marginal distributions.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>-</td>
-<td>Observed daily streamflow with DatetimeIndex</td>
+<td><span class="arithmatex">\(Q_t\)</span></td>
+<td>Observed daily streamflow at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>marginal</code></td>
-<td><code>str</code></td>
-<td><code>'kappa'</code></td>
-<td>Marginal distribution: <code>'kappa'</code> (extrapolation) or <code>'empirical'</code></td>
+<td><span class="arithmatex">\(\hat{Q}_t\)</span></td>
+<td>Synthetic daily streamflow at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>win_h_length</code></td>
-<td><code>int</code></td>
-<td><code>15</code></td>
-<td>Half-window for daily distribution fitting (total = 2*h + 1 days)</td>
+<td><span class="arithmatex">\(X_t\)</span></td>
+<td>Normal score-transformed series</td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this generator instance</td>
+<td><span class="arithmatex">\(\mathcal{F}\{X\}_k\)</span></td>
+<td>Discrete Fourier Transform of <span class="arithmatex">\(X\)</span> at frequency index <span class="arithmatex">\(k\)</span></td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(A_k\)</span></td>
+<td>Amplitude (modulus) at frequency <span class="arithmatex">\(k\)</span>, $A_k =</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\varphi_k\)</span></td>
+<td>Original phase at frequency <span class="arithmatex">\(k\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\varphi_k'\)</span></td>
+<td>Randomized phase, <span class="arithmatex">\(\varphi_k' \sim \text{Uniform}(-\pi, \pi)\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Length of the observed series (in days)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(d\)</span></td>
+<td>Day-of-year index, <span class="arithmatex">\(d \in \{1, \ldots, 365\}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\xi, \alpha, \kappa, h\)</span></td>
+<td>Kappa distribution parameters (location, scale, shape 1, shape 2)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\lambda_1, \lambda_2\)</span></td>
+<td>First and second L-moments</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tau_3, \tau_4\)</span></td>
+<td>L-skewness and L-kurtosis ratios</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Full power spectrum (all temporal autocorrelations, in expectation)</li>
-<li>Long-range dependence (Hurst coefficient)</li>
-<li>Day-of-year marginal distributions (via kappa or empirical)</li>
-<li>Seasonal patterns</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Phase coherence (randomized by design)
-- Exact autocorrelations (preserved only in expectation across ensemble)</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="normal-score-transform">Normal Score Transform<a class="headerlink" href="#normal-score-transform" title="Permanent link">&para;</a></h3>
+<p>For each day of year <span class="arithmatex">\(d\)</span>, the observed values across all years are ranked and mapped to standard normal quantiles:</p>
+<div class="arithmatex">\[
+X_t = \Phi^{-1}\!\left(\frac{r_d(Q_t) - 0.5}{N_d}\right)
+\]</div>
+<p>where <span class="arithmatex">\(r_d(\cdot)\)</span> is the rank among the <span class="arithmatex">\(N_d\)</span> observations for day <span class="arithmatex">\(d\)</span> and <span class="arithmatex">\(\Phi^{-1}\)</span> is the standard normal inverse CDF. This produces a series <span class="arithmatex">\(\{X_t\}\)</span> with approximately <span class="arithmatex">\(\mathcal{N}(0,1)\)</span> marginals at each calendar day.</p>
+<h3 id="fourier-decomposition">Fourier Decomposition<a class="headerlink" href="#fourier-decomposition" title="Permanent link">&para;</a></h3>
+<p>The Discrete Fourier Transform of the normalized series yields:</p>
+<div class="arithmatex">\[
+\mathcal{F}\{X\}_k = A_k\,e^{i\varphi_k}, \qquad k = 0, 1, \ldots, N-1
+\]</div>
+<p>The power spectrum <span class="arithmatex">\(|A_k|^2\)</span> encodes all second-order temporal dependence, including the spectral slope that characterizes long-range persistence.</p>
+<h3 id="phase-randomization">Phase Randomization<a class="headerlink" href="#phase-randomization" title="Permanent link">&para;</a></h3>
+<p>New phases are drawn independently from a uniform distribution:</p>
+<div class="arithmatex">\[
+\varphi_k' \sim \text{Uniform}(-\pi, \pi), \qquad k = 1, \ldots, \lfloor N/2 \rfloor
+\]</div>
+<p>The surrogate spectrum is constructed by combining the original amplitudes with the random phases:</p>
+<div class="arithmatex">\[
+\mathcal{F}\{\hat{X}\}_k = A_k\,e^{i\varphi_k'}
+\]</div>
+<p>The DC component (<span class="arithmatex">\(k = 0\)</span>) is preserved unchanged. Conjugate symmetry is imposed for the negative frequencies to ensure a real-valued inverse:</p>
+<div class="arithmatex">\[
+\mathcal{F}\{\hat{X}\}_{N-k} = \overline{\mathcal{F}\{\hat{X}\}_k}
+\]</div>
+<p>For even-length signals, the Nyquist component (<span class="arithmatex">\(k = N/2\)</span>) is set to its real modulus. The phase-randomized series in normal space is recovered via the inverse FFT:</p>
+<div class="arithmatex">\[
+\hat{X}_t = \text{Re}\left(\mathcal{F}^{-1}\{\mathcal{F}\{\hat{X}\}\}_t\right)
+\]</div>
+<h3 id="kappa-distribution-and-back-transformation">Kappa Distribution and Back-Transformation<a class="headerlink" href="#kappa-distribution-and-back-transformation" title="Permanent link">&para;</a></h3>
+<p>For each day of year <span class="arithmatex">\(d\)</span>, a four-parameter kappa distribution (Hosking, 1994) is fitted via L-moment matching. The quantile function is:</p>
+<div class="arithmatex">\[
+F^{-1}(u) = \xi + \frac{\alpha}{\kappa}\left[1 - \left(\frac{1 - u^h}{h}\right)^{\!\kappa}\right]
+\]</div>
+<p>with special cases: when <span class="arithmatex">\(h = 0\)</span> it reduces to the generalized extreme value (GEV) distribution; when <span class="arithmatex">\(\kappa = 0\)</span> it further reduces to the Gumbel distribution.</p>
+<p>The L-moments are computed from probability weighted moments <span class="arithmatex">\(b_0, b_1, b_2, b_3\)</span>:</p>
+<div class="arithmatex">\[
+\lambda_1 = b_0, \quad \lambda_2 = 2b_1 - b_0, \quad \tau_3 = \frac{2(3b_2 - b_0)}{2b_1 - b_0} - 3, \quad \tau_4 = \frac{5(2(2b_3 - 3b_2) + b_0)}{2b_1 - b_0} + 6
+\]</div>
+<p>The shape parameters <span class="arithmatex">\((\kappa, h)\)</span> are determined by minimizing the squared difference between the sample <span class="arithmatex">\((\tau_3, \tau_4)\)</span> and the theoretical L-moment ratios of the kappa distribution. The location and scale parameters <span class="arithmatex">\((\xi, \alpha)\)</span> are then derived analytically from <span class="arithmatex">\(\lambda_1\)</span> and <span class="arithmatex">\(\lambda_2\)</span>.</p>
+<p>The back-transformation maps the phase-randomized normal scores to the fitted kappa distribution by rank matching: for each day <span class="arithmatex">\(d\)</span>, the ranks of <span class="arithmatex">\(\hat{X}_t\)</span> among all values for that day are computed, a kappa sample of the same size is generated and sorted, and the ranks are used to select the corresponding kappa quantiles. If the empirical marginal option is used instead, observed values replace the kappa sample, preventing extrapolation beyond the historical range.</p>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Remove leap days and construct the day-of-year index.</li>
+<li>Fit the kappa distribution for each day <span class="arithmatex">\(d\)</span> (using a moving window of <span class="arithmatex">\(\pm h\)</span> days).</li>
+<li>Apply the normal score transform to obtain <span class="arithmatex">\(\{X_t\}\)</span>.</li>
+<li>Compute the FFT and extract amplitudes <span class="arithmatex">\(\{A_k\}\)</span>.</li>
+<li>Draw random phases <span class="arithmatex">\(\{\varphi_k'\}\)</span> and construct the surrogate spectrum.</li>
+<li>Apply the inverse FFT to obtain <span class="arithmatex">\(\{\hat{X}_t\}\)</span>.</li>
+<li>Back-transform via rank matching against kappa (or empirical) samples.</li>
+<li>Enforce non-negativity.</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The method preserves the full power spectrum of the normalized series, which in expectation reproduces all temporal autocorrelations including long-range dependence characterized by the Hurst exponent. The seasonal marginal distributions are preserved (or extrapolated via the kappa fit) through the day-of-year back-transformation.</p>
+<p>Phase coherence is destroyed by design, meaning the temporal sequencing of events (e.g., the specific ordering of flood peaks within a year) is randomized. Individual autocorrelation values are preserved only in expectation across the ensemble, not in each realization. The method is univariate and does not model spatial dependence.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Univariate only - no spatial correlations between sites</li>
-<li>Generated series has same length as observed (no temporal extrapolation)</li>
-<li>Output excludes February 29 dates</li>
-<li>Kappa fitting may fail for some days - falls back to adjacent day parameters or empirical distribution</li>
-<li>Minimum 2 years of data; 10+ recommended for stable kappa fits</li>
+<li>Univariate only; no spatial correlation between sites.</li>
+<li>Synthetic series length equals the observed series length (no temporal extrapolation).</li>
+<li>February 29 dates are excluded.</li>
+<li>Kappa distribution fitting may fail for some days of year, requiring fallback to adjacent-day parameters or the empirical distribution.</li>
+<li>Minimum of 2 complete years required; 10+ recommended for stable kappa fits.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
-Brunner, M.I., Bárdossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. <em>Hydrology and Earth System Sciences</em>, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019</p>
+Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. <em>Hydrology and Earth System Sciences</em>, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019</p>
 <p><strong>See also:</strong>
 - Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. <em>Physica D</em>, 58, 77-94.
 - Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. <em>Journal of the Royal Statistical Society Series B</em>, 52, 105-124.
 - Hosking, J.R.M. (1994). The four-parameter kappa distribution. <em>IBM Journal of Research and Development</em>, 38, 251-258.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/phase_randomization.py</code>
-<strong>Tests:</strong> <code>tests/test_phase_randomization_generator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/phase_randomization.py</code></p>
 
 
 

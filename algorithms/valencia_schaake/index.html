@@ -990,37 +990,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Parameter Estimation
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#synthesis-procedure" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1032,18 +1041,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1284,46 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#model-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Model Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#parameter-estimation" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Parameter Estimation
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#synthesis-procedure" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1335,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1380,7 @@
   
 
 
-<h1 id="valencia-schaake-temporal-disaggregation-valencia-and-schaake-1973">Valencia-Schaake Temporal Disaggregation (Valencia and Schaake 1973)<a class="headerlink" href="#valencia-schaake-temporal-disaggregation-valencia-and-schaake-1973" title="Permanent link">&para;</a></h1>
+<h1 id="valencia-schaake-temporal-disaggregation-valencia-and-schaake-1973">Valencia-Schaake Temporal Disaggregation (Valencia and Schaake, 1973)<a class="headerlink" href="#valencia-schaake-temporal-disaggregation-valencia-and-schaake-1973" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,132 +1401,133 @@
 <td><strong>Sites</strong></td>
 <td>Univariate / Multisite</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>ValenciaSchaakeDisaggregator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) using a linear regression model that preserves the conditional mean and covariance structure of the sub-periods given the aggregate. The method models sub-period flows as a multivariate normal distribution conditioned on the known aggregate, then samples from this conditional distribution.</p>
-<p>This is the classical baseline against which all subsequent disaggregation methods are compared.</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Validate input</strong>: observed flows at the finer resolution (e.g., daily or monthly) with DatetimeIndex.</li>
-<li><strong>Aggregate observed flows</strong> to the coarser resolution (e.g., monthly to annual by summation).</li>
-<li><strong>Organize into matrices</strong>: for each year y, form the vector of sub-period flows:
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>X_y = [Q_{y,1}, Q_{y,2}, ..., Q_{y,m}]^T
-</span></code></pre></div>
-   where m is the number of sub-periods (e.g., 12 months).</li>
-<li><strong>Optional transformation</strong>: apply log or Box-Cox transform to improve normality.</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Compute sub-period statistics</strong>:</li>
-<li>Mean vector: <code>mu_X = E[X]</code> (m x 1)</li>
-<li>Covariance matrix: <code>S_XX = Cov(X, X)</code> (m x m)</li>
-<li><strong>Compute aggregate statistics</strong>:</li>
-<li>Mean: <code>mu_Y = E[Y]</code> where Y = sum(X)</li>
-<li>Variance: <code>sigma_Y^2 = Var(Y)</code></li>
-<li><strong>Compute cross-covariance</strong> between sub-periods and aggregate:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>S_XY = Cov(X, Y) = S_XX * 1_m
-</span></code></pre></div>
-   where 1_m is an m-vector of ones.</li>
-<li><strong>Compute regression parameters</strong>:</li>
-<li>Regression coefficients: <code>A = S_XY / sigma_Y^2</code> (m x 1)</li>
-<li>Conditional covariance: <code>S_e = S_XX - A * sigma_Y^2 * A^T</code> (m x m)</li>
-<li><strong>Cholesky decomposition</strong> of S_e:
-   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>S_e = C * C^T
-</span></code></pre></div>
-   If S_e is not positive semi-definite, apply spectral repair (set negative eigenvalues to small positive value).</li>
-<li><strong>Store</strong> mu_X, mu_Y, sigma_Y^2, A, C, and transformation parameters.</li>
-</ol>
-<h3 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h3>
-<p>For each synthetic aggregate value Y_syn:</p>
-<ol>
-<li><strong>Compute conditional mean</strong>:
-   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>mu_X|Y = mu_X + A * (Y_syn - mu_Y)
-</span></code></pre></div></li>
-<li><strong>Sample residuals</strong>:
-   <div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>Z ~ N(0, I_m)
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>X_syn = mu_X|Y + C * Z
-</span></code></pre></div></li>
-<li><strong>Proportional adjustment</strong> to enforce consistency (sub-periods sum to aggregate):
-   <div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>X_adj = X_syn * (Y_syn / sum(X_syn))
-</span></code></pre></div>
-   Note: This multiplicative adjustment is simple but can distort the conditional covariance. See Grygier-Stedinger (1988) for a more rigorous conservation correction.</li>
-<li><strong>Inverse transform</strong> if log/Box-Cox was applied.</li>
-<li><strong>Enforce non-negativity</strong>: clip to zero.</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) by modeling the sub-periods as a multivariate normal distribution conditioned on the known aggregate. A linear regression relates the sub-period vector to the aggregate, and the conditional covariance captures the remaining uncertainty. This is the classical baseline against which subsequent disaggregation methods, including the <a href="../grygier_stedinger/">Grygier-Stedinger</a> extension, are compared.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>-</td>
-<td>Observed streamflow at sub-period resolution with DatetimeIndex</td>
+<td><span class="arithmatex">\(\mathbf{X}_y \in \mathbb{R}^{m}\)</span></td>
+<td>Vector of sub-period flows for year <span class="arithmatex">\(y\)</span>, <span class="arithmatex">\(X_{y,j}\)</span> is the flow in sub-period <span class="arithmatex">\(j\)</span></td>
 </tr>
 <tr>
-<td><code>n_subperiods</code></td>
-<td><code>int</code></td>
-<td><code>12</code></td>
-<td>Number of sub-periods per aggregate period</td>
+<td><span class="arithmatex">\(Y_y\)</span></td>
+<td>Aggregate (annual) flow for year <span class="arithmatex">\(y\)</span>, <span class="arithmatex">\(Y_y = \mathbf{1}^\top \mathbf{X}_y\)</span></td>
 </tr>
 <tr>
-<td><code>transform</code></td>
-<td><code>str</code></td>
-<td><code>'log'</code></td>
-<td>Transformation before fitting: <code>'log'</code>, <code>'boxcox'</code>, or <code>'none'</code></td>
+<td><span class="arithmatex">\(\boldsymbol{\mu}_X \in \mathbb{R}^{m}\)</span></td>
+<td>Mean vector of sub-period flows</td>
 </tr>
 <tr>
-<td><code>conservation_method</code></td>
-<td><code>str</code></td>
-<td><code>'proportional'</code></td>
-<td>Method to enforce sum consistency: <code>'proportional'</code> or <code>'none'</code></td>
+<td><span class="arithmatex">\(\mu_Y\)</span></td>
+<td>Mean of the aggregate flow</td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this disaggregator instance</td>
+<td><span class="arithmatex">\(\sigma_Y^2\)</span></td>
+<td>Variance of the aggregate flow</td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(\mathbf{S}_{XX} \in \mathbb{R}^{m \times m}\)</span></td>
+<td>Covariance matrix of sub-period flows</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{S}_{XY} \in \mathbb{R}^{m}\)</span></td>
+<td>Cross-covariance between sub-periods and aggregate</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{A} \in \mathbb{R}^{m}\)</span></td>
+<td>Regression coefficient vector</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{S}_e \in \mathbb{R}^{m \times m}\)</span></td>
+<td>Conditional covariance of sub-periods given the aggregate</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{C}\)</span></td>
+<td>Lower Cholesky factor, <span class="arithmatex">\(\mathbf{S}_e = \mathbf{C}\mathbf{C}^\top\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(m\)</span></td>
+<td>Number of sub-periods (e.g., 12 months)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Number of complete years in the historical record</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\mathbf{1}\)</span></td>
+<td><span class="arithmatex">\(m\)</span>-vector of ones</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Conditional mean of sub-periods given aggregate (by construction)</li>
-<li>Conditional covariance structure (via S_e)</li>
-<li>Monthly means and standard deviations (approximately)</li>
-<li>Cross-correlations between sub-periods (via full covariance S_XX)</li>
-<li>Aggregate total (exactly, via proportional adjustment)</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Exact conditional covariance after proportional adjustment
-- Non-Gaussian features of sub-period distributions
-- Inter-annual temporal correlations between sub-periods</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="model-structure">Model Structure<a class="headerlink" href="#model-structure" title="Permanent link">&para;</a></h3>
+<p>The sub-period vector <span class="arithmatex">\(\mathbf{X}\)</span> and the aggregate <span class="arithmatex">\(Y = \mathbf{1}^\top \mathbf{X}\)</span> are assumed to follow a joint multivariate normal distribution. The conditional distribution of <span class="arithmatex">\(\mathbf{X}\)</span> given <span class="arithmatex">\(Y\)</span> is:</p>
+<div class="arithmatex">\[
+\mathbf{X} \mid Y \;\sim\; \mathcal{N}\!\left(\boldsymbol{\mu}_{X|Y},\; \mathbf{S}_e\right)
+\]</div>
+<p>where the conditional mean is:</p>
+<div class="arithmatex">\[
+\boldsymbol{\mu}_{X|Y} = \boldsymbol{\mu}_X + \mathbf{A}(Y - \mu_Y)
+\]</div>
+<h3 id="parameter-estimation">Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permanent link">&para;</a></h3>
+<p>The sub-period covariance and aggregate statistics are estimated from the historical record. The cross-covariance between sub-periods and the aggregate is:</p>
+<div class="arithmatex">\[
+\mathbf{S}_{XY} = \text{Cov}(\mathbf{X}, Y) = \mathbf{S}_{XX}\,\mathbf{1}
+\]</div>
+<p>The regression coefficient vector is:</p>
+<div class="arithmatex">\[
+\mathbf{A} = \frac{\mathbf{S}_{XY}}{\sigma_Y^2}
+\]</div>
+<p>The conditional covariance matrix is:</p>
+<div class="arithmatex">\[
+\mathbf{S}_e = \mathbf{S}_{XX} - \frac{\mathbf{S}_{XY}\,\mathbf{S}_{XY}^\top}{\sigma_Y^2}
+\]</div>
+<p>If <span class="arithmatex">\(\mathbf{S}_e\)</span> is not positive semi-definite, it is repaired via spectral projection. The Cholesky factorization <span class="arithmatex">\(\mathbf{S}_e = \mathbf{C}\mathbf{C}^\top\)</span> is then computed.</p>
+<p>An optional transformation (log or Box-Cox) may be applied to the sub-period flows before fitting to improve the normality assumption.</p>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<p>For each synthetic aggregate value <span class="arithmatex">\(Y^{\text{syn}}\)</span>:</p>
+<ol>
+<li>Compute the conditional mean:</li>
+</ol>
+<div class="arithmatex">\[
+\boldsymbol{\mu}_{X|Y} = \boldsymbol{\mu}_X + \mathbf{A}(Y^{\text{syn}} - \mu_Y)
+\]</div>
+<ol>
+<li>Sample from the conditional distribution:</li>
+</ol>
+<div class="arithmatex">\[
+\mathbf{Z} \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_m), \qquad \mathbf{X}^{\text{syn}} = \boldsymbol{\mu}_{X|Y} + \mathbf{C}\,\mathbf{Z}
+\]</div>
+<ol>
+<li>Apply a proportional adjustment to enforce volume conservation:</li>
+</ol>
+<div class="arithmatex">\[
+X_j^{\text{adj}} = X_j^{\text{syn}} \cdot \frac{Y^{\text{syn}}}{\displaystyle\sum_{k=1}^{m} X_k^{\text{syn}}}
+\]</div>
+<ol>
+<li>Invert the transformation if one was applied.</li>
+<li>Enforce non-negativity.</li>
+</ol>
+<p>Note: The proportional adjustment ensures exact volume conservation but distorts the conditional covariance structure. The <a href="../grygier_stedinger/">Grygier-Stedinger</a> method provides a correction that preserves this structure.</p>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The method preserves the conditional mean and covariance of sub-period flows given the aggregate, the cross-correlations among sub-periods, and the aggregate total (exactly, after proportional adjustment). Monthly means and standard deviations are approximately preserved.</p>
+<p>However, the proportional adjustment introduces distortion into the conditional covariance. The multivariate normal assumption may be violated for strongly skewed flow distributions, particularly at the monthly or daily scale. Inter-annual serial correlations between sub-periods of consecutive years are not modeled.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Assumes multivariate normality of sub-period flows (often violated for daily/monthly data)</li>
-<li>Proportional adjustment distorts the conditional covariance</li>
-<li>Does not model serial correlation between consecutive years' sub-periods</li>
-<li>For high m (many sub-periods), covariance estimation requires long records</li>
-<li>Better suited for annual-to-monthly than monthly-to-daily (daily data requires many more sub-periods)</li>
+<li>Multivariate normality assumption may be violated for skewed sub-period distributions.</li>
+<li>Proportional adjustment distorts the conditional covariance (see Grygier-Stedinger for improvement).</li>
+<li>Does not model serial correlations between sub-periods of consecutive years.</li>
+<li>Full covariance estimation requires long records relative to <span class="arithmatex">\(m\)</span>.</li>
+<li>Better suited for annual-to-monthly than monthly-to-daily disaggregation.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1535,8 +1536,7 @@ Valencia, R.D., and Schaake, J.C. (1973). Disaggregation processes in stochastic
 - Stedinger, J.R., and Vogel, R.M. (1984). Disaggregation procedures for generating serially correlated flow vectors. <em>Water Resources Research</em>, 20(1), 47-56. https://doi.org/10.1029/WR020i001p00047
 - Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). <em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/valencia_schaake.py</code>
-<strong>Tests:</strong> <code>tests/test_valencia_schaake_disaggregator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/disaggregation/temporal/valencia_schaake.py</code></p>
 
 
 

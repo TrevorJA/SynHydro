@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#knn-bootstrap-generator-lall-and-sharma-1996" class="md-skip">
+        <a href="#k-nearest-neighbor-bootstrap-lall-and-sharma-1996" class="md-skip">
           Skip to content
         </a>
       
@@ -783,37 +783,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#neighbor-selection-and-kernel-weights" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Neighbor Selection and Kernel Weights
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#feature-successor-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Feature-Successor Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#multisite-extension" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Multisite Extension
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -825,18 +843,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1293,55 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#neighbor-selection-and-kernel-weights" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Neighbor Selection and Kernel Weights
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#feature-successor-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Feature-Successor Structure
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#multisite-extension" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Multisite Extension
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1353,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1398,7 @@
   
 
 
-<h1 id="knn-bootstrap-generator-lall-and-sharma-1996">KNN Bootstrap Generator (Lall and Sharma 1996)<a class="headerlink" href="#knn-bootstrap-generator-lall-and-sharma-1996" title="Permanent link">&para;</a></h1>
+<h1 id="k-nearest-neighbor-bootstrap-lall-and-sharma-1996">K-Nearest Neighbor Bootstrap (Lall and Sharma, 1996)<a class="headerlink" href="#k-nearest-neighbor-bootstrap-lall-and-sharma-1996" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,128 +1419,92 @@
 <td><strong>Sites</strong></td>
 <td>Univariate / Multisite</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>KNNBootstrapGenerator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The K-Nearest Neighbor (KNN) bootstrap generates synthetic streamflow by conditionally resampling from the historical record. At each timestep, the current flow value determines a neighborhood of K similar historical states, and the next value is drawn from the successors of those neighbors using kernel-weighted probabilities. This nonparametric approach preserves the empirical marginal distribution exactly and captures nonlinear dependence structures that parametric models may miss.</p>
-<p>For multisite applications, all sites are resampled jointly using the same selected neighbor index, preserving spatial correlation by construction.</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Validate input</strong> as univariate or multisite DataFrame with DatetimeIndex.</li>
-<li><strong>Construct state vectors</strong>: for each timestep t, define the feature vector used for neighbor search. Default: the flow value(s) at time t.</li>
-<li><strong>Build successor pairs</strong>: for each historical timestep t, store (feature_t, Q_{t+1}) so that neighbors of the current state yield candidate next values. For monthly data, successors are partitioned by calendar month to preserve seasonality.</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li>
-<p><strong>Determine K</strong> (number of neighbors). Default heuristic:
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>K = ceil(sqrt(n))
-</span></code></pre></div>
-   where n is the number of historical timesteps. Can also be set manually.</p>
-</li>
-<li>
-<p><strong>Fit KNN model</strong> using <code>sklearn.NearestNeighbors</code> on the historical feature vectors.</p>
-</li>
-<li>
-<p><strong>Compute Lall-Sharma kernel weights</strong> for neighbor selection:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>K(i) = (1/i) / sum_{j=1}^{K} (1/j)
-</span></code></pre></div>
-   where i is the rank of the neighbor (i=1 is closest). This harmonic kernel gives the closest neighbor approximately twice the weight of the second-closest.</p>
-</li>
-<li>
-<p><strong>Store</strong> the fitted KNN model, the historical feature-successor pairs, and the kernel weights.</p>
-</li>
-</ol>
-<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Initialize</strong> by randomly selecting a historical timestep as the starting state.</li>
-<li><strong>For each subsequent timestep</strong>:
-   a. Query the KNN model for the K nearest neighbors of the current state.
-   b. Select one neighbor with probability K(i) (Lall-Sharma kernel).
-   c. The generated value is the <strong>successor</strong> of the selected neighbor in the historical record:
-      <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>Q_syn(t+1) = Q_obs(neighbor_t + 1)
-</span></code></pre></div>
-   d. Update the current state to Q_syn(t+1) for the next iteration.</li>
-<li><strong>Multisite</strong>: use the index site (or multivariate distance) for neighbor search, then take the successor vector across all sites jointly.</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>The K-Nearest Neighbor (KNN) bootstrap generates synthetic streamflow by conditionally resampling from the historical record. At each time step, the most recent generated value defines a query point in feature space; the <span class="arithmatex">\(K\)</span> closest historical states are identified, and one is selected with probability inversely proportional to its rank (Lall-Sharma kernel). The generated value is the historical successor of the selected neighbor. This nonparametric approach preserves the empirical marginal distribution exactly and can capture nonlinear dependence structures that parametric models may miss.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.DataFrame</code></td>
-<td>-</td>
-<td>Observed streamflow with DatetimeIndex, sites as columns</td>
+<td><span class="arithmatex">\(Q_t \in \mathbb{R}^S\)</span></td>
+<td>Observed flow vector at time <span class="arithmatex">\(t\)</span> across <span class="arithmatex">\(S\)</span> sites</td>
 </tr>
 <tr>
-<td><code>n_neighbors</code></td>
-<td><code>Optional[int]</code></td>
-<td><code>None</code></td>
-<td>K; if None, uses ceil(sqrt(n))</td>
+<td><span class="arithmatex">\(\hat{Q}_t\)</span></td>
+<td>Synthetic flow vector at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>feature_cols</code></td>
-<td><code>Optional[List[str]]</code></td>
-<td><code>None</code></td>
-<td>Columns to use as features for KNN search. If None, uses all site columns</td>
+<td><span class="arithmatex">\(K\)</span></td>
+<td>Number of nearest neighbors</td>
 </tr>
 <tr>
-<td><code>index_site</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Reserved for future use (multisite index site selection)</td>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Number of historical time steps</td>
 </tr>
 <tr>
-<td><code>block_size</code></td>
-<td><code>int</code></td>
-<td><code>1</code></td>
-<td>Reserved for future use (block resampling)</td>
+<td><span class="arithmatex">\(w_i\)</span></td>
+<td>Lall-Sharma kernel weight for the <span class="arithmatex">\(i\)</span>-th closest neighbor</td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this generator instance</td>
+<td><span class="arithmatex">\(\mathbf{x}_t\)</span></td>
+<td>Feature vector at time <span class="arithmatex">\(t\)</span> (flow values at selected sites)</td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(d(\cdot, \cdot)\)</span></td>
+<td>Euclidean distance in feature space</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Empirical marginal distribution (resampled values are historical observations)</li>
-<li>Nonlinear dependence structure (via conditional resampling)</li>
-<li>Lag-1 autocorrelation (approximately, via nearest-neighbor conditioning)</li>
-<li>Spatial cross-correlations (via joint resampling in multisite mode)</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Values outside the historical range (bootstrap limitation)
-- Long-range persistence beyond the conditioning lag
-- Trends or non-stationarity</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="neighbor-selection-and-kernel-weights">Neighbor Selection and Kernel Weights<a class="headerlink" href="#neighbor-selection-and-kernel-weights" title="Permanent link">&para;</a></h3>
+<p>The number of neighbors defaults to <span class="arithmatex">\(K = \lceil \sqrt{N} \rceil\)</span>, where <span class="arithmatex">\(N\)</span> is the length of the historical record. The Lall-Sharma kernel assigns probability to the <span class="arithmatex">\(i\)</span>-th closest neighbor (<span class="arithmatex">\(i = 1, 2, \ldots, K\)</span>) as:</p>
+<div class="arithmatex">\[
+w_i = \frac{1/i}{\displaystyle\sum_{j=1}^{K} 1/j}
+\]</div>
+<p>This harmonic weighting gives the closest neighbor approximately twice the selection probability of the second-closest, encouraging fidelity to the local neighborhood while maintaining stochastic diversity.</p>
+<h3 id="feature-successor-structure">Feature-Successor Structure<a class="headerlink" href="#feature-successor-structure" title="Permanent link">&para;</a></h3>
+<p>For each historical time step <span class="arithmatex">\(t\)</span>, a feature-successor pair is stored:</p>
+<div class="arithmatex">\[
+(\mathbf{x}_t,\; Q_{t+1})
+\]</div>
+<p>where <span class="arithmatex">\(\mathbf{x}_t\)</span> is the feature vector (flow values at time <span class="arithmatex">\(t\)</span> for the selected sites) and <span class="arithmatex">\(Q_{t+1}\)</span> is the observed flow at the next time step. For monthly data, the pairs are partitioned by calendar month to respect seasonality: at generation time, only neighbors from the same calendar month are considered.</p>
+<h3 id="multisite-extension">Multisite Extension<a class="headerlink" href="#multisite-extension" title="Permanent link">&para;</a></h3>
+<p>In multisite mode, the neighbor search is performed on a single index site or on the full multivariate feature vector using Euclidean distance:</p>
+<div class="arithmatex">\[
+d(\mathbf{x}, \mathbf{x}') = \left\|\mathbf{x} - \mathbf{x}'\right\|_2
+\]</div>
+<p>Once a neighbor is selected, the successor vector across all <span class="arithmatex">\(S\)</span> sites is taken jointly, preserving spatial correlation by construction.</p>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>Select a random historical time step as the initial state and set <span class="arithmatex">\(\hat{Q}_1\)</span> equal to the successor of that state.</li>
+<li>For each subsequent time step <span class="arithmatex">\(t = 2, 3, \ldots, T\)</span>:</li>
+<li>Form the query feature vector <span class="arithmatex">\(\hat{\mathbf{x}}_{t-1}\)</span> from the most recently generated flow values.</li>
+<li>Find the <span class="arithmatex">\(K\)</span> nearest neighbors of <span class="arithmatex">\(\hat{\mathbf{x}}_{t-1}\)</span> among the historical feature vectors (within the same calendar month if monthly).</li>
+<li>Select one neighbor <span class="arithmatex">\(j^*\)</span> with probability <span class="arithmatex">\(w_i\)</span> based on its rank <span class="arithmatex">\(i\)</span>.</li>
+<li>Set the generated value to the historical successor:</li>
+</ol>
+<div class="arithmatex">\[
+\hat{Q}_t = Q_{j^* + 1}
+\]</div>
+<ol>
+<li>For multisite data, the entire successor vector is assigned jointly.</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The empirical marginal distribution is preserved exactly, since every generated value is drawn directly from the historical record. Nonlinear dependence is captured implicitly through the conditional neighborhood structure. Lag-1 autocorrelation is approximately preserved because the successor of a similar state will tend to exhibit similar temporal dynamics. Spatial cross-correlations are maintained through joint resampling.</p>
+<p>However, generated values cannot exceed the historical range (a fundamental bootstrap limitation). Long-range persistence beyond the conditioning lag is not explicitly modeled, and the method does not capture trends or nonstationarity. The curse of dimensionality can degrade neighbor selection quality when many sites are used simultaneously as features.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Cannot generate values outside the range of the historical record</li>
-<li>Sensitive to the choice of K: too small causes repetitive sequences, too large destroys temporal structure</li>
-<li>Curse of dimensionality for high-dimensional feature spaces (many sites)</li>
-<li>Successor-based resampling can create discontinuities at December-January boundaries if not handled explicitly</li>
-<li>Requires at least 20 years for monthly data to avoid excessive repetition of analogs</li>
+<li>Cannot generate values outside the range of the historical record.</li>
+<li>Sensitive to <span class="arithmatex">\(K\)</span>: too small leads to repetitive cycling through a few neighbors; too large destroys local temporal structure.</li>
+<li>Curse of dimensionality for high-dimensional feature spaces (many sites).</li>
+<li>Requires sufficient record length (roughly 20+ years for monthly data) to avoid excessive repetition of analogs.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1531,8 +1513,7 @@ Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hyd
 - Rajagopalan, B., and Lall, U. (1999). A k-nearest-neighbor simulator for daily precipitation and other weather variables. <em>Water Resources Research</em>, 35(10), 3089-3101. https://doi.org/10.1029/1999WR900028
 - Lall, U. (1995). Recent advances in nonparametric function estimation: Hydrologic applications. <em>Reviews of Geophysics</em>, 33(S2), 1093-1102.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/knn_bootstrap.py</code>
-<strong>Tests:</strong> <code>tests/test_knn_bootstrap_generator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/knn_bootstrap.py</code></p>
 
 
 

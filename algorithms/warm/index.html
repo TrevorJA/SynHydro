@@ -852,37 +852,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#continuous-wavelet-transform" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Continuous Wavelet Transform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#scale-averaged-wavelet-power" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Scale Averaged Wavelet Power
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#normalization" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Normalization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoregressive-fitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autoregressive Fitting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -894,18 +921,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1284,37 +1302,64 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#algorithm" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Algorithm
+      Notation
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Algorithm">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#formulation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#preprocessing" class="md-nav__link">
+  <a href="#continuous-wavelet-transform" class="md-nav__link">
     <span class="md-ellipsis">
-      Preprocessing
+      Continuous Wavelet Transform
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fitting" class="md-nav__link">
+  <a href="#scale-averaged-wavelet-power" class="md-nav__link">
     <span class="md-ellipsis">
-      Fitting
+      Scale Averaged Wavelet Power
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#generation" class="md-nav__link">
+  <a href="#normalization" class="md-nav__link">
     <span class="md-ellipsis">
-      Generation
+      Normalization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#autoregressive-fitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Autoregressive Fitting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
     </span>
   </a>
   
@@ -1326,18 +1371,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#parameters" class="md-nav__link">
+  <a href="#statistical-properties" class="md-nav__link">
     <span class="md-ellipsis">
-      Parameters
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#properties-preserved" class="md-nav__link">
-    <span class="md-ellipsis">
-      Properties Preserved
+      Statistical Properties
     </span>
   </a>
   
@@ -1380,7 +1416,7 @@
   
 
 
-<h1 id="warm-wavelet-auto-regressive-method-nowak-et-al-2011">WARM - Wavelet Auto-Regressive Method (Nowak et al. 2011)<a class="headerlink" href="#warm-wavelet-auto-regressive-method-nowak-et-al-2011" title="Permanent link">&para;</a></h1>
+<h1 id="warm-wavelet-auto-regressive-method-nowak-et-al-2011">WARM -- Wavelet Auto-Regressive Method (Nowak et al., 2011)<a class="headerlink" href="#warm-wavelet-auto-regressive-method-nowak-et-al-2011" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1401,120 +1437,135 @@
 <td><strong>Sites</strong></td>
 <td>Univariate</td>
 </tr>
-<tr>
-<td><strong>Class</strong></td>
-<td><code>WARMGenerator</code></td>
-</tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>WARM combines continuous wavelet transforms with autoregressive modeling to generate synthetic annual streamflow. Its key innovation is the Scale Averaged Wavelet Power (SAWP), which captures time-varying spectral characteristics. This makes WARM particularly suited for non-stationary flows with regime shifts or low-frequency variability (e.g., climate oscillations, multi-decadal droughts).</p>
-<h2 id="algorithm">Algorithm<a class="headerlink" href="#algorithm" title="Permanent link">&para;</a></h2>
-<h3 id="preprocessing">Preprocessing<a class="headerlink" href="#preprocessing" title="Permanent link">&para;</a></h3>
-<ol>
-<li>Validate input (univariate time series, minimum ~20 years recommended).</li>
-<li>Resample to annual frequency if needed (sum monthly or daily).</li>
-</ol>
-<h3 id="fitting">Fitting<a class="headerlink" href="#fitting" title="Permanent link">&para;</a></h3>
-<ol>
-<li>
-<p><strong>Continuous Wavelet Transform</strong> - decompose observed flows into time-frequency components using mother wavelet (default: Morlet):
-   <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>W(s, t) = CWT(Q_obs, scales, wavelet)
-</span></code></pre></div>
-   Result: coefficient matrix of shape (n_scales, n_years).</p>
-</li>
-<li>
-<p><strong>Scale Averaged Wavelet Power</strong> - compute time-varying power across all scales:
-   <div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>SAWP(t) = (1/S) * sum_s |W(s, t)|^2
-</span></code></pre></div>
-   High SAWP indicates high energy/variability at time t.</p>
-</li>
-<li>
-<p><strong>Normalize by SAWP</strong> - remove time-varying power to produce stationary components:
-   <div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>W_norm(s, t) = W(s, t) / sqrt(SAWP(t) + epsilon)
-</span></code></pre></div></p>
-</li>
-<li>
-<p><strong>Fit AR models</strong> - for each scale s, fit an AR(p) model to normalized coefficients via Yule-Walker equations. Store parameters: mean, AR coefficients, innovation variance.</p>
-</li>
-</ol>
-<h3 id="generation">Generation<a class="headerlink" href="#generation" title="Permanent link">&para;</a></h3>
-<ol>
-<li><strong>Generate normalized coefficients</strong> - for each scale, run the fitted AR(p) process forward with Gaussian innovations.</li>
-<li><strong>Resample SAWP</strong> - bootstrap SAWP values from the historical record with replacement.</li>
-<li><strong>Rescale coefficients</strong> - restore time-varying power:
-   <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>W_syn(s, t) = W_norm_syn(s, t) * sqrt(SAWP_syn(t) + epsilon)
-</span></code></pre></div></li>
-<li><strong>Inverse wavelet transform</strong> - reconstruct streamflow via weighted summation across scales. Adjust mean and variance to match observed, then clip negatives to zero.</li>
-</ol>
-<h2 id="parameters">Parameters<a class="headerlink" href="#parameters" title="Permanent link">&para;</a></h2>
+<p>WARM combines continuous wavelet transforms with autoregressive modeling to generate synthetic annual streamflow that preserves non-stationary low-frequency variability. The observed series is decomposed into time-frequency components via the continuous wavelet transform (CWT), and the time-varying energy is captured by the Scale Averaged Wavelet Power (SAWP). After normalizing by SAWP to produce stationary components, independent AR models are fitted at each wavelet scale. Synthetic generation reverses the process: AR-generated coefficients are rescaled by bootstrapped SAWP values and reconstructed via the inverse CWT.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Parameter</th>
-<th>Type</th>
-<th>Default</th>
+<th>Symbol</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>Q_obs</code></td>
-<td><code>pd.Series</code> or <code>pd.DataFrame</code></td>
-<td>-</td>
-<td>Observed streamflow with DatetimeIndex</td>
+<td><span class="arithmatex">\(Q_t\)</span></td>
+<td>Observed annual streamflow at year <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>wavelet</code></td>
-<td><code>str</code></td>
-<td><code>'morl'</code></td>
-<td>Mother wavelet; any pywt continuous wavelet (e.g., <code>'morl'</code>, <code>'morlet'</code>)</td>
+<td><span class="arithmatex">\(\hat{Q}_t\)</span></td>
+<td>Synthetic annual streamflow at year <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>scales</code></td>
-<td><code>int</code></td>
-<td><code>64</code></td>
-<td>Number of frequency scales (rule of thumb: T/2 to T)</td>
+<td><span class="arithmatex">\(W(s, t)\)</span></td>
+<td>CWT coefficient at scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><code>ar_order</code></td>
-<td><code>int</code></td>
-<td><code>1</code></td>
-<td>AR model order (1 or 2 typically sufficient)</td>
+<td><span class="arithmatex">\(s_j\)</span></td>
+<td>Wavelet scale, <span class="arithmatex">\(j = 1, \ldots, J\)</span></td>
 </tr>
 <tr>
-<td><code>name</code></td>
-<td><code>Optional[str]</code></td>
-<td><code>None</code></td>
-<td>Optional name identifier for this generator instance</td>
+<td><span class="arithmatex">\(J\)</span></td>
+<td>Total number of scales</td>
 </tr>
 <tr>
-<td><code>debug</code></td>
-<td><code>bool</code></td>
-<td><code>False</code></td>
-<td>Enable debug logging</td>
+<td><span class="arithmatex">\(P(t)\)</span></td>
+<td>Scale Averaged Wavelet Power at time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde{W}(s, t)\)</span></td>
+<td>SAWP-normalized wavelet coefficient</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\phi_k^{(s)}\)</span></td>
+<td>AR coefficient at lag <span class="arithmatex">\(k\)</span> for scale <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(p\)</span></td>
+<td>AR model order</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\sigma_s\)</span></td>
+<td>Innovation standard deviation for scale <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\varepsilon_t\)</span></td>
+<td>Independent standard normal innovation</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Number of years in the historical record</td>
 </tr>
 </tbody>
 </table>
-<h2 id="properties-preserved">Properties Preserved<a class="headerlink" href="#properties-preserved" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Mean and variance (exactly, via post-reconstruction adjustment)</li>
-<li>Lag-1 autocorrelation (approximately, via AR models)</li>
-<li>Multi-year persistence and low-frequency variability (via wavelet decomposition)</li>
-<li>Non-stationary variance structure (via SAWP)</li>
-<li>Power spectrum (via wavelet amplitude preservation)</li>
-</ul>
-<p><strong>Not preserved:</strong>
-- Exact marginal distribution shape (Gaussian innovations)
-- Skewness and higher moments (not explicitly modeled)
-- Spatial correlations (univariate method)</p>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="continuous-wavelet-transform">Continuous Wavelet Transform<a class="headerlink" href="#continuous-wavelet-transform" title="Permanent link">&para;</a></h3>
+<p>The observed annual flow series <span class="arithmatex">\(\{Q_t\}\)</span> is decomposed using a mother wavelet <span class="arithmatex">\(\psi\)</span> (default: Morlet) at <span class="arithmatex">\(J\)</span> discrete scales:</p>
+<div class="arithmatex">\[
+W(s_j, t) = \text{CWT}(Q, s_j), \qquad j = 1, \ldots, J
+\]</div>
+<p>yielding a coefficient matrix of dimension <span class="arithmatex">\(J \times N\)</span>.</p>
+<h3 id="scale-averaged-wavelet-power">Scale Averaged Wavelet Power<a class="headerlink" href="#scale-averaged-wavelet-power" title="Permanent link">&para;</a></h3>
+<p>The SAWP captures the time-varying energy across all frequency scales:</p>
+<div class="arithmatex">\[
+P(t) = \frac{1}{J} \sum_{j=1}^{J} |W(s_j, t)|^2
+\]</div>
+<p>High values of <span class="arithmatex">\(P(t)\)</span> indicate periods of elevated variability (e.g., regime shifts, climate oscillations).</p>
+<h3 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h3>
+<p>The wavelet coefficients are normalized by the SAWP to remove time-varying power and produce approximately stationary components:</p>
+<div class="arithmatex">\[
+\tilde{W}(s_j, t) = \frac{W(s_j, t)}{\sqrt{P(t) + \epsilon}}
+\]</div>
+<p>where <span class="arithmatex">\(\epsilon\)</span> is a small constant to prevent division by zero.</p>
+<h3 id="autoregressive-fitting">Autoregressive Fitting<a class="headerlink" href="#autoregressive-fitting" title="Permanent link">&para;</a></h3>
+<p>For each scale <span class="arithmatex">\(s_j\)</span>, the normalized coefficient series <span class="arithmatex">\(\{\tilde{W}(s_j, t)\}_{t=1}^{N}\)</span> is modeled as an AR(<span class="arithmatex">\(p\)</span>) process. Let <span class="arithmatex">\(\mu_s = \mathbb{E}[\tilde{W}(s_j, \cdot)]\)</span> denote the mean and <span class="arithmatex">\(\gamma_k^{(s)}\)</span> the autocovariance at lag <span class="arithmatex">\(k\)</span>. The AR coefficients are estimated via the Yule-Walker equations:</p>
+<div class="arithmatex">\[
+\begin{pmatrix} \gamma_0^{(s)} &amp; \gamma_1^{(s)} &amp; \cdots &amp; \gamma_{p-1}^{(s)} \\ \gamma_1^{(s)} &amp; \gamma_0^{(s)} &amp; \cdots &amp; \gamma_{p-2}^{(s)} \\ \vdots &amp; &amp; \ddots &amp; \vdots \\ \gamma_{p-1}^{(s)} &amp; \gamma_{p-2}^{(s)} &amp; \cdots &amp; \gamma_0^{(s)} \end{pmatrix} \begin{pmatrix} \phi_1^{(s)} \\ \phi_2^{(s)} \\ \vdots \\ \phi_p^{(s)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(s)} \\ \gamma_2^{(s)} \\ \vdots \\ \gamma_p^{(s)} \end{pmatrix}
+\]</div>
+<p>The innovation variance is:</p>
+<div class="arithmatex">\[
+\sigma_s^2 = \gamma_0^{(s)} \left(1 - \sum_{k=1}^{p} \phi_k^{(s)} \cdot \frac{\gamma_k^{(s)}}{\gamma_0^{(s)}}\right)
+\]</div>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>For each scale <span class="arithmatex">\(s_j\)</span>, generate a synthetic normalized coefficient series via the AR(<span class="arithmatex">\(p\)</span>) recursion:</li>
+</ol>
+<div class="arithmatex">\[
+\hat{\tilde{W}}(s_j, t) = \mu_{s_j} + \sum_{k=1}^{p} \phi_k^{(s_j)} \left[\hat{\tilde{W}}(s_j, t-k) - \mu_{s_j}\right] + \sigma_{s_j}\,\varepsilon_t
+\]</div>
+<ol>
+<li>
+<p>Bootstrap SAWP values from the historical record with replacement to obtain <span class="arithmatex">\(\{\hat{P}(t)\}_{t=1}^{T}\)</span>.</p>
+</li>
+<li>
+<p>Rescale the synthetic coefficients by the bootstrapped SAWP:</p>
+</li>
+</ol>
+<div class="arithmatex">\[
+\hat{W}(s_j, t) = \hat{\tilde{W}}(s_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
+\]</div>
+<ol>
+<li>Reconstruct the synthetic flow via inverse CWT:</li>
+</ol>
+<div class="arithmatex">\[
+\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{s_j}} \,\text{Re}\!\left[\hat{W}(s_j, t)\right]
+\]</div>
+<p>where <span class="arithmatex">\(c\)</span> is a normalization constant. The reconstructed series is then rescaled to match the observed mean and standard deviation.</p>
+<ol>
+<li>Enforce non-negativity: <span class="arithmatex">\(\hat{Q}_t \leftarrow \max(\hat{Q}_t, 0)\)</span>.</li>
+</ol>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The method preserves the mean and variance of the annual flow series (exactly, through post-reconstruction adjustment) and the lag-1 autocorrelation (approximately, through the AR models at each scale). The wavelet decomposition and SAWP bootstrapping capture multi-year persistence and non-stationary variance structure, making WARM well suited for flows influenced by climate oscillations or multi-decadal drought regimes.</p>
+<p>The power spectrum is approximately preserved through the amplitude structure of the wavelet coefficients. However, the inverse CWT is approximate and requires a mean/variance correction step. Gaussian AR innovations may underrepresent extreme annual flows, and higher moments (skewness, kurtosis) are not explicitly modeled. The method is univariate and does not model spatial dependence.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Annual frequency only - for finer resolution, couple with a disaggregation method</li>
-<li>Univariate (single site) - no native multi-site support</li>
-<li>Inverse CWT is approximate (PyWavelets); corrected by mean/variance adjustment</li>
-<li>Edge effects in CWT for short records (&lt; 20 years)</li>
-<li>Gaussian AR innovations may underrepresent extremes</li>
+<li>Annual frequency only; for finer resolution, must be coupled with a disaggregation method.</li>
+<li>Univariate; no native multi-site support.</li>
+<li>Inverse CWT is approximate; corrected by matching the first two moments.</li>
+<li>Edge effects in the CWT can degrade quality for short records (fewer than 20 years).</li>
+<li>Gaussian AR innovations may not adequately represent tail behavior.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
@@ -1524,8 +1575,7 @@ Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Met
 - Kwon, H.-H., Lall, U., and Khalil, A.F. (2007). Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition. <em>Water Resources Research</em>, 43(5).
 - Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78.</p>
 <hr />
-<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/warm.py</code>
-<strong>Tests:</strong> <code>tests/test_warm_generator.py</code></p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/warm.py</code></p>
 
 
 
