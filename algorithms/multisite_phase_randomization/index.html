@@ -12,13 +12,9 @@
         <meta name="author" content="Trevor Amestoy">
       
       
-        <link rel="canonical" href="https://trevorja.github.io/SynHydro/tutorials/05_validation/">
+        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/multisite_phase_randomization/">
       
       
-        <link rel="prev" href="../04_drought_analysis/">
-      
-      
-        <link rel="next" href="../../algorithms/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Ensemble Validation - SynHydro</title>
+        <title>Multisite Wavelet Phase Randomization (Brunner and Gilleland, 2020) - SynHydro</title>
       
     
     
@@ -82,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#ensemble-validation" class="md-skip">
+        <a href="#multisite-wavelet-phase-randomization-brunner-and-gilleland-2020" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Ensemble Validation
+              Multisite Wavelet Phase Randomization (Brunner and Gilleland, 2020)
             
           </span>
         </div>
@@ -259,13 +255,11 @@
   
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../tutorials/" class="md-tabs__link">
           
   
   
@@ -285,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../algorithms/" class="md-tabs__link">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -416,31 +410,26 @@
       
   
   
-    
   
   
-  
     
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   
@@ -453,7 +442,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Tutorials
@@ -467,7 +456,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../" class="md-nav__link">
+      <a href="../../tutorials/" class="md-nav__link">
         
   
   
@@ -490,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../01_quickstart/" class="md-nav__link">
+      <a href="../../tutorials/01_quickstart/" class="md-nav__link">
         
   
   
@@ -513,7 +502,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../02_multisite/" class="md-nav__link">
+      <a href="../../tutorials/02_multisite/" class="md-nav__link">
         
   
   
@@ -536,7 +525,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../03_pipeline/" class="md-nav__link">
+      <a href="../../tutorials/03_pipeline/" class="md-nav__link">
         
   
   
@@ -559,7 +548,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../04_drought_analysis/" class="md-nav__link">
+      <a href="../../tutorials/04_drought_analysis/" class="md-nav__link">
         
   
   
@@ -579,32 +568,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    Ensemble Validation
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../tutorials/05_validation/" class="md-nav__link">
         
   
   
@@ -615,71 +582,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
-    <span class="md-ellipsis">
-      Setup
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run validation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#explore-results" class="md-nav__link">
-    <span class="md-ellipsis">
-      Explore results
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#visual-validation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Visual validation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Next steps
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -742,7 +644,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -765,7 +667,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/thomas_fiering/" class="md-nav__link">
+      <a href="../thomas_fiering/" class="md-nav__link">
         
   
   
@@ -788,7 +690,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/kirsch/" class="md-nav__link">
+      <a href="../kirsch/" class="md-nav__link">
         
   
   
@@ -811,7 +713,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/knn_bootstrap/" class="md-nav__link">
+      <a href="../knn_bootstrap/" class="md-nav__link">
         
   
   
@@ -834,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/matalas/" class="md-nav__link">
+      <a href="../matalas/" class="md-nav__link">
         
   
   
@@ -857,7 +759,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/phase_randomization/" class="md-nav__link">
+      <a href="../phase_randomization/" class="md-nav__link">
         
   
   
@@ -880,7 +782,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/warm/" class="md-nav__link">
+      <a href="../warm/" class="md-nav__link">
         
   
   
@@ -903,7 +805,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/multisite_hmm/" class="md-nav__link">
+      <a href="../multisite_hmm/" class="md-nav__link">
         
   
   
@@ -926,7 +828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/arfima/" class="md-nav__link">
+      <a href="../arfima/" class="md-nav__link">
         
   
   
@@ -949,7 +851,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/gaussian_copula/" class="md-nav__link">
+      <a href="../gaussian_copula/" class="md-nav__link">
         
   
   
@@ -972,7 +874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/vine_copula/" class="md-nav__link">
+      <a href="../vine_copula/" class="md-nav__link">
         
   
   
@@ -995,7 +897,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/nowak_disaggregation/" class="md-nav__link">
+      <a href="../nowak_disaggregation/" class="md-nav__link">
         
   
   
@@ -1018,7 +920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/valencia_schaake/" class="md-nav__link">
+      <a href="../valencia_schaake/" class="md-nav__link">
         
   
   
@@ -1041,7 +943,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/grygier_stedinger/" class="md-nav__link">
+      <a href="../grygier_stedinger/" class="md-nav__link">
         
   
   
@@ -1233,45 +1135,87 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#setup" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Setup
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-validation" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Run validation
+      Notation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#explore-results" class="md-nav__link">
+  <a href="#formulation" class="md-nav__link">
     <span class="md-ellipsis">
-      Explore results
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#model-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Model Structure
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameter Estimation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistical-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Properties
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#visual-validation" class="md-nav__link">
+  <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
-      Visual validation
+      Limitations
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#next-steps" class="md-nav__link">
+  <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
-      Next steps
+      References
     </span>
   </a>
   
@@ -1296,121 +1240,164 @@
   
 
 
-<h1 id="ensemble-validation">Ensemble Validation<a class="headerlink" href="#ensemble-validation" title="Permanent link">&para;</a></h1>
-<p>After generating synthetic flows you need to verify that they reproduce the
-statistical properties of the historical record. <code>validate_ensemble</code> computes
-a comprehensive suite of metrics comparing the ensemble against observed data.</p>
-<h2 id="setup">Setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">synhydro</span>
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
-</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="n">Q_daily</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">load_example_data</span><span class="p">()</span>
-</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="n">Q_monthly</span> <span class="o">=</span> <span class="n">Q_daily</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;MS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>
-</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="n">gen</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">KirschGenerator</span><span class="p">()</span>
-</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">)</span>
-</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_realizations</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_years</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="run-validation">Run validation<a class="headerlink" href="#run-validation" title="Permanent link">&para;</a></h2>
-<p><code>validate_ensemble</code> compares the ensemble to observed data across eight
-metric categories:</p>
+<h1 id="multisite-wavelet-phase-randomization-brunner-and-gilleland-2020">Multisite Wavelet Phase Randomization (Brunner and Gilleland, 2020)<a class="headerlink" href="#multisite-wavelet-phase-randomization-brunner-and-gilleland-2020" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
-<th>Category</th>
-<th>What it checks</th>
+<th></th>
+<th></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Marginal</strong></td>
-<td>Mean, std, skewness, kurtosis, CV, percentiles, KS test</td>
+<td><strong>Type</strong></td>
+<td>Nonparametric</td>
 </tr>
 <tr>
-<td><strong>Temporal</strong></td>
-<td>Lag-1/2 autocorrelation, Hurst exponent, ACF RMSE</td>
+<td><strong>Resolution</strong></td>
+<td>Daily</td>
 </tr>
 <tr>
-<td><strong>Spatial</strong></td>
-<td>Cross-site correlation RMSE and bias</td>
-</tr>
-<tr>
-<td><strong>Drought</strong></td>
-<td>Mean/max duration, mean/max severity, frequency</td>
-</tr>
-<tr>
-<td><strong>Spectral</strong></td>
-<td>Power spectrum RMSE, correlation, low-frequency ratio</td>
-</tr>
-<tr>
-<td><strong>Seasonal</strong></td>
-<td>Per-month mean/std/skewness bias, Wilcoxon p-values</td>
-</tr>
-<tr>
-<td><strong>Annual</strong></td>
-<td>Annual mean, variance, skewness, lag-1 ACF, variance ratio</td>
-</tr>
-<tr>
-<td><strong>FDC</strong></td>
-<td>Flow duration curve RMSE, bias at Q10/Q50/Q90, envelope coverage</td>
+<td><strong>Sites</strong></td>
+<td>Multisite</td>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">validate_ensemble</span><span class="p">(</span><span class="n">ensemble</span><span class="p">,</span> <span class="n">Q_monthly</span><span class="p">)</span>
-</span></code></pre></div>
-<p>You can also request a subset of categories:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="n">result</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">validate_ensemble</span><span class="p">(</span>
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>    <span class="n">ensemble</span><span class="p">,</span> <span class="n">Q_monthly</span><span class="p">,</span>
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>    <span class="n">metrics</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;seasonal&quot;</span><span class="p">,</span> <span class="s2">&quot;fdc&quot;</span><span class="p">],</span>
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="p">)</span>
-</span></code></pre></div>
-<h2 id="explore-results">Explore results<a class="headerlink" href="#explore-results" title="Permanent link">&para;</a></h2>
-<p>Each metric entry contains the observed value, synthetic median and spread,
-and relative error:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="n">site</span> <span class="o">=</span> <span class="n">Q_monthly</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a><span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">marginal</span><span class="p">[</span><span class="n">site</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>    <span class="nb">print</span><span class="p">(</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>        <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">metric</span><span class="si">:</span><span class="s2">12s</span><span class="si">}</span><span class="s2">  obs=</span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;observed&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  &quot;</span>
-</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>        <span class="sa">f</span><span class="s2">&quot;syn=</span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;synthetic_median&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">  &quot;</span>
-</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>        <span class="sa">f</span><span class="s2">&quot;rel_err=</span><span class="si">{</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;relative_error&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span id="__span-3-7"><a id="__codelineno-3-7" name="__codelineno-3-7" href="#__codelineno-3-7"></a>    <span class="p">)</span>
-</span></code></pre></div>
-<p>Summary scores give a single-number snapshot of generation quality:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">score</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-</span></code></pre></div>
-<p>For further analysis, flatten results into a tidy DataFrame:</p>
-<div class="highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">df</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;relative_error&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">]</span>   <span class="c1"># flag large errors</span>
-</span></code></pre></div>
-<h2 id="visual-validation">Visual validation<a class="headerlink" href="#visual-validation" title="Permanent link">&para;</a></h2>
-<p><code>plot_validation_panel</code> produces a 5-panel figure comparing observed and
-synthetic distributions by month, with Wilcoxon rank-sum and Levene test
-p-values. Values above the dashed line (p = 0.05) indicate the distributions
-are statistically indistinguishable.</p>
-<div class="highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="kn">from</span><span class="w"> </span><span class="nn">synhydro.plotting</span><span class="w"> </span><span class="kn">import</span> <span class="n">plot_validation_panel</span>
-</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
-</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plot_validation_panel</span><span class="p">(</span>
-</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="n">ensemble</span><span class="p">,</span>
-</span><span id="__span-6-5"><a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="n">observed</span><span class="o">=</span><span class="n">Q_monthly</span><span class="p">[</span><span class="n">site</span><span class="p">],</span>
-</span><span id="__span-6-6"><a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="n">site</span><span class="o">=</span><span class="n">site</span><span class="p">,</span>
-</span><span id="__span-6-7"><a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">)</span>
-</span></code></pre></div>
-<div class="admonition tip">
-<p class="admonition-title">Log-space validation</p>
-<p>Streamflow is often right-skewed. Validating in log space can reveal
-differences in the lower tail:
-<div class="highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plot_validation_panel</span><span class="p">(</span>
-</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>    <span class="n">ensemble</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="n">Q_monthly</span><span class="p">[</span><span class="n">site</span><span class="p">],</span> <span class="n">log_space</span><span class="o">=</span><span class="kc">True</span>
-</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="p">)</span>
-</span></code></pre></div></p>
-</div>
-<h2 id="next-steps">Next steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The Multisite Wavelet Phase Randomization generator extends the univariate Fourier phase randomization method of Brunner et al. (2019) to multiple sites using the continuous wavelet transform (CWT). The key innovation is drawing a single set of random phases from a white-noise CWT and applying those shared phases to all sites simultaneously. Because the phase perturbation is identical across sites, the spatial dependence structure of the original record is approximately preserved while the per-site power spectra (wavelet amplitudes) remain intact. The method is well suited for generating long daily streamflow ensembles where both temporal autocorrelation and inter-site synchrony -- such as basin-wide wet or dry spells -- must be reproduced.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(Q_{t,s}\)</span></td>
+<td>Observed daily streamflow at time <span class="arithmatex">\(t\)</span>, site <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat{Q}_{t,s}\)</span></td>
+<td>Synthetic daily streamflow at time <span class="arithmatex">\(t\)</span>, site <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(N\)</span></td>
+<td>Length of the historical record (days, multiple of 365, no leap days)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(S\)</span></td>
+<td>Number of sites</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(d\)</span></td>
+<td>Day of year (1 to 365)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(w\)</span></td>
+<td>Half-window length for marginal fitting (default 15 days)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(y_{t,s}\)</span></td>
+<td>Normal-score transformed value of <span class="arithmatex">\(Q_{t,s}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\hat{y}_{t,s}\)</span></td>
+<td>Synthetic normal-score value for site <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(a\)</span></td>
+<td>CWT scale index</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(W_s(a, t)\)</span></td>
+<td>CWT coefficient at scale <span class="arithmatex">\(a\)</span>, time <span class="arithmatex">\(t\)</span>, site <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\phi_\varepsilon(a, t)\)</span></td>
+<td>Phase of the white-noise CWT at scale <span class="arithmatex">\(a\)</span>, time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\((\xi_d^s, \alpha_d^s, k_d^s, h_d^s)\)</span></td>
+<td>Four-parameter kappa distribution fitted to day-of-year <span class="arithmatex">\(d\)</span>, site <span class="arithmatex">\(s\)</span></td>
+</tr>
+</tbody>
+</table>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="model-structure">Model Structure<a class="headerlink" href="#model-structure" title="Permanent link">&para;</a></h3>
+<p>The generator operates in a transformed domain. For each site <span class="arithmatex">\(s\)</span>, observed flows are converted to normal scores <span class="arithmatex">\(y_{t,s}\)</span> using a per-day-of-year ranking procedure. The CWT of each normal-score series is then computed:</p>
+<div class="arithmatex">\[
+W_s(a, t) = \int_{-\infty}^{\infty} y_{u,s} \, \frac{1}{\sqrt{a}} \psi^*\!\left(\frac{u - t}{a}\right) du
+\]</div>
+<p>where <span class="arithmatex">\(\psi\)</span> is the complex Morlet wavelet (pywt identifier <code>cmor1.5-1.0</code>, bandwidth 1.5, center frequency 1.0). In the discrete implementation, scales are spaced log-uniformly from 2 to <span class="arithmatex">\(N/8\)</span> over <span class="arithmatex">\(n_{\text{scales}} = 100\)</span> values.</p>
+<p>Phase randomization replaces the observed phase at each scale and time with a shared random phase:</p>
+<div class="arithmatex">\[
+\hat{W}_s(a, t) = |W_s(a, t)| \cdot e^{i \phi_\varepsilon(a, t)}
+\]</div>
+<p>where <span class="arithmatex">\(\phi_\varepsilon(a, t) = \arg\!\left[W_\varepsilon(a, t)\right]\)</span> is derived from the CWT of a single white-noise realization <span class="arithmatex">\(\varepsilon \sim \mathcal{N}(0, 1)\)</span> of length <span class="arithmatex">\(N\)</span>. Sharing <span class="arithmatex">\(\phi_\varepsilon\)</span> across all <span class="arithmatex">\(S\)</span> sites is the mechanism that preserves spatial correlation.</p>
+<p>The synthetic normal-score series is recovered by an inverse CWT approximation:</p>
+<div class="arithmatex">\[
+\hat{y}_{t,s} \propto \Delta_j \sum_{a} \frac{\operatorname{Re}\!\left[\hat{W}_s(a, t)\right]}{\sqrt{a}}
+\]</div>
+<p>where <span class="arithmatex">\(\Delta_j = \ln(a_{j+1}/a_j)\)</span> is the log-scale spacing (constant for geometrically spaced scales).</p>
+<h3 id="parameter-estimation">Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permanent link">&para;</a></h3>
+<p><strong>Marginal distributions.</strong> For each site <span class="arithmatex">\(s\)</span> and day of year <span class="arithmatex">\(d\)</span>, the four-parameter kappa distribution is fitted by the method of L-moments. All observations within a <span class="arithmatex">\(\pm w\)</span>-day circular window around <span class="arithmatex">\(d\)</span> (pooled across all years) are used, giving approximately <span class="arithmatex">\(2w + 1\)</span> pooling days and <span class="arithmatex">\(N_{\text{yr}} \times (2w + 1)\)</span> samples. The kappa quantile function is:</p>
+<div class="arithmatex">\[
+F^{-1}(p;\, \xi, \alpha, k, h) =
+\xi + \frac{\alpha}{k} \left[ 1 - \left(\frac{1 - p^h}{h}\right)^k \right]
+\]</div>
+<p>with the GEV limit when <span class="arithmatex">\(h = 0\)</span>. Parameters <span class="arithmatex">\((k, h)\)</span> are found by minimizing the squared difference between sample and theoretical L-skewness (<span class="arithmatex">\(\tau_3\)</span>) and L-kurtosis (<span class="arithmatex">\(\tau_4\)</span>), and <span class="arithmatex">\((\xi, \alpha)\)</span> are then determined analytically from the first two L-moments.</p>
+<p><strong>Normal score transform.</strong> For each day <span class="arithmatex">\(d\)</span> at each site <span class="arithmatex">\(s\)</span>, the <span class="arithmatex">\(N_{\text{yr}}\)</span> observations are ranked, and the Van der Waerden scores are assigned:</p>
+<div class="arithmatex">\[
+y_{t,s} = \Phi^{-1}\!\left(\frac{r_{t,s}}{N_{\text{yr}} + 1}\right)
+\]</div>
+<p>where <span class="arithmatex">\(r_{t,s}\)</span> is the rank of observation <span class="arithmatex">\(t\)</span> among all observations on day <span class="arithmatex">\(d\)</span> at site <span class="arithmatex">\(s\)</span>, and <span class="arithmatex">\(\Phi^{-1}\)</span> is the standard normal quantile function.</p>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>Fit kappa distribution parameters <span class="arithmatex">\((\xi_d^s, \alpha_d^s, k_d^s, h_d^s)\)</span> for each day <span class="arithmatex">\(d\)</span> and site <span class="arithmatex">\(s\)</span> using L-moments over the <span class="arithmatex">\(\pm w\)</span>-day window.</p>
+</li>
+<li>
+<p>Apply the normal score transform to <span class="arithmatex">\(Q_{t,s}\)</span> per day of year, producing <span class="arithmatex">\(y_{t,s}\)</span> for each site.</p>
+</li>
+<li>
+<p>Compute the CWT of each normal-score series: <span class="arithmatex">\(W_s(a, t) = \text{CWT}(y_{\cdot,s},\, a,\, \psi)\)</span>.</p>
+</li>
+<li>
+<p>For each realization:</p>
+</li>
+</ol>
+<p>a. Draw white noise <span class="arithmatex">\(\varepsilon \sim \mathcal{N}(0, 1)\)</span> of length <span class="arithmatex">\(N\)</span>.</p>
+<p>b. Compute the shared phase field:
+   $<span class="arithmatex">\(\phi_\varepsilon(a, t) = \arg\!\left[\text{CWT}(\varepsilon,\, a,\, \psi)\right]\)</span>$</p>
+<p>c. For each site <span class="arithmatex">\(s\)</span>, form synthetic CWT coefficients:
+   $<span class="arithmatex">\(\hat{W}_s(a, t) = |W_s(a, t)| \cdot e^{i\phi_\varepsilon(a, t)}\)</span>$</p>
+<p>d. Recover the synthetic normal-score series via the approximate inverse CWT:
+   $<span class="arithmatex">\(\hat{y}_{t,s} = C \, \Delta_j \sum_{a} \frac{\operatorname{Re}\!\left[\hat{W}_s(a, t)\right]}{\sqrt{a}}\)</span>$
+   where <span class="arithmatex">\(C\)</span> is a normalization constant chosen so that <span class="arithmatex">\(\hat{y}_{t,s}\)</span> has unit variance.</p>
+<p>e. Back-transform to original units. For each day <span class="arithmatex">\(d\)</span> and site <span class="arithmatex">\(s\)</span>, rank <span class="arithmatex">\(\{\hat{y}_{t,s} : \text{doy}(t) = d\}\)</span>, draw <span class="arithmatex">\(N_{\text{yr}}\)</span> kappa quantiles, and map via rank-order to produce <span class="arithmatex">\(\hat{Q}_{t,s}\)</span>. Enforce non-negativity.</p>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>The method preserves, per site, the full spectral envelope (CWT amplitude spectrum) of the normal-score series, which encodes both short-range seasonality and long-range persistence. The back-transformation via the kappa distribution reproduces the daily marginal distributions accurately, including heavy tails, because L-moments are resistant to outliers and the kappa family subsumes GEV, logistic, exponential, and Pareto distributions as special cases.</p>
+<p>Spatial correlation is preserved because all sites receive identical phase perturbations. In the wavelet domain, phase at each scale and time jointly determines whether a cross-site event (e.g., a flood pulse) occurs; sharing <span class="arithmatex">\(\phi_\varepsilon\)</span> keeps these co-occurrence patterns intact. The approach does not impose a parametric spatial model and is therefore robust to non-Gaussian and nonlinear dependence structures.</p>
+<p>Higher-order cross-site statistics (e.g., cross-site lag correlations) are not explicitly targeted and will depend on how well the single shared phase field represents the observed joint phase structure across sites.</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>Diagnostic plots</strong> for specific properties (ACF, FDC, spatial correlation)
-  are available in <code>synhydro.plotting</code> -- see the <a href="../../api/generators/">API reference</a></li>
-<li><strong>Algorithm details</strong> can help diagnose which statistical properties a
-  generator is designed to preserve -- <a href="../../algorithms/">Algorithms</a></li>
+<li>The approximate inverse CWT does not guarantee exact reconstruction of the original signal; the round-trip error is acceptable for generating synthetic variability but not for signal decomposition.</li>
+<li>Spatial correlation is preserved on average over realizations, but individual realizations may deviate from the observed correlation matrix, particularly for short records.</li>
+<li>The CWT of a white-noise series does not have a flat spectrum, so the shared phase field is not strictly uniform over scale; this introduces some residual scale-dependence in the inter-site phase coherence.</li>
+<li>The method assumes stationarity; non-stationary trends or shifts in the observed record are embedded in the fitted amplitudes and marginals but not explicitly modeled.</li>
+<li>Computational cost scales as <span class="arithmatex">\(O(S \cdot n_{\text{scales}} \cdot N \log N)\)</span> due to the FFT-based CWT, which may be significant for large <span class="arithmatex">\(S\)</span> or very long records.</li>
 </ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p><strong>Primary:</strong>
+Brunner, M.I., and Gilleland, E. (2020). Stochastic simulation of streamflow and spatial extremes: a continuous, wavelet-based approach. <em>Hydrology and Earth System Sciences</em>, 24, 3967-3982. https://doi.org/10.5194/hess-24-3967-2020</p>
+<p><strong>See also:</strong>
+- Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. <em>Hydrology and Earth System Sciences</em>, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
+- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. <em>Physica D</em>, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90043-8
+- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. <em>Journal of the Royal Statistical Society, Series B</em>, 52(1), 105-124.</p>
+<hr />
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/multisite_phase_randomization.py</code></p>
 
 
 

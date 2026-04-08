@@ -1440,7 +1440,7 @@
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the <span class="arithmatex">\(K\)</span> nearest historical months (by total flow magnitude) are identified, one is selected stochastically using Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.</p>
+<p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the <span class="arithmatex">\(K\)</span> nearest historical months (by total flow magnitude) are identified, one is selected stochastically using either inverse-distance weighting (default) or Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.</p>
 <h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1468,7 +1468,11 @@
 </tr>
 <tr>
 <td><span class="arithmatex">\(w_i\)</span></td>
-<td>Lall-Sharma kernel weight for the <span class="arithmatex">\(i\)</span>-th closest neighbor</td>
+<td>Selection weight for the <span class="arithmatex">\(i\)</span>-th closest neighbor</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(d_i\)</span></td>
+<td>Euclidean distance from the synthetic monthly flow to the <span class="arithmatex">\(i\)</span>-th neighbor</td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(b\)</span></td>
@@ -1484,11 +1488,17 @@
 <h3 id="analog-pool-construction">Analog Pool Construction<a class="headerlink" href="#analog-pool-construction" title="Permanent link">&para;</a></h3>
 <p>For each calendar month <span class="arithmatex">\(m\)</span>, a pool of candidate historical months is assembled. A tolerance of <span class="arithmatex">\(\pm b_{\text{shift}}\)</span> calendar days around the center of month <span class="arithmatex">\(m\)</span> is allowed, which provides flexibility in matching months near the calendar boundary. The candidate pool stores the total monthly flow and the corresponding daily flow time series for each historical month.</p>
 <h3 id="neighbor-selection">Neighbor Selection<a class="headerlink" href="#neighbor-selection" title="Permanent link">&para;</a></h3>
-<p>For each synthetic monthly flow <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>, the <span class="arithmatex">\(K\)</span> nearest historical months are found by Euclidean distance on total monthly flow. The Lall-Sharma kernel assigns selection probability to the <span class="arithmatex">\(i\)</span>-th closest neighbor:</p>
+<p>For each synthetic monthly flow <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>, the <span class="arithmatex">\(K\)</span> nearest historical months are found by Euclidean distance on total monthly flow. One neighbor is then drawn stochastically from the <span class="arithmatex">\(K\)</span> candidates using one of two weighting schemes.</p>
+<p><strong>Inverse-distance weighting</strong> (default). The selection probability for the <span class="arithmatex">\(i\)</span>-th neighbor is proportional to the inverse of its distance:</p>
+<div class="arithmatex">\[
+w_i = \frac{1/d_i}{\displaystyle\sum_{j=1}^{K} 1/d_j}
+\]</div>
+<p>where <span class="arithmatex">\(d_i\)</span> is the Euclidean distance between <span class="arithmatex">\(Q_m^{\text{syn}}\)</span> and the <span class="arithmatex">\(i\)</span>-th neighbor's monthly total. This gives stronger preference to closer analogs when the distance differences are large, but approaches uniform selection when all neighbors are similarly distant.</p>
+<p><strong>Lall-Sharma kernel</strong> (Lall and Sharma, 1996). The selection probability depends only on rank, not distance:</p>
 <div class="arithmatex">\[
 w_i = \frac{1/i}{\displaystyle\sum_{j=1}^{K} 1/j}, \qquad i = 1, \ldots, K
 \]</div>
-<p>One neighbor is drawn from the <span class="arithmatex">\(K\)</span> candidates with these probabilities.</p>
+<p>This harmonic weighting gives the closest neighbor approximately twice the probability of the second-closest, regardless of the actual distance magnitudes.</p>
 <h3 id="proportional-disaggregation">Proportional Disaggregation<a class="headerlink" href="#proportional-disaggregation" title="Permanent link">&para;</a></h3>
 <p>The daily flows of the selected analog month are used as a template. Let <span class="arithmatex">\(\{q_d^*\}_{d=1}^{D}\)</span> denote the observed daily flows in the selected analog month (with <span class="arithmatex">\(D\)</span> days). The synthetic daily flows are computed by proportional scaling:</p>
 <div class="arithmatex">\[
@@ -1505,7 +1515,7 @@ q_d^{\text{smoothed}} \leftarrow q_d^{\text{smoothed}} \cdot \frac{Q_m^{\text{sy
 <li>Fit a KNN model on the historical monthly flow totals for each calendar month.</li>
 <li>For each synthetic monthly flow <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>:</li>
 <li>Query the <span class="arithmatex">\(K\)</span> nearest neighbors by total flow.</li>
-<li>Select one analog month using the Lall-Sharma kernel weights.</li>
+<li>Select one analog month using inverse-distance or Lall-Sharma kernel weights.</li>
 <li>Disaggregate by applying the analog's daily proportions to <span class="arithmatex">\(Q_m^{\text{syn}}\)</span>.</li>
 <li>Optionally smooth month boundaries and rescale to preserve monthly totals.</li>
 <li>Enforce non-negativity.</li>

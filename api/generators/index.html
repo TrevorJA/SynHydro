@@ -1523,24 +1523,24 @@
         <li class="md-nav__item">
   <a href="#matalasgenerator" class="md-nav__link">
     <span class="md-ellipsis">
-      MATALASGenerator
+      MatalasGenerator
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator" class="md-nav__link">
     <span class="md-ellipsis">
-      MATALASGenerator
+      MatalasGenerator
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="MATALASGenerator">
+    <nav class="md-nav" aria-label="MatalasGenerator">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.preprocessing" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.preprocessing" class="md-nav__link">
     <span class="md-ellipsis">
       preprocessing
     </span>
@@ -1549,7 +1549,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.fit" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.fit" class="md-nav__link">
     <span class="md-ellipsis">
       fit
     </span>
@@ -1558,7 +1558,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.generate" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.generate" class="md-nav__link">
     <span class="md-ellipsis">
       generate
     </span>
@@ -2411,24 +2411,24 @@
         <li class="md-nav__item">
   <a href="#matalasgenerator" class="md-nav__link">
     <span class="md-ellipsis">
-      MATALASGenerator
+      MatalasGenerator
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator" class="md-nav__link">
     <span class="md-ellipsis">
-      MATALASGenerator
+      MatalasGenerator
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="MATALASGenerator">
+    <nav class="md-nav" aria-label="MatalasGenerator">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.preprocessing" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.preprocessing" class="md-nav__link">
     <span class="md-ellipsis">
       preprocessing
     </span>
@@ -2437,7 +2437,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.fit" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.fit" class="md-nav__link">
     <span class="md-ellipsis">
       fit
     </span>
@@ -2446,7 +2446,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.generate" class="md-nav__link">
+  <a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.generate" class="md-nav__link">
     <span class="md-ellipsis">
       generate
     </span>
@@ -5764,7 +5764,10 @@ Each entry contains {'xi', 'alfa', 'k', 'h'}.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Not used (generates same length as observed data).</p>
+                <p>Target length of each realization in years (365-day years, no leap
+days).  When provided, independent phase-randomized chunks are
+concatenated until the target length is reached, then trimmed.
+When None the output length equals the observed record length.</p>
               </div>
             </td>
             <td>
@@ -5780,7 +5783,7 @@ Each entry contains {'xi', 'alfa', 'k', 'h'}.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Not used (generates same length as observed data).</p>
+                <p>Not used.  Length is controlled via n_years.</p>
               </div>
             </td>
             <td>
@@ -6351,19 +6354,19 @@ If None, uses the length of historic data.</p>
     </div>
 
 </div><hr />
-<h2 id="matalasgenerator">MATALASGenerator<a class="headerlink" href="#matalasgenerator" title="Permanent link">&para;</a></h2>
+<h2 id="matalasgenerator">MatalasGenerator<a class="headerlink" href="#matalasgenerator" title="Permanent link">&para;</a></h2>
 
 
 <div class="doc doc-object doc-class">
 
 
 
-<h2 id="synhydro.methods.generation.parametric.matalas.MATALASGenerator" class="doc doc-heading">
-            <span class="doc doc-object-name doc-class-name">MATALASGenerator</span>
+<h2 id="synhydro.methods.generation.parametric.matalas.MatalasGenerator" class="doc doc-heading">
+            <span class="doc doc-object-name doc-class-name">MatalasGenerator</span>
 
 
-<a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">MATALASGenerator</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">log_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator" class="headerlink" title="Permanent link">&para;</a></h2>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">MatalasGenerator</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">log_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents first">
@@ -6461,7 +6464,7 @@ B(m) is the lower Cholesky factor of the residual covariance.</p>
 </details>
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">MATALASGenerator</span><span class="p">(</span><span class="n">log_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span> <span class="o">=</span> <span class="n">MatalasGenerator</span><span class="p">(</span><span class="n">log_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">gen</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Q_monthly</span><span class="p">)</span>
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="gp">&gt;&gt;&gt; </span><span class="n">ensemble</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">n_years</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n_realizations</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
 </span></code></pre></div>
@@ -6498,11 +6501,11 @@ Applied Modeling of Hydrologic Time Series. Water Resources Publications.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="synhydro.methods.generation.parametric.matalas.MATALASGenerator.preprocessing" class="doc doc-heading">
+<h3 id="synhydro.methods.generation.parametric.matalas.MatalasGenerator.preprocessing" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">preprocessing</span>
 
 
-<a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.preprocessing" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.preprocessing" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">preprocessing</span><span class="p">(</span><span class="n">Q_obs</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sites</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
 
@@ -6581,11 +6584,11 @@ Applied Modeling of Hydrologic Time Series. Water Resources Publications.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="synhydro.methods.generation.parametric.matalas.MATALASGenerator.fit" class="doc doc-heading">
+<h3 id="synhydro.methods.generation.parametric.matalas.MatalasGenerator.fit" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">fit</span>
 
 
-<a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.fit" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.fit" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">fit</span><span class="p">(</span><span class="n">Q_obs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">sites</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </span></code></pre></div>
 
@@ -6666,11 +6669,11 @@ lag-1 (S1) cross-correlation matrices then solves for A and B.</p>
 <div class="doc doc-object doc-function">
 
 
-<h3 id="synhydro.methods.generation.parametric.matalas.MATALASGenerator.generate" class="doc doc-heading">
+<h3 id="synhydro.methods.generation.parametric.matalas.MatalasGenerator.generate" class="doc doc-heading">
             <span class="doc doc-object-name doc-function-name">generate</span>
 
 
-<a href="#synhydro.methods.generation.parametric.matalas.MATALASGenerator.generate" class="headerlink" title="Permanent link">&para;</a></h3>
+<a href="#synhydro.methods.generation.parametric.matalas.MatalasGenerator.generate" class="headerlink" title="Permanent link">&para;</a></h3>
 <div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate</span><span class="p">(</span><span class="n">n_years</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">n_realizations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ensemble</span>
 </span></code></pre></div>
 

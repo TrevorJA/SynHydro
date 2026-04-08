@@ -1325,7 +1325,7 @@
 <div class="highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a><span class="kn">import</span><span class="w"> </span><span class="nn">synhydro</span>
 </span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>
 </span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a><span class="n">Q_daily</span> <span class="o">=</span> <span class="n">synhydro</span><span class="o">.</span><span class="n">load_example_data</span><span class="p">()</span>                 <span class="c1"># USGS daily streamflow (cms)</span>
-</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">Q_monthly</span> <span class="o">=</span> <span class="n">Q_daily</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;MS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>           <span class="c1"># aggregate to monthly</span>
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a><span class="n">Q_monthly</span> <span class="o">=</span> <span class="n">Q_daily</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">&quot;MS&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>            <span class="c1"># aggregate to monthly</span>
 </span></code></pre></div>
 <h2 id="choosing-a-generator">Choosing a Generator<a class="headerlink" href="#choosing-a-generator" title="Permanent link">&para;</a></h2>
 <table>
@@ -1342,7 +1342,7 @@
 </tr>
 <tr>
 <td>Monthly, multi-site, parametric</td>
-<td><code>MATALASGenerator</code></td>
+<td><code>MatalasGenerator</code></td>
 </tr>
 <tr>
 <td>Monthly, multi-site, nonparametric</td>
