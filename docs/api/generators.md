@@ -30,9 +30,9 @@
 
 ---
 
-## MATALASGenerator
+## MatalasGenerator
 
-::: synhydro.methods.generation.parametric.matalas.MATALASGenerator
+::: synhydro.methods.generation.parametric.matalas.MatalasGenerator
 
 ---
 

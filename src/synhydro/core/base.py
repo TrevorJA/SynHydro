@@ -321,6 +321,10 @@ class Generator(ABC):
                 "<MonthEnd>": "MS",
                 "<YearBegin: month=1>": "YS",
                 "<YearEnd: month=12>": "YS",
+                "YS-JAN": "YS",
+                "YE-DEC": "YS",
+                "MS": "MS",
+                "ME": "MS",
                 "<Day>": "D",
             }
             normalized = freq_map.get(freq_str, freq_str)
@@ -762,7 +766,7 @@ class Generator(ABC):
                 f"{self.__class__.__name__} is univariate and does not support "
                 f"multi-site data ({Q.shape[1]} columns provided). "
                 f"Pass a single-column DataFrame, or use a multi-site generator "
-                f"such as KirschGenerator, MATALASGenerator, or "
+                f"such as KirschGenerator, MatalasGenerator, or "
                 f"MultiSiteHMMGenerator."
             )
         self._sites = Q.columns.tolist()

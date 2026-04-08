@@ -14,7 +14,7 @@ below -2 is extreme.
 import synhydro
 
 Q_daily = synhydro.load_example_data()
-Q_monthly = Q_daily.resample("MS").mean()
+Q_monthly = Q_daily.resample("MS").sum()
 site = Q_monthly.columns[0]
 
 ssi_calc = synhydro.SSI(dist="gamma", timescale=12, fit_freq="ME")

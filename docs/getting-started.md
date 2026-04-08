@@ -42,7 +42,7 @@ Use `synhydro.load_example_data()` to get a ready-to-use daily dataset:
 import synhydro
 
 Q_daily = synhydro.load_example_data()                 # USGS daily streamflow (cms)
-Q_monthly = Q_daily.resample("MS").mean()           # aggregate to monthly
+Q_monthly = Q_daily.resample("MS").sum()            # aggregate to monthly
 ```
 
 ## Choosing a Generator
@@ -50,7 +50,7 @@ Q_monthly = Q_daily.resample("MS").mean()           # aggregate to monthly
 | Need | Generator |
 |------|-----------|
 | Monthly, single-site, parametric | `ThomasFieringGenerator` |
-| Monthly, multi-site, parametric | `MATALASGenerator` |
+| Monthly, multi-site, parametric | `MatalasGenerator` |
 | Monthly, multi-site, nonparametric | `KirschGenerator` |
 | Daily, single-site | `PhaseRandomizationGenerator` |
 | Annual, single-site | `WARMGenerator` |

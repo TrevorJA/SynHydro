@@ -10,7 +10,7 @@ correlations using Cholesky decomposition.
 import synhydro
 
 Q_daily = synhydro.load_example_data()
-Q_monthly = Q_daily.resample("MS").mean()   # all sites, monthly
+Q_monthly = Q_daily.resample("MS").sum()    # all sites, monthly
 
 gen = synhydro.KirschGenerator()
 gen.fit(Q_monthly)

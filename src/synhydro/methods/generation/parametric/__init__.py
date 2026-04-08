@@ -9,7 +9,8 @@ from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
 from synhydro.methods.generation.parametric.gaussian_copula import (
     GaussianCopulaGenerator,
 )
-from synhydro.methods.generation.parametric.matalas import MATALASGenerator
+from synhydro.methods.generation.parametric.matalas import MatalasGenerator
+from synhydro.methods.generation.parametric.hmm_knn import HMMKNNGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.warm import WARMGenerator
@@ -17,7 +18,8 @@ from synhydro.methods.generation.parametric.warm import WARMGenerator
 __all__ = [
     "ARFIMAGenerator",
     "GaussianCopulaGenerator",
-    "MATALASGenerator",
+    "HMMKNNGenerator",
+    "MatalasGenerator",
     "MultiSiteHMMGenerator",
     "ThomasFieringGenerator",
     "VineCopulaGenerator",

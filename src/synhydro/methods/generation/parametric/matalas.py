@@ -20,7 +20,7 @@ from synhydro.core.statistics import repair_correlation_matrix
 logger = logging.getLogger(__name__)
 
 
-class MATALASGenerator(Generator):
+class MatalasGenerator(Generator):
     """
     Matalas (1967) multi-site monthly lag-1 autoregressive (MAR(1)) model.
 
@@ -60,7 +60,7 @@ class MATALASGenerator(Generator):
 
     Examples
     --------
-    >>> gen = MATALASGenerator(log_transform=True)
+    >>> gen = MatalasGenerator(log_transform=True)
     >>> gen.fit(Q_monthly)
     >>> ensemble = gen.generate(n_years=100, n_realizations=50, seed=42)
 

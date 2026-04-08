@@ -271,15 +271,47 @@ class TestPhaseRandomizationGeneratorGenerate:
             result1.data_by_realization[0].values, result2.data_by_realization[0].values
         )
 
-    def test_generate_output_length(self, sample_daily_series_long):
-        """Test that output has same length as input."""
+    def test_generate_output_length_default(self, sample_daily_series_long):
+        """Test that output length equals observed length when n_years is not given."""
         gen = PhaseRandomizationGenerator()
         gen.fit(sample_daily_series_long)
 
         result = gen.generate(n_realizations=1, seed=42)
 
-        # Output length should match preprocessed data length
         assert len(result.data_by_realization[0]) == len(gen.Q_obs_)
+
+    def test_generate_n_years(self, sample_daily_series_long):
+        """Test that n_years produces the correct output length."""
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
+
+        n_years = 10
+        result = gen.generate(n_realizations=2, n_years=n_years, seed=42)
+
+        expected_len = n_years * 365
+        for r in result.realization_ids:
+            assert len(result.data_by_realization[r]) == expected_len
+
+    def test_generate_n_years_longer_than_obs(self, sample_daily_series_long):
+        """Test n_years greater than the observed record length."""
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
+
+        n_years = 50
+        result = gen.generate(n_realizations=1, n_years=n_years, seed=42)
+
+        expected_len = n_years * 365
+        assert len(result.data_by_realization[0]) == expected_len
+
+    def test_generate_n_years_noleap_index(self, sample_daily_series_long):
+        """Test that output index contains no Feb 29 entries."""
+        gen = PhaseRandomizationGenerator()
+        gen.fit(sample_daily_series_long)
+
+        result = gen.generate(n_realizations=1, n_years=5, seed=42)
+        idx = result.data_by_realization[0].index
+        feb29 = idx[(idx.month == 2) & (idx.day == 29)]
+        assert len(feb29) == 0
 
     def test_generate_non_negative(self, sample_daily_series_long):
         """Test that generated flows are non-negative."""

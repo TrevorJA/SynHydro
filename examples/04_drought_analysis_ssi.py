@@ -57,7 +57,7 @@ print(f"Total days: {len(Q_daily):,}")
 print()
 
 # Resample to monthly for this analysis
-Q_monthly = Q_daily[site].resample("MS").mean()
+Q_monthly = Q_daily[site].resample("MS").sum()
 
 # Subset to analysis period
 Q_analysis = Q_monthly.loc[ANALYSIS_START:ANALYSIS_END]

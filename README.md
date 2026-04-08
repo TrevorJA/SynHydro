@@ -16,7 +16,7 @@ pip install git+https://github.com/TrevorJA/SynHydro.git
 import synhydro
 
 Q_daily = synhydro.load_example_data()
-Q_monthly = Q_daily.resample("MS").mean()
+Q_monthly = Q_daily.resample("MS").sum()
 
 gen = synhydro.KirschGenerator()
 gen.fit(Q_monthly)
@@ -28,7 +28,7 @@ ensemble = gen.generate(n_realizations=50, n_years=30, seed=42)
 | Generator | Type | Frequency | Sites | Reference |
 |---|---|---|---|---|
 | `ThomasFieringGenerator` | Parametric AR(1) | Monthly | Single | Thomas & Fiering (1962) |
-| `MATALASGenerator` | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
+| `MatalasGenerator` | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
 | `ARFIMAGenerator` | Fractional ARIMA | Monthly/Annual | Single | Hosking (1984) |
 | `KirschGenerator` | Nonparametric Bootstrap | Monthly | Multi | Kirsch et al. (2013) |
 | `KNNBootstrapGenerator` | K-Nearest Neighbor | Daily/Monthly/Annual | Multi | Lall & Sharma (1996) |

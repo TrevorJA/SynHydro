@@ -9,7 +9,7 @@ fit a generator, generate synthetic realizations, and plot the results.
 import synhydro
 
 Q_daily = synhydro.load_example_data()       # multi-site daily DataFrame
-Q_monthly = Q_daily.resample("MS").mean()    # aggregate to monthly
+Q_monthly = Q_daily.resample("MS").sum()     # aggregate to monthly
 site = Q_monthly.columns[0]                  # pick one site
 Q_single = Q_monthly[[site]]                 # keep as DataFrame
 ```

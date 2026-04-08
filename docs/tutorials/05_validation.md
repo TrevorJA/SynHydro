@@ -10,7 +10,7 @@ a comprehensive suite of metrics comparing the ensemble against observed data.
 import synhydro
 
 Q_daily = synhydro.load_example_data()
-Q_monthly = Q_daily.resample("MS").mean()
+Q_monthly = Q_daily.resample("MS").sum()
 
 gen = synhydro.KirschGenerator()
 gen.fit(Q_monthly)

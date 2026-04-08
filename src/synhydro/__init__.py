@@ -58,7 +58,7 @@ from synhydro.methods.generation.parametric.gaussian_copula import (
     GaussianCopulaGenerator,
 )
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
-from synhydro.methods.generation.parametric.matalas import MATALASGenerator
+from synhydro.methods.generation.parametric.matalas import MatalasGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
 from synhydro.methods.generation.parametric.vine_copula import (
     VineCopulaGenerator,
@@ -93,7 +93,7 @@ __all__ = [
     "KNNBootstrapGenerator",
     "PhaseRandomizationGenerator",
     "ThomasFieringGenerator",
-    "MATALASGenerator",
+    "MatalasGenerator",
     "MultiSiteHMMGenerator",
     "VineCopulaGenerator",
     "WARMGenerator",

@@ -729,6 +729,19 @@ class VineCopulaGenerator(Generator):
         n_months = n_years * 12
         Q = np.zeros((n_months, n_sites))
 
+        # Pre-generate all vine samples in one batch per calendar month so that
+        # pyvinecopulib's internal RNG is invoked exactly once per month type,
+        # with a seed derived from the parent rng.  Each calendar month m
+        # appears exactly n_years times in the n_months loop.
+        _vine_draws: Dict[int, np.ndarray] = {}
+        _vine_idx: Dict[int, int] = {}
+        for _m in range(1, 13):
+            _vine = self._monthly_vines.get(_m)
+            if _vine is not None and n_sites > 1:
+                _seed_m = int(rng.integers(0, 2**31))
+                _vine_draws[_m] = _vine.simulate(n_years, seeds=[_seed_m])
+                _vine_idx[_m] = 0
+
         z_prev = np.zeros(n_sites)
 
         for t in range(n_months):
@@ -737,9 +750,9 @@ class VineCopulaGenerator(Generator):
             vine = self._monthly_vines.get(m)
 
             if vine is not None and n_sites > 1:
-                # Draw from vine copula in uniform space
-                vine_seed = int(rng.integers(0, 2**31))
-                u_new = vine.simulate(1, seeds=[vine_seed])  # (1, n_sites)
+                # Retrieve the pre-generated sample for this month occurrence
+                u_new = _vine_draws[m][_vine_idx[m] : _vine_idx[m] + 1]
+                _vine_idx[m] += 1
                 # Transform uniform to normal: these are the PAR residuals
                 e = norm.ppf(np.clip(u_new[0], 1e-8, 1.0 - 1e-8))
             else:

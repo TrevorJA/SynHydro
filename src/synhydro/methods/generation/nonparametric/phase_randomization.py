@@ -20,6 +20,7 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 from scipy.special import gamma
+from scipy.stats import norm as _norm
 
 from synhydro.core.base import Generator, FittedParams
 from synhydro.core.ensemble import Ensemble
@@ -546,11 +547,8 @@ class PhaseRandomizationGenerator(Generator):
             # Rank the values (1-based ranking)
             ranks = np.argsort(np.argsort(day_values)) + 1
 
-            # Generate sorted standard normal samples
-            sorted_normal = np.sort(np.random.standard_normal(n))
-
-            # Map ranks to normal values
-            self.norm_[mask] = sorted_normal[ranks - 1]
+            # Map ranks to deterministic Van der Waerden normal scores
+            self.norm_[mask] = _norm.ppf(ranks / (n + 1.0))
 
     def _compute_fft(self) -> None:
         """Compute FFT and extract modulus and phases."""
@@ -611,9 +609,12 @@ class PhaseRandomizationGenerator(Generator):
         n_realizations : int, default=1
             Number of synthetic realizations to generate.
         n_years : int, optional
-            Not used (generates same length as observed data).
+            Target length of each realization in years (365-day years, no leap
+            days).  When provided, independent phase-randomized chunks are
+            concatenated until the target length is reached, then trimmed.
+            When None the output length equals the observed record length.
         n_timesteps : int, optional
-            Not used (generates same length as observed data).
+            Not used.  Length is controlled via n_years.
         seed : int, optional
             Random seed for reproducibility.
         **kwargs : dict
@@ -626,33 +627,64 @@ class PhaseRandomizationGenerator(Generator):
         """
         self.validate_fit()
 
-        # Create random number generator
         rng = np.random.default_rng(seed)
 
-        if n_years is not None or n_timesteps is not None:
-            self.logger.warning(
-                "n_years and n_timesteps are ignored. "
-                "Phase randomization generates series of same length as observed."
-            )
+        n_obs = len(self.Q_obs_)
+        if n_years is not None:
+            n_target = int(n_years) * 365
+        else:
+            n_target = n_obs
 
+        n_chunks = max(1, int(np.ceil(n_target / n_obs)))
+        self.logger.info(
+            "Generating %d realizations of %d days (%d chunks of %d each)",
+            n_realizations,
+            n_target,
+            n_chunks,
+            n_obs,
+        )
+
+        out_index = self._build_noleap_index(n_target)
         realizations = {}
 
         for r in range(n_realizations):
-            # Phase randomization
-            ts_new = self._phase_randomize(rng=rng)
+            segments = []
+            for _ in range(n_chunks):
+                ts_chunk = self._phase_randomize(rng=rng)
+                segments.append(self._back_transform(ts_chunk, rng=rng))
+            simulated = np.concatenate(segments)[:n_target]
 
-            # Back-transformation
-            simulated = self._back_transform(ts_new, rng=rng)
-
-            # Store as DataFrame
             realizations[r] = pd.DataFrame(
-                simulated, index=self.Q_obs_index_, columns=self._sites
+                simulated, index=out_index, columns=self._sites
             )
 
-        self.logger.info(f"Generated {n_realizations} realizations")
-
-        # Create and return Ensemble
+        self.logger.info("Generated %d realizations", n_realizations)
         return Ensemble(realizations)
+
+    @staticmethod
+    def _build_noleap_index(n_days: int, start_year: int = 2000) -> pd.DatetimeIndex:
+        """Build a no-leap daily DatetimeIndex of length n_days.
+
+        Parameters
+        ----------
+        n_days : int
+            Number of days required.
+        start_year : int
+            Calendar year for the first day of the index.
+
+        Returns
+        -------
+        pd.DatetimeIndex
+            Daily index with Feb 29 rows removed, of exactly n_days length.
+        """
+        # Generate enough calendar days to cover n_days after removing leap days.
+        # Worst case: ~0.25 % of days are Feb 29, so pad by 1 % plus a fixed buffer.
+        n_calendar = n_days + n_days // 365 + 10
+        all_days = pd.date_range(
+            start=f"{start_year}-01-01", periods=n_calendar, freq="D"
+        )
+        noleap = all_days[~((all_days.month == 2) & (all_days.day == 29))]
+        return noleap[:n_days]
 
     def _phase_randomize(self, rng=None) -> np.ndarray:
         """

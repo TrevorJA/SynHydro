@@ -16,7 +16,7 @@ SynHydro provides parametric, nonparametric, and machine-learning stochastic gen
 | [`KirschGenerator`][synhydro.methods.generation.nonparametric.kirsch.KirschGenerator] | Nonparametric | Monthly | Multi | Kirsch et al. (2013) |
 | [`PhaseRandomizationGenerator`][synhydro.methods.generation.nonparametric.phase_randomization.PhaseRandomizationGenerator] | Nonparametric | Daily | Single | Brunner et al. (2019) |
 | [`ThomasFieringGenerator`][synhydro.methods.generation.parametric.thomas_fiering.ThomasFieringGenerator] | Parametric AR(1) | Monthly | Single | Thomas & Fiering (1962) |
-| [`MATALASGenerator`][synhydro.methods.generation.parametric.matalas.MATALASGenerator] | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
+| [`MatalasGenerator`][synhydro.methods.generation.parametric.matalas.MatalasGenerator] | Parametric MAR(1) | Monthly | Multi | Matalas (1967) |
 | [`MultiSiteHMMGenerator`][synhydro.methods.generation.parametric.multisite_hmm.MultiSiteHMMGenerator] | Hidden Markov Model | Annual | Multi | Gold et al. (2024) |
 | [`WARMGenerator`][synhydro.methods.generation.parametric.warm.WARMGenerator] | Wavelet AR | Annual | Single | Nowak et al. (2011) |
 
@@ -26,7 +26,7 @@ SynHydro provides parametric, nonparametric, and machine-learning stochastic gen
 import synhydro
 
 Q_obs = synhydro.load_example_data()                       # daily DataFrame
-Q_monthly = Q_obs.resample("MS").mean()                 # resample to monthly
+Q_monthly = Q_obs.resample("MS").sum()                  # resample to monthly
 
 gen = synhydro.KirschGenerator()
 gen.fit(Q_monthly)

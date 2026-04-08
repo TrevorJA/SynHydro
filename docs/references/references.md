@@ -10,6 +10,11 @@ Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. *Water Res
 **Multi-Site Hidden Markov Model**
 Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. *Earth's Future*. https://doi.org/10.1029/2024EF004841
 
+**HMM-KNN Regime-Conditioned Bootstrap**
+Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2008). A stochastic nonparametric approach for streamflow generation combining observational and paleoreconstructed data. *Water Resources Research*, 44, W06423. https://doi.org/10.1029/2007WR006684
+
+Steinschneider, S., and Brown, C. (2013). A semiparametric multivariate, multisite weather generator with low-frequency variability for use in climate risk assessments. *Water Resources Research*, 49, 7205-7220. https://doi.org/10.1002/wrcr.20528
+
 **ARFIMA (Autoregressive Fractionally Integrated Moving Average)**
 Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using fractional differencing. *Water Resources Research*, 20(12), 1898-1908. https://doi.org/10.1029/WR020i012p01898
 
@@ -45,7 +50,10 @@ Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of 
 Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. *Water Resources Research*, 32(3), 679-693. https://doi.org/10.1029/95WR02966
 
 **Phase Randomization**
-Brunner, M.I., Bárdossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. *Hydrology and Earth System Sciences*, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
+Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. *Hydrology and Earth System Sciences*, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
+
+**Multisite Wavelet Phase Randomization**
+Brunner, M.I., and Gilleland, E. (2020). Stochastic simulation of streamflow and spatial extremes: a continuous, wavelet-based approach. *Hydrology and Earth System Sciences*, 24, 3967-3982. https://doi.org/10.5194/hess-24-3967-2020
 
 ---
 

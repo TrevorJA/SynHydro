@@ -8,7 +8,7 @@
 
 ## Overview
 
-The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the $K$ nearest historical months (by total flow magnitude) are identified, one is selected stochastically using Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.
+The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the $K$ nearest historical months (by total flow magnitude) are identified, one is selected stochastically using either inverse-distance weighting (default) or Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.
 
 ## Notation
 
@@ -18,7 +18,8 @@ The Nowak disaggregator converts synthetic monthly flows to daily flows by borro
 | $q_d^{\text{syn}}$ | Synthetic daily flow on day $d$ |
 | $q_d^*$ | Observed daily flow on day $d$ of the selected analog month |
 | $K$ | Number of nearest neighbors |
-| $w_i$ | Lall-Sharma kernel weight for the $i$-th closest neighbor |
+| $w_i$ | Selection weight for the $i$-th closest neighbor |
+| $d_i$ | Euclidean distance from the synthetic monthly flow to the $i$-th neighbor |
 | $b$ | Number of blending days at month boundaries |
 | $N_m$ | Number of historical months in the candidate pool for month $m$ |
 
@@ -30,13 +31,23 @@ For each calendar month $m$, a pool of candidate historical months is assembled.
 
 ### Neighbor Selection
 
-For each synthetic monthly flow $Q_m^{\text{syn}}$, the $K$ nearest historical months are found by Euclidean distance on total monthly flow. The Lall-Sharma kernel assigns selection probability to the $i$-th closest neighbor:
+For each synthetic monthly flow $Q_m^{\text{syn}}$, the $K$ nearest historical months are found by Euclidean distance on total monthly flow. One neighbor is then drawn stochastically from the $K$ candidates using one of two weighting schemes.
+
+**Inverse-distance weighting** (default). The selection probability for the $i$-th neighbor is proportional to the inverse of its distance:
+
+$$
+w_i = \frac{1/d_i}{\displaystyle\sum_{j=1}^{K} 1/d_j}
+$$
+
+where $d_i$ is the Euclidean distance between $Q_m^{\text{syn}}$ and the $i$-th neighbor's monthly total. This gives stronger preference to closer analogs when the distance differences are large, but approaches uniform selection when all neighbors are similarly distant.
+
+**Lall-Sharma kernel** (Lall and Sharma, 1996). The selection probability depends only on rank, not distance:
 
 $$
 w_i = \frac{1/i}{\displaystyle\sum_{j=1}^{K} 1/j}, \qquad i = 1, \ldots, K
 $$
 
-One neighbor is drawn from the $K$ candidates with these probabilities.
+This harmonic weighting gives the closest neighbor approximately twice the probability of the second-closest, regardless of the actual distance magnitudes.
 
 ### Proportional Disaggregation
 
@@ -61,7 +72,7 @@ $$
 1. Fit a KNN model on the historical monthly flow totals for each calendar month.
 2. For each synthetic monthly flow $Q_m^{\text{syn}}$:
    - Query the $K$ nearest neighbors by total flow.
-   - Select one analog month using the Lall-Sharma kernel weights.
+   - Select one analog month using inverse-distance or Lall-Sharma kernel weights.
    - Disaggregate by applying the analog's daily proportions to $Q_m^{\text{syn}}$.
 3. Optionally smooth month boundaries and rescale to preserve monthly totals.
 4. Enforce non-negativity.

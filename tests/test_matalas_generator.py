@@ -1,5 +1,5 @@
 """
-Tests for MATALASGenerator (Matalas 1967, multi-site MAR(1)).
+Tests for MatalasGenerator (Matalas 1967, multi-site MAR(1)).
 """
 
 import pickle
@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from synhydro.methods.generation.parametric.matalas import MATALASGenerator
+from synhydro.methods.generation.parametric.matalas import MatalasGenerator
 from synhydro.core.ensemble import Ensemble
 
 
@@ -50,28 +50,28 @@ def short_monthly(monthly_multisite):
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASInit:
+class TestMatalasInit:
     def test_default_params(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         assert gen.log_transform is True
         assert gen.is_preprocessed is False
         assert gen.is_fitted is False
 
     def test_log_transform_false(self, monthly_multisite):
-        gen = MATALASGenerator(log_transform=False)
+        gen = MatalasGenerator(log_transform=False)
         assert gen.log_transform is False
 
     def test_stores_algorithm_params(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         assert gen.init_params.algorithm_params["method"] == "Matalas MAR(1)"
 
     def test_accepts_series_via_fit(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite.iloc[:, 0])
         assert gen is not None
 
     def test_accepts_dataframe_via_fit(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         assert gen is not None
 
@@ -81,43 +81,43 @@ class TestMATALASInit:
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASPreprocessing:
+class TestMatalasPreprocessing:
     def test_preprocessed_flag(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(monthly_multisite)
         assert gen.is_preprocessed is True
 
     def test_sites_stored(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(monthly_multisite)
         assert gen._sites == ["A", "B", "C"]
         assert gen._n_sites == 3
 
     def test_single_site(self, monthly_single_site):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(monthly_single_site)
         assert gen._n_sites == 1
 
     def test_site_subset(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(monthly_multisite, sites=["A", "B"])
         assert gen._sites == ["A", "B"]
         assert gen._n_sites == 2
 
     def test_monthly_index_preserved(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(monthly_multisite)
         assert len(gen.Q_obs_monthly) == 360
 
     def test_daily_resampled_to_monthly(self):
         dates = pd.date_range("2000-01-01", periods=365 * 10, freq="D")
         Q = pd.DataFrame({"X": np.random.gamma(2, 50, len(dates))}, index=dates)
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(Q)
         assert gen.Q_obs_monthly.index.freqstr in ("MS", "MS-JAN")
 
     def test_no_fit_before_preprocessing_raises(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         with pytest.raises(ValueError, match="preprocessing"):
             gen.fit()
 
@@ -127,28 +127,28 @@ class TestMATALASPreprocessing:
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASFit:
+class TestMatalasFit:
     def test_fitted_flag(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         assert gen.is_fitted is True
 
     def test_twelve_matrices(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         assert len(gen._A) == 12
         assert len(gen._B) == 12
 
     def test_matrix_shapes(self, monthly_multisite):
         n = 3
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         for m in range(12):
             assert gen._A[m].shape == (n, n), f"A[{m}] wrong shape"
             assert gen._B[m].shape == (n, n), f"B[{m}] wrong shape"
 
     def test_b_lower_triangular(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         for m in range(12):
             B = gen._B[m]
@@ -156,38 +156,38 @@ class TestMATALASFit:
             assert np.allclose(np.triu(B, 1), 0, atol=1e-8)
 
     def test_mu_sigma_shape(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         assert gen._mu.shape == (12, 3)
         assert gen._sigma.shape == (12, 3)
         assert gen._sigma.values.min() > 0
 
     def test_mu_sigma_index(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         assert list(gen._mu.index) == list(range(1, 13))
 
     def test_fitted_params_stored(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         assert gen.fitted_params_ is not None
         assert gen.fitted_params_.n_sites_ == 3
 
     def test_single_site_fit(self, monthly_single_site):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_single_site)
         assert gen.is_fitted
         for m in range(12):
             assert gen._A[m].shape == (1, 1)
 
     def test_no_generate_before_fit_raises(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.preprocessing(monthly_multisite)
         with pytest.raises(ValueError, match="fit"):
             gen.generate(n_years=5)
 
     def test_log_transform_false_fits(self, monthly_multisite):
-        gen = MATALASGenerator(log_transform=False)
+        gen = MatalasGenerator(log_transform=False)
         gen.fit(monthly_multisite)
         assert gen.is_fitted
 
@@ -197,55 +197,55 @@ class TestMATALASFit:
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASGenerate:
+class TestMatalasGenerate:
     def test_returns_ensemble(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=10, n_realizations=2, seed=0)
         assert isinstance(result, Ensemble)
 
     def test_n_realizations(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=5, n_realizations=7, seed=0)
         assert result.metadata.n_realizations == 7
 
     def test_shape_multisite(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=10, n_realizations=1, seed=0)
         df = result.data_by_realization[0]
         assert df.shape == (120, 3)  # 10*12 months, 3 sites
 
     def test_site_columns_match(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=5, n_realizations=1, seed=0)
         assert list(result.data_by_realization[0].columns) == ["A", "B", "C"]
 
     def test_datetime_index(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=5, n_realizations=1, seed=0)
         df = result.data_by_realization[0]
         assert isinstance(df.index, pd.DatetimeIndex)
 
     def test_non_negative_flows(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=20, n_realizations=10, seed=0)
         for i in range(10):
             assert (result.data_by_realization[i].values >= 0).all()
 
     def test_no_nans(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=20, n_realizations=5, seed=0)
         for i in range(5):
             assert not result.data_by_realization[i].isna().any().any()
 
     def test_seed_reproducibility(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         r1 = gen.generate(n_years=10, n_realizations=3, seed=99)
         r2 = gen.generate(n_years=10, n_realizations=3, seed=99)
@@ -255,20 +255,20 @@ class TestMATALASGenerate:
             )
 
     def test_different_seeds_differ(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         r1 = gen.generate(n_years=10, n_realizations=1, seed=1)
         r2 = gen.generate(n_years=10, n_realizations=1, seed=2)
         assert not r1.data_by_realization[0].equals(r2.data_by_realization[0])
 
     def test_n_timesteps_override(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_timesteps=36, n_realizations=1, seed=0)
         assert len(result.data_by_realization[0]) == 36
 
     def test_default_n_years(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_realizations=1, seed=0)
         # Should match historic length in years
@@ -276,7 +276,7 @@ class TestMATALASGenerate:
         assert len(result.data_by_realization[0]) == expected
 
     def test_realizations_differ(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=10, n_realizations=5, seed=7)
         # Not all realizations should be identical
@@ -290,10 +290,10 @@ class TestMATALASGenerate:
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASStatistics:
+class TestMatalasStatistics:
     def test_monthly_mean_preserved(self, monthly_multisite):
         """Ensemble mean by month should approximate historical monthly mean."""
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=50, n_realizations=20, seed=0)
 
@@ -311,7 +311,7 @@ class TestMATALASStatistics:
 
     def test_spatial_correlation_sign_preserved(self, monthly_multisite):
         """Contemporaneous cross-site correlation sign should be preserved."""
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=50, n_realizations=10, seed=0)
 
@@ -332,9 +332,9 @@ class TestMATALASStatistics:
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASSerialization:
+class TestMatalasSerialization:
     def test_pickle_roundtrip(self, monthly_multisite, tmp_path):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
 
         path = tmp_path / "matalas.pkl"
@@ -347,7 +347,7 @@ class TestMATALASSerialization:
         assert gen2._n_sites == 3
 
     def test_generate_after_pickle(self, monthly_multisite, tmp_path):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite)
 
         path = tmp_path / "matalas.pkl"
@@ -365,29 +365,29 @@ class TestMATALASSerialization:
 # ---------------------------------------------------------------------------
 
 
-class TestMATALASEdgeCases:
+class TestMatalasEdgeCases:
     def test_short_record_warns(self, short_monthly):
         """Short record should fit without crash (may log warnings)."""
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(short_monthly)
         assert gen.is_fitted
 
     def test_single_site_equivalent(self, monthly_single_site):
         """Single-site MAR(1) should produce valid output."""
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_single_site)
         result = gen.generate(n_years=10, n_realizations=3, seed=0)
         for i in range(3):
             assert result.data_by_realization[i].shape == (120, 1)
 
     def test_two_sites(self, monthly_multisite):
-        gen = MATALASGenerator()
+        gen = MatalasGenerator()
         gen.fit(monthly_multisite[["A", "B"]])
         result = gen.generate(n_years=5, n_realizations=2, seed=0)
         assert result.data_by_realization[0].shape == (60, 2)
 
     def test_log_transform_false_end_to_end(self, monthly_multisite):
-        gen = MATALASGenerator(log_transform=False)
+        gen = MatalasGenerator(log_transform=False)
         gen.fit(monthly_multisite)
         result = gen.generate(n_years=10, n_realizations=2, seed=0)
         assert not result.data_by_realization[0].isna().any().any()
