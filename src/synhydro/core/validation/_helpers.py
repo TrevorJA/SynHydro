@@ -79,6 +79,7 @@ def _extract_droughts(
 def _metric_entry(
     obs_val: float,
     syn_vals: list[float],
+    denom_floor: float = 1e-10,
 ) -> dict | None:
     """
     Build a standardized metric comparison dict.
@@ -89,6 +90,14 @@ def _metric_entry(
         Observed statistic.
     syn_vals : list of float
         Per-realization synthetic values.
+    denom_floor : float, optional
+        Minimum absolute denominator for relative error computation.
+        When ``abs(obs_val)`` is below this floor the floor value is
+        used instead, preventing blow-up for near-zero observed values.
+        Callers should set this to a physically meaningful minimum
+        (e.g. 1% of the site mean flow). Default ``1e-10`` preserves
+        backward compatibility (effectively returns NaN for zero
+        observed values).
 
     Returns
     -------
@@ -101,7 +110,8 @@ def _metric_entry(
     if len(arr) == 0:
         return None
     median = float(np.median(arr))
-    rel_err = (median - obs_val) / abs(obs_val) if abs(obs_val) > 1e-10 else np.nan
+    denom = max(abs(obs_val), denom_floor)
+    rel_err = (median - obs_val) / denom
     return {
         "observed": float(obs_val),
         "synthetic_median": median,

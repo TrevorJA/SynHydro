@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/TrevorJA/SynHydro/actions/workflows/tests.yml/badge.svg)](https://github.com/TrevorJA/SynHydro/actions/workflows/tests.yml)
 
-SynHydro is a Python library for generating synthetic hydrologic timeseries using a unified, scikit-learn-style API. All generators share a common `fit() / generate()` workflow, and the library includes validation, drought analysis, plotting, and ensemble management tools.
+SynHydro is a Python library for generating synthetic hydrologic timeseries using a unified, scikit-learn-style API. All generators share a common `fit()` and `generate()` workflow, and the library includes validation, drought analysis, plotting, and ensemble data management tools.
 
 ## Installation
 

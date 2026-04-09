@@ -36,6 +36,15 @@ Wang, W., Dong, Z., Zhang, T., Ren, L., Xue, L., Wu, T. (2024). Mixed D-vine cop
 
 Czado, C., and Nagler, T. (2022). Vine copula based modeling. *Annual Review of Statistics and Its Application*, 9, 453-477.
 
+**SMARTA (Symmetric Moving Average neaRly To Anything)**
+Tsoukalas, I., Makropoulos, C., and Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. *Water Resources Research*, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462
+
+**SPARTA (Stochastic Periodic AutoRegressive To Anything)**
+Tsoukalas, I., Efstratiadis, A., and Makropoulos, C. (2018). Stochastic periodic autoregressive to anything (SPARTA): Modeling and simulation of cyclostationary processes with arbitrary marginal distributions. *Water Resources Research*, 54(1), 161-185. https://doi.org/10.1002/2017WR021394
+
+**anySim R Package**
+Tsoukalas, I., Kossieris, P., and Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. *Water*, 12(6), 1645. https://doi.org/10.3390/w12061645
+
 **Stedinger-Taylor Normalization** (used in Thomas-Fiering)
 Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. *Water Resources Research*, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909
 
@@ -116,6 +125,15 @@ Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates 
 
 **ARFIMA in hydrology**
 Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. *Water Resources Research*, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
+
+**SMA (Symmetric Moving Average) Model and CAS**
+Koutsoyiannis, D. (2000). A generalized mathematical framework for stochastic simulation and forecast of hydrologic time series. *Water Resources Research*, 36(6), 1519-1533. https://doi.org/10.1029/2000WR900044
+
+**Nataf joint distribution model**
+Nataf, A. (1962). Determination des distributions de probabilites dont les marges sont donnees. *Comptes Rendus de l'Academie des Sciences*, 225, 42-43.
+
+**NORTA (Normal To Anything)**
+Cario, M.C., and Nelson, B.L. (1996). Autoregressive to anything: Time-series input processes for simulation. *Operations Research Letters*, 19(2), 51-58. https://doi.org/10.1016/0167-6377(96)00017-X
 
 **Hurst phenomenon**
 Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. *Hydrological Sciences Journal*, 47(4), 573-595.

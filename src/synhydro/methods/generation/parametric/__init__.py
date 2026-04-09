@@ -14,6 +14,8 @@ from synhydro.methods.generation.parametric.hmm_knn import HMMKNNGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.warm import WARMGenerator
+from synhydro.methods.generation.parametric.smarta import SMARTAGenerator
+from synhydro.methods.generation.parametric.sparta import SPARTAGenerator
 
 __all__ = [
     "ARFIMAGenerator",
@@ -21,6 +23,8 @@ __all__ = [
     "HMMKNNGenerator",
     "MatalasGenerator",
     "MultiSiteHMMGenerator",
+    "SMARTAGenerator",
+    "SPARTAGenerator",
     "ThomasFieringGenerator",
     "VineCopulaGenerator",
     "WARMGenerator",

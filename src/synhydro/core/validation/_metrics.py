@@ -78,6 +78,7 @@ def _compute_marginal_metrics(
 
         syn_stats: dict[str, list[float]] = {k: [] for k in obs_stats}
         syn_ks_pvals: list[float] = []
+        syn_ks_stats: list[float] = []
 
         for df in ensemble.data_by_realization.values():
             if site not in df.columns:
@@ -101,6 +102,7 @@ def _compute_marginal_metrics(
             try:
                 ks_stat, ks_p = sp_stats.ks_2samp(obs, s)
                 syn_ks_pvals.append(float(ks_p))
+                syn_ks_stats.append(float(ks_stat))
             except Exception:
                 pass
 
@@ -119,6 +121,17 @@ def _compute_marginal_metrics(
                 "synthetic_p10": float(np.percentile(arr, 10)),
                 "synthetic_p90": float(np.percentile(arr, 90)),
                 "relative_error": float(np.median(arr) - 1.0),
+            }
+
+        # KS statistic D_n: ideal = 0.0 (max CDF deviation)
+        if syn_ks_stats:
+            arr_d = np.array(syn_ks_stats)
+            site_results["ks_statistic"] = {
+                "observed": 0.0,
+                "synthetic_median": float(np.median(arr_d)),
+                "synthetic_p10": float(np.percentile(arr_d, 10)),
+                "synthetic_p90": float(np.percentile(arr_d, 90)),
+                "relative_error": float(np.median(arr_d)),
             }
 
         results[site] = site_results
