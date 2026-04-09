@@ -12,7 +12,7 @@
         <meta name="author" content="Trevor Amestoy">
       
       
-        <link rel="canonical" href="https://trevorja.github.io/SynHydro/references/references/">
+        <link rel="canonical" href="https://trevorja.github.io/SynHydro/algorithms/smarta/">
       
       
       
@@ -22,7 +22,7 @@
     
     
       
-        <title>References - SynHydro</title>
+        <title>SMARTA -- Symmetric Moving Average (neaRly) To Anything (Tsoukalas et al., 2018) - SynHydro</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#parametric-methods" class="md-skip">
+        <a href="#smarta-symmetric-moving-average-nearly-to-anything-tsoukalas-et-al-2018" class="md-skip">
           Skip to content
         </a>
       
@@ -114,7 +114,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              References
+              SMARTA -- Symmetric Moving Average (neaRly) To Anything (Tsoukalas et al., 2018)
             
           </span>
         </div>
@@ -279,7 +279,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../algorithms/" class="md-tabs__link">
+        <a href="../" class="md-tabs__link">
           
   
   
@@ -644,7 +644,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   
@@ -667,7 +667,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/thomas_fiering/" class="md-nav__link">
+      <a href="../thomas_fiering/" class="md-nav__link">
         
   
   
@@ -690,7 +690,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/kirsch/" class="md-nav__link">
+      <a href="../kirsch/" class="md-nav__link">
         
   
   
@@ -713,7 +713,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/knn_bootstrap/" class="md-nav__link">
+      <a href="../knn_bootstrap/" class="md-nav__link">
         
   
   
@@ -736,7 +736,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/matalas/" class="md-nav__link">
+      <a href="../matalas/" class="md-nav__link">
         
   
   
@@ -759,7 +759,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/phase_randomization/" class="md-nav__link">
+      <a href="../phase_randomization/" class="md-nav__link">
         
   
   
@@ -782,7 +782,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/warm/" class="md-nav__link">
+      <a href="../warm/" class="md-nav__link">
         
   
   
@@ -805,7 +805,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/multisite_hmm/" class="md-nav__link">
+      <a href="../multisite_hmm/" class="md-nav__link">
         
   
   
@@ -828,7 +828,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/arfima/" class="md-nav__link">
+      <a href="../arfima/" class="md-nav__link">
         
   
   
@@ -851,7 +851,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/gaussian_copula/" class="md-nav__link">
+      <a href="../gaussian_copula/" class="md-nav__link">
         
   
   
@@ -874,7 +874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/vine_copula/" class="md-nav__link">
+      <a href="../vine_copula/" class="md-nav__link">
         
   
   
@@ -897,7 +897,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/nowak_disaggregation/" class="md-nav__link">
+      <a href="../nowak_disaggregation/" class="md-nav__link">
         
   
   
@@ -920,7 +920,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/valencia_schaake/" class="md-nav__link">
+      <a href="../valencia_schaake/" class="md-nav__link">
         
   
   
@@ -943,7 +943,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../algorithms/grygier_stedinger/" class="md-nav__link">
+      <a href="../grygier_stedinger/" class="md-nav__link">
         
   
   
@@ -1125,6 +1125,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -1133,45 +1135,132 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#parametric-methods" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      Parametric Methods
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#nonparametric-methods" class="md-nav__link">
+  <a href="#notation" class="md-nav__link">
     <span class="md-ellipsis">
-      Nonparametric Methods
+      Notation
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#disaggregation" class="md-nav__link">
+  <a href="#formulation" class="md-nav__link">
     <span class="md-ellipsis">
-      Disaggregation
+      Formulation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Formulation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nataf-mapping-gaussian-to-target-domain" class="md-nav__link">
+    <span class="md-ellipsis">
+      Nataf Mapping (Gaussian to Target Domain)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#equivalent-correlation-identification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Equivalent Correlation Identification
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cauchy-type-autocorrelation-structure-cas" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cauchy-type Autocorrelation Structure (CAS)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sma-model-auxiliary-gaussian-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      SMA Model (Auxiliary Gaussian Process)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multivariate-extension" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multivariate Extension
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parameter-estimation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parameter Estimation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synthesis-procedure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthesis Procedure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#statistical-properties" class="md-nav__link">
+    <span class="md-ellipsis">
+      Statistical Properties
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#wavelet-based-methods" class="md-nav__link">
+  <a href="#limitations" class="md-nav__link">
     <span class="md-ellipsis">
-      Wavelet-Based Methods
+      Limitations
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#methodological-foundations" class="md-nav__link">
+  <a href="#implementation-notes" class="md-nav__link">
     <span class="md-ellipsis">
-      Methodological Foundations
+      Implementation Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    <span class="md-ellipsis">
+      References
     </span>
   </a>
   
@@ -1196,105 +1285,236 @@
   
 
 
-  <h1>References</h1>
-
-<h2 id="parametric-methods">Parametric Methods<a class="headerlink" href="#parametric-methods" title="Permanent link">&para;</a></h2>
-<p><strong>Thomas-Fiering AR(1)</strong>
-Thomas, H.A., and Fiering, M.B. (1962). Mathematical synthesis of streamflow sequences for the analysis of river basins by simulation. In <em>Design of Water Resource Systems</em> (eds. Maass et al.), pp. 459-493. Harvard University Press.</p>
-<p><strong>Matalas MAR(1)</strong>
-Matalas, N.C. (1967). Mathematical assessment of synthetic hydrology. <em>Water Resources Research</em>, 3(4), 937-945. https://doi.org/10.1029/WR003i004p00937</p>
-<p><strong>Multi-Site Hidden Markov Model</strong>
-Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. <em>Earth's Future</em>. https://doi.org/10.1029/2024EF004841</p>
-<p><strong>HMM-KNN Regime-Conditioned Bootstrap</strong>
-Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2008). A stochastic nonparametric approach for streamflow generation combining observational and paleoreconstructed data. <em>Water Resources Research</em>, 44, W06423. https://doi.org/10.1029/2007WR006684</p>
-<p>Steinschneider, S., and Brown, C. (2013). A semiparametric multivariate, multisite weather generator with low-frequency variability for use in climate risk assessments. <em>Water Resources Research</em>, 49, 7205-7220. https://doi.org/10.1002/wrcr.20528</p>
-<p><strong>ARFIMA (Autoregressive Fractionally Integrated Moving Average)</strong>
-Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using fractional differencing. <em>Water Resources Research</em>, 20(12), 1898-1908. https://doi.org/10.1029/WR020i012p01898</p>
-<p><strong>Copula-Based Multivariate Streamflow Generation</strong>
-Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know about copula modeling but were afraid to ask. <em>Journal of Hydrologic Engineering</em>, 12(4), 347-368. https://doi.org/10.1061/(ASCE)1084-0699(2007)12:4(347)</p>
-<p>Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based method for multisite monthly and daily streamflow simulation. <em>Journal of Hydrology</em>, 526, 360-381. https://doi.org/10.1016/j.jhydrol.2015.01.025</p>
-<p>Tootoonchi, F., Haerter, J.O., Todsen, A., Whan, K., Laux, P., and Sadegh, M. (2022). Copulas for hydroclimatic analysis: A practice-oriented overview. <em>WIREs Water</em>, 9(2), e1579. https://doi.org/10.1002/wat2.1579</p>
-<p>Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic spatial vine copula model for multi-site streamflow simulation. <em>Electric Power Systems Research</em>, 152, 9-17. https://doi.org/10.1016/j.epsr.2017.06.017</p>
-<p><strong>Vine Copula-Based Multivariate Streamflow Generation</strong>
-Yu, X., Xu, Y.-P., Guo, Y., Chen, S., and Gu, H. (2025). Synchronization frequency analysis and stochastic simulation of multi-site flood flows based on the complicated vine copula structure. <em>Hydrology and Earth System Sciences</em>, 29, 179-214. https://doi.org/10.5194/hess-29-179-2025</p>
-<p>Wang, X., and Shen, Y.-M. (2023). R-statistic based predictor variables selection and vine structure determination approach for stochastic streamflow generation. <em>Journal of Hydrology</em>, 617, 129093. https://doi.org/10.1016/j.jhydrol.2023.129093</p>
-<p>Wang, W., Dong, Z., Zhang, T., Ren, L., Xue, L., Wu, T. (2024). Mixed D-vine copula-based conditional quantile model for stochastic monthly streamflow simulation. <em>Water Science and Engineering</em>, 17(1), 13-20. https://doi.org/10.1016/j.wse.2023.05.004</p>
-<p>Czado, C., and Nagler, T. (2022). Vine copula based modeling. <em>Annual Review of Statistics and Its Application</em>, 9, 453-477.</p>
-<p><strong>SMARTA (Symmetric Moving Average neaRly To Anything)</strong>
-Tsoukalas, I., Makropoulos, C., and Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. <em>Water Resources Research</em>, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462</p>
-<p><strong>SPARTA (Stochastic Periodic AutoRegressive To Anything)</strong>
-Tsoukalas, I., Efstratiadis, A., and Makropoulos, C. (2018). Stochastic periodic autoregressive to anything (SPARTA): Modeling and simulation of cyclostationary processes with arbitrary marginal distributions. <em>Water Resources Research</em>, 54(1), 161-185. https://doi.org/10.1002/2017WR021394</p>
-<p><strong>anySim R Package</strong>
-Tsoukalas, I., Kossieris, P., and Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. <em>Water</em>, 12(6), 1645. https://doi.org/10.3390/w12061645</p>
-<p><strong>Stedinger-Taylor Normalization</strong> (used in Thomas-Fiering)
-Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. <em>Water Resources Research</em>, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909</p>
+<h1 id="smarta-symmetric-moving-average-nearly-to-anything-tsoukalas-et-al-2018">SMARTA -- Symmetric Moving Average (neaRly) To Anything (Tsoukalas et al., 2018)<a class="headerlink" href="#smarta-symmetric-moving-average-nearly-to-anything-tsoukalas-et-al-2018" title="Permanent link">&para;</a></h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Type</strong></td>
+<td>Parametric</td>
+</tr>
+<tr>
+<td><strong>Resolution</strong></td>
+<td>Monthly (or Annual)</td>
+</tr>
+<tr>
+<td><strong>Sites</strong></td>
+<td>Multisite</td>
+</tr>
+</tbody>
+</table>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>SMARTA generates stationary synthetic timeseries with arbitrary marginal distributions and any-range autocorrelation structure (short-range or long-range / Hurst-Kolmogorov). The core idea is to simulate an auxiliary standard Gaussian process using the Symmetric Moving Average (SMA) model, then map the Gaussian variates to the target domain via their inverse CDF. Because Pearson correlation is not invariant under this nonlinear transformation, the Gaussian process must use "equivalent" (inflated) correlation coefficients, identified through the Nataf joint distribution model. In multivariate mode the model additionally preserves the lag-0 cross-correlation matrix across sites.</p>
+<h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Symbol</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><span class="arithmatex">\(x_t^i\)</span></td>
+<td>Observed process <span class="arithmatex">\(i\)</span> at time <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(z_t^i\)</span></td>
+<td>Auxiliary standard Gaussian process for site <span class="arithmatex">\(i\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(F_{x^i}\)</span></td>
+<td>Target marginal CDF of process <span class="arithmatex">\(i\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(F_{x^i}^{-1}\)</span></td>
+<td>Target marginal ICDF (quantile function) of process <span class="arithmatex">\(i\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\Phi(\cdot)\)</span></td>
+<td>Standard normal CDF</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\phi_2(\cdot;\tilde{\rho})\)</span></td>
+<td>Bivariate standard normal PDF with correlation <span class="arithmatex">\(\tilde{\rho}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\rho_\tau^i\)</span></td>
+<td>Target autocorrelation of process <span class="arithmatex">\(i\)</span> at lag <span class="arithmatex">\(\tau\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde{\rho}_\tau^i\)</span></td>
+<td>Equivalent (Gaussian-domain) autocorrelation of process <span class="arithmatex">\(i\)</span> at lag <span class="arithmatex">\(\tau\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\rho_0^{i,j}\)</span></td>
+<td>Target lag-0 cross-correlation between processes <span class="arithmatex">\(i\)</span> and <span class="arithmatex">\(j\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde{\rho}_0^{i,j}\)</span></td>
+<td>Equivalent lag-0 cross-correlation between processes <span class="arithmatex">\(i\)</span> and <span class="arithmatex">\(j\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde{a}_\zeta^i\)</span></td>
+<td>SMA weight coefficients for process <span class="arithmatex">\(i\)</span>, <span class="arithmatex">\(\zeta = -q, \ldots, q\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(q\)</span></td>
+<td>SMA truncation order (typically a power of 2, e.g. 512)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(v_t^i\)</span></td>
+<td>Standard normal i.i.d. innovation for process <span class="arithmatex">\(i\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde{G}\)</span></td>
+<td>Equivalent lag-0 cross-correlation matrix of innovations</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\tilde{B}\)</span></td>
+<td>Lower Cholesky factor of <span class="arithmatex">\(\tilde{G}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(m\)</span></td>
+<td>Number of sites (processes)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\kappa, \beta\)</span></td>
+<td>Parameters of the Cauchy-type autocorrelation structure (CAS)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(H\)</span></td>
+<td>Hurst coefficient</td>
+</tr>
+</tbody>
+</table>
+<h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
+<h3 id="nataf-mapping-gaussian-to-target-domain">Nataf Mapping (Gaussian to Target Domain)<a class="headerlink" href="#nataf-mapping-gaussian-to-target-domain" title="Permanent link">&para;</a></h3>
+<p>Each auxiliary Gaussian variate is mapped to the target domain by:</p>
+<div class="arithmatex">\[
+x_t^i = F_{x^i}^{-1}\!\left(\Phi(z_t^i)\right)
+\]</div>
+<p>This guarantees exact preservation of the target marginal distribution.</p>
+<h3 id="equivalent-correlation-identification">Equivalent Correlation Identification<a class="headerlink" href="#equivalent-correlation-identification" title="Permanent link">&para;</a></h3>
+<p>Because Pearson's correlation is not invariant under the nonlinear ICDF mapping, the target correlation <span class="arithmatex">\(\rho\)</span> and equivalent Gaussian-domain correlation <span class="arithmatex">\(\tilde{\rho}\)</span> are related by:</p>
+<div class="arithmatex">\[
+\rho = \mathcal{F}(\tilde{\rho} \mid F_{x^i}, F_{x^j})
+= \frac{
+  \int_{-\infty}^{\infty} \int_{-\infty}^{\infty}
+  F_{x^i}^{-1}(\Phi(z^i))\;
+  F_{x^j}^{-1}(\Phi(z^j))\;
+  \phi_2(z^i, z^j;\, \tilde{\rho})\; dz^i\, dz^j
+  \;-\; E[x^i]\, E[x^j]
+}{
+  \sqrt{Var[x^i]\; Var[x^j]}
+}
+\]</div>
+<p>Key properties (Lemmas from the paper):
+- <span class="arithmatex">\(\rho\)</span> is a strictly increasing function of <span class="arithmatex">\(\tilde{\rho}\)</span>
+- <span class="arithmatex">\(|\rho| \leq |\tilde{\rho}|\)</span> (equality only when both marginals are Gaussian)
+- <span class="arithmatex">\(\tilde{\rho} = 0\)</span> iff <span class="arithmatex">\(\rho = 0\)</span></p>
+<p>The relationship <span class="arithmatex">\(\mathcal{F}(\cdot)\)</span> generally has no closed-form solution (exception: log-normal case, Eq. 18-19 in paper). It is approximated numerically following the procedure of Appendix A in the paper (see also Tsoukalas et al., 2018a):</p>
+<ol>
+<li>Select <span class="arithmatex">\(\Omega\)</span> support points <span class="arithmatex">\(\tilde{\rho}_k\)</span> in <span class="arithmatex">\([-1, 1]\)</span> (default <span class="arithmatex">\(\Omega = 9\)</span>).</li>
+<li>For each support point, evaluate <span class="arithmatex">\(\rho_k = \mathcal{F}(\tilde{\rho}_k)\)</span> by Monte Carlo simulation: draw <span class="arithmatex">\(N\)</span> bivariate normal pairs <span class="arithmatex">\((z^i, z^j)\)</span> with correlation <span class="arithmatex">\(\tilde{\rho}_k\)</span>, map through the ICDFs, and compute the sample Pearson correlation. The paper recommends <span class="arithmatex">\(N = 150{,}000\)</span>.</li>
+<li>Fit a polynomial of degree <span class="arithmatex">\(d\)</span> (default <span class="arithmatex">\(d = 8\)</span>) through the <span class="arithmatex">\((\tilde{\rho}_k, \rho_k)\)</span> pairs.</li>
+<li>Invert the polynomial: evaluate it densely over <span class="arithmatex">\([-1, 1]\)</span> and interpolate to find <span class="arithmatex">\(\tilde{\rho}\)</span> for each target <span class="arithmatex">\(\rho\)</span>. (The anySim R package uses <code>polyval</code> on a fine grid followed by linear interpolation.)</li>
+</ol>
+<p>Alternative integration methods (Gauss-Hermite quadrature, numerical integration) can replace the Monte Carlo step but may be less robust for discrete or mixed-type marginals.</p>
+<p>This procedure is applied a total of <span class="arithmatex">\(m(m+1)/2\)</span> times:
+- <span class="arithmatex">\(m\)</span> times for autocorrelation (one per site, each producing the full equivalent ACF vector <span class="arithmatex">\(\tilde{\rho}_1^i, \ldots, \tilde{\rho}_q^i\)</span>)
+- <span class="arithmatex">\(m(m-1)/2\)</span> times for lag-0 cross-correlations (one per site pair, each producing a single <span class="arithmatex">\(\tilde{\rho}_0^{i,j}\)</span>)</p>
+<h3 id="cauchy-type-autocorrelation-structure-cas">Cauchy-type Autocorrelation Structure (CAS)<a class="headerlink" href="#cauchy-type-autocorrelation-structure-cas" title="Permanent link">&para;</a></h3>
+<p>CAS is a two-parameter theoretical ACF that captures both SRD and LRD:</p>
+<div class="arithmatex">\[
+\rho_\tau^{CAS} = (1 + \kappa \beta \tau)^{-1/\beta}, \qquad \tau \geq 0
+\]</div>
+<p>Special cases:
+- <span class="arithmatex">\(\beta &gt; 1\)</span>: long-range dependence (approximates HK/fGn behavior). When <span class="arithmatex">\(\kappa = \kappa_0\)</span> (see Eq. 8 in paper), CAS closely matches the fGn ACF with <span class="arithmatex">\(H\)</span> related by <span class="arithmatex">\(\beta = 1/(2 - 2H)\)</span>.
+- <span class="arithmatex">\(\beta = 0\)</span> (via L'Hopital): <span class="arithmatex">\(\rho_\tau = \exp(-\kappa \tau)\)</span>, which is SRD (Markovian/AR(1) type).</p>
+<p>Parameters <span class="arithmatex">\(\kappa\)</span> and <span class="arithmatex">\(\beta\)</span> are estimated by minimizing MSE between sample and theoretical ACF or climacogram. The paper recommends using the climacogram for parameter identification, especially for LRD processes, because it exhibits less bias and uncertainty in its estimation compared to the ACF (Dimitriadis &amp; Koutsoyiannis, 2015).</p>
+<h3 id="sma-model-auxiliary-gaussian-process">SMA Model (Auxiliary Gaussian Process)<a class="headerlink" href="#sma-model-auxiliary-gaussian-process" title="Permanent link">&para;</a></h3>
+<p>The univariate SMA generating mechanism is:</p>
+<div class="arithmatex">\[
+z_t^i = \sum_{\zeta=-q}^{q} \tilde{a}_{|\zeta|}^i \; v_{t+\zeta}^i
+\]</div>
+<p>where <span class="arithmatex">\(v_t^i\)</span> are i.i.d. standard normal, and the symmetric weights <span class="arithmatex">\(\tilde{a}_\zeta^i\)</span> satisfy:</p>
+<div class="arithmatex">\[
+\tilde{\rho}_\tau^i = \sum_{\zeta=-q}^{q-\tau} \tilde{a}_{|\zeta|}^i \; \tilde{a}_{|\tau+\zeta|}^i, \qquad \tau = 0, 1, \ldots, q
+\]</div>
+<p>The weights are computed via FFT (Koutsoyiannis, 2000). Form the full symmetric equivalent ACF vector of length <span class="arithmatex">\(2q+1\)</span>: <span class="arithmatex">\([\tilde{\rho}_q, \ldots, \tilde{\rho}_1, 1, \tilde{\rho}_1, \ldots, \tilde{\rho}_q]\)</span>. Compute its DFT to get the power spectrum <span class="arithmatex">\(S_{\tilde{\rho}}(\omega)\)</span>. The DFT of the weight sequence is <span class="arithmatex">\(S_{\tilde{a}}(\omega) = \sqrt{|S_{\tilde{\rho}}(\omega)|}\)</span> (absolute value guards against small negative values from numerical imprecision). Apply the inverse FFT to obtain the weights <span class="arithmatex">\(\tilde{a}_\zeta\)</span>. The weights must satisfy <span class="arithmatex">\(\sum_\zeta \tilde{a}_\zeta^2 = 1\)</span> (i.e., <span class="arithmatex">\(\tilde{\rho}_0 = 1\)</span>).</p>
+<p>Note: The paper (referencing Koutsoyiannis, 2000) writes <span class="arithmatex">\(S_{\tilde{a}}(\omega) = \sqrt{2 S_{\tilde{\rho}}(\omega)}\)</span> using a one-sided spectral convention. When using the full two-sided symmetric ACF as input to the DFT (as in the anySim R implementation), the factor of 2 is not needed.</p>
+<h3 id="multivariate-extension">Multivariate Extension<a class="headerlink" href="#multivariate-extension" title="Permanent link">&para;</a></h3>
+<p>For <span class="arithmatex">\(m &gt; 1\)</span> sites, innovations <span class="arithmatex">\(v_t^i\)</span> must be contemporaneously cross-correlated. Define:</p>
+<div class="arithmatex">\[
+\tilde{g}^{i,j} = \frac{\tilde{\rho}_0^{i,j}}{\sum_{\zeta=-q}^{q} \tilde{a}_{|\zeta|}^i \; \tilde{a}_{|\zeta|}^j}
+\]</div>
+<p>Form matrix <span class="arithmatex">\(\tilde{G}\)</span> with <span class="arithmatex">\(\tilde{G}[i,j] = \tilde{g}^{i,j}\)</span> and ones on the diagonal. Decompose <span class="arithmatex">\(\tilde{G} = \tilde{B}\tilde{B}^\top\)</span> via Cholesky (if positive definite) or nearest-PD correction. Generate correlated innovations: <span class="arithmatex">\(\mathbf{v}_t = \tilde{B}\,\mathbf{w}_t\)</span> where <span class="arithmatex">\(\mathbf{w}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I})\)</span>.</p>
+<h3 id="parameter-estimation">Parameter Estimation<a class="headerlink" href="#parameter-estimation" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Marginal fitting:</strong> Fit a distribution <span class="arithmatex">\(F_{x^i}\)</span> to each site's data (any distribution with finite variance).</li>
+<li><strong>Autocorrelation fitting:</strong> Fit CAS parameters <span class="arithmatex">\((\kappa^i, \beta^i)\)</span> to each site's sample ACF or climacogram.</li>
+<li><strong>Equivalent ACF:</strong> For each site, compute <span class="arithmatex">\(\tilde{\rho}_\tau^i\)</span> for <span class="arithmatex">\(\tau = 1, \ldots, q\)</span> by inverting <span class="arithmatex">\(\mathcal{F}\)</span>.</li>
+<li><strong>SMA weights:</strong> Compute <span class="arithmatex">\(\tilde{a}_\zeta^i\)</span> via FFT of the equivalent ACF.</li>
+<li><strong>Equivalent cross-correlations:</strong> For each pair <span class="arithmatex">\((i,j)\)</span>, compute <span class="arithmatex">\(\tilde{\rho}_0^{i,j}\)</span> by inverting <span class="arithmatex">\(\mathcal{F}\)</span>.</li>
+<li><strong>Cross-correlation decomposition:</strong> Build <span class="arithmatex">\(\tilde{G}\)</span>, decompose to get <span class="arithmatex">\(\tilde{B}\)</span>.</li>
+</ol>
+<h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p>For each time step <span class="arithmatex">\(t = 1, \ldots, T + 2q\)</span>, draw <span class="arithmatex">\(\mathbf{w}_t \sim \mathcal{N}(\mathbf{0}, \mathbf{I}_m)\)</span>.</p>
+</li>
+<li>
+<p>Compute correlated innovations: <span class="arithmatex">\(\mathbf{v}_t = \tilde{B}\,\mathbf{w}_t\)</span> (univariate case: <span class="arithmatex">\(\tilde{B} = 1\)</span>).</p>
+</li>
+<li>
+<p>For each site <span class="arithmatex">\(i = 1, \ldots, m\)</span>, compute the auxiliary Gaussian series via SMA convolution:</p>
+</li>
+</ol>
+<div class="arithmatex">\[
+z_t^i = \sum_{\zeta=-q}^{q} \tilde{a}_{|\zeta|}^i \; v_{t+\zeta}^i, \qquad t = 1, \ldots, T
+\]</div>
+<ol>
+<li>Map to the target domain:</li>
+</ol>
+<div class="arithmatex">\[
+x_t^i = F_{x^i}^{-1}\!\left(\Phi(z_t^i)\right)
+\]</div>
+<h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
+<p>SMARTA exactly preserves the target marginal distribution at each site (by construction via the ICDF mapping). The theoretical autocorrelation structure is preserved up to lag <span class="arithmatex">\(q\)</span> in the Gaussian domain; in the actual domain, correlation preservation depends on the accuracy of the Nataf polynomial approximation. The lag-0 cross-correlation structure is preserved across sites to the extent that the matrix <span class="arithmatex">\(\tilde{G}\)</span> is positive definite and the Nataf inversion is accurate. Lagged cross-correlations (<span class="arithmatex">\(\tau &gt; 0\)</span>) are not explicitly modeled but emerge from the SMA convolution with shared temporal structure.</p>
+<p>The model is capable of reproducing long-range dependence (Hurst-Kolmogorov behavior) through the CAS autocorrelation structure, which is a key advantage over ARMA-type models. The climacogram (variance vs. aggregation scale) provides a diagnostic that is less biased than the ACF for verifying LRD preservation.</p>
+<h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Requires target marginal distributions with finite variance (excludes heavy-tailed distributions with infinite second moment).</li>
+<li>The maximum attainable correlation in the target domain may be less than 1 when marginals are highly skewed or differ significantly between sites (Frechet-Hoeffding bounds).</li>
+<li>The Nataf polynomial inversion is an approximation; accuracy depends on the number and placement of evaluation points and polynomial degree.</li>
+<li>Only lag-0 cross-correlations are explicitly preserved; lagged cross-correlations are implicitly determined by the SMA structure and may not match observations.</li>
+<li>The model assumes stationarity. Seasonal nonstationarity must be handled externally (e.g., treating each month as a separate process as in the daily rainfall example).</li>
+<li>SMA order <span class="arithmatex">\(q\)</span> must be large enough for the target ACF to decay sufficiently; for strong LRD, this requires large <span class="arithmatex">\(q\)</span> (e.g., <span class="arithmatex">\(2^{12}\)</span>), increasing memory and computation.</li>
+<li>The Nataf evaluation (Gauss-Hermite quadrature or Monte Carlo) can be slow when many sites and lags are involved (<span class="arithmatex">\(m + m(m-1)/2\)</span> inversions).</li>
+</ul>
+<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">&para;</a></h2>
+<ul>
+<li><strong>FFT normalization:</strong> NumPy's <code>np.fft.fft</code> uses the same convention as R's <code>fft()</code>. When computing weights from the full symmetric ACF of length <span class="arithmatex">\(2q+1\)</span>, no normalization adjustment is needed. Clamp negative power spectrum values to zero before taking the square root.</li>
+<li><strong>Positive-definiteness:</strong> After Nataf inversion, the matrix <span class="arithmatex">\(\tilde{G}\)</span> may not be positive definite. Use nearest-PD correction (e.g., <code>statsmodels.stats.correlation_tools.cov_nearest_factor_homog</code> or Higham's algorithm) before Cholesky decomposition.</li>
+<li><strong>Polynomial accuracy for skewed marginals:</strong> For highly skewed or zero-inflated distributions, the <span class="arithmatex">\(\mathcal{F}(\cdot)\)</span> relationship is strongly nonlinear. The 8th-degree polynomial may oscillate near the bounds. Validate that interpolated <span class="arithmatex">\(\tilde{\rho}\)</span> values lie in <span class="arithmatex">\([-1, 1]\)</span> and clip if necessary.</li>
+<li><strong>Reference R implementation:</strong> The <code>anySim</code> R package (https://github.com/itsoukal/anySim) by the paper's authors provides a validated implementation with functions <code>EstSMARTA()</code> and <code>SimSMARTA()</code>.</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<p><strong>Primary:</strong>
+Tsoukalas, I., Makropoulos, C., &amp; Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. Water Resources Research, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462</p>
+<p><strong>See also:</strong>
+- Koutsoyiannis, D. (2000). A generalized mathematical framework for stochastic simulation and forecast of hydrologic time series. Water Resources Research, 36(6), 1519-1533. https://doi.org/10.1029/2000WR900044
+- Nataf, A. (1962). Determination des distributions de probabilites dont les marges sont donnees. Comptes Rendus de l'Academie des Sciences, 225, 42-43.
+- Cario, M. C., &amp; Nelson, B. L. (1996). Autoregressive to anything: Time-series input processes for simulation. Operations Research Letters, 19(2), 51-58. https://doi.org/10.1016/0167-6377(96)00017-X
+- Tsoukalas, I., Kossieris, P., &amp; Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. Water, 12(6), 1645. https://doi.org/10.3390/w12061645</p>
 <hr />
-<h2 id="nonparametric-methods">Nonparametric Methods<a class="headerlink" href="#nonparametric-methods" title="Permanent link">&para;</a></h2>
-<p><strong>Kirsch Monthly Bootstrap</strong>
-Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact of alternative hydro-climate scenarios on transfer agreements: A practical improvement for generating synthetic streamflows. <em>Journal of Water Resources Planning and Management</em>, 139(4), 396-406. https://doi.org/10.1061/(ASCE)WR.1943-5452.0000287</p>
-<p><strong>KNN Bootstrap</strong>
-Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693. https://doi.org/10.1029/95WR02966</p>
-<p><strong>Phase Randomization</strong>
-Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. <em>Hydrology and Earth System Sciences</em>, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019</p>
-<p><strong>Multisite Wavelet Phase Randomization</strong>
-Brunner, M.I., and Gilleland, E. (2020). Stochastic simulation of streamflow and spatial extremes: a continuous, wavelet-based approach. <em>Hydrology and Earth System Sciences</em>, 24, 3967-3982. https://doi.org/10.5194/hess-24-3967-2020</p>
-<hr />
-<h2 id="disaggregation">Disaggregation<a class="headerlink" href="#disaggregation" title="Permanent link">&para;</a></h2>
-<p><strong>Nowak Annual-to-Daily Disaggregation</strong>
-Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. <em>Water Resources Research</em>, 46(8). https://doi.org/10.1029/2009WR008530</p>
-<p><strong>Valencia-Schaake Disaggregation</strong>
-Valencia, R.D., and Schaake, J.C. (1973). Disaggregation processes in stochastic hydrology. <em>Water Resources Research</em>, 9(3), 580-585. https://doi.org/10.1029/WR009i003p00580</p>
-<p><strong>Grygier-Stedinger Condensed Disaggregation</strong>
-Grygier, J.C., and Stedinger, J.R. (1988). Condensed disaggregation procedures and conservation corrections for stochastic hydrology. <em>Water Resources Research</em>, 24(10), 1574-1584. https://doi.org/10.1029/WR024i010p01574</p>
-<p><strong>Stedinger-Vogel Disaggregation</strong> (serial correlation extension)
-Stedinger, J.R., and Vogel, R.M. (1984). Disaggregation procedures for generating serially correlated flow vectors. <em>Water Resources Research</em>, 20(1), 47-56. https://doi.org/10.1029/WR020i001p00047</p>
-<p><strong>LAST stochastic techniques</strong>
-Lane, W.L. (1979). Applied stochastic techniques (LAST computer package). User Manual, Division of Planning Technical Services, Bureau of Reclamation, Denver, CO.</p>
-<hr />
-<h2 id="wavelet-based-methods">Wavelet-Based Methods<a class="headerlink" href="#wavelet-based-methods" title="Permanent link">&para;</a></h2>
-<p><strong>WARM (Wavelet Auto-Regressive Method)</strong>
-Erkyihun, S.T., Rajagopalan, B., Zagona, E., Lall, U., and Nowak, K. (2016). Wavelet-based time series bootstrap model for multidecadal streamflow simulation using climate indicators. <em>Water Resources Research</em>, 52(5), 4061-4077. https://doi.org/10.1002/2016WR018696</p>
-<p>Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12. https://doi.org/10.1016/j.jhydrol.2011.08.049</p>
-<hr />
-<h2 id="methodological-foundations">Methodological Foundations<a class="headerlink" href="#methodological-foundations" title="Permanent link">&para;</a></h2>
-<p><strong>Applied stochastic hydrology</strong>
-Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). <em>Applied Modeling of Hydrologic Time Series</em>. Water Resources Publications.</p>
-<p><strong>L-moments</strong>
-Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. <em>Journal of the Royal Statistical Society Series B</em>, 52, 105-124. https://doi.org/10.1111/j.2517-6161.1990.tb01775.x</p>
-<p><strong>Kappa distribution</strong>
-Hosking, J.R.M. (1994). The four-parameter kappa distribution. <em>IBM Journal of Research and Development</em>, 38, 251-258. https://doi.org/10.1147/rd.383.0251</p>
-<p><strong>Surrogate data / phase randomization theory</strong>
-Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. <em>Physica D</em>, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90102-S</p>
-<p><strong>Hidden Markov Models</strong>
-Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. <em>Proceedings of the IEEE</em>, 77(2), 257-286. https://doi.org/10.1109/5.18626</p>
-<p><strong>GMMHMM for hydrology</strong>
-Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. <em>Water Resources Research</em>, 41(9). https://doi.org/10.1029/2004WR003605</p>
-<p><strong>Fractional differencing (foundational)</strong>
-Granger, C.W.J., and Joyeux, R. (1980). An introduction to long-memory time series models and fractional differencing. <em>Journal of Time Series Analysis</em>, 1(1), 15-29. https://doi.org/10.1111/j.1467-9892.1980.tb00297.x</p>
-<p><strong>GPH log-periodogram regression</strong>
-Geweke, J., and Porter-Hudak, S. (1983). The estimation and application of long memory time series models. <em>Journal of Time Series Analysis</em>, 4(4), 221-238. https://doi.org/10.1111/j.1467-9892.1983.tb00371.x</p>
-<p><strong>Whittle frequency-domain MLE</strong>
-Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates for strongly dependent stationary Gaussian time series. <em>The Annals of Statistics</em>, 14(2), 517-532.</p>
-<p><strong>ARFIMA in hydrology</strong>
-Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. <em>Water Resources Research</em>, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043</p>
-<p><strong>SMA (Symmetric Moving Average) Model and CAS</strong>
-Koutsoyiannis, D. (2000). A generalized mathematical framework for stochastic simulation and forecast of hydrologic time series. <em>Water Resources Research</em>, 36(6), 1519-1533. https://doi.org/10.1029/2000WR900044</p>
-<p><strong>Nataf joint distribution model</strong>
-Nataf, A. (1962). Determination des distributions de probabilites dont les marges sont donnees. <em>Comptes Rendus de l'Academie des Sciences</em>, 225, 42-43.</p>
-<p><strong>NORTA (Normal To Anything)</strong>
-Cario, M.C., and Nelson, B.L. (1996). Autoregressive to anything: Time-series input processes for simulation. <em>Operations Research Letters</em>, 19(2), 51-58. https://doi.org/10.1016/0167-6377(96)00017-X</p>
-<p><strong>Hurst phenomenon</strong>
-Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. <em>Hydrological Sciences Journal</em>, 47(4), 573-595.</p>
-<p><strong>KNN for weather variables</strong>
-Rajagopalan, B., and Lall, U. (1999). A k-nearest-neighbor simulator for daily precipitation and other weather variables. <em>Water Resources Research</em>, 35(10), 3089-3101. https://doi.org/10.1029/1999WR900028</p>
-<p><strong>Spatial-temporal KNN disaggregation</strong>
-Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2007). A stochastic nonparametric technique for space-time disaggregation of streamflows. <em>Water Resources Research</em>, 43, W03432. https://doi.org/10.1029/2005WR004721</p>
-<p><strong>Nonparametric function estimation in hydrology</strong>
-Lall, U. (1995). Recent advances in nonparametric function estimation: Hydrologic applications. <em>Reviews of Geophysics</em>, 33(S2), 1093-1102.</p>
-<p><strong>Nonstationary wavelet decomposition</strong>
-Kwon, H.-H., Lall, U., and Khalil, A.F. (2007). Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition. <em>Water Resources Research</em>, 43(5).</p>
-<p><strong>Wavelet analysis</strong>
-Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78. https://doi.org/10.1175/1520-0477(1998)079&lt;0061:APGTWA&gt;2.0.CO;2</p>
+<p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/smarta.py</code></p>
 
 
 
