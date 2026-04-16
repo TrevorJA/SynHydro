@@ -438,6 +438,37 @@ class KirschGenerator(Generator):
                 output[i, m] = source[h_idx, m]
         return output
 
+    def _apply_cholesky_and_combine(self, X, X_prime, n_years):
+        """
+        Apply Cholesky decomposition and combine Z with Z_prime tensors.
+
+        This is the core pipeline: apply Cholesky to decorrelated residuals,
+        then combine across years to preserve Dec-Jan transitions.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            Bootstrap standardized residuals with shape (n_years+1, 12, n_sites).
+        X_prime : np.ndarray
+            Bootstrap standardized residuals from Y_prime with shape (n_years+1, 12, n_sites).
+        n_years : int
+            Number of years for the output (before buffering).
+
+        Returns
+        -------
+        np.ndarray
+            Combined and Cholesky-transformed flows with shape (n_years, 12, n_sites).
+        """
+        Z = np.zeros_like(X)
+        Z_prime = np.zeros_like(X_prime)
+
+        for s in range(self.n_sites):
+            Z[:, :, s] = X[:, :, s] @ self.U_site[s]
+            Z_prime[:, :, s] = X_prime[:, :, s] @ self.U_prime_site[s]
+
+        ZC = self._combine_Z_and_Z_prime(Z, Z_prime)
+        return ZC
+
     def _combine_Z_and_Z_prime(self, Z, Z_prime):
         """
         Combine Z and Z_prime into a single tensor, to preserve intra-year correlations.
@@ -485,6 +516,169 @@ class KirschGenerator(Generator):
 
     def _reshape_output(self, Q_syn):
         return Q_syn.reshape(-1, self.n_sites)
+
+    def generate_from_indices(self, indices, n_years=None, as_array=True,
+                               synthetic_index=None):
+        """
+        Generate synthetic flows by directly specifying historical year indices.
+
+        This method allows external code (e.g., MOEA-FIND) to inject decision
+        variables (year indices) instead of random sampling. Runs the full
+        post-bootstrap pipeline: Cholesky, normal-score inversion, re-seasonalization.
+
+        Parameters
+        ----------
+        indices : np.ndarray
+            Array of historical year indices to resample. Shape (n_years+1, 12)
+            where each entry is in [0, n_historic_years). The extra year allows
+            Dec-Jan cross-year correlation handling. Can be floats (will be cast to int).
+        n_years : int, optional
+            Number of years for the synthetic output. If None, inferred from
+            indices.shape[0] - 1.
+        as_array : bool, default=True
+            If True, returns numpy array; if False, returns pandas DataFrame.
+        synthetic_index : pd.DatetimeIndex, optional
+            Custom DatetimeIndex for the output. If None, a default index is generated.
+
+        Returns
+        -------
+        np.ndarray or pd.DataFrame
+            Synthetic monthly flows with shape (n_years * 12, n_sites) if as_array=True,
+            otherwise a pandas DataFrame.
+
+        Notes
+        -----
+        This method assumes the generator has been fitted. Indices are treated as
+        indices into the historic years array (self.historic_years or [0, 1, ..., n-1]).
+        """
+        self.validate_fit()
+
+        indices = np.asarray(indices, dtype=int)
+
+        if n_years is None:
+            n_years = indices.shape[0] - 1
+
+        if indices.shape != (n_years + 1, self.n_months):
+            raise ValueError(
+                f"indices must have shape ({n_years + 1}, {self.n_months}), "
+                f"got {indices.shape}"
+            )
+
+        # Clamp indices to valid range
+        indices = np.clip(indices, 0, self.Y.shape[0] - 1)
+
+        # Create bootstrap tensors using provided indices for Y
+        X = self._create_bootstrap_tensor(indices, use_Y_prime=False)
+
+        # For Y_prime, we need separate clamping to its valid range
+        indices_prime = np.clip(indices, 0, self.Y_prime.shape[0] - 1)
+        X_prime = self._create_bootstrap_tensor(indices_prime, use_Y_prime=True)
+
+        # Apply Cholesky and combine
+        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
+
+        # Inverse normal score transform
+        if self.generate_using_log_flow:
+            ZC = self._apply_inverse_normal_score_transform(ZC)
+
+        # Destandardize and exponentiate
+        Q_syn = self._destandardize_flows(ZC)
+        if self.generate_using_log_flow:
+            Q_syn = np.exp(Q_syn)
+
+        Q_flat = self._reshape_output(Q_syn)
+
+        if as_array:
+            return Q_flat
+        else:
+            if synthetic_index is None:
+                synthetic_index = self._get_synthetic_index(n_years)
+            return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
+
+    def generate_from_residuals(self, residuals, as_array=True, synthetic_index=None):
+        """
+        Generate synthetic flows from pre-computed standardized residuals.
+
+        This method allows external code (e.g., MOEA-FIND) to inject decision
+        variables (standardized residuals) directly, bypassing the bootstrap
+        resampling step. Runs steps 4-8 of the Kirsch pipeline:
+        normal-score transform, Cholesky, inverse normal-score, Dec-Jan combination,
+        and re-seasonalization.
+
+        Parameters
+        ----------
+        residuals : np.ndarray
+            Array of standardized residuals with shape (n_years, 12, n_sites).
+            Each residual should be approximately N(0,1) or representable as such
+            within month-specific empirical distributions.
+        as_array : bool, default=True
+            If True, returns numpy array; if False, returns pandas DataFrame.
+        synthetic_index : pd.DatetimeIndex, optional
+            Custom DatetimeIndex for the output. If None, a default index is generated.
+
+        Returns
+        -------
+        np.ndarray or pd.DataFrame
+            Synthetic monthly flows with shape (n_years * 12, n_sites) if as_array=True,
+            otherwise a pandas DataFrame.
+
+        Notes
+        -----
+        This method assumes the generator has been fitted. Residuals are assumed
+        to be standardized residuals; they will be normal-score transformed,
+        processed through Cholesky factors, and combined to preserve Dec-Jan correlations.
+        """
+        self.validate_fit()
+
+        residuals = np.asarray(residuals)
+
+        if residuals.ndim != 3 or residuals.shape[1:] != (self.n_months, self.n_sites):
+            raise ValueError(
+                f"residuals must have shape (n_years, {self.n_months}, {self.n_sites}), "
+                f"got {residuals.shape}"
+            )
+
+        n_years = residuals.shape[0]
+
+        # For the pipeline we need a buffered year (n_years+1)
+        # Create buffer by repeating the last year
+        X = np.zeros((n_years + 1, self.n_months, self.n_sites))
+        X[:n_years] = residuals
+        X[n_years] = residuals[-1]  # repeat last year for buffer
+
+        # Create X_prime by shifting (Dec-Jan transitions)
+        # X_prime mirrors Y_prime structure: has n_years shape
+        # Then _apply_cholesky_and_combine will output n_years shape from both
+        X_prime_temp = np.zeros((n_years, self.n_months, self.n_sites))
+        X_prime_temp[:, :6, :] = X[:-1, 6:, :]
+        X_prime_temp[:, 6:, :] = X[1:, :6, :]
+
+        # But _apply_cholesky_and_combine expects both to be (n_years+1, 12, n_sites)
+        # So pad X_prime_temp back to n_years+1 by repeating last year
+        X_prime = np.zeros((n_years + 1, self.n_months, self.n_sites))
+        X_prime[:n_years] = X_prime_temp
+        X_prime[n_years] = X_prime_temp[-1]
+
+        # Apply Cholesky and combine
+        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
+
+        # Inverse normal score transform
+        if self.generate_using_log_flow:
+            ZC = self._apply_inverse_normal_score_transform(ZC)
+
+        # Destandardize and exponentiate
+        Q_syn = self._destandardize_flows(ZC)
+        if self.generate_using_log_flow:
+            Q_syn = np.exp(Q_syn)
+
+        Q_flat = self._reshape_output(Q_syn)
+
+        if as_array:
+            return Q_flat
+        else:
+            if synthetic_index is None:
+                synthetic_index = self._get_synthetic_index(n_years)
+            return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
 
     def generate_single_series(
         self, n_years, M=None, as_array=True, synthetic_index=None, rng=None
@@ -534,14 +728,7 @@ class KirschGenerator(Generator):
         X = self._create_bootstrap_tensor(M, use_Y_prime=False)
         X_prime = self._create_bootstrap_tensor(M_prime, use_Y_prime=True)
 
-        Z = np.zeros_like(X)
-        Z_prime = np.zeros_like(X_prime)
-
-        for s in range(self.n_sites):
-            Z[:, :, s] = X[:, :, s] @ self.U_site[s]
-            Z_prime[:, :, s] = X_prime[:, :, s] @ self.U_prime_site[s]
-
-        ZC = self._combine_Z_and_Z_prime(Z, Z_prime)
+        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
 
         # Inverse normal score transform: map from N(0,1) back to
         # month-specific standardized distributions before destandardization
