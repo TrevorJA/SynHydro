@@ -1318,6 +1318,24 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_indices" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate_from_indices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_residuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate_from_residuals
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_single_series" class="md-nav__link">
     <span class="md-ellipsis">
       generate_single_series
@@ -2200,6 +2218,24 @@
   <a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.fit" class="md-nav__link">
     <span class="md-ellipsis">
       fit
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_indices" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate_from_indices
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_residuals" class="md-nav__link">
+    <span class="md-ellipsis">
+      generate_from_residuals
     </span>
   </a>
   
@@ -4468,6 +4504,262 @@ Journal of Water Resources Planning and Management, 139(4), 396-406.</p>
       </tbody>
     </table>
 
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_indices" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">generate_from_indices</span>
+
+
+<a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_indices" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate_from_indices</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">n_years</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">synthetic_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate synthetic flows by directly specifying historical year indices.</p>
+<p>This method allows external code (e.g., MOEA-FIND) to inject decision
+variables (year indices) instead of random sampling. Runs the full
+post-bootstrap pipeline: Cholesky, normal-score inversion, re-seasonalization.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>indices</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Array of historical year indices to resample. Shape (n_years+1, 12)
+where each entry is in [0, n_historic_years). The extra year allows
+Dec-Jan cross-year correlation handling. Can be floats (will be cast to int).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>n_years</code>
+            </td>
+            <td>
+                  <code><span title="int">int</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Number of years for the synthetic output. If None, inferred from
+indices.shape[0] - 1.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>as_array</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, returns numpy array; if False, returns pandas DataFrame.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>synthetic_index</code>
+            </td>
+            <td>
+                  <code><span title="pandas.DatetimeIndex">DatetimeIndex</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Custom DatetimeIndex for the output. If None, a default index is generated.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> or <span title="pandas.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Synthetic monthly flows with shape (n_years * 12, n_sites) if as_array=True,
+otherwise a pandas DataFrame.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>This method assumes the generator has been fitted. Indices are treated as
+indices into the historic years array (self.historic_years or [0, 1, ..., n-1]).</p>
+</details>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_residuals" class="doc doc-heading">
+            <span class="doc doc-object-name doc-function-name">generate_from_residuals</span>
+
+
+<a href="#synhydro.methods.generation.nonparametric.kirsch.KirschGenerator.generate_from_residuals" class="headerlink" title="Permanent link">&para;</a></h3>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">generate_from_residuals</span><span class="p">(</span><span class="n">residuals</span><span class="p">,</span> <span class="n">as_array</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">synthetic_index</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span></code></pre></div>
+
+    <div class="doc doc-contents ">
+
+        <p>Generate synthetic flows from pre-computed standardized residuals.</p>
+<p>This method allows external code (e.g., MOEA-FIND) to inject decision
+variables (standardized residuals) directly, bypassing the bootstrap
+resampling step. Runs steps 4-8 of the Kirsch pipeline:
+normal-score transform, Cholesky, inverse normal-score, Dec-Jan combination,
+and re-seasonalization.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>residuals</code>
+            </td>
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Array of standardized residuals with shape (n_years, 12, n_sites).
+Each residual should be approximately N(0,1) or representable as such
+within month-specific empirical distributions.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>as_array</code>
+            </td>
+            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, returns numpy array; if False, returns pandas DataFrame.</p>
+              </div>
+            </td>
+            <td>
+                  <code>True</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>synthetic_index</code>
+            </td>
+            <td>
+                  <code><span title="pandas.DatetimeIndex">DatetimeIndex</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Custom DatetimeIndex for the output. If None, a default index is generated.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="numpy.ndarray">ndarray</span> or <span title="pandas.DataFrame">DataFrame</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Synthetic monthly flows with shape (n_years * 12, n_sites) if as_array=True,
+otherwise a pandas DataFrame.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="note" open>
+  <summary>Notes</summary>
+  <p>This method assumes the generator has been fitted. Residuals are assumed
+to be standardized residuals; they will be normal-score transformed,
+processed through Cholesky factors, and combined to preserve Dec-Jan correlations.</p>
+</details>
 
     </div>
 
