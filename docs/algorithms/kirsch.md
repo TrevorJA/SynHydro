@@ -61,7 +61,13 @@ For each site $s$, the $12 \times 12$ sample correlation matrices $\mathbf{R}^{(
 
 ### Synthesis Procedure
 
-1. **Bootstrap**: For each synthetic year, sample $N$ year indices with replacement from the historical record. Construct a bootstrap matrix $\mathbf{X}^{(s)}$ (and corresponding $\mathbf{X}'^{(s)}$) by extracting the normal scores at the sampled indices.
+1. **Bootstrap**: For each synthetic realization, draw a single matrix $\mathbf{M} \in \{1, \dots, N\}^{(N_{\text{syn}}+1) \times 12}$ of year indices sampled with replacement from the historical record. The same $\mathbf{M}$ is reused across all sites so that cross-site correlation is preserved (Kirsch et al. 2013, p. 7). Construct the bootstrap matrix $\mathbf{X}^{(s)}$ by extracting the normal scores of site $s$ at the sampled indices. Construct the corresponding shifted matrix $\mathbf{X}'^{(s)}$ **deterministically** from $\mathbf{X}^{(s)}$ using the same 6-month shift that produced $\mathbf{Y}'^{(s)}$ from $\mathbf{Y}^{(s)}$:
+
+$$
+\mathbf{X}'^{(s)}_{y,\,1:6} = \mathbf{X}^{(s)}_{y,\,7:12}, \qquad \mathbf{X}'^{(s)}_{y,\,7:12} = \mathbf{X}^{(s)}_{y+1,\,1:6}
+$$
+
+Following Kirsch et al. (2013, p. 6): "The matrix X is converted to X' just as Y was converted to Y'". There is exactly one bootstrap draw per realization; $\mathbf{X}'^{(s)}$ is not resampled independently.
 
 2. **Impose correlation**: Multiply each bootstrap matrix by its Cholesky factor:
 

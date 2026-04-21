@@ -517,8 +517,85 @@ class KirschGenerator(Generator):
     def _reshape_output(self, Q_syn):
         return Q_syn.reshape(-1, self.n_sites)
 
-    def generate_from_indices(self, indices, n_years=None, as_array=True,
-                               synthetic_index=None):
+    def _derive_X_prime(self, X):
+        """
+        Deterministically derive X_prime from X per Kirsch et al. (2013), p. 6.
+
+        X_prime is the 6-month shift of X: row i of X_prime combines the
+        second half of year i with the first half of year i+1, mirroring how
+        Y_prime is constructed from Y at fit time. There is exactly one
+        bootstrap in the Kirsch algorithm; X_prime is not independently
+        resampled.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            Bootstrap residual tensor with shape (n_years+1, n_months, n_sites).
+
+        Returns
+        -------
+        np.ndarray
+            X_prime of shape (n_years+1, n_months, n_sites). The first
+            n_years rows are the paper-correct shifted content; the last row
+            repeats the penultimate row to satisfy the shape expected by
+            ``_apply_cholesky_and_combine``.
+        """
+        n_years_plus_1, n_months, n_sites = X.shape
+        if n_months != self.n_months:
+            raise ValueError(f"X has {n_months} months, expected {self.n_months}")
+        n_years = n_years_plus_1 - 1
+        X_prime_temp = np.zeros((n_years, self.n_months, n_sites))
+        X_prime_temp[:, :6, :] = X[:-1, 6:, :]
+        X_prime_temp[:, 6:, :] = X[1:, :6, :]
+        X_prime = np.zeros((n_years + 1, self.n_months, n_sites))
+        X_prime[:n_years] = X_prime_temp
+        X_prime[n_years] = X_prime_temp[-1]
+        return X_prime
+
+    def _pipeline_from_X(self, X, n_years, *, as_array=True, synthetic_index=None):
+        """
+        Run the paper-correct post-bootstrap pipeline on a pre-built X tensor.
+
+        Shared by ``generate_single_series``, ``generate_from_indices``, and
+        ``generate_from_residuals``. Derives X_prime (via ``_derive_X_prime``),
+        applies the per-site Cholesky combination, the inverse normal-score
+        transform when ``generate_using_log_flow`` is True, destandardizes,
+        exponentiates, and reshapes.
+
+        Parameters
+        ----------
+        X : np.ndarray
+            Bootstrap residual tensor, shape (n_years+1, n_months, n_sites).
+        n_years : int
+            Number of years for the synthetic output.
+        as_array : bool, default=True
+            If True, returns numpy array; if False, returns pandas DataFrame.
+        synthetic_index : pd.DatetimeIndex, optional
+            Custom DatetimeIndex for the output. If None, a default index
+            is generated.
+
+        Returns
+        -------
+        np.ndarray or pd.DataFrame
+            Synthetic monthly flows with shape (n_years * n_months, n_sites).
+        """
+        X_prime = self._derive_X_prime(X)
+        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
+        if self.generate_using_log_flow:
+            ZC = self._apply_inverse_normal_score_transform(ZC)
+        Q_syn = self._destandardize_flows(ZC)
+        if self.generate_using_log_flow:
+            Q_syn = np.exp(Q_syn)
+        Q_flat = self._reshape_output(Q_syn)
+        if as_array:
+            return Q_flat
+        if synthetic_index is None:
+            synthetic_index = self._get_synthetic_index(n_years)
+        return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
+
+    def generate_from_indices(
+        self, indices, n_years=None, as_array=True, synthetic_index=None
+    ):
         """
         Generate synthetic flows by directly specifying historical year indices.
 
@@ -564,36 +641,11 @@ class KirschGenerator(Generator):
                 f"got {indices.shape}"
             )
 
-        # Clamp indices to valid range
         indices = np.clip(indices, 0, self.Y.shape[0] - 1)
-
-        # Create bootstrap tensors using provided indices for Y
         X = self._create_bootstrap_tensor(indices, use_Y_prime=False)
-
-        # For Y_prime, we need separate clamping to its valid range
-        indices_prime = np.clip(indices, 0, self.Y_prime.shape[0] - 1)
-        X_prime = self._create_bootstrap_tensor(indices_prime, use_Y_prime=True)
-
-        # Apply Cholesky and combine
-        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
-
-        # Inverse normal score transform
-        if self.generate_using_log_flow:
-            ZC = self._apply_inverse_normal_score_transform(ZC)
-
-        # Destandardize and exponentiate
-        Q_syn = self._destandardize_flows(ZC)
-        if self.generate_using_log_flow:
-            Q_syn = np.exp(Q_syn)
-
-        Q_flat = self._reshape_output(Q_syn)
-
-        if as_array:
-            return Q_flat
-        else:
-            if synthetic_index is None:
-                synthetic_index = self._get_synthetic_index(n_years)
-            return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
+        return self._pipeline_from_X(
+            X, n_years, as_array=as_array, synthetic_index=synthetic_index
+        )
 
     def generate_from_residuals(self, residuals, as_array=True, synthetic_index=None):
         """
@@ -640,45 +692,13 @@ class KirschGenerator(Generator):
 
         n_years = residuals.shape[0]
 
-        # For the pipeline we need a buffered year (n_years+1)
-        # Create buffer by repeating the last year
         X = np.zeros((n_years + 1, self.n_months, self.n_sites))
         X[:n_years] = residuals
-        X[n_years] = residuals[-1]  # repeat last year for buffer
+        X[n_years] = residuals[-1]
 
-        # Create X_prime by shifting (Dec-Jan transitions)
-        # X_prime mirrors Y_prime structure: has n_years shape
-        # Then _apply_cholesky_and_combine will output n_years shape from both
-        X_prime_temp = np.zeros((n_years, self.n_months, self.n_sites))
-        X_prime_temp[:, :6, :] = X[:-1, 6:, :]
-        X_prime_temp[:, 6:, :] = X[1:, :6, :]
-
-        # But _apply_cholesky_and_combine expects both to be (n_years+1, 12, n_sites)
-        # So pad X_prime_temp back to n_years+1 by repeating last year
-        X_prime = np.zeros((n_years + 1, self.n_months, self.n_sites))
-        X_prime[:n_years] = X_prime_temp
-        X_prime[n_years] = X_prime_temp[-1]
-
-        # Apply Cholesky and combine
-        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
-
-        # Inverse normal score transform
-        if self.generate_using_log_flow:
-            ZC = self._apply_inverse_normal_score_transform(ZC)
-
-        # Destandardize and exponentiate
-        Q_syn = self._destandardize_flows(ZC)
-        if self.generate_using_log_flow:
-            Q_syn = np.exp(Q_syn)
-
-        Q_flat = self._reshape_output(Q_syn)
-
-        if as_array:
-            return Q_flat
-        else:
-            if synthetic_index is None:
-                synthetic_index = self._get_synthetic_index(n_years)
-            return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
+        return self._pipeline_from_X(
+            X, n_years, as_array=as_array, synthetic_index=synthetic_index
+        )
 
     def generate_single_series(
         self, n_years, M=None, as_array=True, synthetic_index=None, rng=None
@@ -718,36 +738,10 @@ class KirschGenerator(Generator):
                     f"M must have shape ({n_years_buffered}, {self.n_months})"
                 )
 
-        # Generate separate bootstrap indices for Y_prime with correct bounds
-        # Y_prime has one fewer year than Y due to cross-year correlation structure
-        # Using M.copy() would allow indices up to Y.shape[0]-1, but Y_prime only has indices up to Y.shape[0]-2
-        M_prime = self._get_bootstrap_indices(
-            n_years_buffered, max_idx=self.Y_prime.shape[0], rng=rng
-        )
-
         X = self._create_bootstrap_tensor(M, use_Y_prime=False)
-        X_prime = self._create_bootstrap_tensor(M_prime, use_Y_prime=True)
-
-        ZC = self._apply_cholesky_and_combine(X, X_prime, n_years)
-
-        # Inverse normal score transform: map from N(0,1) back to
-        # month-specific standardized distributions before destandardization
-        if self.generate_using_log_flow:
-            ZC = self._apply_inverse_normal_score_transform(ZC)
-
-        Q_syn = self._destandardize_flows(ZC)
-
-        if self.generate_using_log_flow:
-            Q_syn = np.exp(Q_syn)
-
-        Q_flat = self._reshape_output(Q_syn)
-
-        if as_array:
-            return Q_flat
-        else:
-            if synthetic_index is None:
-                synthetic_index = self._get_synthetic_index(n_years)
-            return pd.DataFrame(Q_flat, columns=self._sites, index=synthetic_index)
+        return self._pipeline_from_X(
+            X, n_years, as_array=as_array, synthetic_index=synthetic_index
+        )
 
     def generate(
         self, n_realizations=1, n_years=None, n_timesteps=None, seed=None, **kwargs

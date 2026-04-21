@@ -268,3 +268,97 @@ class TestKirschGeneratorMethods:
 
         # Check that values are in reasonable range
         assert (result.data_by_realization[0] >= 0).all().all()
+
+
+class TestKirschPaperConformance:
+    """Tests verifying conformance with Kirsch et al. (2013), p. 6.
+
+    The paper specifies that X_prime is a deterministic 6-month shift of X,
+    not an independent bootstrap. These tests guard against regression to
+    the pre-fix behavior where ``generate_single_series`` drew a second
+    bootstrap and ``generate_from_indices`` did a shared-index lookup.
+    """
+
+    def test_derive_X_prime_is_deterministic_shift(self, sample_monthly_dataframe):
+        """X_prime row i = [second-half of X year i, first-half of X year i+1]."""
+        gen = KirschGenerator()
+        gen.fit(sample_monthly_dataframe)
+
+        rng = np.random.default_rng(42)
+        n_years = 5
+        M = gen._get_bootstrap_indices(n_years + 1, max_idx=gen.Y.shape[0], rng=rng)
+        X = gen._create_bootstrap_tensor(M, use_Y_prime=False)
+        X_prime = gen._derive_X_prime(X)
+
+        assert X_prime.shape == (n_years + 1, 12, gen.n_sites)
+        np.testing.assert_allclose(X_prime[:n_years, :6], X[:n_years, 6:])
+        np.testing.assert_allclose(X_prime[:n_years, 6:], X[1 : n_years + 1, :6])
+
+    def test_derive_X_prime_rejects_wrong_month_count(self, sample_monthly_dataframe):
+        """_derive_X_prime validates its input shape."""
+        gen = KirschGenerator()
+        gen.fit(sample_monthly_dataframe)
+        bad_X = np.zeros((3, 10, gen.n_sites))
+        with pytest.raises(ValueError, match="expected"):
+            gen._derive_X_prime(bad_X)
+
+    def test_entry_points_agree_on_cross_month_correlation(
+        self, sample_monthly_dataframe
+    ):
+        """generate() and generate_from_residuals() should produce ensembles
+        with statistically equivalent cross-month correlation. Pre-fix,
+        generate() drew an independent bootstrap for X_prime and diverged."""
+        gen = KirschGenerator()
+        gen.fit(sample_monthly_dataframe)
+
+        n_years = 10
+        n_realizations = 100
+
+        ens_a = gen.generate(n_realizations=n_realizations, n_years=n_years, seed=42)
+        flows_a = [
+            ens_a.data_by_realization[r].values
+            for r in sorted(ens_a.data_by_realization)
+        ]
+
+        rng = np.random.default_rng(42)
+        flows_c = []
+        for _ in range(n_realizations):
+            residuals = np.empty((n_years, 12, gen.n_sites))
+            for m in range(12):
+                for s in range(gen.n_sites):
+                    residuals[:, m, s] = rng.choice(
+                        gen.Z_h[:, m, s], size=n_years, replace=True
+                    )
+            flows_c.append(gen.generate_from_residuals(residuals))
+
+        def pool_corr(flows_list):
+            mats = []
+            for fl in flows_list:
+                col0 = fl[:, 0]
+                monthly = col0[: (len(col0) // 12) * 12].reshape(-1, 12)
+                mats.append(np.corrcoef(monthly, rowvar=False))
+            return np.mean(mats, axis=0)
+
+        frob = np.linalg.norm(pool_corr(flows_a) - pool_corr(flows_c), ord="fro")
+        assert frob < 1.5, (
+            f"generate() and generate_from_residuals() disagree on cross-month "
+            f"correlation: Frobenius {frob:.3f}."
+        )
+
+    def test_generate_from_indices_matches_single_series(
+        self, sample_monthly_dataframe
+    ):
+        """Given the same M, generate_from_indices and generate_single_series
+        must produce identical output. Pre-fix they diverged because
+        generate_from_indices clamped indices differently for Y_prime."""
+        gen = KirschGenerator()
+        gen.fit(sample_monthly_dataframe)
+
+        rng = np.random.default_rng(123)
+        n_years = 8
+        M = gen._get_bootstrap_indices(n_years + 1, max_idx=gen.Y.shape[0], rng=rng)
+
+        out_series = gen.generate_single_series(n_years, M=M, as_array=True)
+        out_indices = gen.generate_from_indices(M, n_years=n_years, as_array=True)
+
+        np.testing.assert_allclose(out_series, out_indices)

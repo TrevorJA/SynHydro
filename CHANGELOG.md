@@ -37,6 +37,15 @@ All notable changes to SynHydro are documented in this file.
 - Multisite `ValueError` for univariate generators
 - Nowak non-leap-year February bug
 - Kirsch correlation matrix bug
+- Kirsch `generate()` and `generate_from_indices()` now build X' as the
+  deterministic 6-month shift of X per Kirsch et al. (2013), p. 6, rather
+  than an independent bootstrap (`generate()`) or a shared-index lookup
+  (`generate_from_indices()`). All three entry points
+  (`generate`/`generate_single_series`, `generate_from_indices`,
+  `generate_from_residuals`) are now statistically equivalent and route
+  through a shared `_pipeline_from_X` helper. Breaking for seed-level
+  reproducibility: `.generate(seed=S)` produces different numerical output
+  than prior releases (the corrected distribution).
 - SSI Python version compatibility issue
 - SSI deprecated pandas `"M"` frequency string (now `"ME"`)
 - Valencia-Schaake divide-by-zero in correlation matrix computation
