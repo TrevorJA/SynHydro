@@ -1503,12 +1503,14 @@ Y_{y,m,s} = \Phi^{-1}\!\left(\frac{r(Z_{y,m,s}) - 0.5}{N}\right)
 <p>For each site <span class="arithmatex">\(s\)</span>, the <span class="arithmatex">\(12 \times 12\)</span> sample correlation matrices <span class="arithmatex">\(\mathbf{R}^{(s)}\)</span> and <span class="arithmatex">\(\mathbf{R}'^{(s)}\)</span> are computed from <span class="arithmatex">\(\mathbf{Y}^{(s)}\)</span> and <span class="arithmatex">\(\mathbf{Y}'^{(s)}\)</span> respectively. If either matrix is not positive definite, it is repaired via spectral projection (negative eigenvalues are set to zero and the matrix is rescaled to unit diagonal). The upper Cholesky factors <span class="arithmatex">\(\mathbf{U}^{(s)}\)</span> and <span class="arithmatex">\(\mathbf{U}'^{(s)}\)</span> are then computed.</p>
 <h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
 <ol>
-<li>
-<p><strong>Bootstrap</strong>: For each synthetic year, sample <span class="arithmatex">\(N\)</span> year indices with replacement from the historical record. Construct a bootstrap matrix <span class="arithmatex">\(\mathbf{X}^{(s)}\)</span> (and corresponding <span class="arithmatex">\(\mathbf{X}'^{(s)}\)</span>) by extracting the normal scores at the sampled indices.</p>
-</li>
-<li>
-<p><strong>Impose correlation</strong>: Multiply each bootstrap matrix by its Cholesky factor:</p>
-</li>
+<li><strong>Bootstrap</strong>: For each synthetic realization, draw a single matrix <span class="arithmatex">\(\mathbf{M} \in \{1, \dots, N\}^{(N_{\text{syn}}+1) \times 12}\)</span> of year indices sampled with replacement from the historical record. The same <span class="arithmatex">\(\mathbf{M}\)</span> is reused across all sites so that cross-site correlation is preserved (Kirsch et al. 2013, p. 7). Construct the bootstrap matrix <span class="arithmatex">\(\mathbf{X}^{(s)}\)</span> by extracting the normal scores of site <span class="arithmatex">\(s\)</span> at the sampled indices. Construct the corresponding shifted matrix <span class="arithmatex">\(\mathbf{X}'^{(s)}\)</span> <strong>deterministically</strong> from <span class="arithmatex">\(\mathbf{X}^{(s)}\)</span> using the same 6-month shift that produced <span class="arithmatex">\(\mathbf{Y}'^{(s)}\)</span> from <span class="arithmatex">\(\mathbf{Y}^{(s)}\)</span>:</li>
+</ol>
+<div class="arithmatex">\[
+\mathbf{X}'^{(s)}_{y,\,1:6} = \mathbf{X}^{(s)}_{y,\,7:12}, \qquad \mathbf{X}'^{(s)}_{y,\,7:12} = \mathbf{X}^{(s)}_{y+1,\,1:6}
+\]</div>
+<p>Following Kirsch et al. (2013, p. 6): "The matrix X is converted to X' just as Y was converted to Y'". There is exactly one bootstrap draw per realization; <span class="arithmatex">\(\mathbf{X}'^{(s)}\)</span> is not resampled independently.</p>
+<ol>
+<li><strong>Impose correlation</strong>: Multiply each bootstrap matrix by its Cholesky factor:</li>
 </ol>
 <div class="arithmatex">\[
 \tilde{\mathbf{Z}}^{(s)} = \mathbf{X}^{(s)} \mathbf{U}^{(s)}, \qquad \tilde{\mathbf{Z}}'^{(s)} = \mathbf{X}'^{(s)} \mathbf{U}'^{(s)}
