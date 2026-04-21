@@ -287,7 +287,7 @@ class TestKirschPaperConformance:
         rng = np.random.default_rng(42)
         n_years = 5
         M = gen._get_bootstrap_indices(n_years + 1, max_idx=gen.Y.shape[0], rng=rng)
-        X = gen._create_bootstrap_tensor(M, use_Y_prime=False)
+        X = gen._create_bootstrap_tensor(M)
         X_prime = gen._derive_X_prime(X)
 
         assert X_prime.shape == (n_years + 1, 12, gen.n_sites)

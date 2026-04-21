@@ -410,23 +410,22 @@ class KirschGenerator(Generator):
         max_idx = self.n_historic_years if max_idx is None else max_idx
         return rng.choice(max_idx, size=(n_years, self.n_months), replace=True)
 
-    def _create_bootstrap_tensor(self, M, use_Y_prime=False):
+    def _create_bootstrap_tensor(self, M):
         """
-        Create the 'Z' tensor of boostrapped standardized flows.
+        Create the bootstrap tensor of standardized flows from index matrix M.
 
         Parameters
         ----------
         M : np.ndarray
-            Bootstrap indices with shape (n_years, n_months).
-        use_Y_prime : bool
-            If True, uses Y_prime; otherwise uses Y.
+            Bootstrap indices with shape (n_years, n_months), values in
+            [0, self.Y.shape[0]).
 
         Returns
         -------
         np.ndarray
             Bootstrap tensor with shape (n_years, n_months, n_sites).
         """
-        source = self.Y_prime if use_Y_prime else self.Y
+        source = self.Y
         n_years, n_months = M.shape
         max_idx = source.shape[0]
         output = np.zeros((n_years, n_months, self.n_sites))
@@ -642,7 +641,7 @@ class KirschGenerator(Generator):
             )
 
         indices = np.clip(indices, 0, self.Y.shape[0] - 1)
-        X = self._create_bootstrap_tensor(indices, use_Y_prime=False)
+        X = self._create_bootstrap_tensor(indices)
         return self._pipeline_from_X(
             X, n_years, as_array=as_array, synthetic_index=synthetic_index
         )
@@ -738,7 +737,7 @@ class KirschGenerator(Generator):
                     f"M must have shape ({n_years_buffered}, {self.n_months})"
                 )
 
-        X = self._create_bootstrap_tensor(M, use_Y_prime=False)
+        X = self._create_bootstrap_tensor(M)
         return self._pipeline_from_X(
             X, n_years, as_array=as_array, synthetic_index=synthetic_index
         )
