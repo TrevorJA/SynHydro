@@ -158,8 +158,10 @@ class ThomasFieringGenerator(Generator):
         """
         Compute lag-1 serial correlation between consecutive months.
 
-        For AR(1) models, computes correlation between month m and month m+1,
-        handling month transitions (Dec -> Jan of next year).
+        Returns the "arriving" correlation: ``rho[m]`` is the Pearson
+        correlation between month ``m-1`` and month ``m`` (with the
+        December-to-January transition wrapping across the year boundary),
+        matching the convention used in the algorithm formulation.
 
         Parameters
         ----------
@@ -174,17 +176,16 @@ class ThomasFieringGenerator(Generator):
         monthly_corr = self.mu_monthly.copy()
 
         for month in range(1, 13):
-            first_month = month
-            second_month = (month % 12) + 1  # Wraps 12 -> 1
+            prev_month = 12 if month == 1 else month - 1
 
-            # Get paired consecutive month values
+            # Get paired consecutive month values: prev_month -> month
             first_values = []
             second_values = []
 
             for i in range(len(data) - 1):
                 if (
-                    data.index[i].month == first_month
-                    and data.index[i + 1].month == second_month
+                    data.index[i].month == prev_month
+                    and data.index[i + 1].month == month
                 ):
                     first_values.append(data.iloc[i])
                     second_values.append(data.iloc[i + 1])
