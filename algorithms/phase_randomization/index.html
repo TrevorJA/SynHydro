@@ -1502,9 +1502,9 @@
 </table>
 <h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
 <h3 id="normal-score-transform">Normal Score Transform<a class="headerlink" href="#normal-score-transform" title="Permanent link">&para;</a></h3>
-<p>For each day of year <span class="arithmatex">\(d\)</span>, the observed values across all years are ranked and mapped to standard normal quantiles:</p>
+<p>For each day of year <span class="arithmatex">\(d\)</span>, the observed values across all years are ranked and mapped to standard normal quantiles using the Van der Waerden plotting position:</p>
 <div class="arithmatex">\[
-X_t = \Phi^{-1}\!\left(\frac{r_d(Q_t) - 0.5}{N_d}\right)
+X_t = \Phi^{-1}\!\left(\frac{r_d(Q_t)}{N_d + 1}\right)
 \]</div>
 <p>where <span class="arithmatex">\(r_d(\cdot)\)</span> is the rank among the <span class="arithmatex">\(N_d\)</span> observations for day <span class="arithmatex">\(d\)</span> and <span class="arithmatex">\(\Phi^{-1}\)</span> is the standard normal inverse CDF. This produces a series <span class="arithmatex">\(\{X_t\}\)</span> with approximately <span class="arithmatex">\(\mathcal{N}(0,1)\)</span> marginals at each calendar day.</p>
 <h3 id="fourier-decomposition">Fourier Decomposition<a class="headerlink" href="#fourier-decomposition" title="Permanent link">&para;</a></h3>

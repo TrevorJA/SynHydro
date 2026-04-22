@@ -1459,11 +1459,11 @@
 <td>Synthetic annual streamflow at year <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(W(s, t)\)</span></td>
-<td>CWT coefficient at scale <span class="arithmatex">\(s\)</span> and time <span class="arithmatex">\(t\)</span></td>
+<td><span class="arithmatex">\(W(a_j, t)\)</span></td>
+<td>CWT coefficient at scale <span class="arithmatex">\(a_j\)</span> and time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(s_j\)</span></td>
+<td><span class="arithmatex">\(a_j\)</span></td>
 <td>Wavelet scale, <span class="arithmatex">\(j = 1, \ldots, J\)</span></td>
 </tr>
 <tr>
@@ -1475,20 +1475,32 @@
 <td>Scale Averaged Wavelet Power at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(\tilde{W}(s, t)\)</span></td>
+<td><span class="arithmatex">\(\tilde{W}(a_j, t)\)</span></td>
 <td>SAWP-normalized wavelet coefficient</td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(\phi_k^{(s)}\)</span></td>
-<td>AR coefficient at lag <span class="arithmatex">\(k\)</span> for scale <span class="arithmatex">\(s\)</span></td>
+<td><span class="arithmatex">\(C_\delta\)</span></td>
+<td>Wavelet-specific reconstruction factor (T&amp;C 1998, Table 2)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\delta_j\)</span></td>
+<td>Mean logarithmic (base-2) spacing of scales</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\delta_t\)</span></td>
+<td>Sampling period (one year for annual input)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\phi_k^{(a_j)}\)</span></td>
+<td>AR coefficient at lag <span class="arithmatex">\(k\)</span> for scale <span class="arithmatex">\(a_j\)</span></td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(p\)</span></td>
 <td>AR model order</td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(\sigma_s\)</span></td>
-<td>Innovation standard deviation for scale <span class="arithmatex">\(s\)</span></td>
+<td><span class="arithmatex">\(\sigma_{a_j}\)</span></td>
+<td>Innovation standard deviation for scale <span class="arithmatex">\(a_j\)</span></td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(\varepsilon_t\)</span></td>
@@ -1504,36 +1516,37 @@
 <h3 id="continuous-wavelet-transform">Continuous Wavelet Transform<a class="headerlink" href="#continuous-wavelet-transform" title="Permanent link">&para;</a></h3>
 <p>The observed annual flow series <span class="arithmatex">\(\{Q_t\}\)</span> is decomposed using a mother wavelet <span class="arithmatex">\(\psi\)</span> (default: Morlet) at <span class="arithmatex">\(J\)</span> discrete scales:</p>
 <div class="arithmatex">\[
-W(s_j, t) = \text{CWT}(Q, s_j), \qquad j = 1, \ldots, J
+W(a_j, t) = \text{CWT}(Q, a_j), \qquad j = 1, \ldots, J
 \]</div>
 <p>yielding a coefficient matrix of dimension <span class="arithmatex">\(J \times N\)</span>.</p>
 <h3 id="scale-averaged-wavelet-power">Scale Averaged Wavelet Power<a class="headerlink" href="#scale-averaged-wavelet-power" title="Permanent link">&para;</a></h3>
-<p>The SAWP captures the time-varying energy across all frequency scales:</p>
+<p>Following Nowak et al. (2011, Eq. 5) and Torrence and Compo (1998, Eq. 24), the SAWP captures the time-varying energy across all frequency scales as a scale-weighted sum with wavelet-specific normalization:</p>
 <div class="arithmatex">\[
-P(t) = \frac{1}{J} \sum_{j=1}^{J} |W(s_j, t)|^2
+P(t) = \frac{\delta_j \, \delta_t}{C_\delta} \sum_{j=1}^{J} \frac{|W(a_j, t)|^2}{a_j}
 \]</div>
+<p>The <span class="arithmatex">\(1/a_j\)</span> weighting is the scale-density correction from the continuous wavelet transform; <span class="arithmatex">\(\delta_j\)</span> is the mean logarithmic (base-2) spacing of the scales, <span class="arithmatex">\(\delta_t\)</span> is the sampling period (one year for annual input), and <span class="arithmatex">\(C_\delta\)</span> is a wavelet-specific reconstruction factor. For the Morlet wavelet, <span class="arithmatex">\(C_\delta = 0.776\)</span> (Torrence and Compo 1998, Table 2).</p>
 <p>High values of <span class="arithmatex">\(P(t)\)</span> indicate periods of elevated variability (e.g., regime shifts, climate oscillations).</p>
 <h3 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h3>
 <p>The wavelet coefficients are normalized by the SAWP to remove time-varying power and produce approximately stationary components:</p>
 <div class="arithmatex">\[
-\tilde{W}(s_j, t) = \frac{W(s_j, t)}{\sqrt{P(t) + \epsilon}}
+\tilde{W}(a_j, t) = \frac{W(a_j, t)}{\sqrt{P(t) + \epsilon}}
 \]</div>
 <p>where <span class="arithmatex">\(\epsilon\)</span> is a small constant to prevent division by zero.</p>
 <h3 id="autoregressive-fitting">Autoregressive Fitting<a class="headerlink" href="#autoregressive-fitting" title="Permanent link">&para;</a></h3>
-<p>For each scale <span class="arithmatex">\(s_j\)</span>, the normalized coefficient series <span class="arithmatex">\(\{\tilde{W}(s_j, t)\}_{t=1}^{N}\)</span> is modeled as an AR(<span class="arithmatex">\(p\)</span>) process. Let <span class="arithmatex">\(\mu_s = \mathbb{E}[\tilde{W}(s_j, \cdot)]\)</span> denote the mean and <span class="arithmatex">\(\gamma_k^{(s)}\)</span> the autocovariance at lag <span class="arithmatex">\(k\)</span>. The AR coefficients are estimated via the Yule-Walker equations:</p>
+<p>For each scale <span class="arithmatex">\(a_j\)</span>, the normalized coefficient series <span class="arithmatex">\(\{\tilde{W}(a_j, t)\}_{t=1}^{N}\)</span> is modeled as an AR(<span class="arithmatex">\(p\)</span>) process. Let <span class="arithmatex">\(\mu_{a_j} = \mathbb{E}[\tilde{W}(a_j, \cdot)]\)</span> denote the mean and <span class="arithmatex">\(\gamma_k^{(a_j)}\)</span> the autocovariance at lag <span class="arithmatex">\(k\)</span>. The AR coefficients are estimated via the Yule-Walker equations:</p>
 <div class="arithmatex">\[
-\begin{pmatrix} \gamma_0^{(s)} &amp; \gamma_1^{(s)} &amp; \cdots &amp; \gamma_{p-1}^{(s)} \\ \gamma_1^{(s)} &amp; \gamma_0^{(s)} &amp; \cdots &amp; \gamma_{p-2}^{(s)} \\ \vdots &amp; &amp; \ddots &amp; \vdots \\ \gamma_{p-1}^{(s)} &amp; \gamma_{p-2}^{(s)} &amp; \cdots &amp; \gamma_0^{(s)} \end{pmatrix} \begin{pmatrix} \phi_1^{(s)} \\ \phi_2^{(s)} \\ \vdots \\ \phi_p^{(s)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(s)} \\ \gamma_2^{(s)} \\ \vdots \\ \gamma_p^{(s)} \end{pmatrix}
+\begin{pmatrix} \gamma_0^{(a_j)} &amp; \gamma_1^{(a_j)} &amp; \cdots &amp; \gamma_{p-1}^{(a_j)} \\ \gamma_1^{(a_j)} &amp; \gamma_0^{(a_j)} &amp; \cdots &amp; \gamma_{p-2}^{(a_j)} \\ \vdots &amp; &amp; \ddots &amp; \vdots \\ \gamma_{p-1}^{(a_j)} &amp; \gamma_{p-2}^{(a_j)} &amp; \cdots &amp; \gamma_0^{(a_j)} \end{pmatrix} \begin{pmatrix} \phi_1^{(a_j)} \\ \phi_2^{(a_j)} \\ \vdots \\ \phi_p^{(a_j)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(a_j)} \\ \gamma_2^{(a_j)} \\ \vdots \\ \gamma_p^{(a_j)} \end{pmatrix}
 \]</div>
 <p>The innovation variance is:</p>
 <div class="arithmatex">\[
-\sigma_s^2 = \gamma_0^{(s)} \left(1 - \sum_{k=1}^{p} \phi_k^{(s)} \cdot \frac{\gamma_k^{(s)}}{\gamma_0^{(s)}}\right)
+\sigma_{a_j}^2 = \gamma_0^{(a_j)} \left(1 - \sum_{k=1}^{p} \phi_k^{(a_j)} \cdot \frac{\gamma_k^{(a_j)}}{\gamma_0^{(a_j)}}\right)
 \]</div>
 <h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
 <ol>
-<li>For each scale <span class="arithmatex">\(s_j\)</span>, generate a synthetic normalized coefficient series via the AR(<span class="arithmatex">\(p\)</span>) recursion:</li>
+<li>For each scale <span class="arithmatex">\(a_j\)</span>, generate a synthetic normalized coefficient series via the AR(<span class="arithmatex">\(p\)</span>) recursion:</li>
 </ol>
 <div class="arithmatex">\[
-\hat{\tilde{W}}(s_j, t) = \mu_{s_j} + \sum_{k=1}^{p} \phi_k^{(s_j)} \left[\hat{\tilde{W}}(s_j, t-k) - \mu_{s_j}\right] + \sigma_{s_j}\,\varepsilon_t
+\hat{\tilde{W}}(a_j, t) = \mu_{a_j} + \sum_{k=1}^{p} \phi_k^{(a_j)} \left[\hat{\tilde{W}}(a_j, t-k) - \mu_{a_j}\right] + \sigma_{a_j}\,\varepsilon_t
 \]</div>
 <ol>
 <li>
@@ -1544,13 +1557,13 @@ P(t) = \frac{1}{J} \sum_{j=1}^{J} |W(s_j, t)|^2
 </li>
 </ol>
 <div class="arithmatex">\[
-\hat{W}(s_j, t) = \hat{\tilde{W}}(s_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
+\hat{W}(a_j, t) = \hat{\tilde{W}}(a_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
 \]</div>
 <ol>
 <li>Reconstruct the synthetic flow via inverse CWT:</li>
 </ol>
 <div class="arithmatex">\[
-\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{s_j}} \,\text{Re}\!\left[\hat{W}(s_j, t)\right]
+\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{a_j}} \,\text{Re}\!\left[\hat{W}(a_j, t)\right]
 \]</div>
 <p>where <span class="arithmatex">\(c\)</span> is a normalization constant. The reconstructed series is then rescaled to match the observed mean and standard deviation.</p>
 <ol>
