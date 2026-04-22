@@ -31,10 +31,10 @@ Phase randomization generates synthetic daily streamflow by replacing the Fourie
 
 ### Normal Score Transform
 
-For each day of year $d$, the observed values across all years are ranked and mapped to standard normal quantiles:
+For each day of year $d$, the observed values across all years are ranked and mapped to standard normal quantiles using the Van der Waerden plotting position:
 
 $$
-X_t = \Phi^{-1}\!\left(\frac{r_d(Q_t) - 0.5}{N_d}\right)
+X_t = \Phi^{-1}\!\left(\frac{r_d(Q_t)}{N_d + 1}\right)
 $$
 
 where $r_d(\cdot)$ is the rank among the $N_d$ observations for day $d$ and $\Phi^{-1}$ is the standard normal inverse CDF. This produces a series $\{X_t\}$ with approximately $\mathcal{N}(0,1)$ marginals at each calendar day.

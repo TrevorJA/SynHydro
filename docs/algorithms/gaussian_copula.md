@@ -130,7 +130,7 @@ The Gaussian copula has zero tail dependence, meaning it underestimates the prob
 **Primary:**
 Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know about copula modeling but were afraid to ask. *Journal of Hydrologic Engineering*, 12(4), 347-368. https://doi.org/10.1061/(ASCE)1084-0699(2007)12:4(347)
 
-Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based method for multisite monthly and daily streamflow simulation. *Journal of Hydrology*, 526, 360-381. https://doi.org/10.1016/j.jhydrol.2015.05.018
+Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based method for multisite monthly and daily streamflow simulation. *Journal of Hydrology*, 528, 369-384. https://doi.org/10.1016/j.jhydrol.2015.05.018
 
 Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic spatial vine copula model for multi-site streamflow simulation. *Electric Power Systems Research*, 152, 9-17. https://doi.org/10.1016/j.epsr.2017.06.017
 
