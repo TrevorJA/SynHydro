@@ -16,14 +16,17 @@ WARM combines continuous wavelet transforms with autoregressive modeling to gene
 |--------|-------------|
 | $Q_t$ | Observed annual streamflow at year $t$ |
 | $\hat{Q}_t$ | Synthetic annual streamflow at year $t$ |
-| $W(s, t)$ | CWT coefficient at scale $s$ and time $t$ |
-| $s_j$ | Wavelet scale, $j = 1, \ldots, J$ |
+| $W(a_j, t)$ | CWT coefficient at scale $a_j$ and time $t$ |
+| $a_j$ | Wavelet scale, $j = 1, \ldots, J$ |
 | $J$ | Total number of scales |
 | $P(t)$ | Scale Averaged Wavelet Power at time $t$ |
-| $\tilde{W}(s, t)$ | SAWP-normalized wavelet coefficient |
-| $\phi_k^{(s)}$ | AR coefficient at lag $k$ for scale $s$ |
+| $\tilde{W}(a_j, t)$ | SAWP-normalized wavelet coefficient |
+| $C_\delta$ | Wavelet-specific reconstruction factor (T&C 1998, Table 2) |
+| $\delta_j$ | Mean logarithmic (base-2) spacing of scales |
+| $\delta_t$ | Sampling period (one year for annual input) |
+| $\phi_k^{(a_j)}$ | AR coefficient at lag $k$ for scale $a_j$ |
 | $p$ | AR model order |
-| $\sigma_s$ | Innovation standard deviation for scale $s$ |
+| $\sigma_{a_j}$ | Innovation standard deviation for scale $a_j$ |
 | $\varepsilon_t$ | Independent standard normal innovation |
 | $N$ | Number of years in the historical record |
 
@@ -34,18 +37,20 @@ WARM combines continuous wavelet transforms with autoregressive modeling to gene
 The observed annual flow series $\{Q_t\}$ is decomposed using a mother wavelet $\psi$ (default: Morlet) at $J$ discrete scales:
 
 $$
-W(s_j, t) = \text{CWT}(Q, s_j), \qquad j = 1, \ldots, J
+W(a_j, t) = \text{CWT}(Q, a_j), \qquad j = 1, \ldots, J
 $$
 
 yielding a coefficient matrix of dimension $J \times N$.
 
 ### Scale Averaged Wavelet Power
 
-The SAWP captures the time-varying energy across all frequency scales:
+Following Nowak et al. (2011, Eq. 5) and Torrence and Compo (1998, Eq. 24), the SAWP captures the time-varying energy across all frequency scales as a scale-weighted sum with wavelet-specific normalization:
 
 $$
-P(t) = \frac{1}{J} \sum_{j=1}^{J} |W(s_j, t)|^2
+P(t) = \frac{\delta_j \, \delta_t}{C_\delta} \sum_{j=1}^{J} \frac{|W(a_j, t)|^2}{a_j}
 $$
+
+The $1/a_j$ weighting is the scale-density correction from the continuous wavelet transform; $\delta_j$ is the mean logarithmic (base-2) spacing of the scales, $\delta_t$ is the sampling period (one year for annual input), and $C_\delta$ is a wavelet-specific reconstruction factor. For the Morlet wavelet, $C_\delta = 0.776$ (Torrence and Compo 1998, Table 2).
 
 High values of $P(t)$ indicate periods of elevated variability (e.g., regime shifts, climate oscillations).
 
@@ -54,31 +59,31 @@ High values of $P(t)$ indicate periods of elevated variability (e.g., regime shi
 The wavelet coefficients are normalized by the SAWP to remove time-varying power and produce approximately stationary components:
 
 $$
-\tilde{W}(s_j, t) = \frac{W(s_j, t)}{\sqrt{P(t) + \epsilon}}
+\tilde{W}(a_j, t) = \frac{W(a_j, t)}{\sqrt{P(t) + \epsilon}}
 $$
 
 where $\epsilon$ is a small constant to prevent division by zero.
 
 ### Autoregressive Fitting
 
-For each scale $s_j$, the normalized coefficient series $\{\tilde{W}(s_j, t)\}_{t=1}^{N}$ is modeled as an AR($p$) process. Let $\mu_s = \mathbb{E}[\tilde{W}(s_j, \cdot)]$ denote the mean and $\gamma_k^{(s)}$ the autocovariance at lag $k$. The AR coefficients are estimated via the Yule-Walker equations:
+For each scale $a_j$, the normalized coefficient series $\{\tilde{W}(a_j, t)\}_{t=1}^{N}$ is modeled as an AR($p$) process. Let $\mu_{a_j} = \mathbb{E}[\tilde{W}(a_j, \cdot)]$ denote the mean and $\gamma_k^{(a_j)}$ the autocovariance at lag $k$. The AR coefficients are estimated via the Yule-Walker equations:
 
 $$
-\begin{pmatrix} \gamma_0^{(s)} & \gamma_1^{(s)} & \cdots & \gamma_{p-1}^{(s)} \\ \gamma_1^{(s)} & \gamma_0^{(s)} & \cdots & \gamma_{p-2}^{(s)} \\ \vdots & & \ddots & \vdots \\ \gamma_{p-1}^{(s)} & \gamma_{p-2}^{(s)} & \cdots & \gamma_0^{(s)} \end{pmatrix} \begin{pmatrix} \phi_1^{(s)} \\ \phi_2^{(s)} \\ \vdots \\ \phi_p^{(s)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(s)} \\ \gamma_2^{(s)} \\ \vdots \\ \gamma_p^{(s)} \end{pmatrix}
+\begin{pmatrix} \gamma_0^{(a_j)} & \gamma_1^{(a_j)} & \cdots & \gamma_{p-1}^{(a_j)} \\ \gamma_1^{(a_j)} & \gamma_0^{(a_j)} & \cdots & \gamma_{p-2}^{(a_j)} \\ \vdots & & \ddots & \vdots \\ \gamma_{p-1}^{(a_j)} & \gamma_{p-2}^{(a_j)} & \cdots & \gamma_0^{(a_j)} \end{pmatrix} \begin{pmatrix} \phi_1^{(a_j)} \\ \phi_2^{(a_j)} \\ \vdots \\ \phi_p^{(a_j)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(a_j)} \\ \gamma_2^{(a_j)} \\ \vdots \\ \gamma_p^{(a_j)} \end{pmatrix}
 $$
 
 The innovation variance is:
 
 $$
-\sigma_s^2 = \gamma_0^{(s)} \left(1 - \sum_{k=1}^{p} \phi_k^{(s)} \cdot \frac{\gamma_k^{(s)}}{\gamma_0^{(s)}}\right)
+\sigma_{a_j}^2 = \gamma_0^{(a_j)} \left(1 - \sum_{k=1}^{p} \phi_k^{(a_j)} \cdot \frac{\gamma_k^{(a_j)}}{\gamma_0^{(a_j)}}\right)
 $$
 
 ### Synthesis Procedure
 
-1. For each scale $s_j$, generate a synthetic normalized coefficient series via the AR($p$) recursion:
+1. For each scale $a_j$, generate a synthetic normalized coefficient series via the AR($p$) recursion:
 
 $$
-\hat{\tilde{W}}(s_j, t) = \mu_{s_j} + \sum_{k=1}^{p} \phi_k^{(s_j)} \left[\hat{\tilde{W}}(s_j, t-k) - \mu_{s_j}\right] + \sigma_{s_j}\,\varepsilon_t
+\hat{\tilde{W}}(a_j, t) = \mu_{a_j} + \sum_{k=1}^{p} \phi_k^{(a_j)} \left[\hat{\tilde{W}}(a_j, t-k) - \mu_{a_j}\right] + \sigma_{a_j}\,\varepsilon_t
 $$
 
 2. Bootstrap SAWP values from the historical record with replacement to obtain $\{\hat{P}(t)\}_{t=1}^{T}$.
@@ -86,13 +91,13 @@ $$
 3. Rescale the synthetic coefficients by the bootstrapped SAWP:
 
 $$
-\hat{W}(s_j, t) = \hat{\tilde{W}}(s_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
+\hat{W}(a_j, t) = \hat{\tilde{W}}(a_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
 $$
 
 4. Reconstruct the synthetic flow via inverse CWT:
 
 $$
-\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{s_j}} \,\text{Re}\!\left[\hat{W}(s_j, t)\right]
+\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{a_j}} \,\text{Re}\!\left[\hat{W}(a_j, t)\right]
 $$
 
 where $c$ is a normalization constant. The reconstructed series is then rescaled to match the observed mean and standard deviation.

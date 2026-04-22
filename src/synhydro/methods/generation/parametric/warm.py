@@ -256,13 +256,47 @@ class WARMGenerator(Generator):
             f"Fitting complete: {self.scales} scales, AR({self.ar_order}) models fitted"
         )
 
+    def _get_wavelet_constants(self) -> Dict[str, float]:
+        """
+        Get wavelet-specific reconstruction constants.
+
+        Values from Torrence and Compo (1998), Table 2. Required for the
+        scale-averaged wavelet power formulation (Eq. 24 therein; Nowak et al.
+        2011, Eq. 5).
+
+        Returns
+        -------
+        dict
+            Dictionary with keys:
+            - 'C_delta': reconstruction factor
+            - 'psi_0': mother wavelet evaluated at zero (real part)
+        """
+        constants = {
+            "morl": {"C_delta": 0.776, "psi_0": np.pi**-0.25},
+            "mexh": {"C_delta": 3.541, "psi_0": 0.867},
+        }
+        if self.wavelet in constants:
+            return constants[self.wavelet]
+        self.logger.warning(
+            f"Reconstruction constants not tabulated for wavelet '{self.wavelet}'. "
+            "Falling back to Morlet values; SAWP magnitude will be approximate."
+        )
+        return constants["morl"]
+
     def _compute_sawp(self, coefficients: NDArray) -> NDArray:
         """
-        Compute Scale Averaged Wavelet Power (SAWP).
+        Compute Scale-Averaged Wavelet Power (SAWP).
 
-        SAWP is the key innovation of WARM (Nowak et al. 2011) that enables
-        capturing time-varying power spectral characteristics. It represents
-        the average power across all scales at each time point.
+        Implements Nowak et al. (2011) Eq. 5, following Torrence and Compo (1998)
+        Eq. 24:
+
+            P(t) = (delta_j * delta_t / C_delta)
+                   * sum_{j=1}^{J} |W(a_j, t)|^2 / a_j
+
+        where delta_j is the mean logarithmic (base-2) spacing of the scales,
+        delta_t is the sampling period (one year for annual input), C_delta is
+        the wavelet-specific reconstruction factor, and the 1/a_j weighting is
+        the scale-density correction from the continuous wavelet transform.
 
         Parameters
         ----------
@@ -274,11 +308,25 @@ class WARMGenerator(Generator):
         NDArray
             SAWP time series with shape (n_years,).
         """
-        # Compute power at each scale and time point
         power = np.abs(coefficients) ** 2
+        scales = self.scales_used_.astype(float)
 
-        # Average across all scales for each time point
-        sawp = np.mean(power, axis=0)
+        # Scale-weighted sum: sum_j |W(a_j, t)|^2 / a_j
+        scale_sum = np.sum(power / scales[:, np.newaxis], axis=0)
+
+        constants = self._get_wavelet_constants()
+        C_delta = constants["C_delta"]
+
+        # delta_j: mean logarithmic (base-2) spacing across scales (T&C convention)
+        if len(scales) > 1:
+            delta_j = float(np.mean(np.diff(np.log2(scales))))
+        else:
+            delta_j = 1.0
+
+        # delta_t: annual sampling period (matches CWT sampling_period=1.0)
+        delta_t = 1.0
+
+        sawp = (delta_j * delta_t / C_delta) * scale_sum
 
         return sawp
 
