@@ -9,8 +9,6 @@
 
 SynHydro provides parametric and nonparametric stochastic generation methods under a unified API. All generators share the same `fit() then generate()` workflow.
 
-![Five-panel ensemble validation comparing synthetic and observed monthly statistics](assets/images/tutorials/05_validation_panel.png){: width="700px" }
-
 ## Generators
 
 | Class | Type | Frequency | Sites | Reference |
