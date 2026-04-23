@@ -7,6 +7,9 @@ repo_name: TrevorJA/SynHydro
 docs_dir: docs
 edit_uri: edit/main/docs/
 
+exclude_docs: |
+  dev/
+
 theme:
   name: material
   palette:
@@ -97,15 +100,19 @@ nav:
   - Algorithms:
     - Overview: algorithms/index.md
     - Thomas-Fiering AR(1): algorithms/thomas_fiering.md
-    - Kirsch Bootstrap: algorithms/kirsch.md
-    - KNN Bootstrap: algorithms/knn_bootstrap.md
     - Matalas MAR(1): algorithms/matalas.md
-    - Phase Randomization: algorithms/phase_randomization.md
-    - WARM: algorithms/warm.md
-    - Multi-Site HMM: algorithms/multisite_hmm.md
     - ARFIMA: algorithms/arfima.md
     - Gaussian/t-Copula: algorithms/gaussian_copula.md
     - Vine Copula: algorithms/vine_copula.md
+    - SPARTA: algorithms/sparta.md
+    - SMARTA: algorithms/smarta.md
+    - Multi-Site HMM: algorithms/multisite_hmm.md
+    - HMM-KNN: algorithms/hmm_knn.md
+    - WARM: algorithms/warm.md
+    - Kirsch Bootstrap: algorithms/kirsch.md
+    - KNN Bootstrap: algorithms/knn_bootstrap.md
+    - Phase Randomization: algorithms/phase_randomization.md
+    - Multisite Phase Randomization: algorithms/multisite_phase_randomization.md
     - Nowak Disaggregation: algorithms/nowak_disaggregation.md
     - Valencia-Schaake: algorithms/valencia_schaake.md
     - Grygier-Stedinger: algorithms/grygier_stedinger.md
@@ -114,3 +121,4 @@ nav:
     - Disaggregators & Pipelines: api/disaggregators.md
     - Drought Metrics: api/drought.md
     - Core: api/core.md
+  - References: references/references.md

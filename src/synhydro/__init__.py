@@ -50,6 +50,9 @@ from synhydro.methods.generation.nonparametric.kirsch import KirschGenerator
 from synhydro.methods.generation.nonparametric.knn_bootstrap import (
     KNNBootstrapGenerator,
 )
+from synhydro.methods.generation.nonparametric.multisite_phase_randomization import (
+    MultisitePhaseRandomizationGenerator,
+)
 from synhydro.methods.generation.nonparametric.phase_randomization import (
     PhaseRandomizationGenerator,
 )
@@ -57,9 +60,12 @@ from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
 from synhydro.methods.generation.parametric.gaussian_copula import (
     GaussianCopulaGenerator,
 )
+from synhydro.methods.generation.parametric.hmm_knn import HMMKNNGenerator
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.matalas import MatalasGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
+from synhydro.methods.generation.parametric.smarta import SMARTAGenerator
+from synhydro.methods.generation.parametric.sparta import SPARTAGenerator
 from synhydro.methods.generation.parametric.vine_copula import (
     VineCopulaGenerator,
 )
@@ -89,12 +95,16 @@ __all__ = [
     # Individual generators
     "ARFIMAGenerator",
     "GaussianCopulaGenerator",
+    "HMMKNNGenerator",
     "KirschGenerator",
     "KNNBootstrapGenerator",
-    "PhaseRandomizationGenerator",
-    "ThomasFieringGenerator",
     "MatalasGenerator",
     "MultiSiteHMMGenerator",
+    "MultisitePhaseRandomizationGenerator",
+    "PhaseRandomizationGenerator",
+    "SMARTAGenerator",
+    "SPARTAGenerator",
+    "ThomasFieringGenerator",
     "VineCopulaGenerator",
     "WARMGenerator",
     # Individual disaggregators

@@ -45,15 +45,25 @@ fig, ax = plot_timeseries(
     observed=Q_monthly[site],
     show_members=3,
 )
+```
 
+![Ensemble timeseries: synthetic members, median, and 10-90th percentile envelope plotted against observed monthly flows](../assets/images/tutorials/01_timeseries.png){: width="700px" }
+
+```python
 fig, ax = plot_flow_duration_curve(
     ensemble,
     observed=Q_monthly[site],
 )
 ```
 
+![Flow duration curve: observed FDC overlaid on ensemble uncertainty bands](../assets/images/tutorials/01_fdc.png){: width="700px" }
+
 ## Next steps
 
 - **Multi-site generation** - [Tutorial 02](02_multisite.md)
 - **Monthly-to-daily pipeline** - [Tutorial 03](03_pipeline.md)
 - **Algorithm details** - [Thomas-Fiering AR(1)](../algorithms/thomas_fiering.md)
+
+---
+
+**Next:** [Multi-Site Monthly (Kirsch)](02_multisite.md)

@@ -7,19 +7,19 @@ SynHydro implements the following stochastic generation and disaggregation metho
 | Algorithm | Type | Resolution | Sites |
 |-----------|------|------------|-------|
 | [Thomas-Fiering AR(1)](thomas_fiering.md) | Parametric | Monthly | Univariate |
-| [Kirsch Bootstrap](kirsch.md) | Nonparametric | Monthly | Multisite |
 | [Matalas MAR(1)](matalas.md) | Parametric | Monthly | Multisite |
-| [Phase Randomization](phase_randomization.md) | Nonparametric | Daily | Univariate |
-| [WARM](warm.md) | Parametric | Annual | Univariate |
-| [Multi-Site HMM](multisite_hmm.md) | Parametric | Annual | Multisite |
 | [ARFIMA](arfima.md) | Parametric | Monthly/Annual | Univariate |
-| [KNN Bootstrap](knn_bootstrap.md) | Nonparametric | Monthly/Annual | Univariate/Multisite |
 | [Gaussian/t-Copula](gaussian_copula.md) | Parametric | Monthly | Multisite |
 | [Vine Copula](vine_copula.md) | Parametric | Monthly | Multisite |
-| [HMM-KNN](hmm_knn.md) | Parametric | Annual | Multisite |
-| [Multisite Phase Randomization](multisite_phase_randomization.md) | Nonparametric | Daily | Multisite |
-| [SMARTA](smarta.md) | Parametric | Annual | Multisite |
 | [SPARTA](sparta.md) | Parametric | Monthly | Multisite |
+| [SMARTA](smarta.md) | Parametric | Annual | Multisite |
+| [Multi-Site HMM](multisite_hmm.md) | Parametric | Annual | Multisite |
+| [HMM-KNN](hmm_knn.md) | Parametric | Annual | Multisite |
+| [WARM](warm.md) | Parametric | Annual | Univariate |
+| [Kirsch Bootstrap](kirsch.md) | Nonparametric | Monthly | Multisite |
+| [KNN Bootstrap](knn_bootstrap.md) | Nonparametric | Monthly/Annual | Univariate/Multisite |
+| [Phase Randomization](phase_randomization.md) | Nonparametric | Daily | Univariate |
+| [Multisite Phase Randomization](multisite_phase_randomization.md) | Nonparametric | Daily | Multisite |
 
 ## Disaggregation Methods
 

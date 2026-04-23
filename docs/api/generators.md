@@ -63,3 +63,27 @@
 ## VineCopulaGenerator
 
 ::: synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator
+
+---
+
+## SPARTAGenerator
+
+::: synhydro.methods.generation.parametric.sparta.SPARTAGenerator
+
+---
+
+## SMARTAGenerator
+
+::: synhydro.methods.generation.parametric.smarta.SMARTAGenerator
+
+---
+
+## HMMKNNGenerator
+
+::: synhydro.methods.generation.parametric.hmm_knn.HMMKNNGenerator
+
+---
+
+## MultisitePhaseRandomizationGenerator
+
+::: synhydro.methods.generation.nonparametric.multisite_phase_randomization.MultisitePhaseRandomizationGenerator

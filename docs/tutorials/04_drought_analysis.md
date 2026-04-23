@@ -4,7 +4,7 @@ SynHydro provides the **Standardized Streamflow Index (SSI)** for
 characterizing drought from streamflow data. This tutorial covers the
 SSI calculation and drought event extraction workflow.
 
-## Calculate SSI
+## Calculate SSI on observed data
 
 SSI transforms raw flows into standardized anomalies by fitting a probability
 distribution within a rolling window. Values below -1 indicate drought;
@@ -25,17 +25,6 @@ print(f"SSI mean: {ssi.mean():.3f}")   # ~0
 print(f"SSI std:  {ssi.std():.3f}")     # ~1
 ```
 
-## Visualize
-
-```python
-from synhydro.plotting import plot_ssi_timeseries
-
-fig, ax = plot_ssi_timeseries(ssi, title=f"SSI-12 - {site}")
-```
-
-Shaded zones mark moderate (-1 to -1.5), severe (-1.5 to -2), and
-extreme (< -2) drought conditions.
-
 ## Extract drought events
 
 `get_drought_metrics` identifies contiguous periods where SSI stays below -1:
@@ -47,6 +36,34 @@ print(metrics[["start", "end", "duration", "severity", "avg_severity"]].head())
 
 Each row is a drought event with its duration, severity (minimum SSI),
 and magnitude (cumulative deficit).
+
+## Visualize ensemble SSI
+
+`plot_ssi_timeseries` computes SSI for each ensemble realization and overlays
+the observed SSI, making it easy to compare synthetic and historical drought
+behavior. Pass the ensemble (not a training SSI series) along with the
+observed flows.
+
+```python
+from synhydro.plotting import plot_ssi_timeseries
+
+gen = synhydro.KirschGenerator()
+gen.fit(Q_monthly)
+ensemble = gen.generate(n_realizations=20, n_years=20, seed=42)
+
+fig, ax = plot_ssi_timeseries(
+    ensemble,
+    observed=Q_monthly[site],
+    site=site,
+    window=12,
+    title=f"SSI-12 -- {site}",
+)
+```
+
+![SSI-12 timeseries with shaded drought-severity bands and ensemble percentile envelopes](../assets/images/tutorials/04_ssi_with_droughts.png){: width="700px" }
+
+Shaded zones mark moderate (-1 to -1.5), severe (-1.5 to -2), and
+extreme (< -2) drought conditions.
 
 !!! tip "Choosing a distribution"
     Use `compare_distributions` to rank candidate distributions by AIC and
@@ -60,3 +77,7 @@ and magnitude (cumulative deficit).
 
 - **Ensemble validation** - [Tutorial 05](05_validation.md)
 - **Algorithm details** - [Kirsch Bootstrap](../algorithms/kirsch.md)
+
+---
+
+**Previous:** [Monthly-to-Daily Pipeline](03_pipeline.md) | **Next:** [Ensemble Validation](05_validation.md)

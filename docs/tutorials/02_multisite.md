@@ -32,8 +32,14 @@ fig, axes = plot_spatial_correlation(
 )
 ```
 
+![Side-by-side heatmaps of observed and synthetic pairwise Pearson correlations across sites](../assets/images/tutorials/02_spatial_correlation.png){: width="700px" }
+
 ## Next steps
 
 - **Monthly-to-daily pipeline** - [Tutorial 03](03_pipeline.md)
 - **Quantitative validation** - [Tutorial 05](05_validation.md)
 - **Algorithm details** - [Kirsch Bootstrap](../algorithms/kirsch.md)
+
+---
+
+**Previous:** [Quickstart (Thomas-Fiering)](01_quickstart.md) | **Next:** [Monthly-to-Daily Pipeline](03_pipeline.md)

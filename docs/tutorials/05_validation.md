@@ -92,6 +92,8 @@ fig, axes = plot_validation_panel(
 )
 ```
 
+![Five-panel validation: boxplots by month, monthly mean and std comparison, Wilcoxon and Levene p-values](../assets/images/tutorials/05_validation_panel.png){: width="700px" }
+
 !!! tip "Log-space validation"
     Streamflow is often right-skewed. Validating in log space can reveal
     differences in the lower tail:
@@ -107,3 +109,7 @@ fig, axes = plot_validation_panel(
   are available in `synhydro.plotting` -- see the [API reference](../api/generators.md)
 - **Algorithm details** can help diagnose which statistical properties a
   generator is designed to preserve -- [Algorithms](../algorithms/index.md)
+
+---
+
+**Previous:** [Drought Analysis (SSI)](04_drought_analysis.md)
