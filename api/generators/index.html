@@ -12198,7 +12198,7 @@ None, defaults to the length of the historical record.</p>
 
 
 <a href="#synhydro.methods.generation.nonparametric.multisite_phase_randomization.MultisitePhaseRandomizationGenerator" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">MultisitePhaseRandomizationGenerator</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cmor1.5-1.0&#39;</span><span class="p">,</span> <span class="n">n_scales</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">win_h_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span>
+<div class="doc-signature highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="nf">MultisitePhaseRandomizationGenerator</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">wavelet</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;cmor1.5-1.0&#39;</span><span class="p">,</span> <span class="n">n_scales</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">win_h_length</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span> <span class="n">transform</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mean_center&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span>
 </span></code></pre></div>
 
     <div class="doc doc-contents first">
@@ -12256,7 +12256,20 @@ contains {'xi', 'alfa', 'k', 'h'}.</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Per-site normal-score transformed series of length N. Keyed by site name.</p>
+                <p>Per-site pre-CWT series (mean-centered or normal-score) of length N.
+Keyed by site name.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td><code><span title="synhydro.methods.generation.nonparametric.multisite_phase_randomization.MultisitePhaseRandomizationGenerator.obs_mean_">obs_mean_</span></code></td>
+            <td>
+                  <code>dict of float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Per-site global mean subtracted during mean-center transform. Empty when
+transform='normal_score'.</p>
               </div>
             </td>
           </tr>
@@ -12374,6 +12387,31 @@ total window of 2*win_h_length+1 days.</p>
             </td>
             <td>
                   <code>15</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>transform</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Transform applied to each site's observed series before computing
+the CWT. Options:</p>
+<ul>
+<li>'mean_center': subtract the global site mean, matching the
+  Brunner and Gilleland (2020) PRSim reference implementation.</li>
+<li>'normal_score': apply the per-day-of-year Van der Waerden
+  normal-score transform, producing a more Gaussian CWT input.</li>
+</ul>
+<p>The kappa marginal fitting always uses the raw (untransformed)
+flow values regardless of this setting.</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;mean_center&#39;</code>
             </td>
           </tr>
           <tr class="doc-section-item">
