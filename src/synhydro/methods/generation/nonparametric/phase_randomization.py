@@ -164,11 +164,18 @@ class PhaseRandomizationGenerator(Generator):
                 f"At least 730 days (2 years) of data required, got {len(Q_series)}"
             )
 
-        # Validate no missing days (must be multiple of 365)
+        # Trim trailing incomplete year so the record is a multiple of 365.
         if len(Q_series) % 365 != 0:
-            raise ValueError(
-                f"Data length must be multiple of 365 after removing leap days. "
-                f"Got {len(Q_series)} days. Some days may be missing."
+            n_trim = len(Q_series) % 365
+            n_before = len(Q_series)
+            Q_series = Q_series.iloc[:-n_trim]
+            self.logger.warning(
+                "Record length (%d days) is not a multiple of 365 after removing "
+                "leap days. Trimmed %d trailing days to %d days (%d complete years).",
+                n_before,
+                n_trim,
+                len(Q_series),
+                len(Q_series) // 365,
             )
 
         # Create day-of-year index (1-365)

@@ -2,6 +2,8 @@
 Tests for MultisitePhaseRandomizationGenerator (Brunner and Gilleland, 2020).
 """
 
+import time
+
 import pytest
 import numpy as np
 import pandas as pd
@@ -65,6 +67,7 @@ class TestInit:
         assert gen.wavelet == "cmor1.5-1.0"
         assert gen.n_scales == 100
         assert gen.win_h_length == 15
+        assert gen.transform == "mean_center"
         assert gen.is_preprocessed is False
         assert gen.is_fitted is False
         assert gen.supports_multisite is True
@@ -77,6 +80,14 @@ class TestInit:
         )
         assert gen.n_scales == 50
         assert gen.win_h_length == 10
+
+    def test_transform_normal_score_accepted(self):
+        gen = MultisitePhaseRandomizationGenerator(transform="normal_score")
+        assert gen.transform == "normal_score"
+
+    def test_invalid_transform_raises(self):
+        with pytest.raises(ValueError, match="transform must be one of"):
+            MultisitePhaseRandomizationGenerator(transform="bad_option")
 
     def test_name_stored(self):
         gen = MultisitePhaseRandomizationGenerator(name="my_gen")
@@ -214,6 +225,50 @@ class TestFit:
 
         assert gen.n_sites == 3
         assert len(gen.cwt_amplitudes_) == 3
+
+    def test_fit_mean_center_stores_obs_mean(self, df_2sites_10yr):
+        gen = MultisitePhaseRandomizationGenerator(n_scales=40, transform="mean_center")
+        gen.fit(df_2sites_10yr)
+
+        for site in gen.sites:
+            assert site in gen.obs_mean_
+            assert abs(gen.obs_mean_[site] - df_2sites_10yr[site].mean()) < 1e-6
+
+    def test_fit_normal_score_transform(self, df_2sites_10yr):
+        gen = MultisitePhaseRandomizationGenerator(
+            n_scales=40, transform="normal_score"
+        )
+        gen.fit(df_2sites_10yr)
+
+        assert gen.is_fitted
+        assert gen.obs_mean_ == {}
+        for site in gen.sites:
+            assert site in gen.par_day_
+            fitted_days = [d for d, v in gen.par_day_[site].items() if v is not None]
+            assert len(fitted_days) > 0
+
+    def test_fit_completes_under_budget_4sites_10yr(self):
+        """
+        Regression test for the daily-scale hang: fit() on 4 sites x 10 years
+        at default settings must complete well under a minute. Historically the
+        kappa-fit Nelder-Mead loop would stall >9 minutes before warm-starting,
+        maxiter=200, and the smooth infeasibility penalty were added.
+        """
+        df = _make_multisite_df(n_years=10, n_sites=4, seed=2024)
+        gen = MultisitePhaseRandomizationGenerator()
+
+        t0 = time.perf_counter()
+        gen.fit(df)
+        elapsed = time.perf_counter() - t0
+
+        assert gen.is_fitted
+        assert gen.n_sites == 4
+        for site in gen.sites:
+            fitted_days = sum(1 for v in gen.par_day_[site].values() if v is not None)
+            assert fitted_days >= 350, f"site {site}: only {fitted_days}/365 days fit"
+        assert (
+            elapsed < 30.0
+        ), f"fit() took {elapsed:.1f}s; expected <30s on 4 sites x 10 years"
 
 
 # ---------------------------------------------------------------------------

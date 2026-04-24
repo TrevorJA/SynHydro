@@ -49,7 +49,11 @@ class MultisitePhaseRandomizationGenerator(Generator):
     cwt_amplitudes_ : dict of np.ndarray
         Per-site CWT amplitude spectra of shape (n_scales, N). Keyed by site name.
     norm_ : dict of np.ndarray
-        Per-site normal-score transformed series of length N. Keyed by site name.
+        Per-site pre-CWT series (mean-centered or normal-score) of length N.
+        Keyed by site name.
+    obs_mean_ : dict of float
+        Per-site global mean subtracted during mean-center transform. Empty when
+        transform='normal_score'.
     scales_ : np.ndarray
         CWT scales used, shape (n_scales,).
     delta_j_ : float
@@ -80,12 +84,15 @@ class MultisitePhaseRandomizationGenerator(Generator):
     supports_multisite: bool = True
     supported_frequencies: tuple = ("D",)
 
+    _VALID_TRANSFORMS = ("mean_center", "normal_score")
+
     def __init__(
         self,
         *,
         wavelet: str = "cmor1.5-1.0",
         n_scales: int = 100,
         win_h_length: int = 15,
+        transform: str = "mean_center",
         name: Optional[str] = None,
         debug: bool = False,
         **kwargs: Any,
@@ -105,6 +112,17 @@ class MultisitePhaseRandomizationGenerator(Generator):
             Half-window length (days) for per-day-of-year kappa fitting. Values
             within +-win_h_length days of each target day are pooled, giving a
             total window of 2*win_h_length+1 days.
+        transform : str, default='mean_center'
+            Transform applied to each site's observed series before computing
+            the CWT. Options:
+
+            - 'mean_center': subtract the global site mean, matching the
+              Brunner and Gilleland (2020) PRSim reference implementation.
+            - 'normal_score': apply the per-day-of-year Van der Waerden
+              normal-score transform, producing a more Gaussian CWT input.
+
+            The kappa marginal fitting always uses the raw (untransformed)
+            flow values regardless of this setting.
         name : str, optional
             Name identifier for this generator instance.
         debug : bool, default=False
@@ -112,21 +130,29 @@ class MultisitePhaseRandomizationGenerator(Generator):
         **kwargs : dict
             Additional keyword arguments (currently unused).
         """
+        if transform not in self._VALID_TRANSFORMS:
+            raise ValueError(
+                f"transform must be one of {self._VALID_TRANSFORMS!r}, got {transform!r}"
+            )
+
         super().__init__(name=name, debug=debug)
 
         self.wavelet = wavelet
         self.n_scales = n_scales
         self.win_h_length = win_h_length
+        self.transform = transform
 
         self.init_params.algorithm_params = {
             "wavelet": wavelet,
             "n_scales": n_scales,
             "win_h_length": win_h_length,
+            "transform": transform,
         }
 
         self.par_day_: Dict[str, Dict[int, Optional[Dict[str, float]]]] = {}
         self.cwt_amplitudes_: Dict[str, np.ndarray] = {}
         self.norm_: Dict[str, np.ndarray] = {}
+        self.obs_mean_: Dict[str, float] = {}
         self.scales_: Optional[np.ndarray] = None
         self.delta_j_: Optional[float] = None
 
@@ -183,9 +209,15 @@ class MultisitePhaseRandomizationGenerator(Generator):
             )
 
         if len(Q) % 365 != 0:
-            raise ValueError(
-                f"Record length must be a multiple of 365 after removing leap "
-                f"days. Got {len(Q)} days. Some days may be missing."
+            n_trim = len(Q) % 365
+            Q = Q.iloc[:-n_trim]
+            self.logger.warning(
+                "Record length (%d days) is not a multiple of 365 after removing "
+                "leap days. Trimmed %d trailing days to %d days (%d complete years).",
+                len(Q) + n_trim,
+                n_trim,
+                len(Q),
+                len(Q) // 365,
             )
 
         self.day_index_ = self._create_day_index(Q.index)
@@ -254,21 +286,28 @@ class MultisitePhaseRandomizationGenerator(Generator):
         self.scales_ = np.geomspace(2, N / 8, self.n_scales)
         self.delta_j_ = float(np.log(self.scales_[1] / self.scales_[0]))
 
-        for site in self._sites:
-            self.logger.debug("Fitting site: %s", site)
+        for site_idx, site in enumerate(self._sites, start=1):
+            self.logger.info("Fitting site %d/%d: %s", site_idx, len(self._sites), site)
             obs = self.Q_obs_df_[site].values
 
-            # Step 1: fit kappa distributions
-            self.par_day_[site] = self._fit_kappa_all_days(obs)
+            self.logger.info("Site %s: fitting per-day-of-year kappa marginals", site)
+            self.par_day_[site] = self._fit_kappa_all_days(obs, site=site)
 
-            # Step 2: normal score transform
-            self.norm_[site] = self._normal_score_transform(obs)
+            if self.transform == "normal_score":
+                self.norm_[site] = self._normal_score_transform(obs)
+            else:
+                self.norm_[site], self.obs_mean_[site] = self._mean_center_transform(
+                    obs
+                )
 
-            # Step 3: CWT and store amplitudes
+            self.logger.info(
+                "Site %s: computing CWT (%d scales, N=%d)", site, self.n_scales, N
+            )
             coefs, _ = pywt.cwt(
                 self.norm_[site], self.scales_, self.wavelet, sampling_period=1.0
             )
             self.cwt_amplitudes_[site] = np.abs(coefs)  # (n_scales, N)
+            self.logger.info("Site %s: CWT complete", site)
 
         self.update_state(fitted=True)
         self.fitted_params_ = self._compute_fitted_params()
@@ -455,15 +494,22 @@ class MultisitePhaseRandomizationGenerator(Generator):
         return simulated
 
     def _fit_kappa_all_days(
-        self, obs: np.ndarray
+        self, obs: np.ndarray, site: Optional[str] = None
     ) -> Dict[int, Optional[Dict[str, float]]]:
         """
         Fit kappa distribution parameters for each day of year (1-365).
+
+        Uses a warm start for the Nelder-Mead optimizer: each day-of-year is
+        initialized from the previous successful day's (k, h), since adjacent
+        days share nearly identical marginal shapes due to the +/- win_h_length
+        pooling window.
 
         Parameters
         ----------
         obs : np.ndarray
             Observed streamflow values, length N (multiple of 365).
+        site : str, optional
+            Site name used in checkpoint log messages.
 
         Returns
         -------
@@ -473,16 +519,23 @@ class MultisitePhaseRandomizationGenerator(Generator):
         """
         par_day: Dict[int, Optional[Dict[str, float]]] = {}
 
+        day_to_mask = {d: self.day_index_ == d for d in range(1, 366)}
+
+        last_good_kh: Tuple[float, float] = (1.0, 1.0)
+
         for d in range(1, 366):
             window_days = self._get_window_days(d)
-            mask = np.isin(self.day_index_, window_days)
+            mask = day_to_mask[window_days[0]].copy()
+            for wd in window_days[1:]:
+                mask |= day_to_mask[wd]
             data_window = obs[mask]
 
             try:
                 lmom = self._compute_lmoments(data_window)
-                params = self._fit_kappa_params(lmom)
+                params = self._fit_kappa_params(lmom, x0=last_good_kh)
                 if params is not None:
                     par_day[d] = params
+                    last_good_kh = (params["k"], params["h"])
                 else:
                     par_day[d] = par_day.get(d - 1) if d > 1 else None
                     if par_day[d] is None:
@@ -490,6 +543,9 @@ class MultisitePhaseRandomizationGenerator(Generator):
             except Exception as exc:
                 par_day[d] = par_day.get(d - 1) if d > 1 else None
                 self.logger.debug("Day %d: kappa fitting failed: %s", d, exc)
+
+            if d % 100 == 0:
+                self.logger.info("Kappa fit: site=%s day=%d/365", site or "?", d)
 
         # Backward fill any remaining None values
         for d in range(364, 0, -1):
@@ -522,6 +578,26 @@ class MultisitePhaseRandomizationGenerator(Generator):
             ranks = np.argsort(np.argsort(day_vals)) + 1
             norm[mask] = _norm.ppf(ranks / (n + 1.0))
         return norm
+
+    def _mean_center_transform(self, obs: np.ndarray) -> Tuple[np.ndarray, float]:
+        """
+        Subtract the global site mean from the observed series.
+
+        This matches the transform used in the PRSim R reference implementation
+        (Brunner and Gilleland, 2020): norm = Qobs - mean(Qobs).
+
+        Parameters
+        ----------
+        obs : np.ndarray
+            Observed streamflow values.
+
+        Returns
+        -------
+        tuple of (np.ndarray, float)
+            Mean-centered series and the global mean that was subtracted.
+        """
+        obs_mean = float(np.mean(obs))
+        return obs - obs_mean, obs_mean
 
     def _get_window_days(self, day: int) -> List[int]:
         """
@@ -594,7 +670,11 @@ class MultisitePhaseRandomizationGenerator(Generator):
 
         return {"l1": l1, "l2": l2, "lcv": lcv, "lca": lca, "lkur": lkur}
 
-    def _fit_kappa_params(self, lmom: Dict[str, float]) -> Optional[Dict[str, float]]:
+    def _fit_kappa_params(
+        self,
+        lmom: Dict[str, float],
+        x0: Optional[Tuple[float, float]] = None,
+    ) -> Optional[Dict[str, float]]:
         """
         Fit four-parameter kappa distribution via L-moments.
 
@@ -602,6 +682,10 @@ class MultisitePhaseRandomizationGenerator(Generator):
         ----------
         lmom : dict
             L-moment dictionary with keys 'l1', 'l2', 'lca', 'lkur'.
+        x0 : tuple of (float, float), optional
+            Initial (k, h) for the Nelder-Mead simplex. Defaults to (1.0, 1.0).
+            Passing a good warm start (e.g., the previous day-of-year's fitted
+            values) dramatically reduces iteration count on daily data.
 
         Returns
         -------
@@ -646,21 +730,35 @@ class MultisitePhaseRandomizationGenerator(Generator):
 
         def objective(kh: np.ndarray) -> float:
             k, h = kh
-            if (k < -1 and h >= 0) or (h < 0 and (k <= -1 or k >= -1 / h)):
-                return 1e10
+            # Smooth quadratic penalty (replaces a step-function cliff) so
+            # Nelder-Mead gets a descent direction back toward the feasible
+            # region {h >= 0 and k > -1} or {h < 0 and -1 < k < -1/h}.
+            infeas = 0.0
+            if k < -1 and h >= 0:
+                infeas = (-1.0 - k) ** 2
+            elif h < 0:
+                if k <= -1:
+                    infeas = (-1.0 - k) ** 2 + h * h
+                elif k >= -1.0 / h:
+                    infeas = (k + 1.0 / h) ** 2
+            if infeas > 0:
+                return 1.0 + 1e3 * infeas
             t3, t4 = theoretical_tau(k, h)
             if t3 is None:
                 return 1e10
             return (tau3 - t3) ** 2 + (tau4 - t4) ** 2
+
+        if x0 is None:
+            x0 = (1.0, 1.0)
 
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 result = minimize(
                     objective,
-                    [1.0, 1.0],
+                    [float(x0[0]), float(x0[1])],
                     method="Nelder-Mead",
-                    options={"maxiter": 1000, "xatol": 1e-6, "fatol": 1e-6},
+                    options={"maxiter": 200, "xatol": 1e-6, "fatol": 1e-6},
                 )
 
             if result.fun > 0.1:
@@ -845,7 +943,7 @@ class MultisitePhaseRandomizationGenerator(Generator):
                 "sites": self._sites,
             },
             transformations_={
-                "normal_score": True,
+                "transform": self.transform,
                 "wavelet": self.wavelet,
                 "n_scales": self.n_scales,
                 "win_h_length": self.win_h_length,
