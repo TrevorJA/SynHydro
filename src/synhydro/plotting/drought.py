@@ -22,6 +22,8 @@ from synhydro.plotting._utils import (
     format_date_axis,
     validate_ensemble_input,
     validate_observed_input,
+    warn_if_many_realizations,
+    warn_if_few_realizations,
 )
 
 
@@ -32,7 +34,6 @@ def plot_drought_characteristics(
     x_metric: str = "magnitude",
     y_metric: str = "duration",
     color_metric: str = "severity",
-    threshold: float = -1.0,
     method: str = "ssi",
     window: int = 12,
     ax: Optional[plt.Axes] = None,
@@ -66,8 +67,6 @@ def plot_drought_characteristics(
         Metric for y-axis: 'magnitude', 'duration', 'severity'
     color_metric : str, default 'severity'
         Metric for color mapping: 'magnitude', 'duration', 'severity'
-    threshold : float, default -1.0
-        SSI threshold for drought identification
     method : str, default 'ssi'
         Drought identification method (currently only 'ssi' supported)
     window : int, default 12
@@ -91,7 +90,7 @@ def plot_drought_characteristics(
     dpi : int, default from config
         Resolution for saved figure
     **kwargs
-        Additional arguments passed to matplotlib scatter
+        Forwarded to `ax.scatter`.
 
     Returns
     -------
@@ -106,6 +105,9 @@ def plot_drought_characteristics(
     # Validate inputs
     validate_ensemble_input(ensemble)
     observed = validate_observed_input(observed, required=False)
+
+    # Aggregating SSI per realization is O(N); warn when N is large
+    warn_if_many_realizations(len(ensemble.realization_ids), context="ssi")
 
     if method != "ssi":
         raise ValueError(f"Only 'ssi' method is currently supported, got '{method}'")
@@ -212,7 +214,7 @@ def plot_ssi_timeseries(
     ensemble: Ensemble,
     observed: Optional[pd.Series] = None,
     site: Optional[str] = None,
-    percentiles: Optional[list] = [10, 50, 90],
+    percentiles: Optional[list] = None,
     window: int = 12,
     start_date: Optional[str] = None,
     end_date: Optional[str] = None,
@@ -242,7 +244,7 @@ def plot_ssi_timeseries(
     site : str, optional
         Site name to analyze. If None, uses first site in ensemble
     percentiles : list, optional
-        Percentiles for ensemble uncertainty bands. Default [10, 50, 90]
+        Percentiles for ensemble uncertainty bands. Default `[10, 50, 90]`.
     window : int, default 12
         Rolling window size for SSI calculation (months)
     start_date : str, optional
@@ -268,7 +270,7 @@ def plot_ssi_timeseries(
     dpi : int, default from config
         Resolution for saved figure
     **kwargs
-        Additional arguments passed to matplotlib plot functions
+        Forwarded to `ax.plot` and `ax.fill_between`.
 
     Returns
     -------
@@ -283,6 +285,15 @@ def plot_ssi_timeseries(
     # Validate inputs
     validate_ensemble_input(ensemble)
     observed = validate_observed_input(observed, required=False)
+
+    if percentiles is None:
+        percentiles = [10, 50, 90]
+
+    # SSI is computed per realization, so cost scales with N
+    n_realizations = len(ensemble.realization_ids)
+    warn_if_many_realizations(n_realizations, context="ssi")
+    if percentiles is not None and len(percentiles) > 0:
+        warn_if_few_realizations(n_realizations, context="percentile bands")
 
     # Setup axes
     fig, ax = setup_axes(ax, figsize)

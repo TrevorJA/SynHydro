@@ -97,6 +97,7 @@ nav:
     - "Monthly→Daily Pipeline": tutorials/03_pipeline.md
     - "Drought Analysis (SSI)": tutorials/04_drought_analysis.md
     - "Ensemble Validation": tutorials/05_validation.md
+    - "Plotting Walkthrough": tutorials/06_plotting.md
   - Algorithms:
     - Overview: algorithms/index.md
     - Thomas-Fiering AR(1): algorithms/thomas_fiering.md
@@ -120,5 +121,6 @@ nav:
     - Generators: api/generators.md
     - Disaggregators & Pipelines: api/disaggregators.md
     - Drought Metrics: api/drought.md
+    - Plotting: api/plotting.md
     - Core: api/core.md
   - References: references/references.md

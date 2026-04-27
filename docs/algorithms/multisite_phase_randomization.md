@@ -20,8 +20,9 @@ The Multisite Wavelet Phase Randomization generator extends the univariate Fouri
 | $S$ | Number of sites |
 | $d$ | Day of year (1 to 365) |
 | $w$ | Half-window length for marginal fitting (default 15 days) |
-| $y_{t,s}$ | Normal-score transformed value of $Q_{t,s}$ |
-| $\hat{y}_{t,s}$ | Synthetic normal-score value for site $s$ |
+| $\bar{Q}_s$ | Global mean of observed flow at site $s$ |
+| $y_{t,s}$ | Pre-CWT transformed value of $Q_{t,s}$ (mean-centered or normal-score) |
+| $\hat{y}_{t,s}$ | Synthetic transformed value for site $s$ |
 | $a$ | CWT scale index |
 | $W_s(a, t)$ | CWT coefficient at scale $a$, time $t$, site $s$ |
 | $\phi_\varepsilon(a, t)$ | Phase of the white-noise CWT at scale $a$, time $t$ |
@@ -31,7 +32,12 @@ The Multisite Wavelet Phase Randomization generator extends the univariate Fouri
 
 ### Model Structure
 
-The generator operates in a transformed domain. For each site $s$, observed flows are converted to normal scores $y_{t,s}$ using a per-day-of-year ranking procedure. The CWT of each normal-score series is then computed:
+The generator operates in a transformed domain. For each site $s$, the observed flow series is pre-processed before the wavelet transform using one of two options controlled by the `transform` parameter:
+
+- **`mean_center`** (default): subtract the global site mean, $\tilde{Q}_{t,s} = Q_{t,s} - \bar{Q}_s$. This matches the PRSim reference implementation of Brunner and Gilleland (2020).
+- **`normal_score`**: apply the per-day-of-year Van der Waerden normal-score transform (see Parameter Estimation below), producing a more Gaussian-distributed CWT input.
+
+In both cases the transformed series is denoted $y_{t,s}$ and the CWT is computed:
 
 $$
 W_s(a, t) = \int_{-\infty}^{\infty} y_{u,s} \, \frac{1}{\sqrt{a}} \psi^*\!\left(\frac{u - t}{a}\right) du
@@ -66,13 +72,21 @@ $$
 
 with the GEV limit when $h = 0$. Parameters $(k, h)$ are found by minimizing the squared difference between sample and theoretical L-skewness ($\tau_3$) and L-kurtosis ($\tau_4$), and $(\xi, \alpha)$ are then determined analytically from the first two L-moments.
 
-**Normal score transform.** For each day $d$ at each site $s$, the $N_{\text{yr}}$ observations are ranked, and the Van der Waerden scores are assigned:
+**Normal score transform** (`transform='normal_score'`). For each day $d$ at each site $s$, the $N_{\text{yr}}$ observations are ranked, and the Van der Waerden scores are assigned:
 
 $$
 y_{t,s} = \Phi^{-1}\!\left(\frac{r_{t,s}}{N_{\text{yr}} + 1}\right)
 $$
 
 where $r_{t,s}$ is the rank of observation $t$ among all observations on day $d$ at site $s$, and $\Phi^{-1}$ is the standard normal quantile function.
+
+**Mean-center transform** (`transform='mean_center'`, default). The global site mean is subtracted:
+
+$$
+y_{t,s} = Q_{t,s} - \bar{Q}_s
+$$
+
+matching the PRSim reference implementation. The kappa marginal fitting always operates on the raw observed flows $Q_{t,s}$ regardless of which transform is selected.
 
 ### Synthesis Procedure
 
@@ -112,7 +126,11 @@ Higher-order cross-site statistics (e.g., cross-site lag correlations) are not e
 - Spatial correlation is preserved on average over realizations, but individual realizations may deviate from the observed correlation matrix, particularly for short records.
 - The CWT of a white-noise series does not have a flat spectrum, so the shared phase field is not strictly uniform over scale; this introduces some residual scale-dependence in the inter-site phase coherence.
 - The method assumes stationarity; non-stationary trends or shifts in the observed record are embedded in the fitted amplitudes and marginals but not explicitly modeled.
-- Computational cost scales as $O(S \cdot n_{\text{scales}} \cdot N \log N)$ due to the FFT-based CWT, which may be significant for large $S$ or very long records.
+- Computational cost scales as $O(S \cdot n_{\text{scales}} \cdot N)$ per scale (direct-convolution CWT), and grows with scale because the Morlet wavelet support widens proportionally. At daily resolution with 100 scales and records of ~12,000 days, the CWT step dominates fit() runtime (~15 s per site).
+
+## Implementation Notes
+
+The default `transform='mean_center'` matches the PRSim reference implementation (Brunner and Gilleland, 2020). The `transform='normal_score'` option applies the Van der Waerden transform per day of year before the CWT, producing a more Gaussian-distributed spectral input; this approach is the basis of the single-site PRSim formulation (Brunner et al., 2019). In both cases the kappa back-transformation uses rank-order mapping, so the absolute scale of the pre-CWT series does not affect the fitted marginals.
 
 ## References
 
@@ -121,8 +139,9 @@ Brunner, M.I., and Gilleland, E. (2020). Stochastic simulation of streamflow and
 
 **See also:**
 - Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. *Hydrology and Earth System Sciences*, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
-- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. *Physica D*, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90043-8
+- Hosking, J.R.M. (1994). The four-parameter kappa distribution. *IBM Journal of Research and Development*, 38(3), 251-258. https://doi.org/10.1147/rd.383.0251
 - Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. *Journal of the Royal Statistical Society, Series B*, 52(1), 105-124.
+- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. *Physica D*, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90043-8
 
 ---
 

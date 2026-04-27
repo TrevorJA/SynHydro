@@ -46,10 +46,12 @@ Timeseries Plots
 ~~~~~~~~~~~~~~~~
 - plot_timeseries: Ensemble timeseries with uncertainty bands
 - plot_flow_ranges: Min/max/median ranges by period (daily/weekly/monthly)
+- plot_seasonal_cycle: Per-period mean or std with inter-realization band
 
 Distribution Plots
 ~~~~~~~~~~~~~~~~~~
 - plot_flow_duration_curve: FDC with ensemble uncertainty
+- plot_cdf: Empirical cumulative distribution with ensemble uncertainty
 - plot_histogram: Flow value histograms with optional KDE
 - plot_monthly_distributions: Monthly boxplots/violin plots
 
@@ -75,10 +77,12 @@ from .config import COLORS, STYLE, LAYOUT, LABELS, apply_plotting_style
 from .timeseries import (
     plot_timeseries,
     plot_flow_ranges,
+    plot_seasonal_cycle,
 )
 
 from .distributions import (
     plot_flow_duration_curve,
+    plot_cdf,
     plot_histogram,
     plot_monthly_distributions,
 )
@@ -97,36 +101,41 @@ from .validation import (
     plot_validation_panel,
 )
 
+from ._utils import (
+    warn_if_many_realizations,
+    warn_if_few_realizations,
+)
+
 # Define public API
 __all__ = [
     # Configuration
-    'COLORS',
-    'STYLE',
-    'LAYOUT',
-    'LABELS',
-    'apply_plotting_style',
-
+    "COLORS",
+    "STYLE",
+    "LAYOUT",
+    "LABELS",
+    "apply_plotting_style",
     # Timeseries plots
-    'plot_timeseries',
-    'plot_flow_ranges',
-
+    "plot_timeseries",
+    "plot_flow_ranges",
+    "plot_seasonal_cycle",
     # Distribution plots
-    'plot_flow_duration_curve',
-    'plot_histogram',
-    'plot_monthly_distributions',
-
+    "plot_flow_duration_curve",
+    "plot_cdf",
+    "plot_histogram",
+    "plot_monthly_distributions",
     # Correlation plots
-    'plot_autocorrelation',
-    'plot_spatial_correlation',
-
+    "plot_autocorrelation",
+    "plot_spatial_correlation",
     # Drought plots
-    'plot_drought_characteristics',
-    'plot_ssi_timeseries',
-
+    "plot_drought_characteristics",
+    "plot_ssi_timeseries",
     # Validation plots
-    'plot_validation_panel',
+    "plot_validation_panel",
+    # Diagnostics helpers
+    "warn_if_many_realizations",
+    "warn_if_few_realizations",
 ]
 
 # Version info
-__version__ = '2.0.0'
-__author__ = 'SynHydro Development Team'
+__version__ = "2.0.0"
+__author__ = "SynHydro Development Team"

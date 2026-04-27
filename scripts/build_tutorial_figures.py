@@ -22,6 +22,7 @@ import pandas as pd
 import synhydro
 from synhydro.plotting import (
     plot_flow_duration_curve,
+    plot_monthly_distributions,
     plot_spatial_correlation,
     plot_ssi_timeseries,
     plot_timeseries,
@@ -125,6 +126,31 @@ def build_validation_figure(Q_monthly) -> None:
     _save(fig, "05_validation_panel.png")
 
 
+def build_plotting_walkthrough_figures(Q_monthly) -> None:
+    logger.info("Tutorial 06: Plotting walkthrough")
+    site = Q_monthly.columns[0]
+
+    gen = synhydro.KirschGenerator()
+    gen.fit(Q_monthly)
+    ensemble = gen.generate(n_realizations=N_REALIZATIONS, n_years=N_YEARS, seed=SEED)
+
+    fig, _ = plot_timeseries(
+        ensemble, observed=Q_monthly[site], site=site, show_members=3
+    )
+    _save(fig, "06_timeseries.png")
+
+    fig, _ = plot_flow_duration_curve(ensemble, observed=Q_monthly[site], site=site)
+    _save(fig, "06_fdc.png")
+
+    fig, _ = plot_monthly_distributions(
+        ensemble, observed=Q_monthly[site], site=site, plot_type="box"
+    )
+    _save(fig, "06_monthly_dist.png")
+
+    fig, _ = plot_validation_panel(ensemble, observed=Q_monthly[site], site=site)
+    _save(fig, "06_validation_panel.png")
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     logger.info("Output directory: %s", OUT_DIR.relative_to(REPO_ROOT))
@@ -137,6 +163,7 @@ def main() -> None:
     build_pipeline_figure(Q_daily)
     build_ssi_figure(Q_monthly)
     build_validation_figure(Q_monthly)
+    build_plotting_walkthrough_figures(Q_monthly)
 
     logger.info("All tutorial figures built.")
 

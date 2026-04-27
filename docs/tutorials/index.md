@@ -9,6 +9,7 @@ Step-by-step guides, each focused on a single SynHydro workflow.
 | [03 - Pipeline](03_pipeline.md) | Monthly-to-daily disaggregation via `KirschNowakPipeline` |
 | [04 - Drought Analysis](04_drought_analysis.md) | SSI calculation and drought event extraction |
 | [05 - Ensemble Validation](05_validation.md) | `validate_ensemble` metrics and `plot_validation_panel` |
+| [06 - Plotting Walkthrough](06_plotting.md) | Default plots for ensemble visualization and validation |
 
 All examples use `synhydro.load_example_data()`, which returns a multi-site
 daily streamflow `DataFrame`.
