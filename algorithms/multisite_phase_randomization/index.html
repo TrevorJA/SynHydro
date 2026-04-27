@@ -612,6 +612,29 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorials/06_plotting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plotting Walkthrough
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1124,6 +1147,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#implementation-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
@@ -1336,6 +1368,29 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/plotting/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Plotting
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/core/" class="md-nav__link">
         
   
@@ -1486,6 +1541,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#implementation-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Implementation Notes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#references" class="md-nav__link">
     <span class="md-ellipsis">
       References
@@ -1572,12 +1636,16 @@
 <td>Half-window length for marginal fitting (default 15 days)</td>
 </tr>
 <tr>
+<td><span class="arithmatex">\(\bar{Q}_s\)</span></td>
+<td>Global mean of observed flow at site <span class="arithmatex">\(s\)</span></td>
+</tr>
+<tr>
 <td><span class="arithmatex">\(y_{t,s}\)</span></td>
-<td>Normal-score transformed value of <span class="arithmatex">\(Q_{t,s}\)</span></td>
+<td>Pre-CWT transformed value of <span class="arithmatex">\(Q_{t,s}\)</span> (mean-centered or normal-score)</td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(\hat{y}_{t,s}\)</span></td>
-<td>Synthetic normal-score value for site <span class="arithmatex">\(s\)</span></td>
+<td>Synthetic transformed value for site <span class="arithmatex">\(s\)</span></td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(a\)</span></td>
@@ -1599,7 +1667,12 @@
 </table>
 <h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
 <h3 id="model-structure">Model Structure<a class="headerlink" href="#model-structure" title="Permanent link">&para;</a></h3>
-<p>The generator operates in a transformed domain. For each site <span class="arithmatex">\(s\)</span>, observed flows are converted to normal scores <span class="arithmatex">\(y_{t,s}\)</span> using a per-day-of-year ranking procedure. The CWT of each normal-score series is then computed:</p>
+<p>The generator operates in a transformed domain. For each site <span class="arithmatex">\(s\)</span>, the observed flow series is pre-processed before the wavelet transform using one of two options controlled by the <code>transform</code> parameter:</p>
+<ul>
+<li><strong><code>mean_center</code></strong> (default): subtract the global site mean, <span class="arithmatex">\(\tilde{Q}_{t,s} = Q_{t,s} - \bar{Q}_s\)</span>. This matches the PRSim reference implementation of Brunner and Gilleland (2020).</li>
+<li><strong><code>normal_score</code></strong>: apply the per-day-of-year Van der Waerden normal-score transform (see Parameter Estimation below), producing a more Gaussian-distributed CWT input.</li>
+</ul>
+<p>In both cases the transformed series is denoted <span class="arithmatex">\(y_{t,s}\)</span> and the CWT is computed:</p>
 <div class="arithmatex">\[
 W_s(a, t) = \int_{-\infty}^{\infty} y_{u,s} \, \frac{1}{\sqrt{a}} \psi^*\!\left(\frac{u - t}{a}\right) du
 \]</div>
@@ -1621,11 +1694,16 @@ F^{-1}(p;\, \xi, \alpha, k, h) =
 \xi + \frac{\alpha}{k} \left[ 1 - \left(\frac{1 - p^h}{h}\right)^k \right]
 \]</div>
 <p>with the GEV limit when <span class="arithmatex">\(h = 0\)</span>. Parameters <span class="arithmatex">\((k, h)\)</span> are found by minimizing the squared difference between sample and theoretical L-skewness (<span class="arithmatex">\(\tau_3\)</span>) and L-kurtosis (<span class="arithmatex">\(\tau_4\)</span>), and <span class="arithmatex">\((\xi, \alpha)\)</span> are then determined analytically from the first two L-moments.</p>
-<p><strong>Normal score transform.</strong> For each day <span class="arithmatex">\(d\)</span> at each site <span class="arithmatex">\(s\)</span>, the <span class="arithmatex">\(N_{\text{yr}}\)</span> observations are ranked, and the Van der Waerden scores are assigned:</p>
+<p><strong>Normal score transform</strong> (<code>transform='normal_score'</code>). For each day <span class="arithmatex">\(d\)</span> at each site <span class="arithmatex">\(s\)</span>, the <span class="arithmatex">\(N_{\text{yr}}\)</span> observations are ranked, and the Van der Waerden scores are assigned:</p>
 <div class="arithmatex">\[
 y_{t,s} = \Phi^{-1}\!\left(\frac{r_{t,s}}{N_{\text{yr}} + 1}\right)
 \]</div>
 <p>where <span class="arithmatex">\(r_{t,s}\)</span> is the rank of observation <span class="arithmatex">\(t\)</span> among all observations on day <span class="arithmatex">\(d\)</span> at site <span class="arithmatex">\(s\)</span>, and <span class="arithmatex">\(\Phi^{-1}\)</span> is the standard normal quantile function.</p>
+<p><strong>Mean-center transform</strong> (<code>transform='mean_center'</code>, default). The global site mean is subtracted:</p>
+<div class="arithmatex">\[
+y_{t,s} = Q_{t,s} - \bar{Q}_s
+\]</div>
+<p>matching the PRSim reference implementation. The kappa marginal fitting always operates on the raw observed flows <span class="arithmatex">\(Q_{t,s}\)</span> regardless of which transform is selected.</p>
 <h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
 <ol>
 <li>
@@ -1660,15 +1738,18 @@ y_{t,s} = \Phi^{-1}\!\left(\frac{r_{t,s}}{N_{\text{yr}} + 1}\right)
 <li>Spatial correlation is preserved on average over realizations, but individual realizations may deviate from the observed correlation matrix, particularly for short records.</li>
 <li>The CWT of a white-noise series does not have a flat spectrum, so the shared phase field is not strictly uniform over scale; this introduces some residual scale-dependence in the inter-site phase coherence.</li>
 <li>The method assumes stationarity; non-stationary trends or shifts in the observed record are embedded in the fitted amplitudes and marginals but not explicitly modeled.</li>
-<li>Computational cost scales as <span class="arithmatex">\(O(S \cdot n_{\text{scales}} \cdot N \log N)\)</span> due to the FFT-based CWT, which may be significant for large <span class="arithmatex">\(S\)</span> or very long records.</li>
+<li>Computational cost scales as <span class="arithmatex">\(O(S \cdot n_{\text{scales}} \cdot N)\)</span> per scale (direct-convolution CWT), and grows with scale because the Morlet wavelet support widens proportionally. At daily resolution with 100 scales and records of ~12,000 days, the CWT step dominates fit() runtime (~15 s per site).</li>
 </ul>
+<h2 id="implementation-notes">Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permanent link">&para;</a></h2>
+<p>The default <code>transform='mean_center'</code> matches the PRSim reference implementation (Brunner and Gilleland, 2020). The <code>transform='normal_score'</code> option applies the Van der Waerden transform per day of year before the CWT, producing a more Gaussian-distributed spectral input; this approach is the basis of the single-site PRSim formulation (Brunner et al., 2019). In both cases the kappa back-transformation uses rank-order mapping, so the absolute scale of the pre-CWT series does not affect the fitted marginals.</p>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
 Brunner, M.I., and Gilleland, E. (2020). Stochastic simulation of streamflow and spatial extremes: a continuous, wavelet-based approach. <em>Hydrology and Earth System Sciences</em>, 24, 3967-3982. https://doi.org/10.5194/hess-24-3967-2020</p>
 <p><strong>See also:</strong>
 - Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. <em>Hydrology and Earth System Sciences</em>, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
-- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. <em>Physica D</em>, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90043-8
-- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. <em>Journal of the Royal Statistical Society, Series B</em>, 52(1), 105-124.</p>
+- Hosking, J.R.M. (1994). The four-parameter kappa distribution. <em>IBM Journal of Research and Development</em>, 38(3), 251-258. https://doi.org/10.1147/rd.383.0251
+- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. <em>Journal of the Royal Statistical Society, Series B</em>, 52(1), 105-124.
+- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. <em>Physica D</em>, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90043-8</p>
 <hr />
 <p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/nonparametric/multisite_phase_randomization.py</code></p>
 
