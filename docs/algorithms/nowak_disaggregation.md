@@ -10,6 +10,10 @@
 
 The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the $K$ nearest historical months (by total flow magnitude) are identified, one is selected stochastically using either inverse-distance weighting (default) or Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.
 
+### Relation to Nowak et al. (2010)
+
+The original Nowak et al. (2010) paper presents the method at annual-to-daily resolution: KNN selects one donor year, and its 365-day proportions are applied to the synthetic annual total at every site. The algorithm is **timestep-agnostic**: the same logic applies to annual-to-monthly, monthly-to-daily, monthly-to-weekly, and other aggregate-to-sub-period pairings. This implementation operates at monthly-to-daily resolution by default. Operating at the monthly level yields a substantially larger pool of historical analogs (12 x N months vs. N years) and therefore better representation of within-pool sampling uncertainty. Annual-to-daily disaggregation can be approximated by chaining a monthly generator (e.g., `KirschGenerator`, `ThomasFieringGenerator`) with this disaggregator (see `KirschNowakPipeline`).
+
 ## Notation
 
 | Symbol | Description |

@@ -8,7 +8,9 @@
 
 ## Overview
 
-SPARTA generates cyclostationary (seasonally varying) synthetic timeseries with per-month arbitrary marginal distributions and month-to-month temporal persistence. The core idea parallels SMARTA: simulate an auxiliary Gaussian process, then map to the target domain via inverse CDFs. However, SPARTA uses a Periodic AutoRegressive PAR(1) model as the auxiliary Gaussian process instead of SMA, which naturally handles seasonal nonstationarity by allowing different autoregressive coefficients, marginal distributions, and cross-correlation structures at each month. Equivalent correlations are identified through the Nataf joint distribution model.
+SPARTA generates cyclostationary (seasonally varying) synthetic timeseries with per-month parametric marginal distributions and month-to-month temporal persistence. The core idea parallels SMARTA: simulate an auxiliary Gaussian process, then map to the target domain via inverse CDFs. However, SPARTA uses a Periodic AutoRegressive PAR(1) model as the auxiliary Gaussian process instead of SMA, which naturally handles seasonal nonstationarity by allowing different autoregressive coefficients, marginal distributions, and cross-correlation structures at each month. Equivalent correlations are identified through the Nataf joint distribution model.
+
+The Tsoukalas et al. (2018) framework supports any continuous marginal distribution. The current SynHydro implementation restricts marginal selection to **gamma** and **lognormal** families, chosen per (month, site) by BIC. Extending to additional families (e.g., kappa, Weibull, GEV) is a planned enhancement.
 
 ## Notation
 

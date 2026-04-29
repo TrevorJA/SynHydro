@@ -5,6 +5,24 @@ Generates synthetic multi-site monthly streamflow by bootstrapping standardized
 residuals and imposing fitted correlation structure via Cholesky decomposition.
 A cross-year shifted matrix preserves December-to-January correlations.
 
+Per Kirsch et al. (2013, eqs. 4-5), the correlation matrix and its Cholesky
+factor are intra-annual (within-year) operators defined for a single site at a
+time. Cross-site correlation is preserved through the shared bootstrap index
+matrix M (Kirsch et al. 2013, p. 7), not through a joint multi-site correlation
+matrix. This implementation therefore computes per-site Cholesky factors and
+reuses one M across all sites.
+
+Kirsch (2013) describes the method on weekly timesteps (52 columns, 26-week
+halves). This module operates on monthly timesteps (12 columns, 6-month
+halves); the algebra is identical.
+
+A normal score transform (NST) is applied in log space when
+generate_using_log_flow=True. NST is a SynHydro-specific extension to Kirsch
+(2013), which only z-score-standardizes (his eq. 3). NST eliminates bias in
+the back-transformed marginal when standardized log-residuals are non-Gaussian.
+Set generate_using_log_flow=False to disable both the log transform and NST
+and run the algorithm closer to the published version.
+
 References
 ----------
 Kirsch, B.R., Characklis, G.W., and Zeff, H.B. (2013). Evaluating the impact

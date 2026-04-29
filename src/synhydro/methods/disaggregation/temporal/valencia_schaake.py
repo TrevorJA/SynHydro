@@ -397,6 +397,17 @@ class ValenciaSchaakeDisaggregator(Disaggregator):
             Sub-period data (n_years, n_subperiods) or
             (n_years, n_subperiods, n_sites).
         """
+        # TODO: True multisite Valencia-Schaake.
+        # Grygier and Stedinger (1988, eq. 3) describe V-S as inherently
+        # multisite: X_y is a (12 * n_sites)-vector and the model fits a joint
+        # (12 * n_sites) x (12 * n_sites) covariance with site-by-site
+        # cross-correlations. The current implementation collapses sites by
+        # averaging (X.mean(axis=2)) and applies the univariate model per site
+        # with shared parameters, which loses cross-site cross-month covariance.
+        # Replacement plan: stack sites along the column axis to form a
+        # (n_years, 12 * n_sites) matrix, fit the full joint covariance, and
+        # disaggregate jointly given a multisite annual vector Y. Cholesky may
+        # require pseudo-inverse / spectral repair for short records.
         if self.is_multisite:
             n_years, n_subperiods, n_sites = X.shape
             # Average across sites for univariate statistics

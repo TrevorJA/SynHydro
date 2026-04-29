@@ -185,21 +185,28 @@ class TestWARMFitting:
         assert np.all(gen.sawp_ >= 0)  # Power should be non-negative
 
     def test_fit_ar_params_structure(self, short_annual_series):
-        """Test AR parameters have correct structure."""
+        """Test AR parameters have correct structure (per band, plus noise)."""
         gen = WARMGenerator(scales=16, ar_order=2)
         gen.fit(short_annual_series)
 
-        # Should have parameters for each scale
-        assert len(gen.ar_params_) == 16
+        # New paradigm: one AR fit per significant band, plus a noise
+        # AR fit. There must be at least one of each.
+        assert len(gen.ar_params_) >= 1
+        assert gen.noise_ar_params_ is not None
 
-        # Each scale should have coeffs, sigma, mean
-        for scale_idx in range(16):
-            params = gen.ar_params_[scale_idx]
+        for band_idx, params in gen.ar_params_.items():
             assert "coeffs" in params
             assert "sigma" in params
             assert "mean" in params
+            assert "order" in params
             assert len(params["coeffs"]) == 2  # AR(2)
             assert params["sigma"] > 0
+
+        # Noise AR has the same fields.
+        for key in ("coeffs", "sigma", "mean", "order"):
+            assert key in gen.noise_ar_params_
+        assert len(gen.noise_ar_params_["coeffs"]) == 2
+        assert gen.noise_ar_params_["sigma"] > 0
 
     def test_fit_creates_fitted_params(self, short_annual_series):
         """Test that fit creates FittedParams object."""
@@ -463,24 +470,27 @@ class TestWARMARModels:
     """Tests for AR model fitting components."""
 
     def test_ar_model_fitting_ar1(self, short_annual_series):
-        """Test AR(1) model fitting."""
+        """Test AR(1) model fitting (per band, plus noise residual)."""
         gen = WARMGenerator(scales=4, ar_order=1)
         gen.fit(short_annual_series)
 
-        # Each scale should have 1 AR coefficient
-        for scale_idx in range(4):
-            params = gen.ar_params_[scale_idx]
+        # AR fit lives on each detected band, plus the noise residual.
+        for band_idx, params in gen.ar_params_.items():
             assert len(params["coeffs"]) == 1
+            assert params["order"] == 1
+        assert gen.noise_ar_params_ is not None
+        assert len(gen.noise_ar_params_["coeffs"]) == 1
 
     def test_ar_model_fitting_ar2(self, short_annual_series):
-        """Test AR(2) model fitting."""
+        """Test AR(2) model fitting (per band, plus noise residual)."""
         gen = WARMGenerator(scales=4, ar_order=2)
         gen.fit(short_annual_series)
 
-        # Each scale should have 2 AR coefficients
-        for scale_idx in range(4):
-            params = gen.ar_params_[scale_idx]
+        for band_idx, params in gen.ar_params_.items():
             assert len(params["coeffs"]) == 2
+            assert params["order"] == 2
+        assert gen.noise_ar_params_ is not None
+        assert len(gen.noise_ar_params_["coeffs"]) == 2
 
 
 class TestWARMIntegration:
@@ -528,3 +538,120 @@ class TestWARMIntegration:
         assert isinstance(params, dict)
         # Check for expected parameter keys
         assert "debug" in params or "wavelet" in params
+
+
+class TestWARMBandIdentification:
+    """Tests for the Nowak 2011 band-identification machinery."""
+
+    def test_invalid_background_spectrum(self):
+        """Background spectrum must be 'red' or 'white'."""
+        with pytest.raises(ValueError, match="background_spectrum"):
+            WARMGenerator(background_spectrum="pink")
+
+    def test_invalid_significance_level(self):
+        """Significance level must be in (0, 1)."""
+        with pytest.raises(ValueError, match="significance_level"):
+            WARMGenerator(significance_level=1.5)
+
+    def test_invalid_ar_select(self):
+        """ar_select must be 'fixed' or 'aic'."""
+        with pytest.raises(ValueError, match="ar_select"):
+            WARMGenerator(ar_select="bic")
+
+    def test_auto_band_detection_attributes(self, sample_annual_series):
+        """Auto-detected bands populate the bands_ attribute."""
+        gen = WARMGenerator(background_spectrum="white")
+        gen.fit(sample_annual_series)
+
+        assert gen.bands_ is not None
+        assert gen.global_spectrum_ is not None
+        assert gen.significance_threshold_ is not None
+        assert gen.fourier_periods_ is not None
+
+        # Each band reports its scale indices, period range, AR fit, and SAWP.
+        for band in gen.bands_:
+            assert "scale_indices" in band
+            assert "period_min" in band
+            assert "period_max" in band
+            assert "ar_params" in band
+            assert "sawp" in band
+            assert band["sawp"].shape == (len(gen.Q_obs_annual),)
+            assert band["auto_detected"] is True
+
+    def test_user_specified_bands(self, sample_annual_series):
+        """User-supplied bands are honored exactly."""
+        gen = WARMGenerator(bands=[(8.0, 32.0)])
+        gen.fit(sample_annual_series)
+
+        assert gen.bands_ is not None
+        assert len(gen.bands_) == 1
+        assert gen.bands_[0]["auto_detected"] is False
+        # Band period range must lie within (or be the inner subset of) the
+        # requested window.
+        assert gen.bands_[0]["period_min"] >= 8.0 - 1e-6
+        assert gen.bands_[0]["period_max"] <= 32.0 + 1e-6
+
+    def test_red_vs_white_thresholds_differ(self, sample_annual_series):
+        """Red-noise and white-noise backgrounds yield different thresholds."""
+        gen_white = WARMGenerator(background_spectrum="white")
+        gen_white.fit(sample_annual_series)
+        gen_red = WARMGenerator(background_spectrum="red")
+        gen_red.fit(sample_annual_series)
+
+        # Background spectra differ only when lag-1 > 0; the synthetic series
+        # has substantial persistence so the two backgrounds must not match.
+        assert not np.allclose(
+            gen_white.background_spectrum_values_,
+            gen_red.background_spectrum_values_,
+        )
+
+    def test_aic_order_selection(self, sample_annual_series):
+        """ar_select='aic' returns a valid order in [1, n_ar_max]."""
+        gen = WARMGenerator(ar_select="aic", n_ar_max=4)
+        gen.fit(sample_annual_series)
+        for params in gen.ar_params_.values():
+            assert 1 <= params["order"] <= 4
+        assert 1 <= gen.noise_ar_params_["order"] <= 4
+
+    def test_geometric_scales_default(self, sample_annual_series):
+        """Default scales follow a geometric Torrence-Compo grid."""
+        gen = WARMGenerator()
+        gen.fit(sample_annual_series)
+        # Geometric grid has nearly constant log2 spacing.
+        log_diffs = np.diff(np.log2(gen.scales_used_))
+        assert np.allclose(log_diffs, log_diffs[0], rtol=1e-6)
+
+
+class TestWARMReconstruction:
+    """Tests for the variance-preserving inverse CWT reconstruction."""
+
+    def test_reconstruction_recovers_mean(self, sample_annual_series):
+        """
+        Generated ensemble mean approximately matches the historic mean
+        without any post-hoc moment matching.
+        """
+        gen = WARMGenerator(background_spectrum="red")
+        gen.fit(sample_annual_series)
+        ensemble = gen.generate(
+            n_years=len(sample_annual_series),
+            n_realizations=50,
+            seed=2026,
+        )
+        all_values = np.concatenate(
+            [ensemble.data_by_realization[r].values.flatten() for r in range(50)]
+        )
+        ratio = np.mean(all_values) / sample_annual_series.mean()
+        # Mean preservation is tight because the historical mean is added
+        # back in synthesis after band/noise summation.
+        assert 0.85 < ratio < 1.15
+
+    def test_band_reconstruction_in_observed_units(self, sample_annual_series):
+        """Per-band time-domain reconstructions are in flow units."""
+        gen = WARMGenerator()
+        gen.fit(sample_annual_series)
+        for band in gen.bands_:
+            recon = band["reconstruction"]
+            assert recon.shape == (len(sample_annual_series),)
+            # Reconstruction magnitudes should be on the same order as the
+            # observed centered series, not normalized.
+            assert np.std(recon) <= np.std(sample_annual_series.values) * 5

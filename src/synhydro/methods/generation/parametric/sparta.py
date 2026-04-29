@@ -2,7 +2,12 @@
 SPARTA: Stochastic Periodic AutoRegressive To Anything.
 
 Multisite cyclostationary generator for monthly streamflow with per-season
-arbitrary marginal distributions and PAR(1)-N auxiliary Gaussian model.
+parametric marginal distributions and PAR(1)-N auxiliary Gaussian model.
+
+The Tsoukalas et al. (2018) framework supports any continuous marginal
+distribution. This implementation restricts marginal selection to gamma and
+lognormal families, chosen per (month, site) by BIC. Extending to additional
+families (e.g., kappa, Weibull, GEV) is a planned enhancement.
 
 Reference:
     Tsoukalas, I., Efstratiadis, A., & Makropoulos, C. (2018). Stochastic

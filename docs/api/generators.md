@@ -54,18 +54,6 @@
 
 ---
 
-## GaussianCopulaGenerator
-
-::: synhydro.methods.generation.parametric.gaussian_copula.GaussianCopulaGenerator
-
----
-
-## VineCopulaGenerator
-
-::: synhydro.methods.generation.parametric.vine_copula.VineCopulaGenerator
-
----
-
 ## SPARTAGenerator
 
 ::: synhydro.methods.generation.parametric.sparta.SPARTAGenerator

@@ -4,11 +4,11 @@
 |---|---|
 | **Type** | Parametric |
 | **Resolution** | Annual to Monthly |
-| **Sites** | Univariate / Multisite |
+| **Sites** | Univariate / Multisite (per-site application of site-averaged univariate model -- joint multisite formulation is a planned enhancement) |
 
 ## Overview
 
-The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) by modeling the sub-periods as a multivariate normal distribution conditioned on the known aggregate. A linear regression relates the sub-period vector to the aggregate, and the conditional covariance captures the remaining uncertainty. This is the classical baseline against which subsequent disaggregation methods, including the [Grygier-Stedinger](grygier_stedinger.md) extension, are compared.
+The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) by modeling the sub-periods as a multivariate normal distribution conditioned on the known aggregate. A linear regression relates the sub-period vector to the aggregate, and the conditional covariance captures the remaining uncertainty. This is the classical baseline against which subsequent disaggregation methods are compared.
 
 ## Notation
 
@@ -93,7 +93,7 @@ $$
 4. Invert the transformation if one was applied.
 5. Enforce non-negativity.
 
-Note: The proportional adjustment ensures exact volume conservation but distorts the conditional covariance structure. The [Grygier-Stedinger](grygier_stedinger.md) method provides a correction that preserves this structure.
+Note: The proportional adjustment ensures exact volume conservation but distorts the conditional covariance structure.
 
 ## Statistical Properties
 
@@ -104,7 +104,7 @@ However, the proportional adjustment introduces distortion into the conditional 
 ## Limitations
 
 - Multivariate normality assumption may be violated for skewed sub-period distributions.
-- Proportional adjustment distorts the conditional covariance (see Grygier-Stedinger for improvement).
+- Proportional adjustment distorts the conditional covariance.
 - Does not model serial correlations between sub-periods of consecutive years.
 - Full covariance estimation requires long records relative to $m$.
 - Better suited for annual-to-monthly than monthly-to-daily disaggregation.

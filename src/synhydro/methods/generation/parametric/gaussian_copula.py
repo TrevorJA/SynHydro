@@ -1,16 +1,95 @@
 """
 Gaussian / Student-t Copula Generator for multi-site monthly streamflow.
 
-Separates marginal distributions from the dependence structure via Sklar's
-theorem.  Marginals are fitted per (calendar-month, site) -- either
-parametrically (gamma / log-normal, selected by BIC) or empirically (Hazen
-plotting position).  Spatial dependence is captured by the copula correlation
-matrix estimated from PAR(1) residuals in normal-score space.  Temporal
-dependence is preserved via a Periodic AR(1) model per site per month,
-following the two-stage approach of Pereira et al. (2017).
+NOT EXPORTED FROM THE PUBLIC API. NOT BUILT INTO THE DOCUMENTATION SITE.
 
-The t-copula generalises the Gaussian copula with symmetric tail dependence
-controlled by a degrees-of-freedom parameter.
+Status: needs realignment to a primary publication before public release. The
+original module attribution was Chen et al. (2015), but a careful re-read of
+that paper showed it describes a fundamentally different method (Archimedean
+cascade with Pearson Type III marginals and Kendall-tau / partial-tau
+estimation). What this code actually implements -- per-(month, site)
+parametric or empirical marginal -> PIT to normal -> PAR(1) on normal scores
+-> Gaussian or Student-t copula correlation matrix on the PAR residuals -> PAR
+recursion + inverse marginal -- is not described in Chen (2015) or in any
+single primary publication. It is closest in structure to a Pereira et al.
+(2017)-style framework with the vine replaced by an elliptical copula, but
+Pereira's distinguishing contributions (the periodic R-vine and the spatial
+T1 reparametrization) are not part of this generator.
+
+This module is retained on disk for a future rewrite. It is excluded from
+``synhydro/__init__.py``, ``synhydro/methods/generation/__init__.py``,
+``synhydro/methods/generation/parametric/__init__.py``,
+``docs/algorithms/index.md``, ``docs/api/generators.md``, ``mkdocs.yml`` nav,
+``README.md``, ``CHANGELOG.md``, and the docs-site build (``mkdocs.yml``
+``exclude_docs``). The existing test file
+``tests/test_gaussian_copula_generator.py`` still imports the class via its
+full module path and continues to pass.
+
+================================================================================
+TODO: refactor decisions for a future session
+================================================================================
+
+The earlier verification review and the comparison with the vine copula
+generator identified the following issues:
+
+  (1) Misattribution. Chen et al. (2015) is cited as primary but does not
+      describe this method. The strings "Gaussian", "Spearman", and
+      "Pearson correlation" do not appear in Chen (2015). Chen (2015) builds
+      a trivariate Archimedean (Gumbel/Frank/Clayton) cascade with Pearson
+      Type III marginals fit by L-moments, conditional copulas, and Kendall
+      tau / partial Kendall tau parameter estimation. None of that is here.
+
+  (2) Citation typo. Chen et al. (2015) volume/pages were "526, 360-381" in
+      the original docstring; the correct citation is *Journal of Hydrology*
+      528, 369-384.
+
+  (3) Code duplication with VineCopulaGenerator. Roughly 520 of the 764
+      lines in this file are byte-equivalent duplicates of the corresponding
+      sections in vine_copula.py: ``preprocessing``, ``_fit_parametric_marginals``,
+      ``_fit_empirical_marginals``, ``_pit_to_normal``, ``_fit_par_residuals``,
+      ``output_frequency``, ``generate``, the inverse-marginal block of
+      ``_generate_one``, and ``_bic`` / ``_LOG2PI``. Only the dependence step
+      (single S x S Gaussian/t correlation matrix vs. R-vine of bivariate
+      pair-copulas) genuinely differs.
+
+  (4) Asymmetric back-transform vs. vine. The Gaussian path uses
+      ``t_dist.cdf`` for the t-copula back-transform; the vine path always
+      uses ``norm.cdf`` regardless of the per-pair families. Document the
+      difference if both classes are kept.
+
+  (5) Empirical-CDF tail extrapolation. ``u`` is clipped to
+      ``[1e-6, 1 - 1e-6]`` before ``norm.ppf`` and ``[1e-8, 1 - 1e-8]`` before
+      parametric ``ppf``; no explicit tail-extrapolation strategy. Document
+      this as a limitation.
+
+REFACTOR OPTIONS FOR A FUTURE SESSION
+
+  Option A: Delete this module entirely.
+    Mathematically, what this generator does is equivalent to
+    ``VineCopulaGenerator(family_set=['gaussian'])`` (or
+    ``family_set=['student_t']``) when the vine copula is realigned to
+    Pereira (2017). Users who want elliptical-copula behavior can simply
+    restrict the vine's family set. This is the cleanest design.
+
+  Option B: Refactor to align with Bardossy & Pegram (2009).
+    Bardossy & Pegram (2009) describe a multisite copula model with a hidden
+    multisite AR(1) Gaussian process, asymmetric V-transform, and quantile
+    back-transform. Streamflow adaptation drops their dry-day pole. This
+    would produce a multisite generator with explicit asymmetric upper-tail
+    dependence, a real value-add over a generic Gaussian copula. Cite
+    Bardossy & Pegram (2009).
+
+  Option C: Refactor to align with Lee & Salas (2011).
+    Lee & Salas (2011) describe a single-site bivariate copula AR(1) with
+    user-selectable family (Clayton / Frank / Gumbel / Gaussian). This is a
+    simpler, single-site generator suitable for sites where heteroscedastic
+    tail dependence (Gumbel for upper-tail persistence) matters.
+
+  See the conversation handoff in vine_copula.py for the broader
+  publication-aligned three-generator design (BardossyPegramGenerator +
+  LeeSalasGenerator + a Pereira-aligned VineCopulaGenerator).
+
+REFERENCES (kept for the future rewrite, with citations corrected)
 
 References
 ----------
@@ -19,10 +98,16 @@ Genest, C., and Favre, A.-C. (2007). Everything you always wanted to know
     Engineering, 12(4), 347-368.
 Chen, L., Singh, V.P., Guo, S., Zhou, J., and Zhang, J. (2015). Copula-based
     method for multisite monthly and daily streamflow simulation. Journal of
-    Hydrology, 526, 360-381.
+    Hydrology, 528, 369-384.
 Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic
     spatial vine copula model for multi-site streamflow simulation. Electric
     Power Systems Research, 152, 9-17.
+Bardossy, A., and Pegram, G.G.S. (2009). Copula based multisite model for
+    daily precipitation simulation. Hydrology and Earth System Sciences,
+    13(12), 2299-2314. https://doi.org/10.5194/hess-13-2299-2009
+Lee, T., and Salas, J.D. (2011). Copula-based stochastic simulation of
+    hydrological data applied to Nile River flows. Hydrology Research, 42(4),
+    318-330. https://doi.org/10.2166/nh.2011.085
 Tootoonchi, F. et al. (2022). Copulas for hydroclimatic analysis: A
     practice-oriented overview. WIREs Water, 9(2), e1579.
 """

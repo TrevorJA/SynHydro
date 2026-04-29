@@ -9,8 +9,6 @@ SynHydro implements the following stochastic generation and disaggregation metho
 | [Thomas-Fiering AR(1)](thomas_fiering.md) | Parametric | Monthly | Univariate |
 | [Matalas MAR(1)](matalas.md) | Parametric | Monthly | Multisite |
 | [ARFIMA](arfima.md) | Parametric | Monthly/Annual | Univariate |
-| [Gaussian/t-Copula](gaussian_copula.md) | Parametric | Monthly | Multisite |
-| [Vine Copula](vine_copula.md) | Parametric | Monthly | Multisite |
 | [SPARTA](sparta.md) | Parametric | Monthly | Multisite |
 | [SMARTA](smarta.md) | Parametric | Annual | Multisite |
 | [Multi-Site HMM](multisite_hmm.md) | Parametric | Annual | Multisite |
@@ -27,19 +25,17 @@ SynHydro implements the following stochastic generation and disaggregation metho
 |-----------|------|------------|
 | [Nowak KNN](nowak_disaggregation.md) | Nonparametric | Monthly to Daily |
 | [Valencia-Schaake](valencia_schaake.md) | Parametric | Annual to Monthly |
-| [Grygier-Stedinger](grygier_stedinger.md) | Parametric | Annual to Monthly |
 
 ## Key Properties Preserved
 
-| Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap | Copula | Vine Copula | SMARTA | SPARTA |
-|----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
-| Monthly means/stds | x | x | x | - | - | - | x | x | x | x | - | x |
-| Temporal correlation | x | x | x | x | x | x | x | x | x | x | x | x |
-| Spatial correlation | - | x | x | - | - | x | - | x | x | x | x | x |
-| Long-range persistence | - | - | - | - | x | - | x | - | - | - | x | - |
-| Non-stationarity | - | - | - | - | x | - | - | - | - | - | - | - |
-| Drought states | - | - | - | - | - | x | - | - | - | - | - | - |
-| Power spectrum | - | - | - | x | x | - | x | - | - | - | - | - |
-| Arbitrary marginals | - | - | - | - | - | - | - | - | x | x | x | x |
-| Empirical distribution | - | x | - | - | - | - | - | x | x | x | - | - |
-| Tail dependence | - | - | - | - | - | - | - | - | x (t-copula) | x (asymmetric) | - | - |
+| Property | Thomas-Fiering | Kirsch | Matalas | Phase Random | WARM | HMM | ARFIMA | KNN Bootstrap | SMARTA | SPARTA |
+|----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| Monthly means/stds | x | x | x | - | - | - | x | x | - | x |
+| Temporal correlation | x | x | x | x | x | x | x | x | x | x |
+| Spatial correlation | - | x | x | - | - | x | - | x | x | x |
+| Long-range persistence | - | - | - | - | x | - | x | - | x | - |
+| Non-stationarity | - | - | - | - | x | - | - | - | - | - |
+| Drought states | - | - | - | - | - | x | - | - | - | - |
+| Power spectrum | - | - | - | x | x | - | x | - | - | - |
+| Arbitrary marginals | - | - | - | - | - | - | - | - | x | x |
+| Empirical distribution | - | x | - | - | - | - | - | x | - | - |

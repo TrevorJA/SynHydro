@@ -1,14 +1,23 @@
-# HMM-KNN Generator (Prairie et al., 2008; Steinschneider and Brown, 2013)
+# HMM-KNN Generator
 
 | | |
 |---|---|
-| **Type** | Parametric |
+| **Type** | Parametric (HMM regime layer) + Nonparametric (KNN bootstrap layer) |
 | **Resolution** | Annual |
 | **Sites** | Multisite |
 
 ## Overview
 
 The HMM-KNN generator produces synthetic annual multisite streamflow by coupling a discrete Hidden Markov Model (HMM) state sequencer with K-Nearest Neighbor (KNN) bootstrapped resampling. The HMM learns K hidden hydrologic regimes (e.g., dry and wet states) from log-annual flows and provides a probabilistic sequence of regime transitions. Within each regime-transition category, a KNN search conditioned on the previous year's log-flows selects a historical analog year, and the full multisite flow vector for that year is directly resampled. This design preserves empirical marginal distributions, multisite spatial dependence, and low-frequency regime persistence without imposing parametric emission assumptions.
+
+### Attribution
+
+This generator is not attributable to a single primary publication. It combines two independent developments from the literature:
+
+* The non-parametric category (NPC) framework of Prairie et al. (2008), which conditions a KNN bootstrap on a discrete regime-transition category. Prairie (2008) used a non-homogeneous Markov chain (NHM) with kernel-smoothed transition probabilities, not a hidden Markov model.
+* The hidden-Markov regime-state representation introduced for hydrologic applications by Akintug and Rasmussen (2005) and applied at multi-site annual scale by Gold et al. (2024).
+
+The HMM substitutes for Prairie's NHM as the upper-layer regime sequencer; the lower-layer KNN bootstrap follows Prairie (2008) directly, with the rank-based kernel weights of Lall and Sharma (1996).
 
 ## Notation
 
@@ -111,14 +120,14 @@ With a small historical record (fewer than roughly 30 years), some regime-transi
 
 ## References
 
-**Primary:**
-Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2008). A stochastic nonparametric approach for streamflow generation combining observational and paleoreconstructed data. *Water Resources Research*, 44, W06423. https://doi.org/10.1029/2007WR006684
-
-Steinschneider, S., and Brown, C. (2013). A semiparametric multivariate, multisite weather generator with low-frequency variability for use in climate risk assessments. *Water Resources Research*, 49, 7205-7220. https://doi.org/10.1002/wrcr.20528
-
-**See also:**
+**KNN bootstrap layer (lower):**
+- Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2008). A stochastic nonparametric approach for streamflow generation combining observational and paleoreconstructed data. *Water Resources Research*, 44, W06423. https://doi.org/10.1029/2007WR006684
 - Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. *Water Resources Research*, 32(3), 679-693. https://doi.org/10.1029/95WR02966
+
+**HMM regime layer (upper):**
+- Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. *Water Resources Research*, 41(9). https://doi.org/10.1029/2004WR003605
 - Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. *Earth's Future*. https://doi.org/10.1029/2024EF004841
+- Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. *Proceedings of the IEEE*, 77(2), 257-286. https://doi.org/10.1109/5.18626
 
 ---
 

@@ -1,19 +1,161 @@
 """
 Vine Copula Generator for multi-site monthly streamflow.
 
-Extends the PAR(1)-plus-copula framework by replacing the single elliptical
-copula with a vine copula for richer dependence modelling.  Vine copulas allow
-heterogeneous pairwise dependence (different copula families per site pair) and
-asymmetric tail dependence (e.g., Clayton for lower tail, Gumbel for upper).
+NOT EXPORTED FROM THE PUBLIC API. NOT BUILT INTO THE DOCUMENTATION SITE.
 
-Marginals and temporal dependence are identical to GaussianCopulaGenerator:
-per-(month, site) parametric or empirical marginals, with a Periodic AR(1)
-model in normal-score space (Pereira et al. 2017).  Spatial dependence among
-the PAR(1) residuals is modelled by a monthly-periodic vine copula fitted
-via the Dissmann algorithm (pyvinecopulib).
+Status: needs substantial refactor to align faithfully to a primary publication
+before public release. The current implementation cites Pereira et al. (2017)
+but does not implement Pereira's actual method; it is closer to a generic
+"periodic vine on PAR(1) Gaussianized residuals" model in the spirit of
+Yu et al. (2025) / Wang & Shen (2023).
+
+This module is retained on disk for a future rewrite. It is excluded from
+``synhydro/__init__.py``, ``synhydro/methods/generation/parametric/__init__.py``,
+``docs/algorithms/index.md``, ``docs/api/generators.md``, ``mkdocs.yml`` nav,
+``README.md``, and the docs-site build (``mkdocs.yml`` ``exclude_docs``).
+The existing test file ``tests/test_vine_copula_generator.py`` still imports
+the class via its full module path and continues to pass.
+
+================================================================================
+TODO: align to Pereira et al. (2017) before re-exporting
+================================================================================
+
+A careful read of the paper against the current code identified 9 algorithmic
+gaps and 4 documentation gaps. Equation and section references below are to
+Pereira et al. (2017), "A periodic spatial vine copula model for multi-site
+streamflow simulation," Electric Power Systems Research 152, 9-17.
+
+ALGORITHMIC GAPS
+
+  (1) Marginal pipeline (Eqs. 5-6).
+      Pereira: log-transform z -> y = ln(z); standardize y by monthly mean
+      mu_m^s and std sigma_m^s INSIDE the PAR equation; PAR residuals are
+      already approximately N(0, 1) and used directly.
+      Current code: per-(month, site) gamma vs. lognormal by BIC, or empirical
+      NormalScoreTransform; PIT through that fitted CDF; norm.ppf to standard
+      normal; THEN PAR(1) on the normal scores. This is a different paradigm
+      (marginal-fit-then-AR-on-normal-scores) and is not what Pereira does.
+
+  (2) PAR order (Eq. 6).
+      Pereira: PAR(p) with order p_m^s explicitly varying by month and site
+      (paper says "the orders, vary according to the month").
+      Current code: PAR(1) hardcoded; no support for higher orders or
+      per-month order selection.
+
+  (3) Tree structure across months (Section 3.3, 4.1).
+      Pereira: "the pair-copula families vary according to the months, while
+      we keep the tree structure fixed." Tree structure is selected ONCE
+      (Dissmann on pooled residuals); only families and parameters vary by
+      month.
+      Current code: fits a complete vine -- structure + families + parameters
+      -- independently per calendar month. This produces 12 different tree
+      structures.
+
+  (4) Spatial T1 reparametrization (Eqs. 7, 10, 11).
+      Pereira's distinguishing contribution. T1 Kendall taus are regressed on
+      log(distance), a same-river-no-other-plant-between indicator D_ij, and
+      seasonal dummies for May-September:
+          g_z(tau_{ij,m}) = a_0 + a_1 ln(Dist_ij) + a_2 D_ij
+                          + sum_{q=5}^{9} a_{q-2} S_{qm}
+      with g_z(r) = 0.5 ln((1+r)/(1-r)) the Fisher z-transform. T1 has 8
+      parameters total (vs. 12 (d-1) unconstrained).
+      Implementation requires user-supplied n_sites x n_sites distance and
+      river-network matrices passed to ``fit()``; joint OLS across all months;
+      then per-pair-per-month copula parameter via theta = g_tau^{-1}(tau; b)
+      for the chosen pair-copula family b.
+      Current code: not implemented at all.
+
+  (5) Family set (Section 3.3, 4.1).
+      Pereira: Clayton, Gumbel, Normal, Product (independence), Student-t --
+      with 90, 180, 270 degree rotations of Clayton and Gumbel.
+      Current code: when ``family_set='all'`` includes Frank, Joe, BB1, BB6,
+      BB7, BB8 -- none of which are in Pereira.
+
+  (6) Family selection criterion (Section 4.1).
+      Pereira: BIC.
+      Current code: AIC by default.
+
+  (7) Student-t df handling (Section 4.2).
+      Pereira: "the degrees of freedom of the Student-t copula are not
+      estimated. Instead, we use the monthly average of the degree of freedom
+      estimates obtained while selecting the pair-copulas."
+      Current code: per-pair, per-month estimation by pyvinecopulib; no
+      averaging across months.
+
+  (8) Truncation level (Section 4.1).
+      Pereira: L = 4 in their case study (95% of total log-likelihood).
+      Current code: ``trunc_level=None`` default (no truncation).
+
+  (9) Log transform (Eq. 5).
+      Pereira: mandatory.
+      Current code: optional via ``log_transform=False`` default.
+
+DOCUMENTATION GAPS (in docs/algorithms/vine_copula.md, currently excluded
+from the docs build)
+
+  (10) Title cites "Yu et al., 2025; Wang and Shen, 2023" rather than Pereira.
+  (11) Module docstring lists Yu/Wang first; Pereira buried at the end.
+  (12) References section places Pereira under "See also" rather than primary.
+  (13) Formulation section describes the gamma/lognormal pipeline that the
+       code currently implements, not Pereira's log-then-standardize-then-PAR
+       pipeline.
+
+REFACTOR PLAN (to be confirmed with user before resuming work)
+
+  Source code:
+   - Replace the marginal pipeline (drop _fit_parametric_marginals,
+     _fit_empirical_marginals, _pit_to_normal). Implement Pereira's:
+       y = ln(z); standardize within PAR; residuals ~ N(0, 1); u = Phi(eps).
+   - Add PAR(p) with method-of-moments / Yule-Walker per Salas et al. (1980),
+     order p_m^s either user-specified or auto-selected per (month, site) by
+     BIC over a small range (e.g., 1..3).
+   - Restructure ``fit`` to: (a) fit ONE tree structure on stacked residuals,
+     (b) apply spatial T1 reparam (joint OLS across months), (c) sequentially
+     fit T_2..T_L families+parameters per month with structure fixed,
+     (d) post-fit step: average Student-t df estimates across months.
+   - Add ``distance_matrix`` and ``river_network`` arguments to ``fit()``.
+     Open question: hard requirement (raises) or optional with documented
+     fallback to per-month T1 (Yu/Wang style) plus a warning?
+   - Default ``family_set`` to Pereira's set (clayton, gumbel, gaussian,
+     indep, student_t) plus rotated clayton/gumbel.
+   - Default ``selection_criterion='bic'``.
+   - Default ``trunc_level=4``.
+   - Default log transform on (and remove the parameter, since Pereira makes
+     it mandatory).
+   - Update ``_generate_one`` to invert Pereira's pipeline (vine sample ->
+     Phi^{-1} -> PAR(p) recursion -> de-standardize by mu_m, sigma_m ->
+     exp).
+
+  Documentation (docs/algorithms/vine_copula.md):
+   - Retitle "Vine Copula Generator (Pereira et al., 2017)".
+   - Rewrite Notation table to use Pereira's symbols.
+   - Rewrite Formulation to follow Eqs. 5, 6, 7, 10, 11, 13.
+   - Add a dedicated "Spatial reparametrization for T1" subsection.
+   - Cite Pereira primary; Yu (2025), Wang & Shen (2023), Erhardt-Czado-
+     Schepsmeier (2015), Dissmann et al. (2013), Aas et al. (2009),
+     Salas et al. (1980) as supporting references.
+
+OPEN QUESTIONS FOR THE USER
+
+  Q1: Replace the gamma/lognormal/empirical marginal options with Pereira's
+      log-then-standardize-then-PAR pipeline, or preserve them as non-Pereira
+      opt-in alternatives with a prominent doc note?
+
+  Q2: Make ``distance_matrix`` and ``river_network`` HARD requirements for
+      ``fit()`` (strict Pereira alignment), or OPTIONAL with explicit
+      fallback to per-month T1 fitting (and a warning)?
+
+  Q3: PAR order: auto-select per (month, site) by BIC over {1, 2, 3}, or
+      user-specified global order with default p = 1?
+
+================================================================================
 
 References
 ----------
+Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic
+    spatial vine copula model for multi-site streamflow simulation. Electric
+    Power Systems Research, 152, 9-17.
+    https://doi.org/10.1016/j.epsr.2017.06.017
 Yu, X., Xu, Y.-P., Guo, Y., Chen, S., and Gu, H. (2025). Synchronization
     frequency analysis and stochastic simulation of multi-site flood flows
     based on the complicated vine copula structure. Hydrology and Earth System
@@ -26,10 +168,6 @@ Wang, W., Dong, Z., Zhang, T., Ren, L., Xue, L., Wu, T. (2024). Mixed
     D-vine copula-based conditional quantile model for stochastic monthly
     streamflow simulation. Water Science and Engineering, 17(1), 13-20.
     https://doi.org/10.1016/j.wse.2023.05.004
-Pereira, G.A.A., Veiga, A., Erhardt, T., and Czado, C. (2017). A periodic
-    spatial vine copula model for multi-site streamflow simulation. Electric
-    Power Systems Research, 152, 9-17.
-    https://doi.org/10.1016/j.epsr.2017.06.017
 """
 
 import logging
@@ -597,6 +735,19 @@ class VineCopulaGenerator(Generator):
 
         controls = pv.FitControlsVinecop(**controls_kwargs)
 
+        # TODO: Pereira et al. (2017) spatial reparametrization of T1.
+        # The current fit lets each per-month vine learn an unconstrained tree
+        # 1 (T1) of d - 1 pair copulas. Pereira (2017) Eq. 11 instead
+        # parametrizes T1 Kendall taus as
+        #   g_z(tau) = beta_0 + beta_1 * ln(distance) + beta_2 * D
+        #              + sum_q beta_q * S_q
+        # where distance is inter-site distance, D is a basin indicator, and
+        # S_q are seasonal harmonics. This reduces T1 from 12 * (d - 1) free
+        # parameters to 8 across all months and is the distinguishing
+        # contribution of Pereira (2017) for sparse-data multisite settings.
+        # Implementing it requires an inter-site distance matrix as input,
+        # constrained MLE across all 12 months jointly for T1, and per-month
+        # unconstrained fits for higher trees only.
         self._monthly_vines = {}
         for m in range(1, 13):
             e = residuals_by_month[m]  # (n_years, n_sites)

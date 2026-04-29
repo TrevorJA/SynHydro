@@ -5,10 +5,8 @@ All notable changes to SynHydro are documented in this file.
 ## [Unreleased]
 
 ### Added
-- Gaussian/t-copula generator with parametric and empirical marginals
 - ARFIMA MA(q) component with CSS estimation and BIC-based order selection
 - KNN Bootstrap generator for nonparametric multi-site generation
-- Grygier-Stedinger temporal disaggregation method
 - Valencia-Schaake temporal disaggregation method
 - Validation framework with 12 metric categories:
   - L-moment ratios, GEV extreme-value metrics

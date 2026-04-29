@@ -57,27 +57,18 @@ from synhydro.methods.generation.nonparametric.phase_randomization import (
     PhaseRandomizationGenerator,
 )
 from synhydro.methods.generation.parametric.arfima import ARFIMAGenerator
-from synhydro.methods.generation.parametric.gaussian_copula import (
-    GaussianCopulaGenerator,
-)
 from synhydro.methods.generation.parametric.hmm_knn import HMMKNNGenerator
 from synhydro.methods.generation.parametric.thomas_fiering import ThomasFieringGenerator
 from synhydro.methods.generation.parametric.matalas import MatalasGenerator
 from synhydro.methods.generation.parametric.multisite_hmm import MultiSiteHMMGenerator
 from synhydro.methods.generation.parametric.smarta import SMARTAGenerator
 from synhydro.methods.generation.parametric.sparta import SPARTAGenerator
-from synhydro.methods.generation.parametric.vine_copula import (
-    VineCopulaGenerator,
-)
 from synhydro.methods.generation.parametric.warm import WARMGenerator
 
 # Disaggregators
 from synhydro.methods.disaggregation.temporal.nowak import NowakDisaggregator
 from synhydro.methods.disaggregation.temporal.valencia_schaake import (
     ValenciaSchaakeDisaggregator,
-)
-from synhydro.methods.disaggregation.temporal.grygier_stedinger import (
-    GrygierStedingerDisaggregator,
 )
 
 # Pre-built pipelines (recommended for most users)
@@ -94,7 +85,6 @@ __all__ = [
     "Disaggregator",
     # Individual generators
     "ARFIMAGenerator",
-    "GaussianCopulaGenerator",
     "HMMKNNGenerator",
     "KirschGenerator",
     "KNNBootstrapGenerator",
@@ -105,12 +95,10 @@ __all__ = [
     "SMARTAGenerator",
     "SPARTAGenerator",
     "ThomasFieringGenerator",
-    "VineCopulaGenerator",
     "WARMGenerator",
     # Individual disaggregators
     "NowakDisaggregator",
     "ValenciaSchaakeDisaggregator",
-    "GrygierStedingerDisaggregator",
     # Pipeline system
     "GeneratorDisaggregatorPipeline",
     "KirschNowakPipeline",

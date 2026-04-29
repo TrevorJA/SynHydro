@@ -113,6 +113,7 @@ Unlike the Gaussian copula, the vine copula can represent asymmetric tail depend
 - With short records (fewer than 20 years), each month has fewer than 20 observations for vine fitting, increasing the risk of overfitting. Truncation and restricted family sets help mitigate this.
 - Vine complexity grows quadratically with the number of sites; practical limit is approximately 15-20 sites.
 - Higher-order temporal dependence and long-range persistence are not captured.
+- **Pereira et al. (2017) spatial reparametrization of tree 1 (T1) is not implemented (planned).** The distinguishing contribution of Pereira (2017) is to constrain T1 Kendall taus by an inter-site distance + seasonal-harmonic regression (Eq. 11), reducing T1 from $12(d-1)$ free parameters to 8 across all months. The current fit instead estimates T1 unconstrained per month, more closely matching Yu et al. (2025) / Wang and Shen (2023) style periodic vines. The Pereira reparametrization will be added in a future release for sparse-data multisite settings.
 
 ## References
 

@@ -10,20 +10,17 @@ from synhydro.methods.generation.nonparametric import (
 )
 from synhydro.methods.generation.parametric import (
     ARFIMAGenerator,
-    GaussianCopulaGenerator,
     HMMKNNGenerator,
     MatalasGenerator,
     MultiSiteHMMGenerator,
     SMARTAGenerator,
     SPARTAGenerator,
     ThomasFieringGenerator,
-    VineCopulaGenerator,
     WARMGenerator,
 )
 
 __all__ = [
     "ARFIMAGenerator",
-    "GaussianCopulaGenerator",
     "HMMKNNGenerator",
     "KirschGenerator",
     "KNNBootstrapGenerator",
@@ -34,6 +31,5 @@ __all__ = [
     "SMARTAGenerator",
     "SPARTAGenerator",
     "ThomasFieringGenerator",
-    "VineCopulaGenerator",
     "WARMGenerator",
 ]

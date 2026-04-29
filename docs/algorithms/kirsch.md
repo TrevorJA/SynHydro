@@ -10,6 +10,10 @@
 
 The Kirsch method generates synthetic multi-site monthly streamflow by bootstrapping standardized residuals and imposing fitted temporal and spatial correlation structure through Cholesky decomposition. A cross-year shifted matrix construction preserves December-to-January continuity. An optional normal score transform reduces bias when operating in log-transformed space. The method is nonparametric in that the generated values are drawn from the historical record rather than from a parametric distribution.
 
+### Generalization note
+
+Kirsch et al. (2013) describe the method on weekly timesteps (52 columns per year, 26-week halves for the cross-year shift). SynHydro implements it on monthly timesteps (12 columns per year, 6-month halves). The mathematical structure is identical; only the column dimension and the half-year split change. The implementation is straightforwardly generalizable to any sub-annual period count $n$, with the half split at $n/2$.
+
 ## Notation
 
 | Symbol | Description |
@@ -45,6 +49,8 @@ $$
 
 where $r(\cdot)$ denotes the rank among the $N$ values and $\Phi^{-1}$ is the standard normal inverse CDF.
 
+**Note:** The normal score transform is a SynHydro-specific extension to the original Kirsch (2013) method. Kirsch (2013, eq. 3) only applies z-score standardization. NST is added in log-space here to prevent bias in the back-transformed marginal distribution when standardized log-residuals are non-Gaussian; the inverse NST (with linear tail extrapolation) maps Cholesky-mixed values back to the empirical $(m, s)$ marginal. To run the algorithm closer to the published version, set `generate_using_log_flow=False` (which also skips NST).
+
 ### Cross-Year Shifted Matrix
 
 To preserve inter-annual correlation (particularly the December-January transition), a shifted matrix $\mathbf{Y}'^{(s)}$ is constructed for each site $s$:
@@ -57,7 +63,9 @@ This re-indexes the data so that July-December of year $y$ is paired with Januar
 
 ### Cholesky Decomposition
 
-For each site $s$, the $12 \times 12$ sample correlation matrices $\mathbf{R}^{(s)}$ and $\mathbf{R}'^{(s)}$ are computed from $\mathbf{Y}^{(s)}$ and $\mathbf{Y}'^{(s)}$ respectively. If either matrix is not positive definite, it is repaired via spectral projection (negative eigenvalues are set to zero and the matrix is rescaled to unit diagonal). The upper Cholesky factors $\mathbf{U}^{(s)}$ and $\mathbf{U}'^{(s)}$ are then computed.
+For each site $s$, the $12 \times 12$ sample correlation matrices $\mathbf{R}^{(s)}$ and $\mathbf{R}'^{(s)}$ are computed from $\mathbf{Y}^{(s)}$ and $\mathbf{Y}'^{(s)}$ respectively. If either matrix is not positive definite, it is repaired via spectral projection (negative eigenvalues are clipped to a small positive constant and the matrix is rescaled to unit diagonal). The upper Cholesky factors $\mathbf{U}^{(s)}$ and $\mathbf{U}'^{(s)}$ are then computed.
+
+Per Kirsch et al. (2013, eqs. 4-5), the correlation matrix and its Cholesky factor are intra-annual operators defined for a single site at a time. Cross-site correlation is preserved through the **shared bootstrap index matrix $\mathbf{M}$** (Kirsch et al. 2013, p. 7), not through a joint multi-site correlation matrix. This implementation therefore computes per-site Cholesky factors $\mathbf{U}^{(s)}, \mathbf{U}'^{(s)}$ and reuses one $\mathbf{M}$ across all sites in the synthesis step below.
 
 ### Synthesis Procedure
 

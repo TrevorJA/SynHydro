@@ -1,9 +1,25 @@
 """
 Grygier-Stedinger condensed disaggregation for temporal downscaling.
 
-This module implements the Grygier-Stedinger method for temporal disaggregation
-of annual synthetic streamflows to monthly flows, with conservation correction
-and condensed parameterization (Grygier and Stedinger, 1988).
+NOT EXPORTED FROM THE PUBLIC API.
+
+TODO: The current implementation does not match Grygier and Stedinger (1988).
+What is here is effectively Valencia-Schaake with a Kalman-style additive
+residual projection D = S_e * 1 / (1^T S_e 1) applied in transformed space.
+Specifically missing from the published method:
+  - The condensed regression structure (per-month regressions with B_t * X_{y,t-1}
+    lag-1 terms and optional cumulative-sum C_t * sum(W_u X_{y,u}) term, eqs. 9-11).
+  - The four real-space conservation-adjustment schemes the paper actually
+    compares (Proportional, ABS, SD, Stedinger-Vogel Exponential); the
+    paper recommends the proportional scheme. The current covariance-based
+    correction is not from the paper.
+  - Inter-annual serial correlation via lag-1 cross-month coupling and
+    previous-year terms.
+Conservation only holds in transformed (log) space; after inverse transform
+the 1^T X_syn = Y_syn guarantee is broken.
+
+This module is retained on disk for a future rewrite. It is not imported
+by synhydro.__init__ and is excluded from the documentation site.
 
 References
 ----------
