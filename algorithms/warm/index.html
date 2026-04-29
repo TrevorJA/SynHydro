@@ -789,52 +789,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../gaussian_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Gaussian/t-Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vine_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Vine Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../sparta/" class="md-nav__link">
         
   
@@ -1014,27 +968,45 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#scale-averaged-wavelet-power" class="md-nav__link">
+  <a href="#significance-testing-and-band-identification" class="md-nav__link">
     <span class="md-ellipsis">
-      Scale Averaged Wavelet Power
+      Significance Testing and Band Identification
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#normalization" class="md-nav__link">
+  <a href="#per-band-sawp" class="md-nav__link">
     <span class="md-ellipsis">
-      Normalization
+      Per-Band SAWP
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#autoregressive-fitting" class="md-nav__link">
+  <a href="#per-band-inverse-cwt" class="md-nav__link">
     <span class="md-ellipsis">
-      Autoregressive Fitting
+      Per-Band Inverse CWT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stationary-component-and-ar-fitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stationary Component and AR Fitting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#noise-residual" class="md-nav__link">
+    <span class="md-ellipsis">
+      Noise Residual
     </span>
   </a>
   
@@ -1051,6 +1023,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-site-simulation-via-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-site Simulation via Composition
+    </span>
+  </a>
   
 </li>
       
@@ -1218,29 +1199,6 @@
   
   <span class="md-ellipsis">
     Valencia-Schaake
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../grygier_stedinger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Grygier-Stedinger
     
   </span>
   
@@ -1509,27 +1467,45 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#scale-averaged-wavelet-power" class="md-nav__link">
+  <a href="#significance-testing-and-band-identification" class="md-nav__link">
     <span class="md-ellipsis">
-      Scale Averaged Wavelet Power
+      Significance Testing and Band Identification
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#normalization" class="md-nav__link">
+  <a href="#per-band-sawp" class="md-nav__link">
     <span class="md-ellipsis">
-      Normalization
+      Per-Band SAWP
     </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#autoregressive-fitting" class="md-nav__link">
+  <a href="#per-band-inverse-cwt" class="md-nav__link">
     <span class="md-ellipsis">
-      Autoregressive Fitting
+      Per-Band Inverse CWT
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#stationary-component-and-ar-fitting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Stationary Component and AR Fitting
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#noise-residual" class="md-nav__link">
+    <span class="md-ellipsis">
+      Noise Residual
     </span>
   </a>
   
@@ -1546,6 +1522,15 @@
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#multi-site-simulation-via-composition" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-site Simulation via Composition
+    </span>
+  </a>
   
 </li>
       
@@ -1614,12 +1599,13 @@
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
-<td>Univariate</td>
+<td>Univariate (multi-site via Nowak 2010 disaggregation)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>WARM combines continuous wavelet transforms with autoregressive modeling to generate synthetic annual streamflow that preserves non-stationary low-frequency variability. The observed series is decomposed into time-frequency components via the continuous wavelet transform (CWT), and the time-varying energy is captured by the Scale Averaged Wavelet Power (SAWP). After normalizing by SAWP to produce stationary components, independent AR models are fitted at each wavelet scale. Synthetic generation reverses the process: AR-generated coefficients are rescaled by bootstrapped SAWP values and reconstructed via the inverse CWT.</p>
+<p>WARM generates synthetic annual streamflow that preserves both the marginal distribution and the non-stationary spectral structure of an observed record. The observed series is decomposed by the continuous wavelet transform (CWT) into time-frequency space; significant spectral bands are identified by chi-squared significance testing of the global wavelet spectrum against a red- or white-noise background (Torrence and Compo 1998). For each significant band the time-domain reconstruction is obtained from the band-restricted inverse CWT, divided by the square root of its Scale-Averaged Wavelet Power (SAWP) to remove the time-varying envelope, and modelled with an autoregressive process. A residual "noise" component captures everything outside the significant bands and is also fit with an AR model. Synthesis simulates the AR processes, multiplies each band's stationary signal by the square root of a bootstrapped SAWP series to restore non-stationarity, and sums the resulting bands and noise in the time domain.</p>
+<p>This implementation follows Nowak et al. (2011) Sections 2.1-2.3 exactly: per-band SAWP, time-domain AR fitting on band-reconstructed series after envelope removal, and variance-preserving inverse CWT in the form of Eq. 4.</p>
 <h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1631,11 +1617,15 @@
 <tbody>
 <tr>
 <td><span class="arithmatex">\(Q_t\)</span></td>
-<td>Observed annual streamflow at year <span class="arithmatex">\(t\)</span></td>
+<td>Observed annual streamflow at year <span class="arithmatex">\(t\)</span>, <span class="arithmatex">\(t = 1, \ldots, N\)</span></td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(\hat{Q}_t\)</span></td>
 <td>Synthetic annual streamflow at year <span class="arithmatex">\(t\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\bar{Q}\)</span></td>
+<td>Sample mean of the observed record</td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(W(a_j, t)\)</span></td>
@@ -1643,129 +1633,188 @@
 </tr>
 <tr>
 <td><span class="arithmatex">\(a_j\)</span></td>
-<td>Wavelet scale, <span class="arithmatex">\(j = 1, \ldots, J\)</span></td>
-</tr>
-<tr>
-<td><span class="arithmatex">\(J\)</span></td>
-<td>Total number of scales</td>
-</tr>
-<tr>
-<td><span class="arithmatex">\(P(t)\)</span></td>
-<td>Scale Averaged Wavelet Power at time <span class="arithmatex">\(t\)</span></td>
-</tr>
-<tr>
-<td><span class="arithmatex">\(\tilde{W}(a_j, t)\)</span></td>
-<td>SAWP-normalized wavelet coefficient</td>
-</tr>
-<tr>
-<td><span class="arithmatex">\(C_\delta\)</span></td>
-<td>Wavelet-specific reconstruction factor (T&amp;C 1998, Table 2)</td>
+<td>Wavelet scale, <span class="arithmatex">\(j = 0, \ldots, J\)</span></td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(\delta_j\)</span></td>
-<td>Mean logarithmic (base-2) spacing of scales</td>
+<td>Voice spacing in <span class="arithmatex">\(\log_2\)</span>-scale (= <span class="arithmatex">\(1 / n_{\text{voices}}\)</span>)</td>
 </tr>
 <tr>
 <td><span class="arithmatex">\(\delta_t\)</span></td>
 <td>Sampling period (one year for annual input)</td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(\phi_k^{(a_j)}\)</span></td>
-<td>AR coefficient at lag <span class="arithmatex">\(k\)</span> for scale <span class="arithmatex">\(a_j\)</span></td>
+<td><span class="arithmatex">\(C_\delta\)</span></td>
+<td>Wavelet-specific reconstruction factor (T&amp;C 1998 Table 2)</td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(p\)</span></td>
-<td>AR model order</td>
+<td><span class="arithmatex">\(\psi_0(0)\)</span></td>
+<td>Mother wavelet evaluated at zero (T&amp;C 1998 Table 2)</td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(\sigma_{a_j}\)</span></td>
-<td>Innovation standard deviation for scale <span class="arithmatex">\(a_j\)</span></td>
+<td><span class="arithmatex">\(\bar P^{(b)}_t\)</span></td>
+<td>Band-restricted SAWP for band <span class="arithmatex">\(b\)</span> at time <span class="arithmatex">\(t\)</span></td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(\varepsilon_t\)</span></td>
-<td>Independent standard normal innovation</td>
+<td><span class="arithmatex">\(S^{(b)}_t\)</span></td>
+<td>Band-restricted time-domain reconstruction</td>
 </tr>
 <tr>
-<td><span class="arithmatex">\(N\)</span></td>
-<td>Number of years in the historical record</td>
+<td><span class="arithmatex">\(\tilde S^{(b)}_t\)</span></td>
+<td>Stationary signal <span class="arithmatex">\(S^{(b)}_t / \sqrt{\bar P^{(b)}_t}\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\eta_t\)</span></td>
+<td>Noise residual (everything outside significant bands)</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\phi_k^{(b)}\)</span></td>
+<td>AR coefficient at lag <span class="arithmatex">\(k\)</span> for band <span class="arithmatex">\(b\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\sigma^{(b)}\)</span></td>
+<td>Innovation standard deviation for band <span class="arithmatex">\(b\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(p^{(b)}\)</span></td>
+<td>AR order for band <span class="arithmatex">\(b\)</span></td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\alpha\)</span></td>
+<td>Lag-1 autocorrelation of <span class="arithmatex">\(Q_t\)</span> used for the red-noise background</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(\nu\)</span></td>
+<td>Equivalent degrees of freedom of the global spectrum estimator</td>
+</tr>
+<tr>
+<td><span class="arithmatex">\(P_k\)</span></td>
+<td>Theoretical background spectrum at Fourier wavenumber <span class="arithmatex">\(k\)</span></td>
 </tr>
 </tbody>
 </table>
 <h2 id="formulation">Formulation<a class="headerlink" href="#formulation" title="Permanent link">&para;</a></h2>
 <h3 id="continuous-wavelet-transform">Continuous Wavelet Transform<a class="headerlink" href="#continuous-wavelet-transform" title="Permanent link">&para;</a></h3>
-<p>The observed annual flow series <span class="arithmatex">\(\{Q_t\}\)</span> is decomposed using a mother wavelet <span class="arithmatex">\(\psi\)</span> (default: Morlet) at <span class="arithmatex">\(J\)</span> discrete scales:</p>
+<p>The observed annual flow series <span class="arithmatex">\(\{Q_t\}_{t=1}^{N}\)</span> is mean-centered and decomposed using a mother wavelet <span class="arithmatex">\(\psi\)</span> (default: Morlet) at <span class="arithmatex">\(J + 1\)</span> scales constructed geometrically following Torrence and Compo (1998) Eq. 9-10:</p>
 <div class="arithmatex">\[
-W(a_j, t) = \text{CWT}(Q, a_j), \qquad j = 1, \ldots, J
+a_j = s_0 \, 2^{j \delta_j}, \qquad j = 0, 1, \ldots, J
 \]</div>
-<p>yielding a coefficient matrix of dimension <span class="arithmatex">\(J \times N\)</span>.</p>
-<h3 id="scale-averaged-wavelet-power">Scale Averaged Wavelet Power<a class="headerlink" href="#scale-averaged-wavelet-power" title="Permanent link">&para;</a></h3>
-<p>Following Nowak et al. (2011, Eq. 5) and Torrence and Compo (1998, Eq. 24), the SAWP captures the time-varying energy across all frequency scales as a scale-weighted sum with wavelet-specific normalization:</p>
+<p>with default smallest scale <span class="arithmatex">\(s_0 = 2 \delta_t\)</span>, voice spacing <span class="arithmatex">\(\delta_j = 1/8\)</span>, and largest scale capped at <span class="arithmatex">\(N \delta_t / 2\)</span>. The CWT yields a coefficient matrix <span class="arithmatex">\(W(a_j, t)\)</span> of dimension <span class="arithmatex">\((J + 1) \times N\)</span>. Each scale <span class="arithmatex">\(a_j\)</span> corresponds to a Fourier period <span class="arithmatex">\(\lambda_j\)</span> via the wavelet-specific scale-to-period relation (Torrence and Compo 1998 Table 1).</p>
+<h3 id="significance-testing-and-band-identification">Significance Testing and Band Identification<a class="headerlink" href="#significance-testing-and-band-identification" title="Permanent link">&para;</a></h3>
+<p>The global wavelet spectrum is the time average of the local power:</p>
 <div class="arithmatex">\[
-P(t) = \frac{\delta_j \, \delta_t}{C_\delta} \sum_{j=1}^{J} \frac{|W(a_j, t)|^2}{a_j}
+\bar W(a_j) = \frac{1}{N} \sum_{t=1}^{N} |W(a_j, t)|^2
 \]</div>
-<p>The <span class="arithmatex">\(1/a_j\)</span> weighting is the scale-density correction from the continuous wavelet transform; <span class="arithmatex">\(\delta_j\)</span> is the mean logarithmic (base-2) spacing of the scales, <span class="arithmatex">\(\delta_t\)</span> is the sampling period (one year for annual input), and <span class="arithmatex">\(C_\delta\)</span> is a wavelet-specific reconstruction factor. For the Morlet wavelet, <span class="arithmatex">\(C_\delta = 0.776\)</span> (Torrence and Compo 1998, Table 2).</p>
-<p>High values of <span class="arithmatex">\(P(t)\)</span> indicate periods of elevated variability (e.g., regime shifts, climate oscillations).</p>
-<h3 id="normalization">Normalization<a class="headerlink" href="#normalization" title="Permanent link">&para;</a></h3>
-<p>The wavelet coefficients are normalized by the SAWP to remove time-varying power and produce approximately stationary components:</p>
+<p>Following Torrence and Compo (1998) Eqs. 16-23, the global-spectrum estimator at scale <span class="arithmatex">\(a_j\)</span> is chi-squared distributed with equivalent degrees of freedom</p>
 <div class="arithmatex">\[
-\tilde{W}(a_j, t) = \frac{W(a_j, t)}{\sqrt{P(t) + \epsilon}}
+\nu_j = 2 \sqrt{1 + \left(\frac{N \delta_t}{\gamma a_j}\right)^2}
 \]</div>
-<p>where <span class="arithmatex">\(\epsilon\)</span> is a small constant to prevent division by zero.</p>
-<h3 id="autoregressive-fitting">Autoregressive Fitting<a class="headerlink" href="#autoregressive-fitting" title="Permanent link">&para;</a></h3>
-<p>For each scale <span class="arithmatex">\(a_j\)</span>, the normalized coefficient series <span class="arithmatex">\(\{\tilde{W}(a_j, t)\}_{t=1}^{N}\)</span> is modeled as an AR(<span class="arithmatex">\(p\)</span>) process. Let <span class="arithmatex">\(\mu_{a_j} = \mathbb{E}[\tilde{W}(a_j, \cdot)]\)</span> denote the mean and <span class="arithmatex">\(\gamma_k^{(a_j)}\)</span> the autocovariance at lag <span class="arithmatex">\(k\)</span>. The AR coefficients are estimated via the Yule-Walker equations:</p>
+<p>where <span class="arithmatex">\(\gamma\)</span> is the wavelet decorrelation factor (<span class="arithmatex">\(\gamma = 2.32\)</span> for Morlet, <span class="arithmatex">\(\gamma = 1.43\)</span> for Mexican Hat). The significance threshold at confidence level <span class="arithmatex">\(p\)</span> is</p>
 <div class="arithmatex">\[
-\begin{pmatrix} \gamma_0^{(a_j)} &amp; \gamma_1^{(a_j)} &amp; \cdots &amp; \gamma_{p-1}^{(a_j)} \\ \gamma_1^{(a_j)} &amp; \gamma_0^{(a_j)} &amp; \cdots &amp; \gamma_{p-2}^{(a_j)} \\ \vdots &amp; &amp; \ddots &amp; \vdots \\ \gamma_{p-1}^{(a_j)} &amp; \gamma_{p-2}^{(a_j)} &amp; \cdots &amp; \gamma_0^{(a_j)} \end{pmatrix} \begin{pmatrix} \phi_1^{(a_j)} \\ \phi_2^{(a_j)} \\ \vdots \\ \phi_p^{(a_j)} \end{pmatrix} = \begin{pmatrix} \gamma_1^{(a_j)} \\ \gamma_2^{(a_j)} \\ \vdots \\ \gamma_p^{(a_j)} \end{pmatrix}
+\bar W_{\text{thr}}(a_j) = P_{k_j} \cdot \frac{\chi^2_{\nu_j}(p)}{\nu_j}
 \]</div>
-<p>The innovation variance is:</p>
+<p>with the theoretical background spectrum</p>
 <div class="arithmatex">\[
-\sigma_{a_j}^2 = \gamma_0^{(a_j)} \left(1 - \sum_{k=1}^{p} \phi_k^{(a_j)} \cdot \frac{\gamma_k^{(a_j)}}{\gamma_0^{(a_j)}}\right)
+P_k = \frac{1 - \alpha^2}{1 + \alpha^2 - 2 \alpha \cos(2 \pi k)}, \qquad k = 1 / \lambda
 \]</div>
+<p>and lag-1 coefficient <span class="arithmatex">\(\alpha\)</span> either set to zero (white-noise background) or estimated from the data (red-noise background). Bands are identified as contiguous runs of scales for which <span class="arithmatex">\(\bar W(a_j) &gt; \bar W_{\text{thr}}(a_j)\)</span>. Runs shorter than <code>min_band_scales</code> are discarded. Users may instead supply explicit period bands <span class="arithmatex">\([\lambda_{\min}, \lambda_{\max}]\)</span>, in which case all scales whose Fourier period lies within the interval form one band.</p>
+<h3 id="per-band-sawp">Per-Band SAWP<a class="headerlink" href="#per-band-sawp" title="Permanent link">&para;</a></h3>
+<p>For each band <span class="arithmatex">\(b\)</span> defined by the scale-index set <span class="arithmatex">\(J_b = \{j_1, \ldots, j_2\}\)</span>, the Scale-Averaged Wavelet Power (Nowak et al. 2011 Eq. 5; Torrence and Compo 1998 Eq. 24) is computed with summation limits restricted to <span class="arithmatex">\(J_b\)</span>:</p>
+<div class="arithmatex">\[
+\bar P^{(b)}_t = \frac{\delta_j \, \delta_t}{C_\delta} \sum_{j \in J_b} \frac{|W(a_j, t)|^2}{a_j}
+\]</div>
+<p>Each band has its own SAWP time series, capturing how the strength of that band evolves over time.</p>
+<h3 id="per-band-inverse-cwt">Per-Band Inverse CWT<a class="headerlink" href="#per-band-inverse-cwt" title="Permanent link">&para;</a></h3>
+<p>The band-restricted time-domain reconstruction is obtained from the inverse CWT of Nowak et al. (2011) Eq. 4 (Torrence and Compo 1998 Eq. 11) with summation limits restricted to <span class="arithmatex">\(J_b\)</span>:</p>
+<div class="arithmatex">\[
+S^{(b)}_t = \frac{\delta_j \, \delta_t^{1/2}}{C_\delta \, \psi_0(0)} \sum_{j \in J_b} \frac{\Re\!\left[W(a_j, t)\right]}{a_j^{1/2}}
+\]</div>
+<p>The wavelet-specific constants are tabulated in Torrence and Compo (1998) Table 2: for the Morlet wavelet <span class="arithmatex">\(C_\delta = 0.776\)</span> and <span class="arithmatex">\(\psi_0(0) = \pi^{-1/4}\)</span>; for the Mexican Hat <span class="arithmatex">\(C_\delta = 3.541\)</span> and <span class="arithmatex">\(\psi_0(0) = (2/\sqrt{3}) \pi^{-1/4}\)</span>. With these constants, <span class="arithmatex">\(S^{(b)}_t\)</span> is a variance-preserving reconstruction in the units of the original (mean-centered) flow series; no post-hoc moment matching is required.</p>
+<h3 id="stationary-component-and-ar-fitting">Stationary Component and AR Fitting<a class="headerlink" href="#stationary-component-and-ar-fitting" title="Permanent link">&para;</a></h3>
+<p>Each band-reconstructed signal <span class="arithmatex">\(S^{(b)}_t\)</span> is non-stationary because its envelope tracks <span class="arithmatex">\(\sqrt{\bar P^{(b)}_t}\)</span>. Dividing by the square root of SAWP yields an approximately stationary series:</p>
+<div class="arithmatex">\[
+\tilde S^{(b)}_t = \frac{S^{(b)}_t}{\sqrt{\bar P^{(b)}_t + \epsilon}}
+\]</div>
+<p>where <span class="arithmatex">\(\epsilon\)</span> is a small floor preventing divide-by-zero where the band power vanishes. An AR<span class="arithmatex">\((p^{(b)})\)</span> model is fit to <span class="arithmatex">\(\tilde S^{(b)}_t\)</span> via the Yule-Walker equations:</p>
+<div class="arithmatex">\[
+R^{(b)} \, \boldsymbol{\phi}^{(b)} = \mathbf{r}^{(b)}, \qquad
+\sigma^{(b) 2} = \gamma_0^{(b)} \left( 1 - \boldsymbol{\phi}^{(b) \top} \mathbf{r}^{(b)} \right)
+\]</div>
+<p>where <span class="arithmatex">\(R^{(b)}\)</span> is the Toeplitz autocorrelation matrix and <span class="arithmatex">\(\mathbf{r}^{(b)}\)</span> is the lag-<span class="arithmatex">\(1, \ldots, p^{(b)}\)</span> autocorrelation vector. The order <span class="arithmatex">\(p^{(b)}\)</span> is either fixed (<code>ar_select='fixed'</code>) or chosen by Akaike's information criterion over <span class="arithmatex">\([1, n_{\text{ar,max}}]\)</span> (<code>ar_select='aic'</code>).</p>
+<h3 id="noise-residual">Noise Residual<a class="headerlink" href="#noise-residual" title="Permanent link">&para;</a></h3>
+<p>The noise component captures variability outside any significant band. It is obtained by subtracting the sum of all band reconstructions from the mean-centered observed series:</p>
+<div class="arithmatex">\[
+\eta_t = (Q_t - \bar Q) - \sum_b S^{(b)}_t
+\]</div>
+<p>An AR<span class="arithmatex">\((p^{(\eta)})\)</span> model is fit to <span class="arithmatex">\(\eta_t\)</span> using the same Yule-Walker procedure. Following the Nowak et al. (2011) Section 4 discussion, this residual contains the stochastic high-frequency content that should not be smoothed by a bandwise wavelet treatment.</p>
 <h3 id="synthesis-procedure">Synthesis Procedure<a class="headerlink" href="#synthesis-procedure" title="Permanent link">&para;</a></h3>
+<p>For each realization of length <span class="arithmatex">\(T\)</span>:</p>
 <ol>
-<li>For each scale <span class="arithmatex">\(a_j\)</span>, generate a synthetic normalized coefficient series via the AR(<span class="arithmatex">\(p\)</span>) recursion:</li>
+<li><strong>Per-band AR simulation.</strong> For each band <span class="arithmatex">\(b\)</span>, simulate a synthetic stationary series:</li>
 </ol>
 <div class="arithmatex">\[
-\hat{\tilde{W}}(a_j, t) = \mu_{a_j} + \sum_{k=1}^{p} \phi_k^{(a_j)} \left[\hat{\tilde{W}}(a_j, t-k) - \mu_{a_j}\right] + \sigma_{a_j}\,\varepsilon_t
+\hat{\tilde S}^{(b)}_t = \mu^{(b)} + \sum_{k=1}^{p^{(b)}} \phi_k^{(b)} \left( \hat{\tilde S}^{(b)}_{t-k} - \mu^{(b)} \right) + \sigma^{(b)} \, \varepsilon_t
+\]</div>
+<p>with a burn-in to reach stationarity.</p>
+<ol>
+<li>
+<p><strong>SAWP bootstrap.</strong> Sample SAWP indices uniformly with replacement from the historical record to obtain <span class="arithmatex">\(\hat P^{(b)}_t\)</span> for <span class="arithmatex">\(t = 1, \ldots, T\)</span>. This preserves the marginal distribution of historical band power.</p>
+</li>
+<li>
+<p><strong>Re-introduce non-stationarity.</strong> Multiply by the square root of the bootstrapped SAWP to restore the time-varying envelope:</p>
+</li>
+</ol>
+<div class="arithmatex">\[
+\hat S^{(b)}_t = \hat{\tilde S}^{(b)}_t \cdot \sqrt{\hat P^{(b)}_t}
 \]</div>
 <ol>
 <li>
-<p>Bootstrap SAWP values from the historical record with replacement to obtain <span class="arithmatex">\(\{\hat{P}(t)\}_{t=1}^{T}\)</span>.</p>
+<p><strong>Noise simulation.</strong> Simulate <span class="arithmatex">\(\hat \eta_t\)</span> from the noise AR model.</p>
 </li>
 <li>
-<p>Rescale the synthetic coefficients by the bootstrapped SAWP:</p>
+<p><strong>Aggregate in the time domain and add the historical mean back:</strong></p>
 </li>
 </ol>
 <div class="arithmatex">\[
-\hat{W}(a_j, t) = \hat{\tilde{W}}(a_j, t) \cdot \sqrt{\hat{P}(t) + \epsilon}
+\hat Q_t = \bar Q + \sum_b \hat S^{(b)}_t + \hat \eta_t
 \]</div>
 <ol>
-<li>Reconstruct the synthetic flow via inverse CWT:</li>
+<li>Enforce non-negativity: <span class="arithmatex">\(\hat Q_t \leftarrow \max(\hat Q_t, 0)\)</span>.</li>
 </ol>
-<div class="arithmatex">\[
-\hat{Q}_t = c \sum_{j=1}^{J} \frac{1}{\sqrt{a_j}} \,\text{Re}\!\left[\hat{W}(a_j, t)\right]
-\]</div>
-<p>where <span class="arithmatex">\(c\)</span> is a normalization constant. The reconstructed series is then rescaled to match the observed mean and standard deviation.</p>
+<h2 id="multi-site-simulation-via-composition">Multi-site Simulation via Composition<a class="headerlink" href="#multi-site-simulation-via-composition" title="Permanent link">&para;</a></h2>
+<p>WARM as published is a univariate generator. Nowak et al. (2011) Section 2.4 achieves multi-site simulation through a two-stage composition:</p>
 <ol>
-<li>Enforce non-negativity: <span class="arithmatex">\(\hat{Q}_t \leftarrow \max(\hat{Q}_t, 0)\)</span>.</li>
+<li>Apply WARM to an aggregate gauge time series (often the most-downstream gauge in the network, or a synthetic basin total constructed by summing contributing gauges).</li>
+<li>Disaggregate the resulting WARM realizations spatially across upstream gauges using the proportional KNN method of Nowak et al. (2010).</li>
 </ol>
+<p>In SynHydro, this composition is implemented by chaining <code>WARMGenerator</code> with <code>synhydro.methods.disaggregation.spatial.NowakDisaggregator</code>. The <code>WARMGenerator</code> class itself remains univariate. Cross-site spectral consistency depends on the spatial homogeneity of the basin: tributaries with substantially different spectral signatures (Nowak et al. 2011 Section 3.3, the San Juan example) may not inherit the aggregate band structure, in which case those gauges should be modeled independently and recombined.</p>
 <h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
-<p>The method preserves the mean and variance of the annual flow series (exactly, through post-reconstruction adjustment) and the lag-1 autocorrelation (approximately, through the AR models at each scale). The wavelet decomposition and SAWP bootstrapping capture multi-year persistence and non-stationary variance structure, making WARM well suited for flows influenced by climate oscillations or multi-decadal drought regimes.</p>
-<p>The power spectrum is approximately preserved through the amplitude structure of the wavelet coefficients. However, the inverse CWT is approximate and requires a mean/variance correction step. Gaussian AR innovations may underrepresent extreme annual flows, and higher moments (skewness, kurtosis) are not explicitly modeled. The method is univariate and does not model spatial dependence.</p>
+<ul>
+<li><strong>Mean and variance.</strong> Preserved approximately through the variance-preserving inverse CWT and explicit re-addition of the historical mean.</li>
+<li><strong>Marginal distribution.</strong> Reproduced well in practice for near-Gaussian flows; departures appear when the observed record has substantial skewness, in which case a log transform of the input series is recommended (the implementation does not transform automatically).</li>
+<li><strong>Lag-1 autocorrelation.</strong> Captured at the band scale through per-band AR fits.</li>
+<li><strong>Spectral structure.</strong> The non-stationary spectral envelope of significant bands is reproduced through the SAWP bootstrap and per-band reconstruction. The global spectrum is reproduced through the variance budget across bands and noise.</li>
+<li><strong>Higher moments.</strong> Skewness is not explicitly modeled and is generally underrepresented when the residual deviates from Gaussianity (Nowak et al. 2011 Fig. 14 caveat).</li>
+</ul>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
-<li>Annual frequency only; for finer resolution, must be coupled with a disaggregation method.</li>
-<li>Univariate; no native multi-site support.</li>
-<li>Inverse CWT is approximate; corrected by matching the first two moments.</li>
-<li>Edge effects in the CWT can degrade quality for short records (fewer than 20 years).</li>
-<li>Gaussian AR innovations may not adequately represent tail behavior.</li>
+<li>Annual frequency only; monthly or daily output requires a downstream temporal disaggregator.</li>
+<li>Univariate; multi-site requires composition with <code>NowakDisaggregator</code> as described above.</li>
+<li>Edge effects in the CWT (the cone of influence) degrade band identification near the start and end of the record. Records shorter than 30 years are discouraged.</li>
+<li>The chi-squared significance test assumes a smoothly varying background spectrum; multi-modal spectra may produce noisy band identification near the threshold.</li>
+<li>Gaussian AR innovations may underrepresent tails; a bootstrap or non-Gaussian AR for the noise component is suggested by Nowak et al. (2011) Section 4 for records with strongly non-Gaussian residuals.</li>
+<li>The variance correction factor of Nowak et al. (2011) Eq. 7 is <em>not</em> applied here; the implementation relies on the variance-preserving form of the inverse CWT and explicit mean re-addition. If the band/noise components exhibit non-trivial cross-correlation in a particular dataset, the user may observe a small variance underestimation.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
 <p><strong>Primary:</strong>
-Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary trends. <em>Journal of Hydrology</em>, 410(1-2), 1-12. https://doi.org/10.1016/j.jhydrol.2011.08.049</p>
+Nowak, K., Rajagopalan, B., and Zagona, E. (2011). A Wavelet Auto-Regressive Method (WARM) for multi-site streamflow simulation of data with non-stationary spectra. <em>Journal of Hydrology</em>, 410(1-2), 1-12. https://doi.org/10.1016/j.jhydrol.2011.08.051</p>
+<p><strong>Significance testing methodology and inverse-CWT constants:</strong>
+Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78. https://doi.org/10.1175/1520-0477(1998)079&lt;0061:APGTWA&gt;2.0.CO;2</p>
+<p><strong>Spatial disaggregation (multi-site composition):</strong>
+Nowak, K., Prairie, J., Rajagopalan, B., and Lall, U. (2010). A nonparametric stochastic approach for multisite disaggregation of annual to daily streamflow. <em>Water Resources Research</em>, 46(8). https://doi.org/10.1029/2009WR008530</p>
 <p><strong>See also:</strong>
 - Erkyihun, S.T., Rajagopalan, B., Zagona, E., Lall, U., and Nowak, K. (2016). Wavelet-based time series bootstrap model for multidecadal streamflow simulation using climate indicators. <em>Water Resources Research</em>, 52(5), 4061-4077. https://doi.org/10.1002/2016WR018696
-- Kwon, H.-H., Lall, U., and Khalil, A.F. (2007). Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition. <em>Water Resources Research</em>, 43(5).
-- Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. <em>Bulletin of the American Meteorological Society</em>, 79(1), 61-78.</p>
+- Kwon, H.-H., Lall, U., and Khalil, A.F. (2007). Stochastic simulation model for nonstationary time series using an autoregressive wavelet decomposition. <em>Water Resources Research</em>, 43(5).</p>
 <hr />
 <p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/warm.py</code></p>
 

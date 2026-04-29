@@ -18,7 +18,7 @@
         <link rel="prev" href="../nowak_disaggregation/">
       
       
-        <link rel="next" href="../grygier_stedinger/">
+        <link rel="next" href="../../api/generators/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -789,52 +789,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../gaussian_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Gaussian/t-Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vine_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Vine Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../sparta/" class="md-nav__link">
         
   
@@ -1210,29 +1164,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../grygier_stedinger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Grygier-Stedinger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -1578,12 +1509,12 @@
 </tr>
 <tr>
 <td><strong>Sites</strong></td>
-<td>Univariate / Multisite</td>
+<td>Univariate / Multisite (per-site application of site-averaged univariate model -- joint multisite formulation is a planned enhancement)</td>
 </tr>
 </tbody>
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) by modeling the sub-periods as a multivariate normal distribution conditioned on the known aggregate. A linear regression relates the sub-period vector to the aggregate, and the conditional covariance captures the remaining uncertainty. This is the classical baseline against which subsequent disaggregation methods, including the <a href="../grygier_stedinger/">Grygier-Stedinger</a> extension, are compared.</p>
+<p>The Valencia-Schaake method is the foundational parametric temporal disaggregation approach in stochastic hydrology. It disaggregates an aggregate flow volume (e.g., annual total) into sub-period values (e.g., 12 monthly flows) by modeling the sub-periods as a multivariate normal distribution conditioned on the known aggregate. A linear regression relates the sub-period vector to the aggregate, and the conditional covariance captures the remaining uncertainty. This is the classical baseline against which subsequent disaggregation methods are compared.</p>
 <h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1696,14 +1627,14 @@ X_j^{\text{adj}} = X_j^{\text{syn}} \cdot \frac{Y^{\text{syn}}}{\displaystyle\su
 <li>Invert the transformation if one was applied.</li>
 <li>Enforce non-negativity.</li>
 </ol>
-<p>Note: The proportional adjustment ensures exact volume conservation but distorts the conditional covariance structure. The <a href="../grygier_stedinger/">Grygier-Stedinger</a> method provides a correction that preserves this structure.</p>
+<p>Note: The proportional adjustment ensures exact volume conservation but distorts the conditional covariance structure.</p>
 <h2 id="statistical-properties">Statistical Properties<a class="headerlink" href="#statistical-properties" title="Permanent link">&para;</a></h2>
 <p>The method preserves the conditional mean and covariance of sub-period flows given the aggregate, the cross-correlations among sub-periods, and the aggregate total (exactly, after proportional adjustment). Monthly means and standard deviations are approximately preserved.</p>
 <p>However, the proportional adjustment introduces distortion into the conditional covariance. The multivariate normal assumption may be violated for strongly skewed flow distributions, particularly at the monthly or daily scale. Inter-annual serial correlations between sub-periods of consecutive years are not modeled.</p>
 <h2 id="limitations">Limitations<a class="headerlink" href="#limitations" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Multivariate normality assumption may be violated for skewed sub-period distributions.</li>
-<li>Proportional adjustment distorts the conditional covariance (see Grygier-Stedinger for improvement).</li>
+<li>Proportional adjustment distorts the conditional covariance.</li>
 <li>Does not model serial correlations between sub-periods of consecutive years.</li>
 <li>Full covariance estimation requires long records relative to <span class="arithmatex">\(m\)</span>.</li>
 <li>Better suited for annual-to-monthly than monthly-to-daily disaggregation.</li>

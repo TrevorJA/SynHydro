@@ -82,7 +82,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#hmm-knn-generator-prairie-et-al-2008-steinschneider-and-brown-2013" class="md-skip">
+        <a href="#hmm-knn-generator" class="md-skip">
           Skip to content
         </a>
       
@@ -789,52 +789,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../gaussian_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Gaussian/t-Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vine_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Vine Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../sparta/" class="md-nav__link">
         
   
@@ -959,6 +913,21 @@
       Overview
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Attribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1210,29 +1179,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../grygier_stedinger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Grygier-Stedinger
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -1460,6 +1406,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attribution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Attribution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1559,7 +1520,7 @@
   
 
 
-<h1 id="hmm-knn-generator-prairie-et-al-2008-steinschneider-and-brown-2013">HMM-KNN Generator (Prairie et al., 2008; Steinschneider and Brown, 2013)<a class="headerlink" href="#hmm-knn-generator-prairie-et-al-2008-steinschneider-and-brown-2013" title="Permanent link">&para;</a></h1>
+<h1 id="hmm-knn-generator">HMM-KNN Generator<a class="headerlink" href="#hmm-knn-generator" title="Permanent link">&para;</a></h1>
 <table>
 <thead>
 <tr>
@@ -1570,7 +1531,7 @@
 <tbody>
 <tr>
 <td><strong>Type</strong></td>
-<td>Parametric</td>
+<td>Parametric (HMM regime layer) + Nonparametric (KNN bootstrap layer)</td>
 </tr>
 <tr>
 <td><strong>Resolution</strong></td>
@@ -1584,6 +1545,13 @@
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The HMM-KNN generator produces synthetic annual multisite streamflow by coupling a discrete Hidden Markov Model (HMM) state sequencer with K-Nearest Neighbor (KNN) bootstrapped resampling. The HMM learns K hidden hydrologic regimes (e.g., dry and wet states) from log-annual flows and provides a probabilistic sequence of regime transitions. Within each regime-transition category, a KNN search conditioned on the previous year's log-flows selects a historical analog year, and the full multisite flow vector for that year is directly resampled. This design preserves empirical marginal distributions, multisite spatial dependence, and low-frequency regime persistence without imposing parametric emission assumptions.</p>
+<h3 id="attribution">Attribution<a class="headerlink" href="#attribution" title="Permanent link">&para;</a></h3>
+<p>This generator is not attributable to a single primary publication. It combines two independent developments from the literature:</p>
+<ul>
+<li>The non-parametric category (NPC) framework of Prairie et al. (2008), which conditions a KNN bootstrap on a discrete regime-transition category. Prairie (2008) used a non-homogeneous Markov chain (NHM) with kernel-smoothed transition probabilities, not a hidden Markov model.</li>
+<li>The hidden-Markov regime-state representation introduced for hydrologic applications by Akintug and Rasmussen (2005) and applied at multi-site annual scale by Gold et al. (2024).</li>
+</ul>
+<p>The HMM substitutes for Prairie's NHM as the upper-layer regime sequencer; the lower-layer KNN bootstrap follows Prairie (2008) directly, with the rank-based kernel weights of Lall and Sharma (1996).</p>
 <h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -1715,12 +1683,13 @@ P(s_t = j \mid s_{t-1} = i) = A_{ij}, \qquad \sum_{j=0}^{K-1} A_{ij} = 1 \quad \
 <li>Annual resolution only; the method does not disaggregate to sub-annual timesteps.</li>
 </ul>
 <h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
-<p><strong>Primary:</strong>
-Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2008). A stochastic nonparametric approach for streamflow generation combining observational and paleoreconstructed data. <em>Water Resources Research</em>, 44, W06423. https://doi.org/10.1029/2007WR006684</p>
-<p>Steinschneider, S., and Brown, C. (2013). A semiparametric multivariate, multisite weather generator with low-frequency variability for use in climate risk assessments. <em>Water Resources Research</em>, 49, 7205-7220. https://doi.org/10.1002/wrcr.20528</p>
-<p><strong>See also:</strong>
-- Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693. https://doi.org/10.1029/95WR02966
-- Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. <em>Earth's Future</em>. https://doi.org/10.1029/2024EF004841</p>
+<p><strong>KNN bootstrap layer (lower):</strong>
+- Prairie, J., Rajagopalan, B., Lall, U., and Fulp, T. (2008). A stochastic nonparametric approach for streamflow generation combining observational and paleoreconstructed data. <em>Water Resources Research</em>, 44, W06423. https://doi.org/10.1029/2007WR006684
+- Lall, U., and Sharma, A. (1996). A nearest neighbor bootstrap for resampling hydrologic time series. <em>Water Resources Research</em>, 32(3), 679-693. https://doi.org/10.1029/95WR02966</p>
+<p><strong>HMM regime layer (upper):</strong>
+- Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. <em>Water Resources Research</em>, 41(9). https://doi.org/10.1029/2004WR003605
+- Gold, D.F., Reed, P.M., and Gupta, R.S. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. <em>Earth's Future</em>. https://doi.org/10.1029/2024EF004841
+- Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. <em>Proceedings of the IEEE</em>, 77(2), 257-286. https://doi.org/10.1109/5.18626</p>
 <hr />
 <p><strong>Implementation:</strong> <code>src/synhydro/methods/generation/parametric/hmm_knn.py</code></p>
 

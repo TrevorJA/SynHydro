@@ -789,52 +789,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../gaussian_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Gaussian/t-Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../vine_copula/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Vine Copula
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../sparta/" class="md-nav__link">
         
   
@@ -1098,6 +1052,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#relation-to-nowak-et-al-2010" class="md-nav__link">
+    <span class="md-ellipsis">
+      Relation to Nowak et al. (2010)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1218,29 +1187,6 @@
   
   <span class="md-ellipsis">
     Valencia-Schaake
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../grygier_stedinger/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Grygier-Stedinger
     
   </span>
   
@@ -1478,6 +1424,21 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Overview">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#relation-to-nowak-et-al-2010" class="md-nav__link">
+    <span class="md-ellipsis">
+      Relation to Nowak et al. (2010)
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1620,6 +1581,8 @@
 </table>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>The Nowak disaggregator converts synthetic monthly flows to daily flows by borrowing within-month daily patterns from the closest historical analogs. For each synthetic month, the <span class="arithmatex">\(K\)</span> nearest historical months (by total flow magnitude) are identified, one is selected stochastically using either inverse-distance weighting (default) or Lall-Sharma kernel weights, and its daily flow proportions are applied to the synthetic monthly total. The method preserves monthly totals exactly by construction and maintains realistic daily flow dynamics drawn directly from the observed record.</p>
+<h3 id="relation-to-nowak-et-al-2010">Relation to Nowak et al. (2010)<a class="headerlink" href="#relation-to-nowak-et-al-2010" title="Permanent link">&para;</a></h3>
+<p>The original Nowak et al. (2010) paper presents the method at annual-to-daily resolution: KNN selects one donor year, and its 365-day proportions are applied to the synthetic annual total at every site. The algorithm is <strong>timestep-agnostic</strong>: the same logic applies to annual-to-monthly, monthly-to-daily, monthly-to-weekly, and other aggregate-to-sub-period pairings. This implementation operates at monthly-to-daily resolution by default. Operating at the monthly level yields a substantially larger pool of historical analogs (12 x N months vs. N years) and therefore better representation of within-pool sampling uncertainty. Annual-to-daily disaggregation can be approximated by chaining a monthly generator (e.g., <code>KirschGenerator</code>, <code>ThomasFieringGenerator</code>) with this disaggregator (see <code>KirschNowakPipeline</code>).</p>
 <h2 id="notation">Notation<a class="headerlink" href="#notation" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
