@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/TrevorJA/SynHydro/actions/workflows/tests.yml/badge.svg)](https://github.com/TrevorJA/SynHydro/actions/workflows/tests.yml)
 [![PyPI](https://img.shields.io/pypi/v/synhydro.svg)](https://pypi.org/project/synhydro/)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22759483.svg)](https://doi.org/10.5281/zenodo.22759483)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22759483-blue.svg)](https://doi.org/10.5281/zenodo.22759483)
 
 SynHydro is a Python library for generating synthetic hydrologic timeseries using a unified, scikit-learn-style API. All generators share a common `fit()` and `generate()` workflow, and the library includes validation, drought analysis, plotting, and ensemble data management tools.
 
@@ -68,7 +68,7 @@ Full documentation including tutorials, algorithm descriptions, and API referenc
 
 ## Citing SynHydro
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22759483.svg)](https://doi.org/10.5281/zenodo.22759483)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.22759483-blue.svg)](https://doi.org/10.5281/zenodo.22759483)
 
 If you use SynHydro in your research, please cite the version you used. The badge links to the concept DOI, which always resolves to the latest release; the reference below carries the version DOI for 0.1.0.
 
