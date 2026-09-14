@@ -38,6 +38,58 @@ def _make_multisite_df(n_years: int, n_sites: int, seed: int = 42) -> pd.DataFra
     return pd.DataFrame(data, index=index)
 
 
+def _ar1(rng: np.random.Generator, n: int, phi: float) -> np.ndarray:
+    """Unit-variance AR(1) series with lag-1 coefficient phi."""
+    x = np.empty(n)
+    x[0] = rng.standard_normal()
+    innov_sd = np.sqrt(1.0 - phi**2)
+    for t in range(1, n):
+        x[t] = phi * x[t - 1] + innov_sd * rng.standard_normal()
+    return x
+
+
+def _make_correlated_multisite_df(
+    n_years: int = 6, n_sites: int = 3, seed: int = 0
+) -> pd.DataFrame:
+    """
+    Build a no-leap daily multisite DataFrame whose sites share a genuine
+    common stochastic component, not only a common seasonal cycle.
+
+    One common AR(1) series c_t (phi=0.9, unit variance) is mixed with
+    per-site independent AR(1) noise e_i through loadings a_i, so the
+    Gaussian-domain cross-site correlation is a_i * a_j:
+
+        y_i    = a_i * c_t + sqrt(1 - a_i^2) * e_i
+        flow_i = 100 + 50 * sin(2 pi t / 365 + 0.3 i) + 30 * exp(0.5 * y_i)
+
+    With the default loadings (0.95, 0.85, 0.75) the observed Spearman
+    correlations are about 0.92 (1,2), 0.79 (1,3) and 0.91 (2,3). The
+    seasonal cycle supplies most of that. The common AR(1) term adds the
+    rest and separates pairs (1,2) and (2,3), which share the same seasonal
+    phase offset.
+    """
+    loadings = (0.95, 0.85, 0.75)
+    if n_sites > len(loadings):
+        raise ValueError(f"n_sites must be <= {len(loadings)}")
+
+    rng = np.random.default_rng(seed)
+    n_days = n_years * 365
+    index = MultisitePhaseRandomizationGenerator._build_noleap_index(
+        n_days, start_year=2000
+    )
+    phi = 0.9
+    c = _ar1(rng, n_days, phi)
+    t = np.arange(n_days, dtype=float)
+    data = {}
+    for i in range(n_sites):
+        a = loadings[i]
+        e = _ar1(rng, n_days, phi)
+        y = a * c + np.sqrt(1.0 - a**2) * e
+        seasonal = 100.0 + 50.0 * np.sin(2 * np.pi * t / 365 + 0.3 * i)
+        data[f"site_{i + 1}"] = seasonal + 30.0 * np.exp(0.5 * y)
+    return pd.DataFrame(data, index=index)
+
+
 @pytest.fixture
 def df_2sites_10yr():
     """Two-site DataFrame, 10 years (3650 days), no leap days."""
@@ -54,6 +106,38 @@ def df_3sites_10yr():
 def df_2sites_3yr():
     """Two-site DataFrame, 3 years (1095 days). Minimum viable length."""
     return _make_multisite_df(n_years=3, n_sites=2, seed=99)
+
+
+def _fit_and_generate(df: pd.DataFrame, transform: str):
+    """Fit on df with the given transform and draw the shared 10-member ensemble."""
+    gen = MultisitePhaseRandomizationGenerator(n_scales=40, transform=transform)
+    gen.fit(df)
+    ens = gen.generate(n_realizations=10, seed=0)
+    return gen, ens
+
+
+@pytest.fixture(scope="module")
+def df_3sites_6yr_correlated():
+    """Three-site, 6-year frame with a shared AR(1) stochastic component."""
+    return _make_correlated_multisite_df(n_years=6, n_sites=3, seed=0)
+
+
+@pytest.fixture(scope="module")
+def correlated_fit_mean_center(df_3sites_6yr_correlated):
+    """(generator, ensemble) fitted once with transform=mean_center."""
+    return _fit_and_generate(df_3sites_6yr_correlated, "mean_center")
+
+
+@pytest.fixture(scope="module")
+def correlated_fit_normal_score(df_3sites_6yr_correlated):
+    """(generator, ensemble) fitted once with transform=normal_score."""
+    return _fit_and_generate(df_3sites_6yr_correlated, "normal_score")
+
+
+@pytest.fixture(scope="module", params=["mean_center", "normal_score"])
+def correlated_fit(request):
+    """Parametrized view over the two fitted (generator, ensemble) pairs."""
+    return request.getfixturevalue(f"correlated_fit_{request.param}")
 
 
 # ---------------------------------------------------------------------------
@@ -428,6 +512,140 @@ class TestSpatialCorrelation:
                 ]
                 mean_syn = np.mean(syn_corrs)
                 assert np.sign(mean_syn) == np.sign(obs_corr) or abs(obs_corr) < 0.05
+
+
+# ---------------------------------------------------------------------------
+# Spearman cross-site correlation (regression)
+# ---------------------------------------------------------------------------
+
+
+def _rank_within_doy(df: pd.DataFrame, day_index: np.ndarray) -> pd.DataFrame:
+    """Rank each column within day-of-year groups (positional alignment)."""
+    return df.groupby(day_index).rank()
+
+
+def _shuffle_within_doy(
+    df: pd.DataFrame, day_index: np.ndarray, rng: np.random.Generator
+) -> pd.DataFrame:
+    """
+    Independently permute each site within each day-of-year.
+
+    Keeps the per-day-of-year marginal of every site (and therefore the
+    seasonal cycle) exactly, but destroys the cross-site stochastic
+    dependence.
+    """
+    out = df.to_numpy(copy=True)
+    for d in np.unique(day_index):
+        rows = np.where(day_index == d)[0]
+        for j in range(out.shape[1]):
+            out[rows, j] = out[rng.permutation(rows), j]
+    return pd.DataFrame(out, index=df.index, columns=df.columns)
+
+
+def _ensemble_mean_spearman(ens: Ensemble, day_index=None) -> pd.DataFrame:
+    """
+    Average the per-realization Spearman matrices of an ensemble.
+
+    If day_index is given, each realization is first replaced by its ranks
+    within day-of-year (across years), which removes the shared seasonal
+    cycle and leaves only the stochastic cross-site dependence.
+    """
+    mats = []
+    for r in ens.realization_ids:
+        df = ens.data_by_realization[r]
+        if day_index is not None:
+            df = _rank_within_doy(df, day_index)
+        mats.append(df.corr(method="spearman").values)
+    cols = ens.data_by_realization[ens.realization_ids[0]].columns
+    return pd.DataFrame(np.mean(mats, axis=0), index=cols, columns=cols)
+
+
+def _max_offdiag_abs_diff(a: pd.DataFrame, b: pd.DataFrame) -> float:
+    diff = np.abs(a.values - b.values)
+    np.fill_diagonal(diff, 0.0)
+    return float(diff.max())
+
+
+class TestMultisitePhaseRandomizationSpearman:
+    """
+    Regression tests for cross-site Spearman correlation.
+
+    _generate_chunk draws one white-noise CWT and shares its phases across
+    all sites, and _back_transform then maps the synthetic series of each
+    site to flows purely by rank within day-of-year. Rank mapping preserves
+    Spearman correlation exactly, so the Spearman cross-correlation of the
+    output is that of the Gaussian-domain synthesis, which makes it a much
+    tighter check on the shared-phase mechanism than the Pearson test with
+    a 0.25 tolerance in TestSpatialCorrelation.
+    """
+
+    TOL = 0.10
+
+    def test_spearman_cross_correlation_preserved(self, correlated_fit):
+        """
+        Ensemble-mean Spearman matrix should match the observed one.
+
+        Measured on this fixture (10 realizations, seed 0): max off-diagonal
+        discrepancy 0.038 (mean_center) and 0.040 (normal_score), so the
+        tolerance is 0.10 rather than 0.05. The shared-phase synthesis does
+        not reproduce cross-site dependence exactly: it forces phase
+        alignment at every scale, so the output correlation is governed by
+        how similar the per-site CWT amplitude envelopes are rather than by
+        the observed dependence itself. Where the observed sites carry
+        independent noise the synthetic correlation exceeds the observed
+        value. Here, where the sites share a strong common component, it
+        falls a few hundredths short. A generator that stopped sharing
+        phases lands 0.12 to 0.14 away on this fixture, outside TOL.
+        """
+        gen, ens = correlated_fit
+        target = gen.Q_obs_df_.corr(method="spearman")
+        syn = _ensemble_mean_spearman(ens)
+        max_diff = _max_offdiag_abs_diff(syn, target)
+        assert max_diff < self.TOL, (
+            f"transform={gen.transform}: max |syn - obs| Spearman = "
+            f"{max_diff:.3f}\nobserved:\n{target.round(3)}\n"
+            f"synthetic:\n{syn.round(3)}"
+        )
+
+    def test_spearman_exceeds_seasonal_only_baseline(self, correlated_fit):
+        """
+        Negative control: the synthetic cross-site dependence is not merely
+        the shared seasonal cycle.
+
+        Raw Spearman is dominated by the seasonal cycle, which the
+        per-day-of-year kappa back-transform re-imposes even when phases are
+        not shared (an independent-phase synthesis still gives about
+        0.79 / 0.66 / 0.79 on this fixture). To isolate the stochastic
+        dependence, both the synthetic output and a seasonal-only baseline
+        are ranked within day-of-year across years before computing
+        Spearman. The baseline is the observed frame with each site
+        independently permuted within each day-of-year: every per-day
+        marginal (hence the seasonal cycle) is kept, the cross-site
+        dependence is destroyed, and its within-day Spearman is about 0.
+        The working generator gives about 0.84 to 0.89 (mean_center) and
+        0.81 to 0.86 (normal_score). One with independent per-site phases
+        gives about 0.
+
+        This control shows that stochastic dependence is present in the
+        output, not that its magnitude tracks the observed value: the
+        observed within-day Spearman here is 0.61 to 0.73, and on a fixture
+        with independent sites the generator still produces about 0.8.
+        """
+        gen, ens = correlated_fit
+        day_index = gen.day_index_
+        baseline_df = _shuffle_within_doy(
+            gen.Q_obs_df_, day_index, np.random.default_rng(0)
+        )
+        baseline = _rank_within_doy(baseline_df, day_index).corr(method="spearman")
+        syn = _ensemble_mean_spearman(ens, day_index=day_index)
+
+        gap = syn.values - baseline.values
+        np.fill_diagonal(gap, np.inf)
+        assert gap.min() >= 0.15, (
+            f"transform={gen.transform}: within-day-of-year Spearman of the "
+            f"synthetic output is not at least 0.15 above the seasonal-only "
+            f"baseline\nbaseline:\n{baseline.round(3)}\nsynthetic:\n{syn.round(3)}"
+        )
 
 
 # ---------------------------------------------------------------------------

@@ -3,8 +3,12 @@
 import numpy as np
 import pandas as pd
 import pytest
+from scipy.linalg import toeplitz
+from scipy.stats import gamma as gamma_dist
+from scipy.stats import lognorm, norm
 
 from synhydro.core.ensemble import Ensemble
+from synhydro.core.nataf import hurst_acf
 from synhydro.methods.generation.parametric.smarta import SMARTAGenerator
 
 
@@ -363,3 +367,149 @@ class TestSMARTAInnovationRepair:
         np.testing.assert_allclose(np.diag(G_rep), np.diag(G), rtol=1e-12)
         np.linalg.cholesky(G_rep)
 
+
+# ---------------------------------------------------------------------------
+# Statistical reproduction of the published SMARTA properties
+# ---------------------------------------------------------------------------
+
+
+def _fgn_gamma_multisite(
+    n_years=120,
+    H=0.75,
+    rho=((1.0, 0.7, 0.5), (0.7, 1.0, 0.6), (0.5, 0.6, 1.0)),
+    shapes=(3.0, 5.0, 2.0),
+    scales=(100.0, 60.0, 150.0),
+    seed=0,
+):
+    """Deterministic 3-site annual series with fGn persistence and gamma margins.
+
+    ``Z = L_t @ W @ L_s.T`` with ``W`` i.i.d. N(0, 1): ``L_t`` is the Cholesky
+    factor of the Toeplitz matrix of ``hurst_acf(H)`` so every column has the
+    fGn autocorrelation, and ``L_s`` is the Cholesky factor of ``rho`` so the
+    columns have lag-0 correlation ``rho``. A Gaussian copula then maps each
+    column onto its gamma marginal.
+    """
+    rho = np.asarray(rho, dtype=float)
+    n_sites = rho.shape[0]
+    rng = np.random.default_rng(seed)
+    L_t = np.linalg.cholesky(toeplitz(hurst_acf(H, n_years - 1)))
+    L_s = np.linalg.cholesky(rho)
+    W = rng.standard_normal((n_years, n_sites))
+    Z = L_t @ W @ L_s.T
+    X = np.empty_like(Z)
+    for i in range(n_sites):
+        X[:, i] = gamma_dist.ppf(norm.cdf(Z[:, i]), a=shapes[i], scale=scales[i])
+    dates = pd.date_range("1900-01-01", periods=n_years, freq="YS")
+    return pd.DataFrame(X, index=dates, columns=["siteA", "siteB", "siteC"])
+
+
+def _frozen_marginal(params):
+    """Build the scipy frozen distribution described by a ``_marginal_params`` entry."""
+    if params["dist"] == "gamma":
+        return gamma_dist(a=params["shape"], loc=params["loc"], scale=params["scale"])
+    if params["dist"] == "lognorm":
+        return lognorm(s=params["s"], loc=params["loc"], scale=params["scale"])
+    raise ValueError(f"Unexpected marginal distribution: {params['dist']}")
+
+
+_N_REALIZATIONS = 40
+_N_YEARS_SYN = 1000
+
+
+@pytest.fixture(scope="module")
+def smarta_fgn():
+    """SMARTA fitted to the fGn/gamma fixture plus a 40 x 1000-year ensemble."""
+    gen = SMARTAGenerator(sma_order=128, nataf_method="GH")
+    gen.fit(_fgn_gamma_multisite())
+    ens = gen.generate(n_realizations=_N_REALIZATIONS, n_years=_N_YEARS_SYN, seed=1)
+    reals = [ens.data_by_realization[r] for r in range(_N_REALIZATIONS)]
+    return gen, reals
+
+
+class TestSMARTAStatisticalReproduction:
+    """The generator must reproduce what SMARTA is built to preserve
+    (Tsoukalas et al., 2018): the target autocorrelation function, the lag-0
+    cross-site correlation, and the fitted marginal distribution.
+
+    All sample statistics use the generator's own biased ACF estimator
+    (``SMARTAGenerator._empirical_acf``) on both the observed and synthetic
+    sides so that estimator bias cancels rather than masquerading as error.
+    """
+
+    def test_generated_acf_matches_target(self, smarta_fgn):
+        gen, reals = smarta_fgn
+        max_lag = 10
+        for s in range(gen._n_sites):
+            acf_syn = np.mean(
+                [
+                    SMARTAGenerator._empirical_acf(df.iloc[:, s].values, max_lag)
+                    for df in reals
+                ],
+                axis=0,
+            )
+            target = gen._target_acf[s][: max_lag + 1]
+            # The biased sample ACF of a long-memory series sits below the
+            # true ACF by roughly sum(rho)/n at every lag (about 0.02 for the
+            # LRD site here), so a small uniform shortfall is expected.
+            assert np.abs(acf_syn[1:] - target[1:]).max() < 0.05
+
+    def test_generated_acf_consistent_with_observed(self, smarta_fgn):
+        """The CAS fit smooths a noisy 120-year sample ACF (per-lag sampling
+        SE about 0.1), so the observed ACF is compared where the comparison
+        is statistically meaningful: at lag 1, on the lags 1-5 average, and
+        lag by lag against the model's own sampling band."""
+        gen, reals = smarta_fgn
+        max_lag = 5
+        n_obs = len(gen._Q_annual)
+        n_chunks = _N_YEARS_SYN // n_obs
+        for s in range(gen._n_sites):
+            acf_syn = np.mean(
+                [
+                    SMARTAGenerator._empirical_acf(df.iloc[:, s].values, max_lag)
+                    for df in reals
+                ],
+                axis=0,
+            )
+            acf_obs = SMARTAGenerator._empirical_acf(
+                gen._Q_annual.iloc[:, s].values, max_lag
+            )
+            # Lag 1 is the best-determined sample lag and anchors the CAS fit.
+            assert abs(acf_syn[1] - acf_obs[1]) < 0.05
+            # A least-squares fit balances residuals over lags, so the mean
+            # over lags 1-5 is preserved even though single lags are not.
+            assert abs(acf_syn[1:].mean() - acf_obs[1:].mean()) < 0.10
+            # Each observed lag must lie within 3 sampling SEs of the model,
+            # SE estimated from n_obs-year chunks of the synthetic ensemble.
+            chunks = np.array(
+                [
+                    SMARTAGenerator._empirical_acf(
+                        df.iloc[:, s].values[c * n_obs : (c + 1) * n_obs], max_lag
+                    )[1:]
+                    for df in reals
+                    for c in range(n_chunks)
+                ]
+            )
+            se = chunks.std(axis=0)
+            assert np.all(np.abs(acf_obs[1:] - acf_syn[1:]) < 3.0 * se)
+
+    def test_generated_cross_correlation_matches_observed(self, smarta_fgn):
+        gen, reals = smarta_fgn
+        corr_syn = np.mean([np.corrcoef(df.values.T) for df in reals], axis=0)
+        corr_obs = np.corrcoef(gen._Q_annual.values.T)
+        off_diag = ~np.eye(gen._n_sites, dtype=bool)
+        assert np.abs(corr_syn - corr_obs)[off_diag].max() < 0.05
+
+    def test_generated_marginal_moments_match_fitted(self, smarta_fgn):
+        gen, reals = smarta_fgn
+        pooled = np.vstack([df.values for df in reals])
+        Q_obs = gen._Q_annual.values
+        for s in range(gen._n_sites):
+            dist = _frozen_marginal(gen._marginal_params[s])
+            syn_mean = pooled[:, s].mean()
+            syn_std = pooled[:, s].std()
+            # Against the fitted marginal the generator samples from.
+            assert abs(syn_mean / dist.mean() - 1.0) < 0.03
+            assert abs(syn_std / dist.std() - 1.0) < 0.08
+            # Looser, against the observed record the marginal was fitted to.
+            assert abs(syn_mean / Q_obs[:, s].mean() - 1.0) < 0.10
+            assert abs(syn_std / Q_obs[:, s].std() - 1.0) < 0.20

@@ -701,3 +701,174 @@ class TestJointEstimator:
         b.fit(monthly_series)
         assert a.d == b.d
         np.testing.assert_array_equal(a.phi, b.phi)
+
+
+# ---------------------------------------------------------------------------
+# Generated output: fitted d, Hosking ACF and moments
+# ---------------------------------------------------------------------------
+
+
+def _hosking_acf(d: float, nlags: int) -> np.ndarray:
+    """Theoretical ACF of ARFIMA(0,d,0) at lags 0..nlags (Hosking, 1981):
+    rho(k) = prod_{j=1..k} (j - 1 + d) / (j - d)."""
+    rho = np.ones(nlags + 1)
+    for k in range(1, nlags + 1):
+        rho[k] = rho[k - 1] * (k - 1 + d) / (k - d)
+    return rho
+
+
+def _acf_about_zero(x: np.ndarray, lags) -> np.ndarray:
+    """Biased (1/n) sample ACF taken about the known process mean of zero."""
+    denom = np.sum(x * x)
+    return np.array([np.sum(x[:-k] * x[k:]) / denom for k in lags])
+
+
+class TestARFIMAGeneratedOutput:
+    """Statistical regression tests on the output of ``generate``.
+
+    The estimator tests above check that the fit recovers d from exact
+    ARFIMA samples.  These check the other direction: that flows produced
+    by the generator carry the fitted d, Hosking's (1981) ACF and the
+    fitted Gaussian-domain variance.
+
+    Input is an exact ARFIMA(0, 0.3, 0) sample of 600 months, exponentiated
+    to positive flows as in ``TestWhittleEstimator``.  The generator uses
+    the profile Whittle estimator (d_fit = 0.279 for this seed) and an
+    inverse filter of K = 300 lags, which retains about 98 percent of the
+    process variance at this d (about 97 percent at the default K = 100).
+    Six 150-year realizations are generated once per class.
+    """
+
+    LAGS = (1, 2, 5, 10, 20)
+
+    @pytest.fixture(scope="class")
+    def fitted(self):
+        rng = np.random.default_rng(0)
+        n = 600
+        idx = pd.date_range("1950-01-01", periods=n, freq="MS")
+        series = pd.Series(
+            np.exp(_exact_arfima_0d0(0.3, n, rng)), index=idx, name="site_1"
+        )
+        gen = ARFIMAGenerator(p=0, q=0, d_method="whittle", truncation_lag=300)
+        gen.fit(series)
+        ens = gen.generate(n_realizations=6, n_years=150, seed=0)
+        return series, gen, ens
+
+    @staticmethod
+    def _to_gaussian(gen: ARFIMAGenerator, flows: pd.Series) -> np.ndarray:
+        """Map generated flows back to the domain of the ARFIMA process.
+
+        Applies the forward transforms of ``preprocessing`` (per-month
+        Stedinger log, then per-month z-score), which invert the last two
+        steps of ``_generate_single`` exactly.
+        """
+        y = gen.scaler.transform(gen.log_transform.transform(flows))
+        return np.asarray(y.values, dtype=float)
+
+    def test_generated_series_recovers_d(self, fitted):
+        """Refitting Whittle on each realization recovers the fitted d.
+
+        Measured (seed 0): d_fit = 0.2791, d_hat = [0.286, 0.288, 0.278,
+        0.320, 0.281, 0.295], mean 0.2915 (bias +0.012, max deviation
+        0.041).  The bias is not a truncation effect: it is +0.016 at
+        K = 100 and +0.010 at K = 1000.  The asymptotic Whittle standard
+        error at n = 1800 is sqrt(6 / pi^2 / n) = 0.018 per realization.
+        """
+        _, gen, ens = fitted
+        d_fit = gen.d
+        d_hats = []
+        for df in ens.data_by_realization.values():
+            refit = ARFIMAGenerator(p=0, q=0, d_method="whittle")
+            refit.fit(df.iloc[:, 0])
+            d_hats.append(refit.d)
+        d_hats = np.array(d_hats)
+        assert abs(d_hats.mean() - d_fit) < 0.05, (
+            f"mean d_hat {d_hats.mean():.4f} vs d_fit {d_fit:.4f}; "
+            f"d_hat = {np.round(d_hats, 4).tolist()}"
+        )
+        assert np.all(
+            np.abs(d_hats - d_fit) < 0.12
+        ), f"d_hat = {np.round(d_hats, 4).tolist()} vs d_fit {d_fit:.4f}"
+
+    def test_generated_acf_matches_hosking(self, fitted):
+        """Ensemble-mean ACF of the Gaussian-domain output matches Hosking.
+
+        The ARFIMA process X_t = sum_k psi_k eps_{t-k} is zero-mean by
+        construction, so the ACF is taken about zero.  The usual sample ACF
+        about the sample mean is biased low by about var(xbar) / gamma(0)
+        for a long-memory series (var(xbar) / gamma(0) is 0.013 here at
+        n = 1800 and K = 300, and 0.046 for the untruncated process; Beran,
+        1994), an estimator artifact unrelated to the generator.  The K = 300
+        truncation lowers the exact ACF by 0.009 (lag 1) to 0.013 (lag 20).
+
+        Measured (seed 0), lags (1, 2, 5, 10, 20):
+            Hosking exact  0.387 0.288 0.193 0.142 0.105
+            ensemble mean  0.393 0.298 0.180 0.146 0.109
+        A short-memory process with the same lag-1 correlation would have
+        rho(20) = 0.39**20 ~ 1e-8, so the lag-20 floor of half the Hosking
+        value cannot be met without long memory.
+        """
+        _, gen, ens = fitted
+        lags = list(self.LAGS)
+        acf = np.mean(
+            [
+                _acf_about_zero(self._to_gaussian(gen, df.iloc[:, 0]), lags)
+                for df in ens.data_by_realization.values()
+            ],
+            axis=0,
+        )
+        theory = _hosking_acf(gen.d, max(lags))[lags]
+        assert np.max(np.abs(acf - theory)) < 0.05, (
+            f"lags {lags}: ensemble ACF {np.round(acf, 4).tolist()} vs "
+            f"Hosking {np.round(theory, 4).tolist()}"
+        )
+        assert acf[-1] > 0.5 * theory[-1], (
+            f"lag-20 ACF {acf[-1]:.4f} below half the Hosking value "
+            f"{theory[-1]:.4f}: long memory not carried into the output"
+        )
+
+    def test_generated_variance_matches_fit(self, fitted):
+        """Pooled Gaussian-domain output has the fitted mean and variance.
+
+        var(X) = sigma_eps^2 * sum_{k<=K} psi_k^2, which for the fitted
+        sigma_eps^2 should reproduce var(Q_norm) = 1 up to the 2 percent
+        truncation deficit; this is the check on sigma_eps^2 and the filter
+        gain that the (normalized) ACF test cannot make.  The pooled mean
+        over 6 x 1800 values has standard deviation sqrt(v / 6) = 0.046,
+        with v = var(xbar) / gamma(0) = 0.013 for the K = 300 truncated
+        process (0.046 untruncated), so 0.25 is over 5 sigma.
+        Measured: mean +0.03, std 1.02.
+        """
+        _, gen, ens = fitted
+        x = np.concatenate(
+            [
+                self._to_gaussian(gen, df.iloc[:, 0])
+                for df in ens.data_by_realization.values()
+            ]
+        )
+        assert abs(x.mean()) < 0.25, f"pooled Gaussian-domain mean {x.mean():+.4f}"
+        assert abs(x.std() - 1.0) < 0.10, f"pooled Gaussian-domain std {x.std():.4f}"
+
+    def test_generated_moments_match_input(self, monthly_series):
+        """Pooled flow mean and std match the input to 10 / 20 percent.
+
+        Pooled version of ``TestARFIMAStatisticalProperties`` (same fixture,
+        generator and ensemble size; those tests allow factors of 2 to 3 per
+        realization).  Measured: mean ratio 1.0001, std ratio 1.004.
+
+        The long-memory ensemble above is not used here: its input is a
+        sigma = 1 lognormal, whose sample std at n = 600 has a sampling
+        standard deviation of 25 to 30 percent (kurtosis above 100, plus
+        long memory), so its measured pooled ratios of 1.08 (mean) and
+        1.28 (std) say nothing about the generator.
+        """
+        gen = ARFIMAGenerator()
+        gen.fit(monthly_series)
+        ens = gen.generate(n_realizations=30, n_years=20, seed=42)
+        arr = np.concatenate(
+            [df.values.ravel() for df in ens.data_by_realization.values()]
+        )
+        mean_ratio = arr.mean() / monthly_series.mean()
+        std_ratio = arr.std() / monthly_series.std()
+        assert abs(mean_ratio - 1.0) < 0.10, f"pooled mean ratio {mean_ratio:.4f}"
+        assert abs(std_ratio - 1.0) < 0.20, f"pooled std ratio {std_ratio:.4f}"

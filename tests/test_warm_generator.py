@@ -909,6 +909,55 @@ class TestWARMSpectralReproduction:
         ratio = float(np.median(syn)) / obs_pk
         assert 0.4 < ratio < 1.6, f"peak power ratio {ratio:.2f}"
 
+    def test_refit_on_generated_output_redetects_band(self):
+        """Refitting WARM on generated traces re-detects the 25 yr band.
+
+        Complements ``test_default_reproduces_spectral_peak``, which checks
+        the magnitude of global wavelet power at 25 yr. Here the question is
+        whether the set of significant periods survives generation: a fresh
+        WARMGenerator with the same settings, fitted to each synthetic
+        realization, must auto-detect a band covering 25 yr in most
+        realizations. As a negative control, a band covering 5 yr, where the
+        input has no signal, must stay rare. Realizations with zero detected
+        bands count as not detected.
+        """
+        kwargs = dict(background_spectrum="white")
+        df = self._sinusoid_plus_noise(seed=1)
+        gen = WARMGenerator(**kwargs)
+        gen.fit(df)
+
+        def covers(bands, period):
+            return any(b["period_min"] <= period <= b["period_max"] for b in bands)
+
+        # Precondition: the input fit auto-detects a band spanning 25 yr and
+        # nothing at 5 yr.
+        assert any(
+            b["auto_detected"] and b["period_min"] <= 25.0 <= b["period_max"]
+            for b in gen.bands_
+        )
+        assert not covers(gen.bands_, 5.0)
+
+        n_realizations = 30
+        ens = gen.generate(n_years=101, n_realizations=n_realizations, seed=0)
+
+        band_at_25 = []
+        band_at_5 = []
+        mask_at_25 = []
+        for r in range(n_realizations):
+            refit = WARMGenerator(**kwargs)
+            refit.fit(ens.data_by_realization[r])
+            band_at_25.append(covers(refit.bands_, 25.0))
+            band_at_5.append(covers(refit.bands_, 5.0))
+            i25 = int(np.argmin(np.abs(refit.fourier_periods_ - 25.0)))
+            mask_at_25.append(bool(refit.significant_mask_[i25]))
+
+        frac_band_25 = float(np.mean(band_at_25))
+        frac_mask_25 = float(np.mean(mask_at_25))
+        frac_band_5 = float(np.mean(band_at_5))
+        assert frac_band_25 >= 0.7, f"25 yr band re-detected in {frac_band_25:.2f}"
+        assert frac_mask_25 >= 0.7, f"25 yr scale significant in {frac_mask_25:.2f}"
+        assert frac_band_5 <= 0.3, f"spurious 5 yr band in {frac_band_5:.2f}"
+
     def test_ar1_fixed_under_reproduces_peak(self):
         """A fixed AR(1) band model cannot carry the spectral peak."""
         df = self._sinusoid_plus_noise(seed=1)

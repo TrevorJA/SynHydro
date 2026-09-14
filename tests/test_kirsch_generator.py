@@ -13,6 +13,7 @@ import pandas as pd
 
 from synhydro.methods.generation.hybrid.kirsch import KirschGenerator
 from synhydro.core.ensemble import Ensemble
+from synhydro.utils import load_example_data
 
 
 AGGREGATED_FIXTURES = ("sample_monthly_dataframe", "sample_weekly_dataframe")
@@ -416,13 +417,15 @@ class TestKirschPaperConformance:
         rng = np.random.default_rng(42)
         flows_c = []
         for _ in range(n_realizations):
-            residuals = np.empty((n_years, n_per, gen.n_sites))
+            # Resample from gen.Y (the space the bootstrap draws from), with
+            # the n_years + 1 buffer row consumed by the half-year shift.
+            residuals = np.empty((n_years + 1, n_per, gen.n_sites))
             for m in range(n_per):
                 for s in range(gen.n_sites):
                     residuals[:, m, s] = rng.choice(
-                        gen.Z_h[:, m, s], size=n_years, replace=True
+                        gen.Y[:, m, s], size=n_years + 1, replace=True
                     )
-            flows_c.append(gen.generate_from_residuals(residuals))
+            flows_c.append(gen.generate_from_residuals(residuals, n_years=n_years))
 
         def pool_corr(flows_list):
             mats = []
@@ -457,3 +460,223 @@ class TestKirschPaperConformance:
         out_indices = gen.generate_from_indices(M, n_years=n_years, as_array=True)
 
         np.testing.assert_allclose(out_series, out_indices)
+
+
+class TestKirschGenerateFromResiduals:
+    """Tests for the ``generate_from_residuals`` entry point.
+
+    The residual tensor plays the role of the bootstrap tensor X and must
+    carry the same ``n_years + 1`` buffer row that ``generate_single_series``
+    and ``generate_from_indices`` consume in the half-year shift.
+    """
+
+    @pytest.mark.parametrize("fixture_name", AGGREGATED_FIXTURES)
+    def test_generate_from_residuals_matches_generate_from_indices(
+        self, fixture_name, request
+    ):
+        """Feeding the bootstrap tensor built from M into
+        generate_from_residuals must reproduce generate_from_indices(M)
+        exactly."""
+        df = request.getfixturevalue(fixture_name)
+        gen = KirschGenerator()
+        gen.fit(df)
+
+        rng = np.random.default_rng(7)
+        n_years = 6
+        M = gen._get_bootstrap_indices(n_years + 1, max_idx=gen.Y.shape[0], rng=rng)
+        X = gen._create_bootstrap_tensor(M)
+
+        np.testing.assert_allclose(
+            gen.generate_from_residuals(X, n_years=n_years),
+            gen.generate_from_indices(M, n_years=n_years),
+        )
+
+    @pytest.mark.parametrize("fixture_name", AGGREGATED_FIXTURES)
+    def test_generate_from_residuals_does_not_duplicate_year_halves(
+        self, fixture_name, request
+    ):
+        """Regression guard: the old implementation padded the residual
+        tensor by repeating its last row, which made the last two synthetic
+        years share an identical second half."""
+        df = request.getfixturevalue(fixture_name)
+        gen = KirschGenerator()
+        gen.fit(df)
+
+        rng = np.random.default_rng(0)
+        n_years = 5
+        n_per = gen.n_periods_per_year
+        half = n_per // 2
+        residuals = rng.standard_normal((n_years + 1, n_per, gen.n_sites))
+
+        out = gen.generate_from_residuals(residuals, n_years=n_years)
+        assert out.shape == (n_years * n_per, gen.n_sites)
+
+        years = out.reshape(n_years, n_per, gen.n_sites)
+        assert not np.allclose(
+            years[n_years - 2, half:, :], years[n_years - 1, half:, :]
+        )
+
+    def test_generate_from_residuals_rejects_wrong_shape(
+        self, sample_monthly_dataframe
+    ):
+        """Exactly n_years rows (the old contract) and a wrong period count
+        are both rejected."""
+        gen = KirschGenerator()
+        gen.fit(sample_monthly_dataframe)
+
+        n_years = 4
+        n_per = gen.n_periods_per_year
+
+        with pytest.raises(ValueError, match=r"n_years \+ 1"):
+            gen.generate_from_residuals(
+                np.zeros((n_years, n_per, gen.n_sites)), n_years=n_years
+            )
+
+        with pytest.raises(ValueError):
+            gen.generate_from_residuals(np.zeros((n_years + 1, n_per - 2, gen.n_sites)))
+
+
+@pytest.fixture(scope="module")
+def usgs_monthly_complete_years():
+    """Packaged USGS monthly flows trimmed to complete calendar years."""
+    try:
+        Q = load_example_data("usgs_monthly_streamflow_cms")
+    except FileNotFoundError:
+        pytest.skip("Example data file not found - skip test")
+    counts = Q.groupby(Q.index.year).size()
+    complete = counts[counts == 12].index
+    return Q.loc[Q.index.year.isin(complete)]
+
+
+@pytest.fixture(scope="module")
+def kirsch_usgs_ensemble(usgs_monthly_complete_years):
+    """Default KirschGenerator fit to the USGS record plus a 200 x 40-year
+    ensemble (seed 0), shared across the statistical reproduction tests.
+
+    With 200 realizations the pooled sample is N = 8000 years per
+    (month, site) cell, so the sampling standard error of a per-period mean
+    is about 0.011 sigma and the 0.05 sigma tolerance below is roughly 4.5
+    standard errors. At 50 realizations (N = 2000, standard error 0.022
+    sigma) the maximum over the 48 cells exceeds 0.05 sigma through sampling
+    noise alone.
+    """
+    gen = KirschGenerator()
+    gen.fit(usgs_monthly_complete_years)
+    ens = gen.generate(n_realizations=200, n_years=40, seed=0)
+    return gen, ens
+
+
+class TestKirschStatisticalReproduction:
+    """Statistical regression tests against the packaged USGS monthly record.
+
+    A default (log-flow, normal-score) KirschGenerator is fit to the complete
+    calendar years of ``usgs_monthly_streamflow_cms``. All statistics are
+    computed on log flows pooled over realizations and years.
+
+    Correlation targets are taken in the normal-score space of ``gen.Y`` (the
+    observed standardized log residuals after the forward normal-score
+    transform), because that is the space in which the per-site Cholesky
+    factors impose correlation. The inverse normal-score transform is a
+    nonlinear marginal map, so Pearson correlation of the synthetic output in
+    ``Z_h`` space differs from ``Corr(Z_h)`` by up to about 0.09 on this
+    record even at very large ensemble sizes (the historical
+    ``|Corr(Y) - Corr(Z_h)|`` itself reaches 0.13). Comparing in ``Z_h``
+    space would test the marginal transform rather than the correlation
+    structure.
+    """
+
+    @staticmethod
+    def _pooled_log_flows(gen, ens):
+        """Stack log flows as (n_realizations * n_years, 12, n_sites).
+
+        Axis 1 is calendar month 1..12 (grouped via ``df.index.month``) and
+        axis 2 follows ``gen._sites``, matching the row and column order of
+        ``gen.mean_period`` and ``gen.std_period``.
+        """
+        n_per = gen.n_periods_per_year
+        blocks = []
+        for r in sorted(ens.data_by_realization):
+            df = ens.data_by_realization[r][gen._sites]
+            log_q = np.log(df.to_numpy())
+            months = df.index.month
+            block = np.empty((len(df) // n_per, n_per, gen.n_sites))
+            for m in range(n_per):
+                block[:, m, :] = log_q[months == m + 1]
+            blocks.append(block)
+        return np.concatenate(blocks, axis=0)
+
+    @staticmethod
+    def _normal_scores(gen, log_flows):
+        """Standardize pooled log flows with the fitted per-period moments
+        and map them into the normal-score space of ``gen.Y``."""
+        z = (log_flows - gen.mean_period.to_numpy()) / gen.std_period.to_numpy()
+        return gen._apply_normal_score_transform(z)
+
+    def test_per_period_mean_and_std(self, kirsch_usgs_ensemble):
+        """Per-month mean of synthetic log flows is within 0.05 sigma of the
+        fitted mean, and per-month std is within 10 percent of the fitted
+        std, at every site."""
+        gen, ens = kirsch_usgs_ensemble
+        assert list(gen.mean_period.index) == list(range(1, 13))
+
+        log_flows = self._pooled_log_flows(gen, ens)
+        mean_syn = log_flows.mean(axis=0)
+        std_syn = log_flows.std(axis=0, ddof=1)
+        mean_obs = gen.mean_period.to_numpy()
+        std_obs = gen.std_period.to_numpy()
+
+        mean_err = np.abs(mean_syn - mean_obs) / std_obs
+        std_ratio = std_syn / std_obs
+
+        assert mean_err.max() < 0.05, f"max |mean error| / sigma = {mean_err.max():.4f}"
+        assert (
+            std_ratio.min() > 0.9 and std_ratio.max() < 1.1
+        ), f"std ratio range = [{std_ratio.min():.4f}, {std_ratio.max():.4f}]"
+
+    def test_within_half_year_correlation(self, kirsch_usgs_ensemble):
+        """Within each half-year block, the synthetic intra-annual correlation
+        in normal-score space matches the historical Corr(Y).
+
+        Only the two within-half blocks (months 1-6 x 1-6 and 7-12 x 7-12)
+        are asserted. The lag-1 correlation across the mid-year seam (month 6
+        to month 7) is only approximately reproduced because the two halves
+        come from different Cholesky factors; this is an inherent limitation
+        of the published method (see docs/algorithms/kirsch.md) and is
+        deliberately not asserted here.
+        """
+        gen, ens = kirsch_usgs_ensemble
+        y_syn = self._normal_scores(gen, self._pooled_log_flows(gen, ens))
+        half = gen.n_periods_per_year // 2
+
+        max_diff = 0.0
+        for s in range(gen.n_sites):
+            c_syn = np.corrcoef(y_syn[:, :, s].T)
+            c_obs = np.corrcoef(gen.Y[:, :, s].T)
+            diff = np.abs(c_syn - c_obs)
+            max_diff = max(max_diff, diff[:half, :half].max(), diff[half:, half:].max())
+
+        assert max_diff < 0.10, f"max within-half correlation error = {max_diff:.4f}"
+
+    def test_cross_site_lag0_correlation(self, kirsch_usgs_ensemble):
+        """Per month, the synthetic cross-site correlation in normal-score
+        space matches the historical Corr(Y[:, m, :]) to within 0.12.
+
+        The bootstrap index matrix is shared across sites, which is what
+        carries cross-site dependence into the synthetic tensor. The per-site
+        Cholesky mixing then blends the cross-site correlation of month m
+        with that of the earlier months feeding column m, so preservation is
+        approximate rather than exact: on this record the implied deviation
+        reaches about 0.09 where the cross-site correlation of the smallest
+        basin swings strongly between months. The 0.12 tolerance leaves
+        room for sampling noise on top of that systematic deviation.
+        """
+        gen, ens = kirsch_usgs_ensemble
+        y_syn = self._normal_scores(gen, self._pooled_log_flows(gen, ens))
+
+        max_diff = 0.0
+        for m in range(gen.n_periods_per_year):
+            c_syn = np.corrcoef(y_syn[:, m, :].T)
+            c_obs = np.corrcoef(gen.Y[:, m, :].T)
+            max_diff = max(max_diff, np.abs(c_syn - c_obs).max())
+
+        assert max_diff < 0.12, f"max cross-site correlation error = {max_diff:.4f}"

@@ -938,27 +938,44 @@ class KirschGenerator(Generator):
             X, n_years, as_array=as_array, synthetic_index=synthetic_index
         )
 
-    def generate_from_residuals(self, residuals, as_array=True, synthetic_index=None):
+    def generate_from_residuals(
+        self, residuals, n_years=None, as_array=True, synthetic_index=None
+    ):
         """
-        Generate synthetic flows from pre-computed standardized residuals.
+        Generate synthetic flows from a pre-built residual tensor.
 
         This method allows external code (e.g., MOEA-FIND) to inject decision
-        variables (standardized residuals) directly, bypassing the bootstrap
-        resampling step. Runs steps 4-8 of the Kirsch pipeline:
-        normal-score transform, Cholesky, inverse normal-score, cross-year
-        combination, and re-seasonalization.
+        variables (residuals) directly in place of the bootstrap resampling
+        step. It mirrors ``generate_from_indices``: the residual tensor plays
+        the role of the bootstrap tensor X and must have ``n_years + 1`` rows.
+        The extra row is consumed by the half-year shift exactly as the
+        buffered bootstrap in ``generate_single_series``: synthetic year ``i``
+        uses the second half of row ``i`` (through X') and all of row
+        ``i + 1``, and the first half of row 0 is unused.
+
+        Residuals must already be in the space that the bootstrap draws from,
+        i.e. the space of ``self.Y``: per-period normal scores when
+        ``generate_using_log_flow=True``, standardized log residuals
+        otherwise. No forward normal-score transform is applied here. The
+        pipeline applies X' derivation, per-site Cholesky mixing, the inverse
+        normal-score transform (only when ``generate_using_log_flow=True``),
+        destandardization, exponentiation (log mode only), and reshaping.
 
         Parameters
         ----------
         residuals : np.ndarray
-            Array of standardized residuals with shape
-            ``(n_years, n_periods_per_year, n_sites)``. Each residual should
-            be approximately N(0,1) or representable as such within
-            period-specific empirical distributions.
+            Residual tensor with shape
+            ``(n_years + 1, n_periods_per_year, n_sites)`` in the space of
+            ``self.Y`` (see above). Approximately N(0, 1) entries are
+            appropriate when ``generate_using_log_flow=True``.
+        n_years : int, optional
+            Number of years for the synthetic output. If None, inferred from
+            ``residuals.shape[0] - 1``.
         as_array : bool, default=True
             If True, returns numpy array; if False, returns pandas DataFrame.
         synthetic_index : pd.DatetimeIndex, optional
-            Custom DatetimeIndex for the output. If None, a default index is generated.
+            Custom DatetimeIndex for the output. If None, a default index is
+            generated.
 
         Returns
         -------
@@ -966,34 +983,45 @@ class KirschGenerator(Generator):
             Synthetic flows with shape ``(n_years * n_periods_per_year, n_sites)``
             if as_array=True, otherwise a pandas DataFrame.
 
+        Raises
+        ------
+        ValueError
+            If ``residuals`` is not three-dimensional, if its period or site
+            dimensions do not match the fitted generator, or if its first
+            dimension is not ``n_years + 1``.
+
         Notes
         -----
-        This method assumes the generator has been fitted. Residuals are assumed
-        to be standardized residuals; they will be normal-score transformed,
-        processed through Cholesky factors, and combined to preserve the
-        cross-year boundary.
+        This method assumes the generator has been fitted. Passing
+        ``self._create_bootstrap_tensor(M)`` as ``residuals`` reproduces
+        ``generate_from_indices(M)`` exactly.
         """
         self.validate_fit()
 
-        residuals = np.asarray(residuals)
+        residuals = np.asarray(residuals, dtype=float)
 
         if residuals.ndim != 3 or residuals.shape[1:] != (
             self.n_periods_per_year,
             self.n_sites,
         ):
             raise ValueError(
-                f"residuals must have shape (n_years, {self.n_periods_per_year}, "
-                f"{self.n_sites}), got {residuals.shape}"
+                "residuals must have shape (n_years + 1, "
+                f"{self.n_periods_per_year}, {self.n_sites}), got "
+                f"{residuals.shape}"
             )
 
-        n_years = residuals.shape[0]
+        if n_years is None:
+            n_years = residuals.shape[0] - 1
 
-        X = np.zeros((n_years + 1, self.n_periods_per_year, self.n_sites))
-        X[:n_years] = residuals
-        X[n_years] = residuals[-1]
+        if n_years < 1 or residuals.shape[0] != n_years + 1:
+            raise ValueError(
+                "residuals must have shape (n_years + 1, n_periods_per_year, "
+                f"n_sites) = ({n_years + 1}, {self.n_periods_per_year}, "
+                f"{self.n_sites}) for n_years={n_years}, got {residuals.shape}"
+            )
 
         return self._pipeline_from_X(
-            X, n_years, as_array=as_array, synthetic_index=synthetic_index
+            residuals, n_years, as_array=as_array, synthetic_index=synthetic_index
         )
 
     def generate_single_series(

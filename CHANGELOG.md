@@ -168,6 +168,14 @@ All notable changes to SynHydro are documented in this file.
   through a shared `_pipeline_from_X` helper. Breaking for seed-level
   reproducibility: `.generate(seed=S)` produces different numerical output
   than prior releases (the corrected distribution).
+- Kirsch `generate_from_residuals` now requires residuals of shape
+  `(n_years + 1, n_periods_per_year, n_sites)`, matching
+  `generate_from_indices`, instead of duplicating the last residual row,
+  which made the last two synthetic years share an identical second half.
+  Breaking for external callers that passed exactly `n_years` rows. The
+  docstring now states that residuals must already be in the normal-score
+  space when `generate_using_log_flow=True` and that only the inverse
+  transform is applied.
 - Kirsch weekly output DatetimeIndex is now built per synthetic year using
   `pd.Timestamp.fromisocalendar(y, w, 7)` instead of a plain
   `pd.date_range(freq="W-SUN")`. The previous range marched in 7-day steps
