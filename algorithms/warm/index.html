@@ -336,6 +336,25 @@
   
 
       
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../citing/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  How to Cite
+
+      </a>
+    </li>
+  
+
+      
     </ul>
   </div>
 </nav>
@@ -1499,6 +1518,28 @@
   
 
     
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../citing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    How to Cite
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
   </ul>
 </nav>
                   </div>
@@ -2029,6 +2070,7 @@ vf = \sqrt{ \frac{ \mathrm{Var}(Q_t - \bar Q) }{ \sum_b \mathrm{Var}(S^{(b)}_t) 
 <li>Univariate; the Section 2.4 spatial proportion disaggregation is not implemented (see above).</li>
 <li>No cone-of-influence handling: wavelet coefficients near the start and end of the record are affected by zero padding, and they enter the global spectrum, the SAWP and the band reconstruction with full weight. Band identification and the SAWP envelope are therefore least reliable within roughly <span class="arithmatex">\(\sqrt{2} a_j\)</span> years of either end at scale <span class="arithmatex">\(a_j\)</span>. Records shorter than 30 years are discouraged.</li>
 <li>The chi-squared significance test assumes a smoothly varying background spectrum; multi-modal spectra may produce noisy band identification near the threshold.</li>
+<li>The significance test is conservative in practice: on white-noise input about 2 percent of scales exceed the 95 percent threshold instead of the nominal 5 percent, and no significant band is found below roughly 8 years. Weak or short-period bands can therefore be missed. Supply the band explicitly through <code>bands</code>, or lower <code>significance_level</code>, when a band that is known to be present is not detected.</li>
 <li>The default white-noise background (as in the paper) can flag low-frequency power that is explained by simple AR(1) persistence as a significant band; <code>background_spectrum='red'</code> tests against the AR(1) spectrum instead but may find no band on short persistent records.</li>
 <li>With the default <code>'historical'</code> re-application every realization shares the observed SAWP envelope, so the ensemble is conditioned on the historical epoch timing; with <code>'random_offset'</code> the cyclic shift preserves the SAWP autocorrelation but produces only <span class="arithmatex">\(N\)</span> distinct envelopes, randomizes the timing of wet/dry-power epochs, and introduces one envelope discontinuity at the wrap point. Either way, when <span class="arithmatex">\(T &gt; N\)</span> the envelope repeats cyclically.</li>
 <li>The synthetic peak power of a strongly periodic band is typically 0.6-0.8 of the observed single-realization value (see Statistical Properties); bands that are near-deterministic oscillations are not reproduced as sharply as in the paper's figures.</li>
