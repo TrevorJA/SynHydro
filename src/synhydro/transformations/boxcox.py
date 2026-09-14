@@ -3,6 +3,7 @@ Box-Cox power transformation for normalizing flow data.
 
 Automatically finds optimal lambda parameter for normalization.
 """
+
 import logging
 import pandas as pd
 
@@ -35,7 +36,7 @@ class BoxCoxTransform(Transform):
         super().__init__()
         self.by_site = by_site
 
-    def fit(self, data: pd.DataFrame) -> 'BoxCoxTransform':
+    def fit(self, data: pd.DataFrame) -> "BoxCoxTransform":
         """
         Fit optimal lambda parameters.
 
@@ -63,7 +64,7 @@ class BoxCoxTransform(Transform):
             _, lambda_val = boxcox(col_data)
             lambdas[col] = lambda_val
 
-        self.params_['lambda'] = lambdas
+        self.params_["lambda"] = lambdas
         self.is_fitted = True
         return self
 
@@ -87,7 +88,7 @@ class BoxCoxTransform(Transform):
         from scipy.stats import boxcox
 
         transformed = data.copy()
-        lambdas = self.params_['lambda']
+        lambdas = self.params_["lambda"]
 
         for col in data.columns:
             lambda_val = lambdas[col]
@@ -97,9 +98,9 @@ class BoxCoxTransform(Transform):
             if (col_data <= 0).any():
                 offset = -col_data.min() + 1e-6
                 col_data = col_data + offset
-                if 'offset' not in self.params_:
-                    self.params_['offset'] = {}
-                self.params_['offset'][col] = offset
+                if "offset" not in self.params_:
+                    self.params_["offset"] = {}
+                self.params_["offset"][col] = offset
 
             transformed[col] = boxcox(col_data, lmbda=lambda_val)
 
@@ -125,8 +126,8 @@ class BoxCoxTransform(Transform):
         from scipy.special import inv_boxcox
 
         result = data.copy()
-        lambdas = self.params_['lambda']
-        offsets = self.params_.get('offset', {})
+        lambdas = self.params_["lambda"]
+        offsets = self.params_.get("offset", {})
 
         for col in data.columns:
             lambda_val = lambdas[col]

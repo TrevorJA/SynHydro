@@ -267,7 +267,12 @@ def nataf_forward_int(
                 val, _ = integrate.dblquad(
                     integrand, -lim, lim, -lim, lim, epsabs=epsabs, epsrel=epsrel
                 )
-            except (ValueError, OverflowError, FloatingPointError, ZeroDivisionError) as exc:
+            except (
+                ValueError,
+                OverflowError,
+                FloatingPointError,
+                ZeroDivisionError,
+            ) as exc:
                 logger.debug(
                     "Nataf integration at rho_z=%.4f, lim=%.1f failed: %s", rz, lim, exc
                 )
@@ -383,13 +388,18 @@ def nataf_inverse(
             "%d target correlation(s) (min %.4f) are below the attainable "
             "Frechet-Hoeffding lower bound %.4f for these marginals; "
             "clipped to the bound (rho_equiv = %.4f).",
-            int(np.sum(below)), float(target_rho[below].min()), rx_lo, float(rmin),
+            int(np.sum(below)),
+            float(target_rho[below].min()),
+            rx_lo,
+            float(rmin),
         )
     if np.any(above):
         logger.warning(
             "%d target correlation(s) (max %.4f) exceed the attainable upper "
             "bound %.4f for these marginals; clipped to the bound.",
-            int(np.sum(above)), float(target_rho[above].max()), rx_hi,
+            int(np.sum(above)),
+            float(target_rho[above].max()),
+            rx_hi,
         )
 
     # Clip to valid range

@@ -23,7 +23,7 @@ class Transform(ABC):
         self.params_: Dict[str, Any] = {}
 
     @abstractmethod
-    def fit(self, data: pd.DataFrame) -> 'Transform':
+    def fit(self, data: pd.DataFrame) -> "Transform":
         """
         Fit transformation parameters to data.
 
@@ -115,7 +115,7 @@ class TransformPipeline:
     def __init__(self, transforms: List[Transform]):
         self.transforms = transforms
 
-    def fit(self, data: pd.DataFrame) -> 'TransformPipeline':
+    def fit(self, data: pd.DataFrame) -> "TransformPipeline":
         """
         Fit all transforms in sequence.
 

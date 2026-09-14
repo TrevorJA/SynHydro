@@ -3,6 +3,7 @@ Example data loading utilities.
 
 Provides functions to load example datasets shipped with SynHydro.
 """
+
 import logging
 import pandas as pd
 from pathlib import Path
@@ -14,8 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def load_example_data(
-    dataset: str = 'usgs_daily_streamflow_cms',
-    **kwargs
+    dataset: str = "usgs_daily_streamflow_cms", **kwargs
 ) -> pd.DataFrame:
     """
     Load an example dataset.
@@ -56,8 +56,8 @@ def load_example_data(
     list_example_datasets : List all available example datasets
     """
     # Add .csv extension if not provided
-    if not dataset.endswith('.csv'):
-        filename = f'{dataset}.csv'
+    if not dataset.endswith(".csv"):
+        filename = f"{dataset}.csv"
     else:
         filename = dataset
 
@@ -67,10 +67,7 @@ def load_example_data(
     logger.info(f"Loading example data from {filepath.name}")
 
     # Set default kwargs for typical use case
-    default_kwargs = {
-        'index_col': 0,
-        'parse_dates': True
-    }
+    default_kwargs = {"index_col": 0, "parse_dates": True}
     default_kwargs.update(kwargs)
 
     # Load data
@@ -102,7 +99,7 @@ def load_example_data(
             # Check if we have daily data by inferring frequency
             if len(data) > 1:
                 inferred_freq = pd.infer_freq(data.index)
-                if inferred_freq and inferred_freq.startswith('D'):
+                if inferred_freq and inferred_freq.startswith("D"):
                     # Daily data - trim to complete months
                     start_date = data.index[0]
                     end_date = data.index[-1]
@@ -113,14 +110,18 @@ def load_example_data(
 
                     # Move end to end of previous complete month
                     # Find the first day of the month containing end_date
-                    end_month_start = pd.Timestamp(year=end_date.year, month=end_date.month, day=1)
+                    end_month_start = pd.Timestamp(
+                        year=end_date.year, month=end_date.month, day=1
+                    )
                     # Get the last day of the previous month
                     end_date = (end_month_start - pd.Timedelta(days=1)).normalize()
 
                     # Filter to complete months
                     if start_date <= end_date:
                         data = data.loc[start_date:end_date]
-                        logger.info(f"Trimmed to complete months: {start_date.date()} to {end_date.date()}")
+                        logger.info(
+                            f"Trimmed to complete months: {start_date.date()} to {end_date.date()}"
+                        )
 
             # Calculate record length
             removed_rows = original_len - len(data)
@@ -129,9 +130,9 @@ def load_example_data(
             # Infer frequency and calculate years of data
             if len(data) > 1:
                 inferred_freq = pd.infer_freq(data.index)
-                if inferred_freq and inferred_freq.startswith('D'):
+                if inferred_freq and inferred_freq.startswith("D"):
                     years_of_data = len(data) / 365.25
-                elif inferred_freq and inferred_freq in ['MS', 'M']:
+                elif inferred_freq and inferred_freq in ["MS", "M"]:
                     years_of_data = len(data) / 12
                 else:
                     years_of_data = (data.index[-1] - data.index[0]).days / 365.25
@@ -140,24 +141,46 @@ def load_example_data(
 
             # Issue warnings based on hydrologic best practices
             if removal_pct > 10:
-                logger.warning(f"DATA MODIFICATION WARNING: Removed {removal_pct:.1f}% of rows ({removed_rows}/{original_len})")
-                logger.warning(f"Significant data filtering may affect statistical properties of generated flows")
+                logger.warning(
+                    f"DATA MODIFICATION WARNING: Removed {removal_pct:.1f}% of rows ({removed_rows}/{original_len})"
+                )
+                logger.warning(
+                    f"Significant data filtering may affect statistical properties of generated flows"
+                )
 
             if years_of_data < 10:
-                logger.warning(f"INSUFFICIENT RECORD LENGTH WARNING: Only {years_of_data:.1f} years of data available")
-                logger.warning(f"Hydrologic generators require at least 10 years for robust parameter estimation")
-                logger.warning(f"Results may not adequately capture interannual variability and climate patterns")
+                logger.warning(
+                    f"INSUFFICIENT RECORD LENGTH WARNING: Only {years_of_data:.1f} years of data available"
+                )
+                logger.warning(
+                    f"Hydrologic generators require at least 10 years for robust parameter estimation"
+                )
+                logger.warning(
+                    f"Results may not adequately capture interannual variability and climate patterns"
+                )
             elif years_of_data < 20:
-                logger.warning(f"LIMITED RECORD LENGTH: {years_of_data:.1f} years of data")
-                logger.warning(f"20+ years recommended for capturing climate variability and extreme events")
+                logger.warning(
+                    f"LIMITED RECORD LENGTH: {years_of_data:.1f} years of data"
+                )
+                logger.warning(
+                    f"20+ years recommended for capturing climate variability and extreme events"
+                )
 
-            logger.info(f"Filtered to {len(data)} rows (removed {removed_rows} rows, {removal_pct:.1f}%)")
-            logger.info(f"Date range: {data.index[0]} to {data.index[-1]} (~{years_of_data:.1f} years)")
+            logger.info(
+                f"Filtered to {len(data)} rows (removed {removed_rows} rows, {removal_pct:.1f}%)"
+            )
+            logger.info(
+                f"Date range: {data.index[0]} to {data.index[-1]} (~{years_of_data:.1f} years)"
+            )
         else:
             # No complete overlap - don't filter, just return as is
             logger.warning(f"DATA QUALITY WARNING: No rows with all columns valid")
-            logger.warning(f"Data contains missing values or gaps that may affect generator performance")
-            logger.warning(f"Consider regenerating example data or selecting specific columns")
+            logger.warning(
+                f"Data contains missing values or gaps that may affect generator performance"
+            )
+            logger.warning(
+                f"Consider regenerating example data or selecting specific columns"
+            )
 
         return data
     except Exception as e:
@@ -165,7 +188,7 @@ def load_example_data(
         raise
 
 
-def get_example_data_info(dataset: str = 'usgs_daily_streamflow_cms') -> dict:
+def get_example_data_info(dataset: str = "usgs_daily_streamflow_cms") -> dict:
     """
     Get information about an example dataset without loading it.
 
@@ -189,8 +212,8 @@ def get_example_data_info(dataset: str = 'usgs_daily_streamflow_cms') -> dict:
     >>> info = get_example_data_info()
     >>> print(f"Dataset size: {info['size_mb']:.2f} MB")
     """
-    if not dataset.endswith('.csv'):
-        filename = f'{dataset}.csv'
+    if not dataset.endswith(".csv"):
+        filename = f"{dataset}.csv"
     else:
         filename = dataset
 
@@ -200,21 +223,16 @@ def get_example_data_info(dataset: str = 'usgs_daily_streamflow_cms') -> dict:
         size_mb = size_bytes / (1024 * 1024)
 
         return {
-            'name': dataset,
-            'path': str(filepath),
-            'size_mb': size_mb,
-            'exists': True
+            "name": dataset,
+            "path": str(filepath),
+            "size_mb": size_mb,
+            "exists": True,
         }
     except FileNotFoundError:
-        return {
-            'name': dataset,
-            'path': None,
-            'size_mb': None,
-            'exists': False
-        }
+        return {"name": dataset, "path": None, "size_mb": None, "exists": False}
 
 
 __all__ = [
-    'load_example_data',
-    'get_example_data_info',
+    "load_example_data",
+    "get_example_data_info",
 ]

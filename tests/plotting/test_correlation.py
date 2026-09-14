@@ -73,8 +73,22 @@ def test_plot_autocorrelation_seed_none_still_draws_members(small_ensemble):
 def test_plot_autocorrelation_seed_is_keyword_only(small_ensemble):
     with pytest.raises(TypeError):
         plot_autocorrelation(
-            small_ensemble, None, None, 10, "daily", 2, None, (6, 4),
-            None, None, None, True, True, None, 100, 3,
+            small_ensemble,
+            None,
+            None,
+            10,
+            "daily",
+            2,
+            None,
+            (6, 4),
+            None,
+            None,
+            None,
+            True,
+            True,
+            None,
+            100,
+            3,
         )
 
 

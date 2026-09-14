@@ -381,7 +381,9 @@ class TestMakeOutputIndex:
 
     def test_create_output_index_uses_second_resolution(self):
         gen = MockGenerator()
-        idx = gen._create_output_index(10, freq="D", start_date=pd.Timestamp("2000-01-01"))
+        idx = gen._create_output_index(
+            10, freq="D", start_date=pd.Timestamp("2000-01-01")
+        )
         assert idx.dtype == np.dtype("datetime64[s]")
         assert idx[0] == pd.Timestamp("2000-01-01")
         assert len(idx) == 10

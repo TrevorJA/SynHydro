@@ -14,75 +14,74 @@ from spei._typing import ContinuousDist
 # Registry of supported distributions for SSI calculation
 DISTRIBUTION_REGISTRY: Dict[str, ContinuousDist] = {
     # Most commonly used distributions for hydrology
-    'gamma': scs.gamma,
-    'lognorm': scs.lognorm,
-    'pearson3': scs.pearson3,
-
+    "gamma": scs.gamma,
+    "lognorm": scs.lognorm,
+    "pearson3": scs.pearson3,
     # Additional distributions that may be useful
-    'weibull_min': scs.weibull_min,
-    'gumbel_r': scs.gumbel_r,
-    'norm': scs.norm,
-    'expon': scs.expon,
-    'genextreme': scs.genextreme,
-    'fisk': scs.fisk,  # Log-logistic distribution
+    "weibull_min": scs.weibull_min,
+    "gumbel_r": scs.gumbel_r,
+    "norm": scs.norm,
+    "expon": scs.expon,
+    "genextreme": scs.genextreme,
+    "fisk": scs.fisk,  # Log-logistic distribution
 }
 
 
 # Distribution metadata for user guidance
 DISTRIBUTION_INFO: Dict[str, Dict[str, str]] = {
-    'gamma': {
-        'name': 'Gamma',
-        'description': 'Most commonly used for precipitation and streamflow. Right-skewed, bounded at zero.',
-        'best_for': 'General streamflow data, especially with positive skew',
-        'parameters': '2 (shape, scale)',
+    "gamma": {
+        "name": "Gamma",
+        "description": "Most commonly used for precipitation and streamflow. Right-skewed, bounded at zero.",
+        "best_for": "General streamflow data, especially with positive skew",
+        "parameters": "2 (shape, scale)",
     },
-    'lognorm': {
-        'name': 'Lognormal',
-        'description': 'Good for highly skewed positive data. Log-transform of normal distribution.',
-        'best_for': 'Highly variable streamflow with strong positive skew',
-        'parameters': '2 (shape, scale)',
+    "lognorm": {
+        "name": "Lognormal",
+        "description": "Good for highly skewed positive data. Log-transform of normal distribution.",
+        "best_for": "Highly variable streamflow with strong positive skew",
+        "parameters": "2 (shape, scale)",
     },
-    'pearson3': {
-        'name': 'Pearson Type III',
-        'description': 'Flexible distribution commonly used in flood frequency analysis.',
-        'best_for': 'Data with moderate to high skewness',
-        'parameters': '3 (skew, location, scale)',
+    "pearson3": {
+        "name": "Pearson Type III",
+        "description": "Flexible distribution commonly used in flood frequency analysis.",
+        "best_for": "Data with moderate to high skewness",
+        "parameters": "3 (skew, location, scale)",
     },
-    'weibull_min': {
-        'name': 'Weibull',
-        'description': 'Flexible distribution good for modeling minima and extremes.',
-        'best_for': 'Low-flow analysis and drought extremes',
-        'parameters': '2 (shape, scale)',
+    "weibull_min": {
+        "name": "Weibull",
+        "description": "Flexible distribution good for modeling minima and extremes.",
+        "best_for": "Low-flow analysis and drought extremes",
+        "parameters": "2 (shape, scale)",
     },
-    'gumbel_r': {
-        'name': 'Gumbel',
-        'description': 'Used for extreme value analysis, particularly maxima.',
-        'best_for': 'Extreme events (floods, droughts)',
-        'parameters': '2 (location, scale)',
+    "gumbel_r": {
+        "name": "Gumbel",
+        "description": "Used for extreme value analysis, particularly maxima.",
+        "best_for": "Extreme events (floods, droughts)",
+        "parameters": "2 (location, scale)",
     },
-    'norm': {
-        'name': 'Normal (Gaussian)',
-        'description': 'Symmetric distribution. May not fit hydrologic data well.',
-        'best_for': 'Data with little skewness (rare in hydrology)',
-        'parameters': '2 (mean, std)',
+    "norm": {
+        "name": "Normal (Gaussian)",
+        "description": "Symmetric distribution. May not fit hydrologic data well.",
+        "best_for": "Data with little skewness (rare in hydrology)",
+        "parameters": "2 (mean, std)",
     },
-    'expon': {
-        'name': 'Exponential',
-        'description': 'Simple distribution with constant hazard rate.',
-        'best_for': 'Waiting times, simple right-skewed data',
-        'parameters': '1 (scale)',
+    "expon": {
+        "name": "Exponential",
+        "description": "Simple distribution with constant hazard rate.",
+        "best_for": "Waiting times, simple right-skewed data",
+        "parameters": "1 (scale)",
     },
-    'genextreme': {
-        'name': 'Generalized Extreme Value (GEV)',
-        'description': 'Very flexible for extreme value analysis.',
-        'best_for': 'Extreme events with varying tail behavior',
-        'parameters': '3 (shape, location, scale)',
+    "genextreme": {
+        "name": "Generalized Extreme Value (GEV)",
+        "description": "Very flexible for extreme value analysis.",
+        "best_for": "Extreme events with varying tail behavior",
+        "parameters": "3 (shape, location, scale)",
     },
-    'fisk': {
-        'name': 'Log-Logistic (Fisk)',
-        'description': 'Alternative to lognormal with heavier tails.',
-        'best_for': 'Highly skewed data with occasional extreme values',
-        'parameters': '2 (shape, scale)',
+    "fisk": {
+        "name": "Log-Logistic (Fisk)",
+        "description": "Alternative to lognormal with heavier tails.",
+        "best_for": "Highly skewed data with occasional extreme values",
+        "parameters": "2 (shape, scale)",
     },
 }
 
@@ -113,7 +112,7 @@ def get_distribution(name: Union[str, ContinuousDist]) -> ContinuousDist:
     """
     if isinstance(name, str):
         if name not in DISTRIBUTION_REGISTRY:
-            available = ', '.join(DISTRIBUTION_REGISTRY.keys())
+            available = ", ".join(DISTRIBUTION_REGISTRY.keys())
             raise ValueError(
                 f"Distribution '{name}' not recognized. "
                 f"Available distributions: {available}"
@@ -124,7 +123,9 @@ def get_distribution(name: Union[str, ContinuousDist]) -> ContinuousDist:
         return name
 
 
-def list_distributions(include_info: bool = False) -> Union[List[str], Dict[str, Dict[str, str]]]:
+def list_distributions(
+    include_info: bool = False,
+) -> Union[List[str], Dict[str, Dict[str, str]]]:
     """
     List available distributions for drought analysis.
 
@@ -179,7 +180,7 @@ def get_distribution_info(name: str) -> Dict[str, str]:
     >>> print(info['description'])
     """
     if name not in DISTRIBUTION_INFO:
-        available = ', '.join(DISTRIBUTION_REGISTRY.keys())
+        available = ", ".join(DISTRIBUTION_REGISTRY.keys())
         raise ValueError(
             f"Distribution '{name}' not recognized. "
             f"Available distributions: {available}"
@@ -246,7 +247,7 @@ def validate_distribution(dist: Union[str, ContinuousDist]) -> ContinuousDist:
     """
     if isinstance(dist, str):
         return get_distribution(dist)
-    elif hasattr(dist, 'pdf') and hasattr(dist, 'cdf'):
+    elif hasattr(dist, "pdf") and hasattr(dist, "cdf"):
         # Looks like a scipy distribution object
         return dist
     else:

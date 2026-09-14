@@ -13,7 +13,7 @@ from synhydro.utils.directories import (
     PACKAGE_ROOT,
     EXAMPLE_DATA_DIR,
     get_example_data_path,
-    list_example_datasets
+    list_example_datasets,
 )
 
 # Validation (not exported by default, but available)
@@ -26,6 +26,6 @@ from synhydro.utils.directories import (
 
 __all__ = [
     # Data loading
-    'get_example_data_info',
-    'load_example_data',
+    "get_example_data_info",
+    "load_example_data",
 ]

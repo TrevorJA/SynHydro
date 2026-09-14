@@ -817,9 +817,7 @@ class TestMultiSiteHMMParameterRecovery:
 
         # Cross-site correlation of generated flows matches the simulated truth
         ens = gen.generate(n_realizations=50, n_years=n_years, seed=5)
-        Q_syn = pd.concat(
-            [ens.data_by_realization[r] for r in range(50)], axis=0
-        )
+        Q_syn = pd.concat([ens.data_by_realization[r] for r in range(50)], axis=0)
         true_corr = np.corrcoef(np.exp(Y_true).T - 1.0)
         syn_corr = Q_syn.corr().values
         assert np.all(np.abs(true_corr - syn_corr) < 0.1)

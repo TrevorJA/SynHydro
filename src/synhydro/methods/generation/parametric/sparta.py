@@ -595,8 +595,7 @@ class SPARTAGenerator(Generator):
         order = np.lexsort((months[keep], years[keep]))
         n_years = len(complete)
         return {
-            site: Q_full[site].values[order].reshape(n_years, 12)
-            for site in Q.columns
+            site: Q_full[site].values[order].reshape(n_years, 12) for site in Q.columns
         }
 
     def _repair_innovation_covariance(self, G_s: np.ndarray) -> np.ndarray:

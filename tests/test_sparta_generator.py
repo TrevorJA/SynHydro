@@ -322,9 +322,10 @@ class TestSPARTAStartMonth:
         assert df0.index[0].month == 1
         assert df0.index[0].year == 1990
         syn = pd.concat([ens.data_by_realization[i] for i in range(10)])
-        ratio = syn.groupby(syn.index.month).mean() / Q_apr.groupby(
-            Q_apr.index.month
-        ).mean()
+        ratio = (
+            syn.groupby(syn.index.month).mean()
+            / Q_apr.groupby(Q_apr.index.month).mean()
+        )
         assert ((ratio > 0.85) & (ratio < 1.15)).all().all(), ratio
 
     def test_too_few_complete_years_raises(self, monthly_multisite):
@@ -373,7 +374,10 @@ class TestSPARTAZeroFlows:
         # Simulated July statistics should match the positive-only marginal
         ens = gen.generate(n_realizations=20, n_years=30, seed=1)
         sim = np.concatenate(
-            [df.loc[df.index.month == 7, "siteA"].values for df in ens.data_by_realization.values()]
+            [
+                df.loc[df.index.month == 7, "siteA"].values
+                for df in ens.data_by_realization.values()
+            ]
         )
         assert np.all(sim > 0)
         assert np.median(sim) == pytest.approx(ref.median(), rel=0.1)

@@ -23,14 +23,14 @@ from pygeohydro import NWIS
 # Use specific gauges in the NE US (Delaware River Basin and nearby) with long records
 # These gauges are known to have good data quality and temporal overlap
 stations = [
-    '01434000',  # Delaware River at Port Jervis, NY (1904-present)
-    '01438500',  # Delaware River at Montague, NJ (1940-present)
-    '01463500',  # Delaware River at Trenton, NJ (1912-present)
-    '01440000',  # Flat Brook near Flatbrookville, NJ (1923-present)
+    "01434000",  # Delaware River at Port Jervis, NY (1904-present)
+    "01438500",  # Delaware River at Montague, NJ (1940-present)
+    "01463500",  # Delaware River at Trenton, NJ (1912-present)
+    "01440000",  # Flat Brook near Flatbrookville, NJ (1923-present)
 ]
 
 # Specify time period - use 1945-2025 to ensure good overlap
-dates = ('1945-01-01', '2025-09-30')
+dates = ("1945-01-01", "2025-09-30")
 
 # Retrieve data for the gauges
 nwis = NWIS()
@@ -45,7 +45,9 @@ print()
 for gauge in Q.columns:
     valid_data = Q[gauge].dropna()
     if len(valid_data) > 0:
-        print(f"{gauge}: {len(valid_data)} valid days, {valid_data.index[0]} to {valid_data.index[-1]}")
+        print(
+            f"{gauge}: {len(valid_data)} valid days, {valid_data.index[0]} to {valid_data.index[-1]}"
+        )
     else:
         print(f"{gauge}: No valid data")
 print()
@@ -71,7 +73,7 @@ else:
 print()
 
 # Transform to monthly
-Q_monthly = Q.resample('MS').sum()
+Q_monthly = Q.resample("MS").sum()
 
 # Export into the package data directory. The path is resolved relative to
 # this script (repo root / src / synhydro / data) rather than through the
@@ -89,4 +91,3 @@ print(f"  - {len(Q_monthly)} monthly observations")
 print(f"  - Date range: {Q.index[0]} to {Q.index[-1]}")
 print(f"  - Directory: {DATA_DIR}")
 print("  - Files: usgs_daily_streamflow_cms.csv, usgs_monthly_streamflow_cms.csv")
-

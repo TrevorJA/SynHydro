@@ -4,6 +4,7 @@ Package directory utilities.
 Provides paths to package resources and to the example datasets shipped in
 the ``synhydro.data`` package.
 """
+
 from importlib.resources import files as resource_files
 from pathlib import Path
 

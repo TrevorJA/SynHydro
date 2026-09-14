@@ -3,6 +3,7 @@ Z-score standardization transformation.
 
 Standardizes data to zero mean and unit variance.
 """
+
 import pandas as pd
 
 from synhydro.transformations.abstract import Transform
@@ -33,17 +34,14 @@ class StandardScaler(Transform):
     """
 
     def __init__(
-        self,
-        by_month: bool = True,
-        with_mean: bool = True,
-        with_std: bool = True
+        self, by_month: bool = True, with_mean: bool = True, with_std: bool = True
     ):
         super().__init__()
         self.by_month = by_month
         self.with_mean = with_mean
         self.with_std = with_std
 
-    def fit(self, data: pd.DataFrame) -> 'StandardScaler':
+    def fit(self, data: pd.DataFrame) -> "StandardScaler":
         """
         Fit mean and std parameters.
 
@@ -59,11 +57,11 @@ class StandardScaler(Transform):
         """
         # Compute mean and std parameters directly
         if self.by_month:
-            self.params_['mean'] = data.groupby(data.index.month).mean()
-            self.params_['std'] = data.groupby(data.index.month).std()
+            self.params_["mean"] = data.groupby(data.index.month).mean()
+            self.params_["std"] = data.groupby(data.index.month).std()
         else:
-            self.params_['mean'] = data.mean()
-            self.params_['std'] = data.std()
+            self.params_["mean"] = data.mean()
+            self.params_["std"] = data.std()
 
         self.is_fitted = True
         return self
@@ -92,14 +90,18 @@ class StandardScaler(Transform):
             for month in range(1, 13):
                 mask = data.index.month == month
                 if self.with_mean:
-                    transformed.loc[mask] = transformed.loc[mask] - self.params_['mean'].loc[month]
+                    transformed.loc[mask] = (
+                        transformed.loc[mask] - self.params_["mean"].loc[month]
+                    )
                 if self.with_std:
-                    transformed.loc[mask] = transformed.loc[mask] / self.params_['std'].loc[month]
+                    transformed.loc[mask] = (
+                        transformed.loc[mask] / self.params_["std"].loc[month]
+                    )
         else:
             if self.with_mean:
-                transformed = transformed - self.params_['mean']
+                transformed = transformed - self.params_["mean"]
             if self.with_std:
-                transformed = transformed / self.params_['std']
+                transformed = transformed / self.params_["std"]
 
         return transformed
 
@@ -127,13 +129,15 @@ class StandardScaler(Transform):
             for month in range(1, 13):
                 mask = data.index.month == month
                 if self.with_std:
-                    result.loc[mask] = result.loc[mask] * self.params_['std'].loc[month]
+                    result.loc[mask] = result.loc[mask] * self.params_["std"].loc[month]
                 if self.with_mean:
-                    result.loc[mask] = result.loc[mask] + self.params_['mean'].loc[month]
+                    result.loc[mask] = (
+                        result.loc[mask] + self.params_["mean"].loc[month]
+                    )
         else:
             if self.with_std:
-                result = result * self.params_['std']
+                result = result * self.params_["std"]
             if self.with_mean:
-                result = result + self.params_['mean']
+                result = result + self.params_["mean"]
 
         return result

@@ -11,6 +11,6 @@ from synhydro.pipelines.prebuilt import (
 )
 
 __all__ = [
-    'KirschNowakPipeline',
-    'ThomasFieringNowakPipeline',
+    "KirschNowakPipeline",
+    "ThomasFieringNowakPipeline",
 ]

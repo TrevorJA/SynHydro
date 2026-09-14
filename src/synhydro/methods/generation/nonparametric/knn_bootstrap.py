@@ -47,7 +47,12 @@ from typing import Optional, List, Dict, Any
 
 from sklearn.neighbors import NearestNeighbors
 
-from synhydro.core.base import Generator, GeneratorParams, FittedParams, make_output_index
+from synhydro.core.base import (
+    Generator,
+    GeneratorParams,
+    FittedParams,
+    make_output_index,
+)
 from synhydro.core.ensemble import Ensemble, EnsembleMetadata
 
 

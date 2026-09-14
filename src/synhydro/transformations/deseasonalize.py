@@ -3,6 +3,7 @@ Deseasonalization transformation for removing monthly patterns.
 
 Removes seasonal patterns (monthly mean and variance) from flow data.
 """
+
 from typing import Literal
 import pandas as pd
 
@@ -31,11 +32,11 @@ class DeseasonalizeTransform(Transform):
     >>> Q_orig = transform.inverse_transform(Q_deseas)
     """
 
-    def __init__(self, method: Literal['mean', 'mean_std'] = 'mean_std'):
+    def __init__(self, method: Literal["mean", "mean_std"] = "mean_std"):
         super().__init__()
         self.method = method
 
-    def fit(self, data: pd.DataFrame) -> 'DeseasonalizeTransform':
+    def fit(self, data: pd.DataFrame) -> "DeseasonalizeTransform":
         """
         Fit monthly statistics.
 
@@ -51,9 +52,9 @@ class DeseasonalizeTransform(Transform):
         """
         # Use centralized compute_monthly_statistics function
         monthly_stats = compute_monthly_statistics(data)
-        self.params_['monthly_mean'] = monthly_stats['mean']
-        if self.method == 'mean_std':
-            self.params_['monthly_std'] = monthly_stats['std']
+        self.params_["monthly_mean"] = monthly_stats["mean"]
+        if self.method == "mean_std":
+            self.params_["monthly_std"] = monthly_stats["std"]
 
         self.is_fitted = True
         return self
@@ -79,10 +80,14 @@ class DeseasonalizeTransform(Transform):
 
         for month in range(1, 13):
             mask = data.index.month == month
-            transformed.loc[mask] = transformed.loc[mask] - self.params_['monthly_mean'].loc[month]
+            transformed.loc[mask] = (
+                transformed.loc[mask] - self.params_["monthly_mean"].loc[month]
+            )
 
-            if self.method == 'mean_std':
-                transformed.loc[mask] = transformed.loc[mask] / self.params_['monthly_std'].loc[month]
+            if self.method == "mean_std":
+                transformed.loc[mask] = (
+                    transformed.loc[mask] / self.params_["monthly_std"].loc[month]
+                )
 
         return transformed
 
@@ -108,9 +113,13 @@ class DeseasonalizeTransform(Transform):
         for month in range(1, 13):
             mask = data.index.month == month
 
-            if self.method == 'mean_std':
-                result.loc[mask] = result.loc[mask] * self.params_['monthly_std'].loc[month]
+            if self.method == "mean_std":
+                result.loc[mask] = (
+                    result.loc[mask] * self.params_["monthly_std"].loc[month]
+                )
 
-            result.loc[mask] = result.loc[mask] + self.params_['monthly_mean'].loc[month]
+            result.loc[mask] = (
+                result.loc[mask] + self.params_["monthly_mean"].loc[month]
+            )
 
         return result

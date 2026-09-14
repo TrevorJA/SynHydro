@@ -170,7 +170,7 @@ cython_debug/
 
 ./pywrdrb_inputs/*
 pywrdrb/*
-*pywrdrb* 
+*pywrdrb*
 ./local/*
 local/
 .claude/

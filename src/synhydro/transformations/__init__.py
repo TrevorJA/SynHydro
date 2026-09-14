@@ -44,12 +44,12 @@ from synhydro.transformations.deseasonalize import DeseasonalizeTransform
 
 __all__ = [
     # Abstract classes
-    'Transform',
-    'TransformPipeline',
+    "Transform",
+    "TransformPipeline",
     # Transformations
-    'LogTransform',
-    'SteddingerTransform',
-    'StandardScaler',
-    'BoxCoxTransform',
-    'DeseasonalizeTransform',
+    "LogTransform",
+    "SteddingerTransform",
+    "StandardScaler",
+    "BoxCoxTransform",
+    "DeseasonalizeTransform",
 ]

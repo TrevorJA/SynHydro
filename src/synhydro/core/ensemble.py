@@ -574,9 +574,7 @@ class Ensemble:
 
                     # Parse dates once for the first realization, reuse if lengths match
                     if shared_dt_index is None:
-                        shared_dt_index = _parse_date_dataset(
-                            realization_group["date"]
-                        )
+                        shared_dt_index = _parse_date_dataset(realization_group["date"])
                     dt_index = shared_dt_index
 
                     # Bulk read into numpy array

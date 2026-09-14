@@ -3,6 +3,7 @@ Logarithmic transformation for flow data.
 
 Useful for positively-skewed flow distributions.
 """
+
 import numpy as np
 import pandas as pd
 
@@ -32,7 +33,7 @@ class LogTransform(Transform):
         super().__init__()
         self.offset = offset
 
-    def fit(self, data: pd.DataFrame) -> 'LogTransform':
+    def fit(self, data: pd.DataFrame) -> "LogTransform":
         """
         Fit transform (no parameters to learn).
 
@@ -47,7 +48,7 @@ class LogTransform(Transform):
             Self (for chaining).
         """
         self.is_fitted = True
-        self.params_['offset'] = self.offset
+        self.params_["offset"] = self.offset
         return self
 
     def transform(self, data: pd.DataFrame) -> pd.DataFrame:

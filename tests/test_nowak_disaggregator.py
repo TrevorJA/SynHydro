@@ -210,8 +210,10 @@ class TestNowakDisaggregatorFit:
         dates = pd.date_range("2000-01-01", "2002-12-31", freq="D")
         rng = np.random.default_rng(7)
         obs = pd.DataFrame(
-            {"a": rng.lognormal(2.0, 0.5, len(dates)),
-             "b": rng.lognormal(1.5, 0.5, len(dates))},
+            {
+                "a": rng.lognormal(2.0, 0.5, len(dates)),
+                "b": rng.lognormal(1.5, 0.5, len(dates)),
+            },
             index=dates,
         )
         shift = 3

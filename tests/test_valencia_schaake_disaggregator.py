@@ -234,9 +234,7 @@ class TestValenciaSchaakeFit:
         trace_psd = eigvals[eigvals > 0].sum()
         # The conditional covariance genuinely has a component outside null(C).
         assert np.abs(C @ BBt_ref).max() > 1e-6
-        np.testing.assert_allclose(
-            np.trace(d.B_ @ d.B_.T) / trace_psd, 1.0, rtol=1e-6
-        )
+        np.testing.assert_allclose(np.trace(d.B_ @ d.B_.T) / trace_psd, 1.0, rtol=1e-6)
         np.testing.assert_allclose(
             d.B_ @ d.B_.T, BBt_ref, atol=1e-8 * max(1.0, np.abs(BBt_ref).max())
         )

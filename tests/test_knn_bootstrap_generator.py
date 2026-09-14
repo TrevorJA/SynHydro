@@ -485,7 +485,9 @@ class TestKNNBootstrapQueryColumns:
         obs_lag1 = df["B"].autocorr(1)
         syn_lag1 = syn_df["B"].autocorr(1)
         assert obs_lag1 > 0.7
-        assert syn_lag1 > 0.5, f"synthetic lag-1 {syn_lag1:.3f} vs observed {obs_lag1:.3f}"
+        assert (
+            syn_lag1 > 0.5
+        ), f"synthetic lag-1 {syn_lag1:.3f} vs observed {obs_lag1:.3f}"
         assert syn_lag1 > 0.7 * obs_lag1
 
     def test_query_site_is_index_site(self):
@@ -548,9 +550,7 @@ class TestKNNBootstrapInitialState:
         pool = df["B"][df.index.month == m0].values
         other = df["B"][df.index.month != m0].values
         for seed in range(50):
-            first = gen._generate_single_realization(
-                1, rng=np.random.default_rng(seed)
-            )
+            first = gen._generate_single_realization(1, rng=np.random.default_rng(seed))
             assert first.index[0].month == m0
             val = first.iloc[0]["B"]
             assert np.isclose(pool, val).any()

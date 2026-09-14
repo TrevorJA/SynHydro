@@ -96,11 +96,9 @@ class TestNatafForwardGH:
         rho_x = nataf_forward_gh(rho_z, gamma_icdf, gamma_icdf)
         assert np.all(rho_x < 0)
 
-
-# ---------------------------------------------------------------------------
-# Forward Nataf: Monte Carlo
-# ---------------------------------------------------------------------------
-
+    # ---------------------------------------------------------------------------
+    # Forward Nataf: Monte Carlo
+    # ---------------------------------------------------------------------------
 
     def test_heavy_tailed_closed_form(self, heavy_lognorm_icdf):
         """GH must not truncate the upper tail (anySim only replaces u == 1).

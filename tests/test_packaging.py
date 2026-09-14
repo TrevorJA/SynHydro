@@ -59,9 +59,7 @@ print(json.dumps({
 
 def _run(cmd, **kwargs):
     """Run a command and fail with its output if it exits non-zero."""
-    result = subprocess.run(
-        cmd, capture_output=True, text=True, timeout=300, **kwargs
-    )
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, **kwargs)
     assert result.returncode == 0, (
         f"command failed ({result.returncode}): {' '.join(map(str, cmd))}\n"
         f"stdout:\n{result.stdout}\nstderr:\n{result.stderr}"
@@ -90,8 +88,14 @@ def installed_wheel(tmp_path_factory):
 
     _run(
         [
-            sys.executable, "-m", "hatchling", "build",
-            "-t", "wheel", "-d", str(dist_dir),
+            sys.executable,
+            "-m",
+            "hatchling",
+            "build",
+            "-t",
+            "wheel",
+            "-d",
+            str(dist_dir),
         ],
         cwd=REPO_ROOT,
     )
@@ -100,8 +104,15 @@ def installed_wheel(tmp_path_factory):
 
     _run(
         [
-            sys.executable, "-m", "pip", "install",
-            "--no-deps", "--no-index", "--target", str(target_dir), str(wheels[0]),
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            "--no-deps",
+            "--no-index",
+            "--target",
+            str(target_dir),
+            str(wheels[0]),
         ],
         cwd=workdir,
     )
