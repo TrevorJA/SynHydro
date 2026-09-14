@@ -1,17 +1,39 @@
 """
 Package directory utilities.
 
-Provides paths to package resources and example data.
+Provides paths to package resources and to the example datasets shipped in
+the ``synhydro.data`` package.
 """
+from importlib.resources import files as resource_files
 from pathlib import Path
-from typing import Union
 
 
-# Package root directory
+# Installed ``synhydro`` package directory
 PACKAGE_ROOT = Path(__file__).parent.parent.resolve()
 
-# Example data directory located in root /examples/example_data
-EXAMPLE_DATA_DIR = PACKAGE_ROOT.parent.parent / "examples" / "example_data"
+
+def get_example_data_dir() -> Path:
+    """
+    Get the directory holding the example datasets.
+
+    The datasets are package data in ``synhydro.data`` and are located with
+    ``importlib.resources`` so the lookup works for editable installs,
+    regular ``pip`` installs, and built wheels alike.
+
+    Returns
+    -------
+    Path
+        Directory containing the example CSV files.
+    """
+    # synhydro.data is a regular package installed as a directory, so the
+    # Traversable returned by importlib.resources is a concrete filesystem
+    # path.
+    return Path(resource_files("synhydro.data"))
+
+
+# Example data directory. Kept as a module constant because it is exported
+# from the synhydro.utils namespace.
+EXAMPLE_DATA_DIR = get_example_data_dir()
 
 
 def get_example_data_path(filename: str) -> Path:
@@ -42,33 +64,32 @@ def get_example_data_path(filename: str) -> Path:
     """
     filepath = EXAMPLE_DATA_DIR / filename
 
-    if not filepath.exists():
+    if not filepath.is_file():
         raise FileNotFoundError(
             f"Example data file not found: {filename}\n"
             f"Expected location: {filepath}\n"
-            f"Available files: {list(EXAMPLE_DATA_DIR.glob('*')) if EXAMPLE_DATA_DIR.exists() else 'directory not found'}"
+            f"Available files: {list_example_datasets()}"
         )
 
     return filepath
 
 
-def list_example_datasets() -> list:
+def list_example_datasets() -> list[str]:
     """
     List all available example datasets.
 
     Returns
     -------
-    list
-        List of available example dataset filenames.
+    list of str
+        Sorted list of example dataset filenames.
 
     Examples
     --------
     >>> from synhydro.utils.directories import list_example_datasets
-    >>> datasets = list_example_datasets()
-    >>> print(datasets)
-    ['usgs_daily_streamflow_cms.csv', ...]
+    >>> list_example_datasets()
+    ['usgs_daily_streamflow_cms.csv', 'usgs_monthly_streamflow_cms.csv']
     """
-    if not EXAMPLE_DATA_DIR.exists():
+    if not EXAMPLE_DATA_DIR.is_dir():
         return []
 
-    return sorted([f.name for f in EXAMPLE_DATA_DIR.glob("*.csv")])
+    return sorted(f.name for f in EXAMPLE_DATA_DIR.glob("*.csv"))

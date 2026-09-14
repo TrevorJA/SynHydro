@@ -145,7 +145,3 @@ __all__ = [
     "warn_if_many_realizations",
     "warn_if_few_realizations",
 ]
-
-# Version info
-__version__ = "2.0.0"
-__author__ = "SynHydro Development Team"

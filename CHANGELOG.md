@@ -68,6 +68,12 @@ All notable changes to SynHydro are documented in this file.
 - MkDocs documentation site with algorithm reference pages
 
 ### Changed
+- Packaging: the version is single-sourced from `synhydro.__version__`
+  (`dynamic = ["version"]` in `pyproject.toml`), the stray
+  `synhydro.plotting.__version__` and `__author__` were removed, and the
+  sdist is restricted to `src/`, `tests/`, and the top-level metadata
+  files. A packaging test builds the wheel, installs it into a temporary
+  directory, and loads the example data from outside the repository.
 - `Ensemble.to_hdf5` writes substantially smaller files (about 35 percent
   smaller on a 10-realization, 5-site, 30-year daily benchmark; 5.9 MB to
   3.8 MB) with faster writes. Dates are now stored once as a fixed-length
@@ -154,6 +160,15 @@ All notable changes to SynHydro are documented in this file.
 - Renamed package from SGLib to SynHydro
 
 ### Fixed
+- Example datasets are now package data. `usgs_daily_streamflow_cms.csv`
+  and `usgs_monthly_streamflow_cms.csv` moved from `examples/example_data/`
+  to `src/synhydro/data/` and are located with `importlib.resources`, so
+  `load_example_data()`, `list_example_datasets()`, and
+  `get_example_data_path()` work for regular `pip install` users. The old
+  lookup resolved a path relative to the repository checkout and raised
+  `FileNotFoundError` on any non-editable install.
+  `examples/example_data/retrieve_example_data.py` now writes into the
+  package data directory; no copy is kept under `examples/`.
 - Matalas correlation matrix repair via shared `repair_correlation_matrix`
 - KNN Bootstrap `block_size` and `index_site` parameters
 - Multisite `ValueError` for univariate generators

@@ -1,8 +1,18 @@
 """
 Retrieves USGS gauge data using hyriver suite.
 
-Selects 3-4 gauges in the NE US with long, overlapping records.
+Selects 3-4 gauges in the NE US with long, overlapping records and writes
+the daily and monthly CSVs into the package data directory
+(``src/synhydro/data/``). That is where ``synhydro.load_example_data()``
+reads them from and what ships in the wheel. No copy is kept under
+``examples/``; the tutorial notebooks call ``load_example_data()``.
+
+Run from a repository checkout with ``pygeohydro`` installed (the ``dev``
+extra). The HyRiver cache is written to ``./cache/`` relative to the
+current working directory.
 """
+
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -63,14 +73,20 @@ print()
 # Transform to monthly
 Q_monthly = Q.resample('MS').sum()
 
-# Export
-Q.to_csv(f'./usgs_daily_streamflow_cms.csv', sep=',')
-Q_monthly.to_csv(f'./usgs_monthly_streamflow_cms.csv', sep=',')
+# Export into the package data directory. The path is resolved relative to
+# this script (repo root / src / synhydro / data) rather than through the
+# installed synhydro package, so regenerating always updates the source tree
+# even when a non-editable synhydro is installed.
+DATA_DIR = Path(__file__).resolve().parents[2] / "src" / "synhydro" / "data"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+Q.to_csv(DATA_DIR / "usgs_daily_streamflow_cms.csv", sep=",")
+Q_monthly.to_csv(DATA_DIR / "usgs_monthly_streamflow_cms.csv", sep=",")
 
 print(f"Data exported successfully!")
 print(f"  - {Q.shape[1]} USGS streamflow gauges")
 print(f"  - {len(Q)} daily observations")
 print(f"  - {len(Q_monthly)} monthly observations")
 print(f"  - Date range: {Q.index[0]} to {Q.index[-1]}")
-print(f"  - Files: usgs_daily_streamflow_cms.csv, usgs_monthly_streamflow_cms.csv")
+print(f"  - Directory: {DATA_DIR}")
+print("  - Files: usgs_daily_streamflow_cms.csv, usgs_monthly_streamflow_cms.csv")
 

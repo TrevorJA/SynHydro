@@ -539,10 +539,7 @@ class TestKirschGenerateFromResiduals:
 @pytest.fixture(scope="module")
 def usgs_monthly_complete_years():
     """Packaged USGS monthly flows trimmed to complete calendar years."""
-    try:
-        Q = load_example_data("usgs_monthly_streamflow_cms")
-    except FileNotFoundError:
-        pytest.skip("Example data file not found - skip test")
+    Q = load_example_data("usgs_monthly_streamflow_cms")
     counts = Q.groupby(Q.index.year).size()
     complete = counts[counts == 12].index
     return Q.loc[Q.index.year.isin(complete)]

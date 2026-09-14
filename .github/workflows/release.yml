@@ -1,0 +1,120 @@
+# Release automation for SynHydro. Two-stage flow:
+#
+#   1. Tag push (a vX.Y.Z tag arrives on GitHub): build the sdist and
+#      wheel, run twine check, smoke-install the wheel from outside the
+#      checkout, and upload to TestPyPI. This is the rehearsal. No GitHub
+#      release exists yet, so Zenodo does nothing and PyPI is untouched.
+#      If anything is wrong, delete the tag, fix, and re-tag.
+#
+#   2. GitHub release published (from that same tag): rebuild, attach the
+#      sdist and wheel to the release, and publish to PyPI. Publishing the
+#      GitHub release is also what triggers the Zenodo archive and DOI.
+#
+# workflow_dispatch runs only the build job, for manual dry runs.
+#
+# Uploads use PyPI Trusted Publishing (OIDC), so no API tokens are stored.
+# The `environment:` names below (testpypi, pypi) and this file name
+# (release.yml) must match the Trusted Publisher configuration on each
+# index exactly. Neither index allows re-uploading an existing version;
+# a broken upload is fixed by yanking it and releasing a new patch version.
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build sdist and wheel
+        run: python -m build
+
+      - name: Check distribution metadata
+        run: twine check dist/*
+
+      - name: Smoke-install the wheel from outside the repo
+        run: |
+          pip install dist/*.whl
+          cd "$RUNNER_TEMP"
+          python - <<'PY'
+          import synhydro
+
+          print("synhydro", synhydro.__version__)
+          Q_daily = synhydro.load_example_data()
+          Q_monthly = Q_daily.resample("MS").sum()
+          gen = synhydro.KirschGenerator()
+          gen.fit(Q_monthly)
+          ensemble = gen.generate(n_realizations=2, n_years=5, seed=42)
+          print("generated", type(ensemble).__name__)
+          PY
+
+      - name: Upload distribution artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  testpypi:
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download distribution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  pypi:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Download distribution artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Attach artifacts to the GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

@@ -7,22 +7,51 @@ import numpy as np
 import pandas as pd
 import h5py
 
-from synhydro.utils import load_example_data
+from synhydro.utils import (
+    EXAMPLE_DATA_DIR,
+    PACKAGE_ROOT,
+    get_example_data_path,
+    list_example_datasets,
+    load_example_data,
+)
 from synhydro.core import Ensemble
 
 
 class TestLoadExampleData:
-    """Tests for load_example_data function."""
+    """Tests for the packaged example data and its loaders."""
 
     def test_load_example_data(self):
-        """Test loading example data."""
-        try:
-            data = load_example_data()
-            assert isinstance(data, (pd.Series, pd.DataFrame))
-            assert isinstance(data.index, pd.DatetimeIndex)
-            assert len(data) > 0
-        except FileNotFoundError:
-            pytest.skip("Example data file not found - skip test")
+        """The default daily dataset loads with a DatetimeIndex."""
+        data = load_example_data()
+        assert isinstance(data, pd.DataFrame)
+        assert isinstance(data.index, pd.DatetimeIndex)
+        assert data.shape == (29340, 4)
+
+    def test_load_monthly_example_data(self):
+        """The monthly dataset loads by name, with or without the extension."""
+        by_name = load_example_data("usgs_monthly_streamflow_cms")
+        by_file = load_example_data("usgs_monthly_streamflow_cms.csv")
+        assert by_name.shape == (965, 4)
+        pd.testing.assert_frame_equal(by_name, by_file)
+
+    def test_list_example_datasets(self):
+        """Both shipped CSVs are listed."""
+        assert list_example_datasets() == [
+            "usgs_daily_streamflow_cms.csv",
+            "usgs_monthly_streamflow_cms.csv",
+        ]
+
+    def test_example_data_lives_inside_package(self):
+        """The data directory is the synhydro.data package, not the repo."""
+        assert EXAMPLE_DATA_DIR.resolve() == (PACKAGE_ROOT / "data").resolve()
+        path = get_example_data_path("usgs_daily_streamflow_cms.csv")
+        assert path.is_file()
+        assert path.parent.resolve() == EXAMPLE_DATA_DIR.resolve()
+
+    def test_missing_dataset_raises(self):
+        """An unknown dataset name raises FileNotFoundError naming the file."""
+        with pytest.raises(FileNotFoundError, match="does_not_exist.csv"):
+            load_example_data("does_not_exist")
 
 
 class TestEnsembleManager:

@@ -176,14 +176,8 @@ local/
 .claude/
 external_source_codes/*
 
-experiments/*/logs/*
-experiments/*/outputs/*
-experiments/disaggregator_diagnostics/*
-experiments/model_diagnostics/outputs/*
-experiments/plotting_module/*
-experiments/release_smoke/*
-experiments/paleo_disagg/
-experiments/nowak_diagnostics/
+# Local experiments, not part of the release
+experiments/
 .vscode/
 docs/dev/
 
@@ -196,6 +190,9 @@ examples/figures/
 examples/**/*.h5
 examples/**/*.hdf5
 examples/example_data/cache/
+
+# Development notebooks (only NN_*.ipynb are published to the docs)
+examples/_dev_*.ipynb
 
 # Notebook copies created by the docs build (source of truth: examples/)
 docs/tutorials/*.ipynb
