@@ -5,7 +5,7 @@ A library for generating synthetic hydrologic timeseries with focus on
 statistical preservation and hydrologic applications.
 """
 
-__version__ = "0.1.0rc1"
+__version__ = "0.1.0"
 
 # Core utilities
 from synhydro.core import (

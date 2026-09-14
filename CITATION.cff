@@ -10,6 +10,7 @@ authors:
     orcid: "https://orcid.org/0000-0002-1736-456X"
     affiliation: "Cornell University"
 version: 0.1.0
+date-released: "2026-09-14"
 license: MIT
 repository-code: "https://github.com/TrevorJA/SynHydro"
 url: "https://trevorja.github.io/SynHydro/"
