@@ -21,9 +21,8 @@ keywords:
   - time series
   - disaggregation
   - water resources
-# Add after the first Zenodo record exists:
-# doi: 10.5281/zenodo.XXXXXXX          (concept DOI)
-# identifiers:
-#   - type: doi
-#     value: 10.5281/zenodo.YYYYYYY    (version DOI for 0.1.0)
-#     description: "Zenodo archive of version 0.1.0"
+doi: 10.5281/zenodo.22759483
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22759484
+    description: "Zenodo archive of version 0.1.0"

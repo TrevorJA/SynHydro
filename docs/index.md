@@ -6,6 +6,8 @@
 [![Docs](https://github.com/TrevorJA/SynHydro/actions/workflows/docs.yml/badge.svg)](https://github.com/TrevorJA/SynHydro/actions/workflows/docs.yml)
 [![Python](https://img.shields.io/badge/python-3.10%20|%203.11%20|%203.12-blue)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](https://github.com/TrevorJA/SynHydro/blob/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/synhydro.svg)](https://pypi.org/project/synhydro/)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22759483.svg)](https://doi.org/10.5281/zenodo.22759483)
 
 SynHydro provides parametric, hybrid, and non-parametric stochastic generation methods under a unified API. All generators share the same `fit()` and `generate()` workflow. See the [Algorithms overview](algorithms/index.md) for the classification and plain-language descriptions of each class.
 
@@ -45,7 +47,7 @@ ensemble = gen.generate(n_realizations=50, n_years=30, seed=42)
 ## Installation
 
 ```bash
-pip install git+https://github.com/TrevorJA/SynHydro.git
+pip install synhydro
 ```
 
 See [Getting Started](getting-started.md) for full setup and data format details.
