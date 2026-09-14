@@ -4,16 +4,15 @@ dynamic = ["version"]
 description = "Synthetic Generation Library - Methods and models for generating synthetic hydrologic timeseries."
 readme = "README.md"
 requires-python = ">=3.10"
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     {name = "Trevor Amestoy", email = "tja73@cornell.edu"},
 ]
 keywords = ["hydrology", "synthetic generation", "streamflow", "stochastic", "time series"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
     "Intended Audience :: Science/Research",
     "Topic :: Scientific/Engineering :: Hydrology",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -29,7 +28,7 @@ dependencies = [
     "hmmlearn>=0.3.3",
     "pywavelets>=1.8",
     "seaborn>=0.13",
-    "spei",
+    "spei>=0.8.2",
     "h5py>=3.16",
 ]
 
@@ -63,7 +62,7 @@ Documentation = "https://trevorja.github.io/SynHydro/"
 Issues = "https://github.com/TrevorJA/SynHydro/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [tool.hatch.version]

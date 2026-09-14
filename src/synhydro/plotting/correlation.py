@@ -46,6 +46,8 @@ def plot_autocorrelation(
     grid: bool = True,
     filename: Optional[str] = None,
     dpi: int = LAYOUT["save_dpi"],
+    *,
+    seed: Optional[Union[int, np.random.Generator]] = None,
     **kwargs,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
@@ -86,6 +88,11 @@ def plot_autocorrelation(
         Path to save figure
     dpi : int, default from config
         Resolution for saved figure
+    seed : int or numpy.random.Generator, optional
+        Keyword-only. Seed or Generator used to pick which members are
+        drawn when ``show_members`` is given, so the figure is
+        reproducible. If None (default), a fresh unseeded Generator is
+        used and the selection differs between calls.
     **kwargs
         Forwarded to `ax.plot` and `ax.fill_between`.
 
@@ -98,6 +105,7 @@ def plot_autocorrelation(
     --------
     >>> plot_autocorrelation(ensemble, observed=Q_obs, max_lag=24)
     >>> plot_autocorrelation(ensemble, timestep='monthly', show_members=5)
+    >>> plot_autocorrelation(ensemble, show_members=5, seed=42)
     """
     # Validate inputs
     validate_ensemble_input(ensemble)
@@ -148,7 +156,8 @@ def plot_autocorrelation(
     # Plot individual members if requested
     if show_members is not None and show_members > 0:
         n_show = min(show_members, n_realizations)
-        member_indices = np.random.choice(n_realizations, n_show, replace=False)
+        rng = np.random.default_rng(seed)
+        member_indices = rng.choice(n_realizations, n_show, replace=False)
         for i in member_indices:
             ax.plot(
                 lag_range,

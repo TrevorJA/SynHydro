@@ -133,6 +133,7 @@ Higher-order cross-site statistics (e.g., cross-site lag correlations) are not e
 - Tail dependence between sites is weaker than observed. Sharing the phase field reproduces the linear cross-site correlation well, but the co-occurrence of extremes (upper-tail dependence) is only partially preserved because each site's extremes are regenerated independently from its own kappa sample; basin-wide extreme events are under-represented relative to the record.
 - Longer series requested via `n_years` are concatenations of independent chunks of length $N$; autocorrelation and persistence are lost at chunk boundaries, and multi-decadal persistence cannot be extrapolated beyond the observed record length.
 - Spatial correlation is preserved on average over realizations, but individual realizations may deviate from the observed correlation matrix, particularly for short records.
+- Within-season cross-site dependence is imposed rather than fitted. Because every site shares the same random phase field and differs only in its CWT amplitude envelope, the synthetic within-day-of-year (seasonal-cycle-removed) rank correlation between sites is nearly the same whatever the observed dependence was: about 0.81 for sites whose observed anomalies are independent (observed 0.00) and 0.84 to 0.89 for strongly dependent sites (observed 0.61 to 0.73). The raw cross-site correlation is reproduced mainly through the shared seasonal cycle. This is inherent to the PRSim.wave design, which targets spatially coherent basins (Brunner and Gilleland, 2020); for weakly dependent sites, fit `PhaseRandomizationGenerator` per site instead.
 - The CWT of a white-noise series does not have a flat spectrum, so the shared phase field is not strictly uniform over scale; this introduces some residual scale-dependence in the inter-site phase coherence.
 - The method assumes stationarity; non-stationary trends or shifts in the observed record are embedded in the fitted amplitudes and marginals but not explicitly modeled.
 - Computational cost of the FFT-based CWT scales as $O(S \cdot n_{\text{scales}} \cdot N \log N)$ and is independent of the wavelet support at each scale. With the default 100 scales the cost is comparable to PRSim.wave's roughly 90 unique integer scales.
@@ -149,9 +150,9 @@ Brunner, M.I., and Gilleland, E. (2020). Stochastic simulation of streamflow and
 **See also:**
 - Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. *Hydrology and Earth System Sciences*, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
 - Hosking, J.R.M. (1994). The four-parameter kappa distribution. *IBM Journal of Research and Development*, 38(3), 251-258. https://doi.org/10.1147/rd.383.0251
-- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. *Journal of the Royal Statistical Society, Series B*, 52(1), 105-124.
+- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. *Journal of the Royal Statistical Society, Series B*, 52(1), 105-124. https://doi.org/10.1111/j.2517-6161.1990.tb01775.x
 - Torrence, C., and Compo, G.P. (1998). A practical guide to wavelet analysis. *Bulletin of the American Meteorological Society*, 79(1), 61-78. https://doi.org/10.1175/1520-0477(1998)079<0061:APGTWA>2.0.CO;2
-- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. *Physica D*, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90043-8
+- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. *Physica D*, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90102-S
 
 ---
 

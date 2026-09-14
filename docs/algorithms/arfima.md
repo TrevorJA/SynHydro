@@ -245,8 +245,8 @@ Hosking, J.R.M. (1984). Modeling persistence in hydrological time series using f
 - Ansley, C.F. (1979). An algorithm for the exact likelihood of a mixed autoregressive-moving average process. *Biometrika*, 66(1), 59-65. https://doi.org/10.1093/biomet/66.1.59
 - Huang, H.-H., Chan, N.H., Chen, K., and Ing, C.-K. (2022). Consistent order selection for ARFIMA processes. *The Annals of Statistics*, 50(3), 1297-1319. https://doi.org/10.1214/21-AOS2149
 - Fox, R., and Taqqu, M.S. (1986). Large-sample properties of parameter estimates for strongly dependent stationary Gaussian time series. *The Annals of Statistics*, 14(2), 517-532.
-- Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series. *Water Resources Research*, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
-- Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. *Hydrological Sciences Journal*, 47(4), 573-595.
+- Montanari, A., Rosso, R., and Taqqu, M.S. (1997). Fractionally differenced ARIMA models applied to hydrologic time series: Identification, estimation, and simulation. *Water Resources Research*, 33(5), 1035-1044. https://doi.org/10.1029/97WR00043
+- Koutsoyiannis, D. (2002). The Hurst phenomenon and fractional Gaussian noise made easy. *Hydrological Sciences Journal*, 47(4), 573-595. https://doi.org/10.1080/02626660208492961
 - Stedinger, J.R., and Taylor, M.R. (1982). Synthetic streamflow generation: 1. Model verification and validation. *Water Resources Research*, 18(4), 909-918. https://doi.org/10.1029/WR018i004p00909
 - Salas, J.D., Delleur, J.W., Yevjevich, V., and Lane, W.L. (1980). *Applied Modeling of Hydrologic Time Series*. Water Resources Publications.
 

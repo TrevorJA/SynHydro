@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 import h5py
 
+from synhydro import __version__ as _synhydro_version
+
 logger = logging.getLogger(__name__)
 
 
@@ -102,6 +104,10 @@ class EnsembleMetadata:
         User-provided description of the ensemble.
     custom_attrs : Dict, optional
         Additional user-defined metadata attributes.
+    synhydro_version : str, optional
+        Version of SynHydro that produced the ensemble. Defaults to the
+        installed ``synhydro.__version__``; None for ensembles loaded from
+        files written before the version was recorded.
     """
 
     generator_class: Optional[str] = None
@@ -113,6 +119,7 @@ class EnsembleMetadata:
     time_period: Optional[Tuple[str, str]] = None
     description: Optional[str] = None
     custom_attrs: Optional[Dict[str, Any]] = field(default_factory=dict)
+    synhydro_version: Optional[str] = _synhydro_version
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert metadata to dictionary."""
@@ -126,6 +133,7 @@ class EnsembleMetadata:
             "time_period": self.time_period,
             "description": self.description,
             "custom_attrs": self.custom_attrs,
+            "synhydro_version": self.synhydro_version,
         }
 
 
@@ -496,6 +504,16 @@ class Ensemble:
             metadata_dict = {}
             if "metadata" in f.attrs:
                 metadata_dict = json.loads(f.attrs["metadata"])
+            # Files written before the version was recorded must load with
+            # None rather than inherit the current version from the
+            # dataclass default.
+            file_version = f.attrs.get("synhydro_version")
+            if isinstance(file_version, bytes):
+                file_version = file_version.decode("utf-8")
+            metadata_dict.setdefault(
+                "synhydro_version",
+                None if file_version is None else str(file_version),
+            )
 
             if stored_by_node:
                 keys = list(f.keys())
@@ -572,7 +590,7 @@ class Ensemble:
                     ensemble_dict[i] = df
 
         # Create metadata
-        metadata = EnsembleMetadata(**metadata_dict) if metadata_dict else None
+        metadata = EnsembleMetadata(**metadata_dict)
 
         return cls(ensemble_dict, metadata=metadata)
 
@@ -617,8 +635,11 @@ class Ensemble:
             return vals if dtype is None else vals.astype(dtype)
 
         with h5py.File(filename, "w", libver="latest") as f:
-            # Save metadata as attributes
+            # Save metadata as attributes. The version is also written as a
+            # plain attribute so h5py users can read it without parsing JSON.
             f.attrs["metadata"] = json.dumps(self.metadata.to_dict())
+            if self.metadata.synhydro_version is not None:
+                f.attrs["synhydro_version"] = self.metadata.synhydro_version
 
             if stored_by_node:
                 data_by_group = self.data_by_site

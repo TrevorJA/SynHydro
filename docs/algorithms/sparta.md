@@ -129,12 +129,12 @@ SPARTA exactly preserves the target marginal distribution at each (month, site) 
 ## References
 
 **Primary:**
-Tsoukalas, I., Efstratiadis, A., & Makropoulos, C. (2018). Stochastic periodic autoregressive to anything (SPARTA): Modeling and simulation of cyclostationary processes with arbitrary marginal distributions. Water Resources Research, 54(1), 161-185. https://doi.org/10.1002/2017WR021394
+Tsoukalas, I., Efstratiadis, A., and Makropoulos, C. (2018). Stochastic periodic autoregressive to anything (SPARTA): Modeling and simulation of cyclostationary processes with arbitrary marginal distributions. *Water Resources Research*, 54(1), 161-185. https://doi.org/10.1002/2017WR021394
 
 **See also:**
-- Tsoukalas, I., Makropoulos, C., & Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. Water Resources Research, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462
-- Cario, M. C., & Nelson, B. L. (1996). Autoregressive to anything: Time-series input processes for simulation. Operations Research Letters, 19(2), 51-58.
-- Tsoukalas, I., Kossieris, P., & Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. Water, 12(6), 1645. https://doi.org/10.3390/w12061645
+- Tsoukalas, I., Makropoulos, C., and Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. *Water Resources Research*, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462
+- Cario, M.C., and Nelson, B.L. (1996). Autoregressive to anything: Time-series input processes for simulation. *Operations Research Letters*, 19(2), 51-58. https://doi.org/10.1016/0167-6377(96)00017-X
+- Tsoukalas, I., Kossieris, P., and Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. *Water*, 12(6), 1645. https://doi.org/10.3390/w12061645
 
 ---
 

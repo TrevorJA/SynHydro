@@ -8,7 +8,7 @@ uncertainty bands, flow ranges, and seasonal patterns.
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from typing import Optional, Tuple, List
+from typing import Optional, Tuple, List, Union
 from synhydro.core.ensemble import Ensemble
 from .config import COLORS, STYLE, LAYOUT, LABELS
 from synhydro.plotting._utils import (
@@ -49,6 +49,8 @@ def plot_timeseries(
     units: str = "cms",
     filename: Optional[str] = None,
     dpi: int = LAYOUT["save_dpi"],
+    *,
+    seed: Optional[Union[int, np.random.Generator]] = None,
     **kwargs,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
@@ -95,6 +97,11 @@ def plot_timeseries(
         Path to save figure
     dpi : int, default from config
         Resolution for saved figure
+    seed : int or numpy.random.Generator, optional
+        Keyword-only. Seed or Generator used to pick which members are
+        drawn when ``show_members`` is given, so the figure is
+        reproducible. If None (default), a fresh unseeded Generator is
+        used and the selection differs between calls.
     **kwargs
         Forwarded to `ax.plot` and `ax.fill_between`.
 
@@ -111,8 +118,8 @@ def plot_timeseries(
     >>> fig, axes = plt.subplots(2, 1)
     >>> plot_timeseries(ensemble, ax=axes[0], percentiles=[25, 50, 75])
 
-    >>> # Show individual members
-    >>> plot_timeseries(ensemble, show_members=10, filename='timeseries.png')
+    >>> # Show individual members, with a fixed member selection
+    >>> plot_timeseries(ensemble, show_members=10, seed=42, filename='timeseries.png')
     """
     # Validate inputs
     validate_ensemble_input(ensemble)
@@ -144,7 +151,9 @@ def plot_timeseries(
     # Plot individual ensemble members if requested
     if show_members is not None and show_members > 0:
         n_members = min(show_members, len(site_data.columns))
-        member_cols = np.random.choice(site_data.columns, n_members, replace=False)
+        rng = np.random.default_rng(seed)
+        member_idx = rng.choice(len(site_data.columns), n_members, replace=False)
+        member_cols = site_data.columns[member_idx]
         for i, col in enumerate(member_cols):
             label = "Ensemble Members" if i == 0 else None
             ax.plot(

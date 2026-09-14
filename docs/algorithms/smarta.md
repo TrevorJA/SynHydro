@@ -166,6 +166,7 @@ The model is capable of reproducing long-range dependence (Hurst-Kolmogorov beha
 - The model assumes stationarity. Seasonal nonstationarity must be handled externally (e.g., treating each month as a separate process as in the daily rainfall example).
 - SMA order $q$ must be large enough for the target ACF to decay sufficiently; for strong LRD, this requires large $q$ (e.g., $2^{12}$), increasing memory and computation.
 - The Nataf evaluation (Gauss-Hermite quadrature or Monte Carlo) can be slow when many sites and lags are involved ($m + m(m-1)/2$ inversions).
+- CAS fitting uses the biased sample ACF (lags $1$ to $\min(q, n/3)$) with no bias correction; the sample ACF is biased downward by roughly $-\sum_\tau \rho_\tau / n$ at every lag, so long-range dependence is under-detected on short records. From about 100 years of data a fractional Gaussian noise process with $H = 0.75$ is fitted as short-range ($\beta \le 1$) on two of three sites, and the generator then reproduces that short-range target faithfully. Tsoukalas et al. (2018) recommend the climacogram for this reason (Dimitriadis and Koutsoyiannis, 2015), but no climacogram estimator is provided (see the implementation deviation above). For short records `acf_model="hurst"` falls back to $H = 0.6$ when the CAS fit finds no long memory, which retains mild persistence; an externally estimated $H$ cannot be supplied in this release.
 
 ## Implementation Notes
 
@@ -179,13 +180,14 @@ The model is capable of reproducing long-range dependence (Hurst-Kolmogorov beha
 ## References
 
 **Primary:**
-Tsoukalas, I., Makropoulos, C., & Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. Water Resources Research, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462
+Tsoukalas, I., Makropoulos, C., and Koutsoyiannis, D. (2018). Simulation of stochastic processes exhibiting any-range dependence and arbitrary marginal distributions. *Water Resources Research*, 54(11), 9484-9513. https://doi.org/10.1029/2017WR022462
 
 **See also:**
-- Koutsoyiannis, D. (2000). A generalized mathematical framework for stochastic simulation and forecast of hydrologic time series. Water Resources Research, 36(6), 1519-1533. https://doi.org/10.1029/2000WR900044
-- Nataf, A. (1962). Determination des distributions de probabilites dont les marges sont donnees. Comptes Rendus de l'Academie des Sciences, 225, 42-43.
-- Cario, M. C., & Nelson, B. L. (1996). Autoregressive to anything: Time-series input processes for simulation. Operations Research Letters, 19(2), 51-58. https://doi.org/10.1016/0167-6377(96)00017-X
-- Tsoukalas, I., Kossieris, P., & Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. Water, 12(6), 1645. https://doi.org/10.3390/w12061645
+- Koutsoyiannis, D. (2000). A generalized mathematical framework for stochastic simulation and forecast of hydrologic time series. *Water Resources Research*, 36(6), 1519-1533. https://doi.org/10.1029/2000WR900044
+- Dimitriadis, P., and Koutsoyiannis, D. (2015). Climacogram versus autocovariance and power spectrum in stochastic modelling for Markovian and Hurst-Kolmogorov processes. *Stochastic Environmental Research and Risk Assessment*, 29(6), 1649-1669. https://doi.org/10.1007/s00477-015-1023-7
+- Nataf, A. (1962). Determination des distributions de probabilites dont les marges sont donnees. *Comptes Rendus de l'Academie des Sciences*, 225, 42-43.
+- Cario, M.C., and Nelson, B.L. (1996). Autoregressive to anything: Time-series input processes for simulation. *Operations Research Letters*, 19(2), 51-58. https://doi.org/10.1016/0167-6377(96)00017-X
+- Tsoukalas, I., Kossieris, P., and Makropoulos, C. (2020). Simulation of non-Gaussian correlated random variables, stochastic processes and random fields: Introducing the anySim R-package for environmental applications and beyond. *Water*, 12(6), 1645. https://doi.org/10.3390/w12061645
 
 ---
 

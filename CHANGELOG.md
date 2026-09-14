@@ -4,6 +4,28 @@ All notable changes to SynHydro are documented in this file.
 
 ## [Unreleased]
 
+### Highlights
+
+SynHydro 0.1.0 is the first tagged, citable release. Every generator and
+disaggregator shares one workflow: `preprocessing()`, `fit()`, and
+`generate()` (or `disaggregate()`), returning an `Ensemble` that can be
+verified, plotted, and saved. The release ships eleven generators across
+the parametric (Thomas-Fiering, Matalas, ARFIMA, SPARTA, SMARTA, multisite
+HMM), hybrid (Kirsch, WARM, phase randomization, multisite phase
+randomization), and non-parametric (KNN bootstrap) families, plus two
+temporal disaggregators (Nowak, Valencia-Schaake). Each method has an
+algorithm page that states where the implementation deviates from its
+source paper, and statistical regression tests check the generators
+against the properties those papers claim. The verification suite
+(`synhydro.verify()`) scores an ensemble against the observed record
+across nine statistical categories, and the validation suite
+(`synhydro.validate()`) evaluates fitness for drought studies. Ensembles
+are stored as compact HDF5 files that record the SynHydro version that
+produced them. Packaging fixes make `pip install synhydro` work outside a
+repository checkout: the example data ships inside the package, the
+version is single-sourced, the sdist contains only the library, tests,
+and metadata, and the license metadata follows PEP 639.
+
 ### Removed
 - `HMMKNNGenerator` moved from `synhydro.methods.generation.hybrid` to the
   unexported `synhydro.methods.generation._dev` module and removed from the
@@ -12,6 +34,16 @@ All notable changes to SynHydro are documented in this file.
   against a published method.
 
 ### Added
+- `EnsembleMetadata.synhydro_version` records the library version that
+  produced an ensemble (default `synhydro.__version__`). `Ensemble.to_hdf5`
+  writes it inside the JSON metadata and as a top-level HDF5 attribute
+  `synhydro_version`, so h5py users can read it without parsing JSON.
+  Files written before the field existed load with `synhydro_version`
+  set to None and stay unversioned when re-saved.
+- `plot_timeseries` and `plot_autocorrelation` accept a keyword-only
+  `seed` argument (int or `np.random.Generator`) that fixes which ensemble
+  members are drawn for `show_members`, so figures are reproducible. The
+  default `seed=None` keeps the previous unseeded selection.
 - Verification suite (`synhydro.verification`) for statistical property
   preservation, following the Stedinger and Taylor (1982) terminology:
   registered per-metric functions across nine categories (marginal,
@@ -68,6 +100,17 @@ All notable changes to SynHydro are documented in this file.
 - MkDocs documentation site with algorithm reference pages
 
 ### Changed
+- Packaging metadata: the license is declared per PEP 639
+  (`license = "MIT"`, `license-files = ["LICENSE"]`, the `License ::`
+  classifier dropped), the `Development Status` classifier is removed,
+  `spei` is pinned to `>=0.8.2` (the only version tested), and the build
+  backend is pinned to `hatchling>=1.27` so isolated builds understand
+  the new license fields.
+- README: `pip install synhydro` is the primary install command, with the
+  tagged git install kept as the alternative; the CONTRIBUTING link is
+  absolute so it resolves on PyPI; and a "Citing SynHydro" section with a
+  Zenodo DOI placeholder follows the quick example. `docs/getting-started.md`
+  shows the same install commands.
 - Packaging: the version is single-sourced from `synhydro.__version__`
   (`dynamic = ["version"]` in `pyproject.toml`), the stray
   `synhydro.plotting.__version__` and `__author__` were removed, and the
@@ -222,7 +265,95 @@ All notable changes to SynHydro are documented in this file.
 - Deprecated Kirsch-Nowak combined generator
 - Outdated `core/validation.py` monolith (replaced by `core/validation/` package)
 
+### Known limitations
+
+Deferred by maintainer decision on 2026-09-14. Each is a property of the
+published method or a cosmetic issue rather than an implementation error;
+method properties are also documented on the algorithm pages.
+
+- `KirschGenerator` preserves cross-site (lag-0) correlation only
+  approximately. The bootstrap indices are shared across sites, but each
+  site's Cholesky factor mixes periods, so the synthetic cross-site
+  correlation for a given month is a blend of the historical values that
+  feed that column of the residual matrix. On the packaged USGS monthly
+  record the deviation reaches 0.09 (December). If month-specific
+  cross-site correlation matters, check the spatial category of
+  `synhydro.verify()` and consider a parametric multisite generator
+  (`MatalasGenerator`, `SPARTAGenerator`) that targets the lag-0
+  cross-correlation matrix directly.
+- `SMARTAGenerator` under-detects long-range dependence on records of
+  about 100 years or fewer. The CAS fit minimizes the error against the
+  biased sample ACF over lags 1 to n/3 with no bias correction, so a
+  long-memory record can be fitted as short-range (a fractional Gaussian
+  noise fixture with H = 0.75 is fitted as short-range on two of three
+  sites), and the generator then faithfully reproduces that short-range
+  target. This matters when multi-decadal persistence drives the analysis.
+  For short records, `acf_model="hurst"` falls back to H = 0.6 when the
+  CAS fit finds no long memory, which retains mild persistence; an
+  externally estimated Hurst coefficient (for example from a climacogram)
+  cannot be supplied in this release.
+- `SMARTAGenerator.fit()` does not populate `fitted_params_`, so
+  `get_fitted_params()` raises "has not been fitted yet" even after a
+  successful fit, unlike the other generators. The per-site CAS fit is
+  logged at debug level (`debug=True`).
+- When a SMARTA site's fitted CAS autocorrelation decays to numerically
+  zero (beta near 0, a short-memory site), the Nataf inversion logs a
+  warning that target correlations are "below the attainable
+  Frechet-Hoeffding lower bound" and were clipped. The message is harmless
+  in this situation: the targets are below the resolution of the
+  polynomial fit, not outside the attainable range, and the output is
+  unaffected.
+- `ARFIMAGenerator.log_transform.params_["tau"]` (the Stedinger lower
+  bounds, one per month for monthly input) is an object-dtype DataFrame,
+  so NumPy ufuncs applied to its `.values` fail. Call `.astype(float)`
+  first; `get_fitted_params()` exposes the same values under
+  `stedinger_tau`.
+- `PhaseRandomizationGenerator` dilutes flow-domain autocorrelation on
+  short records. The back-transform draws, for each day of year, an
+  independent kappa sample with one value per observed year and assigns
+  it by rank, so with 6 observed years the lag-1 flow autocorrelation
+  drops from 0.93 to 0.75 even though the normal-score spectrum is
+  preserved exactly. The gap shrinks with record length (0.12, 0.08, and
+  0.05 at 12, 30, and 60 years) and follows PRSim's construction. Use the
+  longest record available and check the temporal category of
+  `synhydro.verify()` before relying on fits to records shorter than
+  about 30 years.
+- `PhaseRandomizationGenerator` departs from PRSim in two details of the
+  kappa fit: invalid (kappa, h) combinations return a large penalty to
+  the optimizer instead of aborting the fit as PRSim does, and the
+  Nelder-Mead settings (`xatol` and `fatol` of 1e-6, `maxiter` of 1000)
+  are not PRSim's. Fitted kappa parameters can therefore differ from
+  PRSim's in the last digits, and days on which PRSim would abort are
+  handled by the fit-rejection rule instead. This matters only when
+  reproducing PRSim output digit for digit.
+- `MultisitePhaseRandomizationGenerator` imposes nearly the same
+  within-season cross-site dependence whatever the observed dependence
+  was, because every site shares one random phase field and differs only
+  in its wavelet amplitude envelope. The within-day-of-year rank
+  correlation between sites is about 0.8 to 0.9 in the output both for
+  sites whose observed anomalies are independent (observed 0.00) and for
+  strongly dependent sites (observed 0.61 to 0.73). This is inherent to
+  the PRSim.wave design, which targets spatially coherent basins. Use the
+  generator for sites within one hydrologically coherent basin; for
+  weakly dependent sites, fit `PhaseRandomizationGenerator` per site
+  instead.
+- `WARMGenerator`'s chi-squared significance test is conservative: on
+  white-noise input about 2 percent of scales exceed the 95 percent
+  threshold instead of the nominal 5 percent, and no significant band is
+  found below roughly 8 years. Weak or short-period bands can therefore
+  be missed. Pass the band explicitly with the `bands` argument or lower
+  `significance_level` when a known band is not detected.
+- `KNNBootstrapGenerator` implements only the Lall and Sharma (1996)
+  bootstrap. The Prairie et al. (2006) local-polynomial modification and
+  the Prairie et al. (2008) paleo-state conditioning listed under "See
+  Also" in the module docstring are not implemented; the algorithm page
+  is the authoritative description.
+
 ## [0.0.2] - 2025-06-09
+
+Versions 0.0.1 and 0.0.2 were never tagged in git and will not be
+retro-tagged; their entries are kept for the record. 0.1.0 is the first
+tagged release.
 
 ### Added
 - Thomas-Fiering monthly generator
@@ -240,3 +371,6 @@ All notable changes to SynHydro are documented in this file.
 ## [0.0.1] - 2023-06-15
 
 - Initial commit with project scaffolding
+
+[Unreleased]: https://github.com/TrevorJA/SynHydro/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/TrevorJA/SynHydro/releases/tag/v0.1.0

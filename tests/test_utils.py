@@ -2,11 +2,14 @@
 Tests for synhydro.utils and synhydro.core modules (data loading, Ensemble).
 """
 
+import json
+
 import pytest
 import numpy as np
 import pandas as pd
 import h5py
 
+import synhydro
 from synhydro.utils import (
     EXAMPLE_DATA_DIR,
     PACKAGE_ROOT,
@@ -139,6 +142,32 @@ class TestEnsembleManager:
         }
         with pytest.raises(ValueError, match="Duplicate realization key"):
             Ensemble(site_data)
+
+
+def _write_legacy_hdf5(ensemble: Ensemble, path) -> None:
+    """Write ``ensemble`` in the pre-optimization HDF5 layout.
+
+    Variable-length string dates duplicated in every site group, no shuffle
+    filter, and no file-level metadata attributes, as written by releases
+    before the current ``Ensemble.to_hdf5``.
+
+    Parameters
+    ----------
+    ensemble : Ensemble
+        Ensemble to write.
+    path : str or pathlib.Path
+        Output file path.
+    """
+    with h5py.File(path, "w", libver="latest") as f:
+        for site, site_df in ensemble.data_by_site.items():
+            grp = f.create_group(str(site))
+            grp.attrs["column_labels"] = [str(c) for c in site_df.columns]
+            dates_list = site_df.index.strftime("%Y-%m-%d").tolist()
+            grp.create_dataset("date", data=dates_list, compression="gzip")
+            for col in site_df.columns:
+                grp.create_dataset(
+                    str(col), data=site_df[col].values, compression="gzip"
+                )
 
 
 class TestEnsembleHDF5IO:
@@ -363,16 +392,7 @@ class TestEnsembleHDF5IO:
         # Reproduce the old format: variable-length string dates duplicated
         # in every site group, no shuffle filter
         old_path = tmp_path / "old.h5"
-        with h5py.File(old_path, "w", libver="latest") as f:
-            for site, site_df in ensemble.data_by_site.items():
-                grp = f.create_group(str(site))
-                grp.attrs["column_labels"] = [str(c) for c in site_df.columns]
-                dates_list = site_df.index.strftime("%Y-%m-%d").tolist()
-                grp.create_dataset("date", data=dates_list, compression="gzip")
-                for col in site_df.columns:
-                    grp.create_dataset(
-                        str(col), data=site_df[col].values, compression="gzip"
-                    )
+        _write_legacy_hdf5(ensemble, old_path)
 
         assert new_path.stat().st_size < old_path.stat().st_size
 
@@ -383,6 +403,68 @@ class TestEnsembleHDF5IO:
             loaded_df = loaded_old.data_by_realization[r_id]
             assert (loaded_df.index == original_df.index).all()
             assert np.allclose(original_df.values, loaded_df.values, rtol=1e-10)
+
+    def test_synhydro_version_roundtrip(self, sample_ensemble_data, temp_hdf5_file):
+        """The producing library version is written to HDF5 and read back."""
+        ensemble = Ensemble(sample_ensemble_data)
+        assert ensemble.metadata.synhydro_version == synhydro.__version__
+
+        ensemble.to_hdf5(str(temp_hdf5_file))
+        with h5py.File(temp_hdf5_file, "r") as f:
+            # Plain attribute for h5py users, plus the JSON metadata copy
+            assert f.attrs["synhydro_version"] == synhydro.__version__
+            metadata_json = json.loads(f.attrs["metadata"])
+            assert metadata_json["synhydro_version"] == synhydro.__version__
+
+        loaded = Ensemble.from_hdf5(str(temp_hdf5_file))
+        assert loaded.metadata.synhydro_version == synhydro.__version__
+
+    def test_synhydro_version_preserved_on_resave(
+        self, sample_ensemble_data, temp_hdf5_file
+    ):
+        """A version already set on the metadata is not replaced when saving."""
+        ensemble = Ensemble(sample_ensemble_data)
+        ensemble.metadata.synhydro_version = "0.0.2"
+        ensemble.to_hdf5(str(temp_hdf5_file))
+
+        with h5py.File(temp_hdf5_file, "r") as f:
+            assert f.attrs["synhydro_version"] == "0.0.2"
+        loaded = Ensemble.from_hdf5(str(temp_hdf5_file))
+        assert loaded.metadata.synhydro_version == "0.0.2"
+
+    def test_file_without_version_loads_as_none(self, sample_ensemble_data, tmp_path):
+        """Files written before the version was recorded load with None."""
+        ensemble = Ensemble(sample_ensemble_data)
+
+        # Legacy layout with no file-level metadata at all
+        old_path = tmp_path / "old.h5"
+        _write_legacy_hdf5(ensemble, old_path)
+        loaded_old = Ensemble.from_hdf5(str(old_path))
+        assert loaded_old.metadata.synhydro_version is None
+        assert loaded_old.metadata.n_realizations == 3
+
+        # Current layout whose metadata JSON predates the field
+        pre_path = tmp_path / "pre_version.h5"
+        ensemble.to_hdf5(str(pre_path))
+        with h5py.File(pre_path, "a") as f:
+            del f.attrs["synhydro_version"]
+            metadata_json = json.loads(f.attrs["metadata"])
+            del metadata_json["synhydro_version"]
+            f.attrs["metadata"] = json.dumps(metadata_json)
+        loaded_pre = Ensemble.from_hdf5(str(pre_path))
+        assert loaded_pre.metadata.synhydro_version is None
+        assert (
+            loaded_pre.metadata.creation_timestamp
+            == ensemble.metadata.creation_timestamp
+        )
+
+        # A re-saved legacy ensemble stays unversioned rather than claiming
+        # the current release produced it
+        resaved_path = tmp_path / "resaved.h5"
+        loaded_old.to_hdf5(str(resaved_path))
+        with h5py.File(resaved_path, "r") as f:
+            assert "synhydro_version" not in f.attrs
+        assert Ensemble.from_hdf5(str(resaved_path)).metadata.synhydro_version is None
 
     def test_stored_by_realization_roundtrip(
         self, sample_ensemble_data, temp_hdf5_file

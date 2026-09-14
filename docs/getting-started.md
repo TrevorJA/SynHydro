@@ -2,10 +2,16 @@
 
 ## Installation
 
-SynHydro is not yet published on PyPI. Install directly from GitHub:
+Install the latest release from PyPI:
 
 ```bash
-pip install git+https://github.com/TrevorJA/SynHydro.git
+pip install synhydro
+```
+
+To install a specific tagged release directly from GitHub instead:
+
+```bash
+pip install git+https://github.com/TrevorJA/SynHydro.git@v0.1.0
 ```
 
 For development (editable install with dev extras):

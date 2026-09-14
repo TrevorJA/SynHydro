@@ -7,6 +7,7 @@ Covers plot_timeseries, plot_flow_ranges, plot_seasonal_cycle.
 import logging
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pytest
 
 from synhydro.plotting import (
@@ -21,6 +22,11 @@ logger = logging.getLogger(__name__)
 def _has_artists(ax: plt.Axes) -> bool:
     """Return True if the axes has any drawn lines or collections."""
     return (len(ax.lines) + len(ax.collections)) > 0
+
+
+def _member_ydata(ax: plt.Axes, n_members: int) -> list:
+    """Return y-data of the first ``n_members`` lines (the member lines)."""
+    return [np.asarray(line.get_ydata()) for line in ax.lines[:n_members]]
 
 
 # ----------------------------------------------------------------------
@@ -51,6 +57,32 @@ def test_plot_timeseries_log_scale(small_ensemble):
 def test_plot_timeseries_show_members(small_ensemble):
     fig, ax = plot_timeseries(small_ensemble, show_members=2)
     assert isinstance(fig, plt.Figure)
+    assert _has_artists(ax)
+
+
+def test_plot_timeseries_seed_reproduces_member_selection(small_ensemble):
+    """The same seed (int or Generator) draws the same ensemble members."""
+    _, ax_a = plot_timeseries(small_ensemble, show_members=2, seed=3)
+    _, ax_b = plot_timeseries(small_ensemble, show_members=2, seed=3)
+    _, ax_c = plot_timeseries(
+        small_ensemble, show_members=2, seed=np.random.default_rng(3)
+    )
+    ydata_a = _member_ydata(ax_a, 2)
+    assert len(ydata_a) == 2
+    for y_a, y_b, y_c in zip(ydata_a, _member_ydata(ax_b, 2), _member_ydata(ax_c, 2)):
+        np.testing.assert_array_equal(y_a, y_b)
+        np.testing.assert_array_equal(y_a, y_c)
+
+    # The drawn lines are real realizations of the plotted site
+    site_df = small_ensemble.data_by_site[small_ensemble.site_names[0]]
+    for y in ydata_a:
+        assert any(np.array_equal(y, site_df[col].values) for col in site_df.columns)
+
+
+def test_plot_timeseries_seed_none_still_draws_members(small_ensemble):
+    fig, ax = plot_timeseries(small_ensemble, show_members=2, seed=None)
+    # Two member lines plus the ensemble median
+    assert len(ax.lines) >= 3
     assert _has_artists(ax)
 
 

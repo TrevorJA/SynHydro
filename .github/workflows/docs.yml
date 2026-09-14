@@ -33,7 +33,7 @@ jobs:
       - name: Build docs
         env:
           PYTHONIOENCODING: utf-8
-        run: python -m mkdocs build 2>&1
+        run: python -m mkdocs build --strict 2>&1
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4

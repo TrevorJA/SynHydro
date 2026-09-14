@@ -7,7 +7,13 @@ SynHydro is a Python library for generating synthetic hydrologic timeseries usin
 ## Installation
 
 ```bash
-pip install git+https://github.com/TrevorJA/SynHydro.git
+pip install synhydro
+```
+
+To install a specific tagged release directly from GitHub instead:
+
+```bash
+pip install git+https://github.com/TrevorJA/SynHydro.git@v0.1.0
 ```
 
 ## Quick example
@@ -21,6 +27,30 @@ Q_monthly = Q_daily.resample("MS").sum()
 gen = synhydro.KirschGenerator()
 gen.fit(Q_monthly)
 ensemble = gen.generate(n_realizations=50, n_years=30, seed=42)
+```
+
+## Citing SynHydro
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+
+The DOI badge and the version DOI below are filled in after the first release is archived on Zenodo. If you use SynHydro in your research, please cite it as:
+
+```
+Amestoy, T. (2026). SynHydro: Synthetic hydrologic timeseries generation
+in Python (Version 0.1.0) [Computer software]. Zenodo.
+https://doi.org/10.5281/zenodo.YYYYYYY
+```
+
+```bibtex
+@software{amestoy_synhydro_2026,
+  author    = {Amestoy, Trevor},
+  title     = {{SynHydro}: Synthetic hydrologic timeseries generation in Python},
+  version   = {0.1.0},
+  year      = {2026},
+  publisher = {Zenodo},
+  doi       = {10.5281/zenodo.YYYYYYY},
+  url       = {https://github.com/TrevorJA/SynHydro}
+}
 ```
 
 ## Supported generators
@@ -52,7 +82,7 @@ Pre-built pipelines (`KirschNowakPipeline`, `ThomasFieringNowakPipeline`) chain 
 
 ## Contributing
 
-SynHydro is under active development, and contributions are welcome. For bug reports, feature requests, or discussion of new methods, please open an issue or pull request on GitHub. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding new generators and the project's development practices.
+SynHydro is under active development, and contributions are welcome. For bug reports, feature requests, or discussion of new methods, please open an issue or pull request on GitHub. See [CONTRIBUTING.md](https://github.com/TrevorJA/SynHydro/blob/main/CONTRIBUTING.md) for guidelines on adding new generators and the project's development practices.
 
 ## Documentation
 

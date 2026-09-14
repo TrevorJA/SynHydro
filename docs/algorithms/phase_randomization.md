@@ -142,6 +142,8 @@ Phase coherence is destroyed by design, meaning the temporal sequencing of event
 - The kappa upper tail is unbounded for $\kappa < 0$ and can extrapolate far beyond the observed maximum.
 - The kappa fitting window is 31 days ($\pm 15$) rather than the 30 days described in the paper, and normal scores are deterministic (Van der Waerden) rather than PRSim's random normal sample; both are minor and do not affect the algorithm's properties.
 - Minimum of 2 complete years required; 10+ recommended for stable kappa fits.
+- Flow-domain autocorrelation is diluted on short records. The back-transform draws, for each day of year, an independent kappa sample with one value per observed year and assigns those values to the surrogate by rank, so the sampling noise of that draw enters every day independently. With 6 observed years the lag-1 autocorrelation of the flows falls from 0.93 (observed) to about 0.75 even though the normal-score amplitude spectrum is preserved exactly; the gap shrinks with record length (about 0.12, 0.08 and 0.05 at 12, 30 and 60 years). This follows PRSim's construction (Brunner et al., 2019). Prefer records of 30 or more years and check the temporal category of `synhydro.verify()` on shorter ones.
+- Two details of the kappa fit differ from PRSim: invalid $(\kappa, h)$ combinations return a large penalty ($10^{10}$) to the optimizer rather than aborting the fit as PRSim's `stop()` does, and the Nelder-Mead settings (`xatol` and `fatol` of $10^{-6}$, `maxiter` of 1000) are not PRSim's. Fitted parameters can differ from PRSim's in the last digits, and a day on which PRSim would abort is instead handled by the fit-rejection rule above.
 
 ## References
 
@@ -149,9 +151,9 @@ Phase coherence is destroyed by design, meaning the temporal sequencing of event
 Brunner, M.I., Bardossy, A., and Furrer, R. (2019). Technical note: Stochastic simulation of streamflow time series using phase randomization. *Hydrology and Earth System Sciences*, 23, 3175-3187. https://doi.org/10.5194/hess-23-3175-2019
 
 **See also:**
-- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. *Physica D*, 58, 77-94.
-- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. *Journal of the Royal Statistical Society Series B*, 52, 105-124.
-- Hosking, J.R.M. (1994). The four-parameter kappa distribution. *IBM Journal of Research and Development*, 38, 251-258.
+- Theiler, J., Eubank, S., Longtin, A., Galdrikian, B., and Farmer, J.D. (1992). Testing for nonlinearity in time series: the method of surrogate data. *Physica D*, 58, 77-94. https://doi.org/10.1016/0167-2789(92)90102-S
+- Hosking, J.R.M. (1990). L-moments: Analysis and estimation of distributions using linear combinations of order statistics. *Journal of the Royal Statistical Society Series B*, 52, 105-124. https://doi.org/10.1111/j.2517-6161.1990.tb01775.x
+- Hosking, J.R.M. (1994). The four-parameter kappa distribution. *IBM Journal of Research and Development*, 38, 251-258. https://doi.org/10.1147/rd.383.0251
 
 ---
 

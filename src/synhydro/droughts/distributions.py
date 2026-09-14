@@ -187,9 +187,13 @@ def get_distribution_info(name: str) -> Dict[str, str]:
     return DISTRIBUTION_INFO[name].copy()
 
 
-def print_distribution_guide():
+def print_distribution_guide() -> None:
     """
     Print a user-friendly guide to available distributions.
+
+    This is a user-facing display function in the spirit of
+    ``DataFrame.info()``, so it writes to stdout with ``print`` rather
+    than through the module logger.
 
     Examples
     --------

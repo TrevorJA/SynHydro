@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use SynHydro in your research, please cite it using these metadata."
+type: software
+title: "SynHydro: Synthetic hydrologic timeseries generation in Python"
+abstract: "Python library for generating synthetic hydrologic timeseries. Provides parametric, hybrid, and non-parametric stochastic streamflow generators and temporal disaggregators under a unified fit/generate API, with ensemble management, verification, and drought validation tools."
+authors:
+  - family-names: Amestoy
+    given-names: Trevor
+    email: tja73@cornell.edu
+    affiliation: "Cornell University"
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/TrevorJA/SynHydro"
+url: "https://trevorja.github.io/SynHydro/"
+keywords:
+  - hydrology
+  - synthetic streamflow
+  - stochastic generation
+  - time series
+  - disaggregation
+  - water resources
+# Add after the first Zenodo record exists:
+# doi: 10.5281/zenodo.XXXXXXX          (concept DOI)
+# identifiers:
+#   - type: doi
+#     value: 10.5281/zenodo.YYYYYYY    (version DOI for 0.1.0)
+#     description: "Zenodo archive of version 0.1.0"

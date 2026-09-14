@@ -121,11 +121,11 @@ Spatial correlations are preserved within each state through the full covariance
 ## References
 
 **Primary:**
-Gold, D.F., Gupta, R.S., and Reed, P.M. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. *Earth's Future*. https://doi.org/10.1029/2024EF004841
+Gold, D.F., Gupta, R.S., and Reed, P.M. (2024). Exploring the spatially compounding multi-sectoral drought vulnerabilities in Colorado's West Slope river basins. *Earth's Future*, 12(11), e2024EF004841. https://doi.org/10.1029/2024EF004841
 
 **See also:**
-- Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. *Proceedings of the IEEE*, 77(2), 257-286.
-- Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. *Water Resources Research*, 41(9).
+- Rabiner, L.R. (1989). A tutorial on hidden Markov models and selected applications in speech recognition. *Proceedings of the IEEE*, 77(2), 257-286. https://doi.org/10.1109/5.18626
+- Akintug, B., and Rasmussen, P.F. (2005). A Markov switching model for annual hydrologic time series. *Water Resources Research*, 41(9). https://doi.org/10.1029/2004WR003605
 
 ---
 
